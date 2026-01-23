@@ -35,26 +35,58 @@
         inboxList.innerHTML = `
             <div class="loading-state">
                 <i class="fas fa-spinner fa-spin"></i>
-                <p>Loading pending tasks...</p>
+                <p>Loading pending items...</p>
             </div>
         `;
 
-        // Fetch pending tasks
-        fetch('controllers/get_pending_tasks.php')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    currentTasks = data.data;
-                    renderTasks(data.data);
-                    updateTaskCount(data.count);
-                } else {
-                    showError('Error loading tasks: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('Database error: ' + error.message + '<br><br>Please ensure MySQL is running and the database schema is imported.');
+        // Fetch both tasks and requests in parallel
+        Promise.all([
+            fetch('controllers/get_pending_tasks.php').then(r => r.json()),
+            fetch('controllers/get_pending_requests.php').then(r => r.json())
+        ])
+        .then(([tasksData, requestsData]) => {
+            let allItems = [];
+
+            // Add tasks if successful
+            if (tasksData.success && tasksData.data) {
+                tasksData.data.forEach(task => {
+                    allItems.push({
+                        ...task,
+                        type: 'task',
+                        item_id: task.task_id,
+                        sort_date: task.due_date || task.created_at
+                    });
+                });
+            }
+
+            // Add requests if successful
+            if (requestsData.success && requestsData.data) {
+                requestsData.data.forEach(request => {
+                    allItems.push({
+                        ...request,
+                        type: 'request',
+                        item_id: request.id,
+                        task_id: 'req_' + request.id, // Unique identifier
+                        sort_date: request.created_at
+                    });
+                });
+            }
+
+            // Sort by date (newest first)
+            allItems.sort((a, b) => {
+                const dateA = new Date(a.sort_date || 0);
+                const dateB = new Date(b.sort_date || 0);
+                return dateB - dateA;
             });
+
+            currentTasks = allItems;
+            renderTasks(allItems);
+            updateTaskCount(allItems.length);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('Database error: ' + error.message + '<br><br>Please ensure MySQL is running and the database schema is imported.');
+        });
     }
 
     // ========================================
@@ -91,10 +123,11 @@
         const div = document.createElement('div');
         div.className = 'task-item';
         div.dataset.id = task.task_id;
+        div.dataset.type = task.type || 'task';
         div.dataset.eventId = task.event_id || '';
 
         // Classes for badges
-        const priorityClass = (task.priority || 'normal').toLowerCase();
+        const priorityClass = (task.priority || task.Priority || 'normal').toLowerCase();
         const categoryClass = (task.category_name || 'default').toLowerCase();
 
         // Mark as active if selected
@@ -104,27 +137,37 @@
 
         // Build category badge
         let categoryBadge = '';
-        if (task.category_name) {
+        if (task.type === 'request') {
+            // For requests from form_contract
+            const categoryIcon = task.category_icon || '📋';
+            categoryBadge = `<span class="task-category-badge" style="background-color: ${task.category_color || '#999'}">
+                ${categoryIcon} ${task.Service_Type || 'Request'}
+            </span>`;
+        } else if (task.category_name) {
+            // For tasks from calendar
             const categoryIcon = task.category_icon || '📋';
             categoryBadge = `<span class="task-category-badge ${categoryClass}" style="background-color: ${task.category_color || '#999'}">
                 ${categoryIcon} ${task.category_name}
             </span>`;
         }
 
+        // Get date formatted
+        const dateFormatted = task.due_date_formatted || task.created_at_formatted || 'No date';
+
         div.innerHTML = `
             <div class="task-header">
-                <span class="task-priority-badge ${priorityClass}">${formatPriority(task.priority)}</span>
+                <span class="task-priority-badge ${priorityClass}">${formatPriority(task.priority || task.Priority)}</span>
                 ${categoryBadge}
             </div>
             <div class="task-body">
                 <h3 class="task-title">${escapeHtml(task.title)}</h3>
                 <p class="task-description">${escapeHtml(task.description)}</p>
                 ${task.event_title ? `<p class="event-ref"><i class="fas fa-link"></i> ${escapeHtml(task.event_title)}</p>` : ''}
-                ${task.client ? `<p class="client-name"><i class="fas fa-user"></i> ${escapeHtml(task.client)}</p>` : ''}
+                ${(task.client || task.client_name) ? `<p class="client-name"><i class="fas fa-user"></i> ${escapeHtml(task.client || task.client_name)}</p>` : ''}
                 <div class="task-meta">
                     <span class="due-date">
                         <i class="far fa-calendar"></i>
-                        <span class="date-text">${task.due_date_formatted}</span>
+                        <span class="date-text">${dateFormatted}</span>
                     </span>
                 </div>
             </div>
@@ -183,7 +226,13 @@
     // ========================================
 
     function loadOrCreateRequestForm(task) {
-        // Try to find existing request linked to this task/event
+        // If this is a request from form_contract, load it directly
+        if (task.type === 'request' && task.id) {
+            loadExistingRequest(task.id);
+            return;
+        }
+
+        // For calendar tasks, try to find existing request linked to this task/event
         if (task.event_id) {
             // Check if a request exists for this event
             fetch(`controllers/find_request_by_event.php?event_id=${task.event_id}`)
