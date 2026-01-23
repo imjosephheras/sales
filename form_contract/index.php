@@ -1159,6 +1159,78 @@ document.addEventListener("DOMContentLoaded", () => {
     
     return card;
   }
+
+  /* ===============================
+     POPULATE FORM - FUNCIÓN PRINCIPAL
+     Rellena todos los campos del formulario con datos cargados
+  =============================== */
+  window.populateForm = function(formData, additionalData = {}) {
+    console.log('📝 Populating form with data:', formData);
+
+    // Reset form first
+    form.reset();
+
+    // Populate simple form fields
+    Object.keys(formData).forEach(key => {
+      const field = document.getElementById(key) ||
+                    document.querySelector(`[name="${key}"]`) ||
+                    document.querySelector(`input[name="${key}"]`) ||
+                    document.querySelector(`select[name="${key}"]`) ||
+                    document.querySelector(`textarea[name="${key}"]`);
+
+      if (field && formData[key] !== null && formData[key] !== undefined) {
+        if (field.type === 'checkbox') {
+          field.checked = formData[key] == '1' || formData[key] === 'true' || formData[key] === true;
+        } else if (field.type === 'radio') {
+          const radio = document.querySelector(`input[name="${key}"][value="${formData[key]}"]`);
+          if (radio) radio.checked = true;
+        } else {
+          field.value = formData[key];
+        }
+
+        // Trigger change event for fields with dynamic behavior
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+
+    // Handle scope_tasks if present
+    if (additionalData.scope_tasks && additionalData.scope_tasks.length > 0) {
+      console.log('📋 Loading scope tasks:', additionalData.scope_tasks);
+      // If you have a specific function to handle scope tasks, call it here
+      // populateScopeTasks(additionalData.scope_tasks);
+    }
+
+    // Handle kitchen_costs if present
+    if (additionalData.kitchen_costs && additionalData.kitchen_costs.length > 0) {
+      console.log('🍳 Loading kitchen costs:', additionalData.kitchen_costs);
+      // If you have a specific function to handle kitchen costs, call it here
+      // populateKitchenCosts(additionalData.kitchen_costs);
+    }
+
+    // Handle hood_costs if present
+    if (additionalData.hood_costs && additionalData.hood_costs.length > 0) {
+      console.log('🚪 Loading hood costs:', additionalData.hood_costs);
+      // If you have a specific function to handle hood costs, call it here
+      // populateHoodCosts(additionalData.hood_costs);
+    }
+
+    // Handle janitorial_costs if present
+    if (additionalData.janitorial_costs && additionalData.janitorial_costs.length > 0) {
+      console.log('🧹 Loading janitorial costs:', additionalData.janitorial_costs);
+      // If you have a specific function to handle janitorial costs, call it here
+      // populateJanitorialCosts(additionalData.janitorial_costs);
+    }
+
+    // Handle photos if present
+    if (additionalData.photos && additionalData.photos.length > 0) {
+      console.log('📸 Loading photos:', additionalData.photos);
+      // If you have a specific function to handle photos, call it here
+      // populatePhotos(additionalData.photos);
+    }
+
+    console.log('✅ Form populated successfully');
+  };
+
 /* ===============================
    LOAD FORM DATA - VERSIÓN CORREGIDA
    ⚠️ ESTA ES LA VERSIÓN QUE DEBES USAR
