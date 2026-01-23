@@ -1200,25 +1200,20 @@ document.addEventListener("DOMContentLoaded", () => {
       // populateScopeTasks(additionalData.scope_tasks);
     }
 
-    // Handle kitchen_costs if present
-    if (additionalData.kitchen_costs && additionalData.kitchen_costs.length > 0) {
-      console.log('🍳 Loading kitchen costs:', additionalData.kitchen_costs);
-      // If you have a specific function to handle kitchen costs, call it here
-      // populateKitchenCosts(additionalData.kitchen_costs);
-    }
-
-    // Handle hood_costs if present
-    if (additionalData.hood_costs && additionalData.hood_costs.length > 0) {
-      console.log('🚪 Loading hood costs:', additionalData.hood_costs);
-      // If you have a specific function to handle hood costs, call it here
-      // populateHoodCosts(additionalData.hood_costs);
-    }
-
     // Handle janitorial_costs if present
     if (additionalData.janitorial_costs && additionalData.janitorial_costs.length > 0) {
       console.log('🧹 Loading janitorial costs:', additionalData.janitorial_costs);
-      // If you have a specific function to handle janitorial costs, call it here
-      // populateJanitorialCosts(additionalData.janitorial_costs);
+      populateJanitorialCosts(additionalData.janitorial_costs);
+    }
+
+    // Handle kitchen_costs and hood_costs if present
+    if ((additionalData.kitchen_costs && additionalData.kitchen_costs.length > 0) ||
+        (additionalData.hood_costs && additionalData.hood_costs.length > 0)) {
+      console.log('🍳 Loading kitchen/hood costs:', {
+        kitchen: additionalData.kitchen_costs,
+        hood: additionalData.hood_costs
+      });
+      populateKitchenCosts(additionalData.kitchen_costs || [], additionalData.hood_costs || []);
     }
 
     // Handle photos if present
@@ -1229,6 +1224,249 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     console.log('✅ Form populated successfully');
+  };
+
+  /* ===============================
+     POPULATE JANITORIAL COSTS (Q18)
+     =============================== */
+  window.populateJanitorialCosts = function(costs) {
+    console.log('🧹 Populating Janitorial Services (Q18) with data:', costs);
+
+    // Set includeJanitorial to "Yes"
+    const includeJanitorial = document.getElementById('includeJanitorial');
+    if (includeJanitorial) {
+      includeJanitorial.value = 'Yes';
+      includeJanitorial.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Show the section
+    const section18Container = document.getElementById('section18Container');
+    if (section18Container) {
+      section18Container.style.display = 'block';
+    }
+
+    // Get the tbody
+    const tbody = document.getElementById('table18body');
+    if (!tbody) {
+      console.error('table18body not found');
+      return;
+    }
+
+    // Clear existing rows
+    tbody.innerHTML = '';
+
+    // Add rows with data
+    costs.forEach((cost, index) => {
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td>
+          <select class="type18" name="type18[]" onchange="toggleWriteOption18(this)">
+            <option value="__write__">✍️ Write...</option>
+            <option value="">-- Select Service --</option>
+            <option>Window Cleaning</option>
+            <option>Window Tint</option>
+            <option>Carpet Cleaning</option>
+            <option>Painting</option>
+            <option>Powerwashing Facade</option>
+            <option>Furniture Upholstery Cleaning</option>
+            <option>Restroom Cleaning</option>
+          </select>
+          <input type="text" class="write-field-18" name="write18[]" style="display:none; margin-top:5px;" placeholder="Write service...">
+        </td>
+        <td>
+          <select class="time18" name="time18[]">
+            <option value="">-- Select Time --</option>
+            <option>1 Day</option>
+            <option>1-2 Days</option>
+            <option>3 Days</option>
+            <option>4 Days</option>
+            <option>5 Days</option>
+            <option>6 Days</option>
+            <option>7 Days</option>
+          </select>
+        </td>
+        <td>
+          <select class="freq18" name="freq18[]">
+            <option value="">-- Select Period --</option>
+            <option>One Time</option>
+            <option>Weekly</option>
+            <option>Every 2 Weeks</option>
+            <option>Every 3 Weeks</option>
+            <option>Monthly</option>
+            <option>Bimonthly</option>
+            <option>Quarterly</option>
+            <option>Every 4 Months</option>
+            <option>Semiannual</option>
+            <option>Annual</option>
+          </select>
+        </td>
+        <td>
+          <input type="text" class="desc18" name="desc18[]" placeholder="Write description...">
+        </td>
+        <td>
+          <input type="number" step="0.01" class="subtotal18" name="subtotal18[]" placeholder="0.00" oninput="calcTotals18()">
+        </td>
+      `;
+      tbody.appendChild(newRow);
+
+      // Set the values
+      const typeSelect = newRow.querySelector('.type18');
+      const writeField = newRow.querySelector('.write-field-18');
+      const timeSelect = newRow.querySelector('.time18');
+      const freqSelect = newRow.querySelector('.freq18');
+      const descInput = newRow.querySelector('.desc18');
+      const subtotalInput = newRow.querySelector('.subtotal18');
+
+      // Check if service_type is in the dropdown options
+      const serviceType = cost.service_type || '';
+      const optionExists = Array.from(typeSelect.options).some(opt => opt.value === serviceType || opt.text === serviceType);
+
+      if (optionExists) {
+        typeSelect.value = serviceType;
+      } else {
+        // Custom value - use write field
+        typeSelect.value = '__write__';
+        writeField.style.display = 'block';
+        writeField.value = serviceType;
+      }
+
+      if (timeSelect) timeSelect.value = cost.service_time || '';
+      if (freqSelect) freqSelect.value = cost.frequency || '';
+      if (descInput) descInput.value = cost.description || '';
+      if (subtotalInput) subtotalInput.value = cost.subtotal || '';
+    });
+
+    // Recalculate totals
+    if (typeof calcTotals18 === 'function') {
+      calcTotals18();
+    }
+
+    console.log('✅ Janitorial costs populated successfully');
+  };
+
+  /* ===============================
+     POPULATE KITCHEN COSTS (Q19)
+     =============================== */
+  window.populateKitchenCosts = function(kitchenCosts, hoodCosts) {
+    console.log('🍳 Populating Kitchen & Hood Services (Q19)');
+
+    // Combine both arrays
+    const allCosts = [...kitchenCosts, ...hoodCosts];
+
+    if (allCosts.length === 0) {
+      console.log('No kitchen/hood costs to populate');
+      return;
+    }
+
+    // Set includeKitchen to "Yes"
+    const includeKitchen = document.getElementById('includeKitchen');
+    if (includeKitchen) {
+      includeKitchen.value = 'Yes';
+      includeKitchen.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Show the section
+    const section19Container = document.getElementById('section19Container');
+    if (section19Container) {
+      section19Container.style.display = 'block';
+    }
+
+    // Get the tbody
+    const tbody = document.getElementById('table19body');
+    if (!tbody) {
+      console.error('table19body not found');
+      return;
+    }
+
+    // Clear existing rows
+    tbody.innerHTML = '';
+
+    // Add rows with data
+    allCosts.forEach((cost, index) => {
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td>
+          <select class="type19" name="type19[]" onchange="toggleWriteOption19(this)">
+            <option value="__write__">✍️ Write...</option>
+            <option value="">-- Select Service --</option>
+            <option>Kitchen Cleaning</option>
+            <option>Vent Hood</option>
+            <option>Bar Cleaning</option>
+            <option>Grease Trap Cleaning</option>
+            <option>Restroom Cleaning</option>
+            <option>Dinning Room Cleaning</option>
+          </select>
+          <input type="text" class="write-field-19" name="write19[]" style="display:none; margin-top:5px;" placeholder="Write service...">
+        </td>
+        <td>
+          <select class="time19" name="time19[]">
+            <option value="">-- Select Time --</option>
+            <option>1 Day</option>
+            <option>1-2 Days</option>
+            <option>3 Days</option>
+            <option>4 Days</option>
+            <option>5 Days</option>
+            <option>6 Days</option>
+            <option>7 Days</option>
+          </select>
+        </td>
+        <td>
+          <select class="freq19" name="freq19[]">
+            <option value="">-- Select Period --</option>
+            <option>One Time</option>
+            <option>Weekly</option>
+            <option>Every 2 Weeks</option>
+            <option>Every 3 Weeks</option>
+            <option>Monthly</option>
+            <option>Bimonthly</option>
+            <option>Quarterly</option>
+            <option>Every 4 Months</option>
+            <option>Semiannual</option>
+            <option>Annual</option>
+          </select>
+        </td>
+        <td>
+          <input type="text" class="desc19" name="desc19[]" placeholder="Write description...">
+        </td>
+        <td>
+          <input type="number" step="0.01" class="subtotal19" name="subtotal19[]" placeholder="0.00" oninput="calcTotals19()">
+        </td>
+      `;
+      tbody.appendChild(newRow);
+
+      // Set the values
+      const typeSelect = newRow.querySelector('.type19');
+      const writeField = newRow.querySelector('.write-field-19');
+      const timeSelect = newRow.querySelector('.time19');
+      const freqSelect = newRow.querySelector('.freq19');
+      const descInput = newRow.querySelector('.desc19');
+      const subtotalInput = newRow.querySelector('.subtotal19');
+
+      // Check if service_type is in the dropdown options
+      const serviceType = cost.service_type || '';
+      const optionExists = Array.from(typeSelect.options).some(opt => opt.value === serviceType || opt.text === serviceType);
+
+      if (optionExists) {
+        typeSelect.value = serviceType;
+      } else {
+        // Custom value - use write field
+        typeSelect.value = '__write__';
+        writeField.style.display = 'block';
+        writeField.value = serviceType;
+      }
+
+      if (timeSelect) timeSelect.value = cost.service_time || '';
+      if (freqSelect) freqSelect.value = cost.frequency || '';
+      if (descInput) descInput.value = cost.description || '';
+      if (subtotalInput) subtotalInput.value = cost.subtotal || '';
+    });
+
+    // Recalculate totals
+    if (typeof calcTotals19 === 'function') {
+      calcTotals19();
+    }
+
+    console.log('✅ Kitchen/Hood costs populated successfully');
   };
 
 /* ===============================
