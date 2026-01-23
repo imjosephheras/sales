@@ -206,22 +206,22 @@ try {
     if (isset($_POST['includeKitchen']) && $_POST['includeKitchen'] === 'Yes') {
         $pdo->prepare("DELETE FROM kitchen_cleaning_costs WHERE form_id = ?")->execute([$saved_form_id]);
         $pdo->prepare("DELETE FROM hood_vent_costs WHERE form_id = ?")->execute([$saved_form_id]);
-        
+
         if (isset($_POST['type19']) && is_array($_POST['type19'])) {
             $stmt_kitchen = $pdo->prepare("
                 INSERT INTO kitchen_cleaning_costs (
-                    form_id, service_number, service_description, frequency,
-                    monthly_cost, annual_cost, total_cost
+                    form_id, service_number, service_type, service_time,
+                    frequency, description, subtotal
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
             ");
-            
+
             $stmt_hood = $pdo->prepare("
                 INSERT INTO hood_vent_costs (
-                    form_id, service_number, service_description, frequency,
-                    monthly_cost, annual_cost, total_cost
+                    form_id, service_number, service_type, service_time,
+                    frequency, description, subtotal
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)
             ");
-            
+
             $count = count($_POST['type19']);
             for ($i = 0; $i < $count; $i++) {
                 // Obtener tipo de servicio
@@ -231,40 +231,39 @@ try {
                 } elseif (isset($_POST['write19'][$i]) && !empty($_POST['write19'][$i])) {
                     $serviceType = $_POST['write19'][$i];
                 }
-                
+
                 if (!empty($serviceType)) {
-                    $time = $_POST['time19'][$i] ?? '';
-                    $desc = $_POST['desc19'][$i] ?? '';
-                    $description = trim($serviceType . ' - ' . $desc . ' - ' . $time, ' -');
+                    $serviceTime = $_POST['time19'][$i] ?? null;
+                    $description = $_POST['desc19'][$i] ?? null;
                     $frequency = $_POST['freq19'][$i] ?? null;
-                    
+
                     // ⚠️ Convertir subtotal vacío a NULL
                     $subtotal = !empty($_POST['subtotal19'][$i]) ? $_POST['subtotal19'][$i] : null;
-                    
+
                     // Determinar si es Kitchen o Hood Vent
-                    $isHoodVent = (stripos($serviceType, 'hood') !== false || 
+                    $isHoodVent = (stripos($serviceType, 'hood') !== false ||
                                    stripos($serviceType, 'vent') !== false ||
                                    stripos($serviceType, 'campana') !== false ||
                                    stripos($serviceType, 'extractora') !== false);
-                    
+
                     if ($isHoodVent) {
                         $stmt_hood->execute([
                             $saved_form_id,
                             $i + 1,
-                            $description,
+                            $serviceType,
+                            $serviceTime,
                             $frequency,
-                            $subtotal,
-                            null,
+                            $description,
                             $subtotal
                         ]);
                     } else {
                         $stmt_kitchen->execute([
                             $saved_form_id,
                             $i + 1,
-                            $description,
+                            $serviceType,
+                            $serviceTime,
                             $frequency,
-                            $subtotal,
-                            null,
+                            $description,
                             $subtotal
                         ]);
                     }
