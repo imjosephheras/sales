@@ -3,7 +3,6 @@
 // CÓDIGO DE CORREO ELIMINADO
 // Ahora solo guardamos en BD y redirigimos al generador de contratos
 // ===============================
-<?php
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
 // ===============================
 // LOGO BASE64 PARA PDF
