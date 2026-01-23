@@ -1196,8 +1196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle scope_tasks if present
     if (additionalData.scope_tasks && additionalData.scope_tasks.length > 0) {
       console.log('📋 Loading scope tasks:', additionalData.scope_tasks);
-      // If you have a specific function to handle scope tasks, call it here
-      // populateScopeTasks(additionalData.scope_tasks);
+      populateScopeTasks(additionalData.scope_tasks);
     }
 
     // Handle janitorial_costs if present
@@ -1224,6 +1223,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     console.log('✅ Form populated successfully');
+  };
+
+  /* ===============================
+     POPULATE SCOPE OF WORK (Q28)
+     =============================== */
+  window.populateScopeTasks = function(tasks) {
+    console.log('📋 Populating Scope of Work (Q28) with tasks:', tasks);
+
+    // Check if tasks array is valid
+    if (!tasks || tasks.length === 0) {
+      console.log('No scope tasks to populate');
+      return;
+    }
+
+    // Check if Requested_Service is already set
+    const serviceSelect = document.getElementById('Requested_Service');
+    if (!serviceSelect || !serviceSelect.value) {
+      console.warn('Requested_Service not set yet, scope tasks cannot be populated');
+      return;
+    }
+
+    // Wait for checkboxes to be generated dynamically
+    // The change event on Requested_Service generates the checkboxes
+    setTimeout(() => {
+      const scopeContainer = document.getElementById('scopeOfWorkContainer');
+      if (!scopeContainer) {
+        console.error('scopeOfWorkContainer not found');
+        return;
+      }
+
+      // Find all checkboxes in the container
+      const checkboxes = scopeContainer.querySelectorAll('input[type="checkbox"][name="Scope_Of_Work[]"]');
+
+      if (checkboxes.length === 0) {
+        console.warn('No checkboxes found in scopeOfWorkContainer. Service may not have scope options.');
+        return;
+      }
+
+      // Mark checkboxes that match the saved tasks
+      let markedCount = 0;
+      checkboxes.forEach(checkbox => {
+        if (tasks.includes(checkbox.value)) {
+          checkbox.checked = true;
+          markedCount++;
+        }
+      });
+
+      console.log(`✅ Scope of Work populated: ${markedCount} of ${tasks.length} tasks marked`);
+    }, 150); // Small delay to ensure checkboxes are generated
   };
 
   /* ===============================
