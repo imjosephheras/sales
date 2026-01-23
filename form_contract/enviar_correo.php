@@ -1,52 +1,8 @@
 <?php
-require 'vendor/autoload.php';
-use PHPMailer\PHPMailer\PHPMailer;
-
-$mail = new PHPMailer(true);
-
-try {
-    // ============================================
-    // CONFIGURACIÓN PARA DESARROLLO LOCAL
-    // ============================================
-    if ($_SERVER['HTTP_HOST'] == 'localhost' || 
-        strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false) {
-        
-        // Usar MailHog para desarrollo
-        $mail->Host = 'localhost';
-        $mail->Port = 1025;
-        $mail->SMTPAuth = false;
-        $mail->SMTPSecure = false;
-        
-    } else {
-        // ============================================
-        // CONFIGURACIÓN PARA PRODUCCIÓN
-        // ============================================
-        $mail->Host = 'smtp-relay.brevo.com';
-        $mail->Port = 587;
-        $mail->SMTPAuth = true;
-        $mail->Username = getenv('SMTP_USERNAME'); // Usar variables de entorno
-        $mail->Password = getenv('SMTP_PASSWORD');
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    }
-    
-    $mail->isSMTP();
-    $mail->setFrom('noreply@tuempresa.com', 'Prime Facility Services');
-    $mail->addAddress($email_destino);
-    $mail->isHTML(true);
-    $mail->Subject = 'Nuevo Formulario';
-    $mail->Body = $contenido_html;
-    
-    $mail->send();
-    echo json_encode(['success' => true]);
-    
-} catch (Exception $e) {
-    echo json_encode([
-        'success' => false,
-        'message' => $mail->ErrorInfo
-    ]);
-}
-?>
-
+// ===============================
+// CÓDIGO DE CORREO ELIMINADO
+// Ahora solo guardamos en BD y redirigimos al generador de contratos
+// ===============================
 <?php
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
 // ===============================
@@ -70,11 +26,7 @@ require_once '../vendor/autoload.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-// Load email configuration
-$mail_config = require_once '../mail_config.php';
+// PHPMailer eliminado - ya no enviamos correos
 
 //
 // ===========================================
@@ -754,62 +706,14 @@ $dompdf->loadHtml($html, 'UTF-8');
 $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 
-// Save PDF
-$pdf_filename = "RequestForm_" . date('Ymd_His') . ".pdf";
-$pdf_path = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $pdf_filename;
-file_put_contents($pdf_path, $dompdf->output());
-
-
 // ==============================
-// SEND EMAIL
+// EMAIL SENDING REMOVED
+// Form is now only saved to database and redirects to contract generator
 // ==============================
 
-$mail = new PHPMailer(true);
-
-try {
-
-    $mail->isSMTP();
-    $mail->Host       = $mail_config['smtp_host'];
-    $mail->SMTPAuth   = true;
-    $mail->Username   = $mail_config['smtp_username'];
-    $mail->Password   = $mail_config['smtp_password'];
-    $mail->SMTPSecure = $mail_config['smtp_encryption'];
-    $mail->Port       = $mail_config['smtp_port'];
-    $mail->CharSet    = 'UTF-8';
-
-    $mail->setFrom($mail_config['from_email'], $mail_config['from_name']);
-    $mail->addAddress($mail_config['to_email'], $mail_config['to_name']);
-
-    $mail->isHTML(true);
-    $mail->Subject = 'New Contract Request Form - ' . htmlspecialchars($company_name);
-
-    $mail->Body = "
-    <h3>A new request form has been submitted.</h3>
-    <p>Company: <strong>{$company_name}</strong></p>
-    <p>Client: {$client_name}</p>
-    <p>Email: {$email}</p>
-    <p>PDF is attached.</p>
-    ";
-
-    $mail->addAttachment($pdf_path, $pdf_filename);
-
-    // ADJUNTAR FOTOS AL CORREO
-    if (!empty($uploaded_photos)) {
-        foreach ($uploaded_photos as $photo) {
-            $mail->addAttachment($photo);
-        }
-    }
-
-    $mail->send();
-    $email_status = 'success';
-    $email_message = 'Form submitted and email sent successfully!';
-
-} catch (Exception $e) {
-    $email_status = 'error';
-    $email_message = "Error sending form: {$mail->ErrorInfo}";
-}
-
-if (file_exists($pdf_path)) unlink($pdf_path);
+// Set success status for redirect
+$email_status = 'success';
+$email_message = 'Form submitted successfully!';
 
 ?>
 

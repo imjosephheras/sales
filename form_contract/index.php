@@ -872,7 +872,7 @@ $lang = $_SESSION["lang"] ?? "en";
       </button>
       
       <button type="button" id="btnPreview" class="btn-submit">
-        📧 <?= ($lang=='en') ? "Submit" : "Enviar"; ?>
+        ✅ <?= ($lang=='en') ? "Complete" : "Completado"; ?>
       </button>
     </div>
 
@@ -927,7 +927,7 @@ $lang = $_SESSION["lang"] ?? "en";
             onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(40,167,69,0.4)'"
             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(40,167,69,0.3)'"
           >
-            ✅ <?= ($lang=='en') ? "Confirm and Send" : "Confirmar y Enviar"; ?>
+            ✅ <?= ($lang=='en') ? "Complete" : "Completado"; ?>
           </button>
 
           <!-- ❌ CANCEL -->
