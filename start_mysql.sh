@@ -22,29 +22,27 @@ else
     echo -e "${YELLOW}⚠️  MySQL NO está corriendo. Intentando iniciar...${NC}"
     echo ""
 
+    # Fix /tmp permissions if needed
+    chmod 1777 /tmp 2>/dev/null
+
     # Try different methods to start MySQL
     if command -v systemctl &> /dev/null; then
-        echo "Intentando: sudo systemctl start mysql"
-        sudo systemctl start mysql 2>&1
+        echo "Intentando: systemctl start mysql"
+        systemctl start mysql 2>&1 || true
         sleep 2
 
         if ! ps aux | grep -v grep | grep mysqld > /dev/null; then
-            echo "Intentando: sudo systemctl start mariadb"
-            sudo systemctl start mariadb 2>&1
+            echo "Intentando: systemctl start mariadb"
+            systemctl start mariadb 2>&1 || true
             sleep 2
         fi
-    elif command -v service &> /dev/null; then
-        echo "Intentando: sudo service mysql start"
-        sudo service mysql start 2>&1
-        sleep 2
+    fi
 
-        if ! ps aux | grep -v grep | grep mysqld > /dev/null; then
-            echo "Intentando: sudo service mariadb start"
-            sudo service mariadb start 2>&1
-            sleep 2
-        fi
-    else
-        echo -e "${RED}❌ No se encontró systemctl ni service${NC}"
+    # If still not running, try direct mysqld start
+    if ! ps aux | grep -v grep | grep mysqld > /dev/null; then
+        echo "Intentando: mysqld --user=mysql (en background)"
+        mysqld --user=mysql > /tmp/mysql.log 2>&1 &
+        sleep 3
     fi
 fi
 
