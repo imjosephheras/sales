@@ -1,0 +1,22 @@
+# ============================================================
+# MINIMAL .htaccess FOR LARAGON
+# ============================================================
+
+# Disable directory listing
+Options -Indexes
+
+# Set default index file
+DirectoryIndex index.php index.html
+
+# UTF-8 encoding
+AddDefaultCharset UTF-8
+
+# Enable rewrite engine
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+</IfModule>
+
+# Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript
+</IfModule>

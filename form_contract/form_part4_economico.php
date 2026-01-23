@@ -1,0 +1,800 @@
+<!-- ==================================== -->
+<!-- 💰 Section 4: Economic Information -->
+<!-- ==================================== -->
+
+<div class="section-title">
+  <?= ($lang=='en') ? "Section 4: Economic Information" : "Sección 4: Información Económica"; ?>
+</div>
+
+<!-- 16️⃣ Seller -->
+<div class="question-block" id="q16">
+  <label for="Seller" class="question-label">
+    <?= ($lang=='en') ? "16. Seller" : "16. Vendedor"; ?>
+  </label>
+
+  <select name="Seller" id="Seller" onchange="updatePriceLabel()">
+    <option value="">
+      <?= ($lang=='en') ? "Select a seller" : "Seleccione un vendedor"; ?>
+    </option>
+    <option value="Keny Howe">Keny Howe</option>
+    <option value="Norma Bustos">Norma Bustos</option>
+    <option value="Sandra Hernandez">Sandra Hernandez</option>
+    <option value="Miguel Palma">Miguel Palma</option>
+    <option value="Rafael Perez JR">Rafael Perez JR</option>
+    <option value="Patty Perez">Patty Perez</option>
+  </select>
+</div>
+
+<!-- 17️⃣ Price -->
+<div class="question-block" id="q17">
+  <label for="PriceInput" id="PriceLabel" class="question-label">
+    <?= ($lang=='en') ? "17. Prime Quote Price" : "17. Precio de la cotización (Prime)"; ?>
+  </label>
+
+  <input
+    type="text"
+    name="PriceInput"
+    id="PriceInput"
+    placeholder="<?= ($lang=='en') ? 'Enter price' : 'Ingrese precio'; ?>"
+  >
+</div>
+
+<script>
+function updatePriceLabel() {
+  const seller = document.getElementById("Seller").value;
+  const label = document.getElementById("PriceLabel");
+
+  if (seller === "Miguel Palma" || seller === "Sandra Hernandez") {
+    label.textContent = "17. <?= ($lang=='en') ? "Subcontractor Price" : "Precio Subcontratista"; ?>";
+  } else {
+    label.textContent = "17. <?= ($lang=='en') ? "Prime Quote Price" : "Precio Prime"; ?>";
+  }
+}
+</script>
+
+<!-- 18️⃣ Janitorial Services -->
+<div class="question-block" id="q18">
+  <label for="includeJanitorial" class="question-label">
+    <?= ($lang=='en') ? "18. Janitorial Services" : "18. Servicios de Limpieza"; ?>
+  </label>
+
+  <select id="includeJanitorial" name="includeJanitorial" onchange="toggleSection18()">
+    <option value="">
+      <?= ($lang=='en') ? "-- Select an option --" : "-- Seleccione una opción --"; ?>
+    </option>
+    <option value="No"><?= ($lang=='en') ? "No" : "No"; ?></option>
+    <option value="Yes"><?= ($lang=='en') ? "Yes" : "Sí"; ?></option>
+  </select>
+</div>
+
+
+  <!-- (todo el contenido interno permanece igual, solo traducimos headers y labels) -->
+
+  <div id="section18Container" style="display:none; margin-top:20px;">
+    <div style="margin-bottom:15px;">
+      <button type="button" class="btn18 addRow18" onclick="addRow18()">
+        ➕ <?= ($lang=='en') ? "Add Row" : "Agregar fila"; ?>
+      </button>
+
+      <button type="button" class="btn18 removeRow18" onclick="removeRow18()">
+        🗑 <?= ($lang=='en') ? "Remove" : "Eliminar"; ?>
+      </button>
+    </div>
+
+    <table class="service-table18">
+      <thead>
+        <tr>
+          <th><?= ($lang=='en') ? "Type of Services" : "Tipo de servicio"; ?></th>
+          <th><?= ($lang=='en') ? "Service Time" : "Tiempo de servicio"; ?></th>
+          <th><?= ($lang=='en') ? "Frequency" : "Frecuencia"; ?></th>
+          <th><?= ($lang=='en') ? "Description" : "Descripción"; ?></th>
+          <th><?= ($lang=='en') ? "Subtotal" : "Subtotal"; ?></th>
+        </tr>
+      </thead>
+
+
+      <tbody id="table18body">
+
+        <!-- ONLY ONE INITIAL ROW -->
+        <tr>
+
+          <!-- TYPE OF SERVICES (WITH WRITE...) -->
+          <td>
+            <select class="type18" name="type18[]" onchange="toggleWriteOption18(this)">
+              <option value="__write__">✍️ Write...</option>
+              <option value="">-- Select Service --</option>
+
+              <!-- JANITORIAL OPTIONS -->
+              <option>Window Cleaning</option>
+              <option>Window Tint</option>
+              <option>Carpet Cleaning</option>
+              <option>Painting</option>
+              <option>Powerwashing Facade</option>
+              <option>Furniture Upholstery Cleaning</option>
+              <option>Restroom Cleaning</option>
+            </select>
+
+            <input type="text" class="write-field-18" name="write18[]" style="display:none; margin-top:5px;" placeholder="Write service...">
+          </td>
+
+          <!-- SERVICE TIME -->
+          <td>
+            <select class="time18" name="time18[]">
+              <option value="">-- Select Time --</option>
+              <option>1 Day</option>
+              <option>1-2 Days</option>
+              <option>3 Days</option>
+              <option>4 Days</option>
+              <option>5 Days</option>
+              <option>6 Days</option>
+              <option>7 Days</option>
+            </select>
+          </td>
+
+          <!-- FREQUENCY -->
+          <td>
+            <select class="freq18" name="freq18[]">
+              <option value="">-- Select Period --</option>
+              <option>One Time</option>
+              <option>Weekly</option>
+              <option>Every 2 Weeks</option>
+              <option>Every 3 Weeks</option>
+              <option>Monthly</option>
+              <option>Bimonthly</option>
+              <option>Quarterly</option>
+              <option>Every 4 Months</option>
+              <option>Semiannual</option>
+              <option>Annual</option>
+            </select>
+          </td>
+
+          <!-- DESCRIPTION (FREE INPUT) -->
+          <td>
+            <input type="text" class="desc18" name="desc18[]" placeholder="Write description...">
+          </td>
+
+          <!-- SUBTOTAL (FREE INPUT) -->
+          <td>
+            <input type="number" step="0.01" class="subtotal18" name="subtotal18[]" placeholder="0.00" oninput="calcTotals18()">
+          </td>
+
+        </tr>
+
+      </tbody>
+    </table>
+
+    <!-- TOTAL BOXES -->
+    <div class="totals18-container">
+
+      <div class="tot-box-18">
+        <div class="tot-header-18">TOTAL</div>
+        <input type="text" id="total18" name="total18" readonly>
+      </div>
+
+      <div class="tot-box-18">
+        <div class="tot-header-18">TAXES (8.25%)</div>
+        <input type="text" id="taxes18" name="taxes18" readonly>
+      </div>
+
+      <div class="tot-box-18">
+        <div class="tot-header-18">GRAND TOTAL</div>
+        <input type="text" id="grand18" name="grand18" readonly>
+      </div>
+
+    </div>
+
+  </div>
+
+
+<style>
+  .service-table18 {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+  }
+
+  .service-table18 th {
+    background-color: #c00;
+    color: #fff;
+    padding: 8px;
+    text-align: center;
+  }
+
+  .service-table18 td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  .service-table18 select,
+  .service-table18 input {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .btn18 {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  .addRow18 { background-color:#008c4a; color:white; }
+  .removeRow18 { background-color:#777; color:white; }
+
+  .totals18-container {
+    margin-top: 25px;
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+  }
+
+  .tot-box-18 {
+    width: 220px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background:white;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .tot-header-18 {
+    background-color:#c00;
+    color:white;
+    padding:8px;
+    text-align:center;
+    font-weight:bold;
+  }
+
+  .tot-box-18 input {
+    width:100%;
+    padding:10px;
+    text-align:right;
+    font-weight:bold;
+    background:#f7f7f7;
+    border:none;
+  }
+</style>
+
+<script>
+// SHOW/HIDE SECTION
+function toggleSection18() {
+  document.getElementById("section18Container").style.display =
+    document.getElementById("includeJanitorial").value === "Yes"
+    ? "block" : "none";
+}
+
+// WRITE OPTION
+function toggleWriteOption18(select) {
+  const input = select.parentElement.querySelector('.write-field-18');
+  input.style.display = (select.value === "__write__") ? "block" : "none";
+}
+
+// ADD ROW
+function addRow18() {
+  const tbody = document.getElementById("table18body");
+  const newRow = tbody.children[0].cloneNode(true);
+
+  newRow.querySelectorAll("select, input").forEach(el => el.value = "");
+  newRow.querySelector('.write-field-18').style.display = "none";
+
+  tbody.appendChild(newRow);
+}
+
+// REMOVE ROW
+function removeRow18() {
+  const tbody = document.getElementById("table18body");
+  if (tbody.children.length > 1) {
+    tbody.lastElementChild.remove();
+    calcTotals18();
+  } else {
+    alert("At least one row must remain.");
+  }
+}
+
+// CALCULATE TOTALS
+function calcTotals18() {
+  let total = 0;
+
+  document.querySelectorAll(".subtotal18").forEach(input => {
+    const val = parseFloat(input.value);
+    if (!isNaN(val)) total += val;
+  });
+
+  document.getElementById("total18").value = "$" + total.toFixed(2);
+
+  const taxes = total * 0.0825;
+  document.getElementById("taxes18").value = "$" + taxes.toFixed(2);
+
+  document.getElementById("grand18").value = "$" + (total + taxes).toFixed(2);
+}
+</script>
+
+<!-- 19️⃣ Hoodvent & Kitchen Cleaning -->
+<div class="question-block" id="q19">
+  <label for="includeKitchen" class="question-label">
+    <?= ($lang=='en')
+      ? "19. Hoodvent & Kitchen Cleaning"
+      : "19. Limpieza de Cocina y Campanas (Hoodvent)"; ?>
+  </label>
+
+  <select id="includeKitchen" name="includeKitchen" onchange="toggleSection19()">
+    <option value="">
+      <?= ($lang=='en') ? "-- Select an option --" : "-- Seleccione una opción --"; ?>
+    </option>
+    <option value="No"><?= ($lang=='en') ? "No" : "No"; ?></option>
+    <option value="Yes"><?= ($lang=='en') ? "Yes" : "Sí"; ?></option>
+  </select>
+
+  <div id="section19Container" style="display:none; margin-top:20px;">
+
+    <!-- ADD / REMOVE -->
+    <div style="margin-bottom:15px;">
+      <button type="button" class="btn19 addRow19" onclick="addRow19()">
+        ➕ <?= ($lang=='en') ? "Add Row" : "Agregar Fila"; ?>
+      </button>
+
+      <button type="button" class="btn19 removeRow19" onclick="removeRow19()">
+        🗑 <?= ($lang=='en') ? "Remove" : "Eliminar"; ?>
+      </button>
+    </div>
+
+    <!-- TABLE -->
+    <table class="service-table19">
+      <thead>
+        <tr>
+          <th><?= ($lang=='en') ? "Type of Services" : "Tipo de Servicio"; ?></th>
+          <th><?= ($lang=='en') ? "Service Time" : "Tiempo de Servicio"; ?></th>
+          <th><?= ($lang=='en') ? "Frequency" : "Frecuencia"; ?></th>
+          <th><?= ($lang=='en') ? "Service Description" : "Descripción del Servicio"; ?></th>
+          <th><?= ($lang=='en') ? "SUBTOTAL" : "SUBTOTAL"; ?></th>
+        </tr>
+      </thead>
+
+      <tbody id="table19body">
+
+        <!-- ONE INITIAL ROW -->
+        <tr>
+
+          <!-- TYPE OF SERVICES -->
+          <td>
+            <select class="type19" name="type19[]" onchange="toggleWriteOption19(this)">
+              <option value="__write__">
+                ✍️ <?= ($lang=='en') ? "Write..." : "Escribir..."; ?>
+              </option>
+
+              <option value="">
+                <?= ($lang=='en') ? "-- Select Service --" : "-- Seleccione un servicio --"; ?>
+              </option>
+
+              <option><?= ($lang=='en') ? "Kitchen Cleaning" : "Limpieza de Cocina"; ?></option>
+              <option><?= ($lang=='en') ? "Vent Hood" : "Campana Extractora (Hood)"; ?></option>
+              <option><?= ($lang=='en') ? "Bar Cleaning" : "Limpieza de Bar"; ?></option>
+              <option><?= ($lang=='en') ? "Grease Trap Cleaning" : "Limpieza de Trampa de Grasa"; ?></option>
+              <option><?= ($lang=='en') ? "Restroom Cleaning" : "Limpieza de Baños"; ?></option>
+              <option><?= ($lang=='en') ? "Dinning Room Cleaning" : "Limpieza de Comedor"; ?></option>
+            </select>
+
+            <input type="text"
+              class="write-field-19"
+              name="write19[]"
+              style="display:none; margin-top:5px;"
+              placeholder="<?= ($lang=='en') ? 'Write service...' : 'Escriba el servicio...'; ?>">
+          </td>
+
+          <!-- SERVICE TIME -->
+          <td>
+            <select class="time19" name="time19[]">
+              <option value="">
+                <?= ($lang=='en') ? "-- Select Time --" : "-- Seleccione tiempo --"; ?>
+              </option>
+              <option><?= ($lang=='en') ? "1 Day" : "1 Día"; ?></option>
+              <option><?= ($lang=='en') ? "1-2 Days" : "1-2 Días"; ?></option>
+              <option><?= ($lang=='en') ? "3 Days" : "3 Días"; ?></option>
+              <option><?= ($lang=='en') ? "4 Days" : "4 Días"; ?></option>
+              <option><?= ($lang=='en') ? "5 Days" : "5 Días"; ?></option>
+              <option><?= ($lang=='en') ? "6 Days" : "6 Días"; ?></option>
+              <option><?= ($lang=='en') ? "7 Days" : "7 Días"; ?></option>
+            </select>
+          </td>
+
+          <!-- FREQUENCY -->
+          <td>
+            <select class="freq19" name="freq19[]">
+              <option value="">
+                <?= ($lang=='en') ? "-- Select Period --" : "-- Seleccione periodo --"; ?>
+              </option>
+              <option><?= ($lang=='en') ? "One Time" : "Una Vez"; ?></option>
+              <option><?= ($lang=='en') ? "Weekly" : "Semanal"; ?></option>
+              <option><?= ($lang=='en') ? "Every 2 Weeks" : "Cada 2 Semanas"; ?></option>
+              <option><?= ($lang=='en') ? "Every 3 Weeks" : "Cada 3 Semanas"; ?></option>
+              <option><?= ($lang=='en') ? "Monthly" : "Mensual"; ?></option>
+              <option><?= ($lang=='en') ? "Bimonthly" : "Bimestral"; ?></option>
+              <option><?= ($lang=='en') ? "Quarterly" : "Trimestral"; ?></option>
+              <option><?= ($lang=='en') ? "Every 4 Months" : "Cada 4 Meses"; ?></option>
+              <option><?= ($lang=='en') ? "Semiannual" : "Semestral"; ?></option>
+              <option><?= ($lang=='en') ? "Annual" : "Anual"; ?></option>
+            </select>
+          </td>
+
+          <!-- DESCRIPTION -->
+          <td>
+            <input type="text"
+              class="desc19"
+              name="desc19[]"
+              placeholder="<?= ($lang=='en') ? 'Write description...' : 'Escriba la descripción...'; ?>">
+          </td>
+
+          <!-- SUBTOTAL -->
+          <td>
+            <input type="number" step="0.01"
+              class="subtotal19"
+              name="subtotal19[]"
+              placeholder="0.00"
+              oninput="calcTotals19()">
+          </td>
+
+        </tr>
+
+      </tbody>
+    </table>
+
+    <!-- TOTAL BOXES -->
+    <div class="totals19-container">
+
+      <div class="tot-box">
+        <div class="tot-header">
+          <?= ($lang=='en') ? "TOTAL" : "TOTAL"; ?>
+        </div>
+        <input type="text" id="total19" readonly name="total19">
+      </div>
+
+      <div class="tot-box">
+        <div class="tot-header">
+          <?= ($lang=='en') ? "TAXES (8.25%)" : "IMPUESTOS (8.25%)"; ?>
+        </div>
+        <input type="text" id="taxes19" readonly name="taxes19">
+      </div>
+
+      <div class="tot-box">
+        <div class="tot-header">
+          <?= ($lang=='en') ? "GRAND TOTAL" : "TOTAL GENERAL"; ?>
+        </div>
+        <input type="text" id="grand19" readonly name="grand19">
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .service-table19 {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+  }
+  .service-table19 th {
+    background-color: #c00;
+    color: #fff;
+    padding: 8px;
+    text-align: center;
+  }
+  .service-table19 td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  .service-table19 select,
+  .service-table19 input {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  .btn19 {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+  .addRow19 { background-color:#008c4a; color:white; }
+  .removeRow19 { background-color:#777; color:white; }
+  .totals19-container {
+    margin-top: 25px;
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+  }
+  .tot-box {
+    width: 220px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background:white;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+  }
+  .tot-header {
+    background-color:#c00;
+    color:white;
+    padding:8px;
+    text-align:center;
+    font-weight:bold;
+  }
+  .tot-box input {
+    width:100%;
+    padding:10px;
+    text-align:right;
+    font-weight:bold;
+    background:#f7f7f7;
+    border:none;
+  }
+</style>
+
+<script>
+function toggleSection19() {
+  document.getElementById("section19Container").style.display =
+    document.getElementById("includeKitchen").value === "Yes"
+    ? "block"
+    : "none";
+}
+
+function toggleWriteOption19(select) {
+  const input = select.parentElement.querySelector('.write-field-19');
+  input.style.display = (select.value === "__write__") ? "block" : "none";
+}
+
+function addRow19() {
+  const tbody = document.getElementById("table19body");
+  const newRow = tbody.children[0].cloneNode(true);
+
+  newRow.querySelectorAll("select, input").forEach(el => el.value = "");
+  newRow.querySelector('.write-field-19').style.display = "none";
+
+  tbody.appendChild(newRow);
+}
+
+function removeRow19() {
+  const tbody = document.getElementById("table19body");
+  if (tbody.children.length > 1) {
+    tbody.lastElementChild.remove();
+    calcTotals19();
+  } else {
+    alert("<?= ($lang=='en')
+      ? 'At least one row must remain.'
+      : 'Debe permanecer al menos una fila.'; ?>");
+  }
+}
+
+function calcTotals19() {
+  let total = 0;
+
+  document.querySelectorAll(".subtotal19").forEach(input => {
+    const val = parseFloat(input.value);
+    if (!isNaN(val)) total += val;
+  });
+
+  document.getElementById("total19").value = "$" + total.toFixed(2);
+
+  const taxes = total * 0.0825;
+  document.getElementById("taxes19").value = "$" + taxes.toFixed(2);
+
+  document.getElementById("grand19").value = "$" + (total + taxes).toFixed(2);
+}
+</script>
+
+
+<!-- 20️⃣ Include Staff Section -->
+<div class="question-block" id="q20">
+  <label for="includeStaff" class="question-label">
+    <?= ($lang=='en') ? "20. Include Staff?" : "20. ¿Incluir Personal?"; ?>
+  </label>
+
+  <select id="includeStaff" name="includeStaff" onchange="toggleStaffTables()">
+    <option value=""><?= ($lang=='en') ? "-- Select an option --" : "-- Seleccione una opción --"; ?></option>
+    <option value="No"><?= ($lang=='en') ? "No" : "No"; ?></option>
+    <option value="Yes"><?= ($lang=='en') ? "Yes" : "Sí"; ?></option>
+  </select>
+
+  <div id="staffTablesContainer" style="display:none; margin-top: 10px;"></div>
+</div>
+
+<style>
+  .staff-category {
+    margin-top: 20px;
+    border-top: 3px solid #c00;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .staff-header {
+    background-color: #c00;
+    color: #fff;
+    padding: 10px 15px;
+    font-size: 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .staff-header:hover {
+    background-color: #a00000;
+  }
+
+  .toggle-icon {
+    font-weight: bold;
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  .staff-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 5px;
+    font-size: 14px;
+    display: none;
+    background-color: #fff;
+  }
+
+  .staff-table th {
+    background-color: #c00;
+    color: white;
+    padding: 6px;
+    text-align: center;
+  }
+
+  .staff-table tr {
+    background-color: #fff;
+  }
+
+  .staff-table td {
+    padding: 8px;
+    text-align: center;
+  }
+
+  .readonly {
+    background-color: #f9f9f9;
+  }
+
+  .expanded .staff-table {
+    display: table;
+  }
+
+  .expanded .toggle-icon {
+    transform: rotate(180deg);
+  }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const container = document.getElementById("staffTablesContainer");
+
+  window.toggleStaffTables = function () {
+    const select = document.getElementById("includeStaff");
+    if (select.value === "Yes") {
+      container.style.display = "block";
+      if (container.childElementCount === 0) loadStaffSections();
+    } else {
+      container.innerHTML = "";
+      container.style.display = "none";
+    }
+  };
+
+  function loadStaffSections() {
+    container.innerHTML = `
+      ${createCategory("<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", [
+        "<?= ($lang=='en') ? 'Housekeeper / GRA' : 'Camarista / GRA'; ?>",
+        "<?= ($lang=='en') ? 'Housekeeping Inspector / GRA Supervisor' : 'Inspector(a) / Supervisor(a) de Housekeeping'; ?>",
+        "<?= ($lang=='en') ? 'Laundry Attendant' : 'Encargado de Lavandería'; ?>",
+        "<?= ($lang=='en') ? 'Houseman' : 'Houseman / Auxiliar General'; ?>",
+        "<?= ($lang=='en') ? 'Public Areas Attendant' : 'Encargado de Áreas Públicas'; ?>",
+        "<?= ($lang=='en') ? 'Lobby Attendant' : 'Encargado de Lobby'; ?>",
+        "<?= ($lang=='en') ? 'Lobby Runner (AM/PM/Overnight)' : 'Lobby Runner (AM/PM/Noche)'; ?>",
+        "<?= ($lang=='en') ? 'Turndown Attendant' : 'Encargado de Turn Down'; ?>"
+      ])}
+
+      ${createCategory("<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", [
+        "<?= ($lang=='en') ? 'Dishwasher' : 'Lavaplatos'; ?>",
+        "<?= ($lang=='en') ? 'Cook (Main Kitchen / Back Table / Cool Water)' : 'Cocinero (Cocina Principal / Back Table / Cool Water)'; ?>",
+        "<?= ($lang=='en') ? 'Prep Cook (Main Kitchen / Back Table / Cool Water)' : 'Cocinero de Preparación (Cocina Principal / Back Table / Cool Water)'; ?>",
+        "<?= ($lang=='en') ? 'Busser (Restaurant / Banquet)' : 'Ayudante de Mesero (Restaurante / Banquetes)'; ?>",
+        "<?= ($lang=='en') ? 'Runner (Food / Restaurant / Banquet)' : 'Runner (Alimentos / Restaurante / Banquetes)'; ?>",
+        "<?= ($lang=='en') ? 'Server (Restaurant / Banquet)' : 'Mesero (Restaurante / Banquetes)'; ?>",
+        "<?= ($lang=='en') ? 'Host / Hostess' : 'Host / Hostess'; ?>",
+        "<?= ($lang=='en') ? 'Barista' : 'Barista'; ?>",
+        "<?= ($lang=='en') ? 'Bartender' : 'Bartender'; ?>",
+        "<?= ($lang=='en') ? 'Barback' : 'Barback / Auxiliar de Barra'; ?>",
+        "<?= ($lang=='en') ? 'Banquet Houseman' : 'Houseman de Banquetes'; ?>",
+        "<?= ($lang=='en') ? 'Cashier' : 'Cajero(a)'; ?>"
+      ])}
+
+      ${createCategory("<?= ($lang=='en') ? 'MAINTENANCE' : 'MANTENIMIENTO'; ?>", [
+        "<?= ($lang=='en') ? 'Maintenance Helper' : 'Auxiliar de Mantenimiento'; ?>",
+        "<?= ($lang=='en') ? 'Movers' : 'Mover / Mudanzas'; ?>"
+      ])}
+
+      ${createCategory("<?= ($lang=='en') ? 'RECREATION & POOL' : 'RECREACIÓN Y PISCINA'; ?>", [
+        "<?= ($lang=='en') ? 'Pool Attendant' : 'Encargado de Piscina'; ?>",
+        "<?= ($lang=='en') ? 'Recreation Slide Attendant' : 'Encargado de Tobogán'; ?>",
+        "<?= ($lang=='en') ? 'Recreation Supervisor' : 'Supervisor de Recreación'; ?>"
+      ])}
+
+      ${createCategory("<?= ($lang=='en') ? 'SECURITY' : 'SEGURIDAD'; ?>", [
+        "<?= ($lang=='en') ? 'Security Guard (Noncommissioned)' : 'Guardia de Seguridad (No Armado)'; ?>"
+      ])}
+
+      ${createCategory("<?= ($lang=='en') ? 'VALET PARKING' : 'VALET PARKING'; ?>", [
+        "<?= ($lang=='en') ? 'Valet Attendant (AM/PM/Overnight)' : 'Valet Attendant (AM/PM/Noche)'; ?>"
+      ])}
+
+      ${createCategory("<?= ($lang=='en') ? 'FRONT DESK' : 'RECEPCIÓN'; ?>", [
+        "<?= ($lang=='en') ? 'Front Desk Attendant' : 'Recepcionista'; ?>",
+        "<?= ($lang=='en') ? 'Night Auditor' : 'Auditor Nocturno'; ?>"
+      ])}
+    `;
+  }
+
+  function createCategory(title, positions) {
+    const rows = positions
+      .map(pos => {
+        const slug = slugify(title + "_" + pos);
+        return `
+          <tr>
+            <td>${pos}</td>
+            <td><input type="number" name="base_${slug}" step="0.01"
+              placeholder="<?= ($lang=='en') ? '0.00' : '0.00'; ?>"
+              oninput="updateBillRate('${slug}')"></td>
+
+            <td><input type="number" name="increase_${slug}" step="0.01"
+              placeholder="<?= ($lang=='en') ? '0%' : '0%'; ?>"
+              oninput="updateBillRate('${slug}')"></td>
+
+            <td><input type="text" name="bill_${slug}" class="readonly" readonly
+              placeholder="$0.00"></td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="staff-category">
+        <div class="staff-header" onclick="this.parentElement.classList.toggle('expanded')">
+          ${title}
+          <span class="toggle-icon">▼</span>
+        </div>
+        <table class="staff-table">
+          <thead>
+            <tr>
+              <th><?= ($lang=='en') ? 'Position' : 'Puesto'; ?></th>
+              <th><?= ($lang=='en') ? 'Base Rate' : 'Tarifa Base'; ?></th>
+              <th><?= ($lang=='en') ? '% Increase' : '% Incremento'; ?></th>
+              <th><?= ($lang=='en') ? 'Bill Rate' : 'Tarifa Final'; ?></th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  window.updateBillRate = function (slug) {
+    const base = parseFloat(document.querySelector(`[name="base_${slug}"]`)?.value) || 0;
+    const inc = parseFloat(document.querySelector(`[name="increase_${slug}"]`)?.value) || 0;
+    const bill = document.querySelector(`[name="bill_${slug}"]`);
+    const total = base + (base * inc / 100);
+    bill.value = total > 0 ? `$${total.toFixed(2)}` : "$0.00";
+  };
+
+  function slugify(text) {
+    return text.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  }
+});
+</script>

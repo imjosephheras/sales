@@ -1,0 +1,193 @@
+<?php
+$translations = [
+
+    // =====================================
+    // 🇺🇸 ENGLISH TRANSLATIONS
+    // =====================================
+    "en" => [
+
+        // ---------------------------------
+        // 🔹 GENERAL UI
+        // ---------------------------------
+        "home" => "Home",
+        "send" => "Send",
+        "preview_form" => "Form Preview",
+        "confirm_send" => "Confirm and Send",
+        "cancel" => "Cancel",
+        "registration_form" => "Registration Form",
+
+        // ---------------------------------
+        // 🔹 SALES / COMMISSION FORM
+        // ---------------------------------
+        "sec1_title" => "Section 1: Commission Form",
+
+        "job_number" => "Job / Work Order Number",
+        "ph_job_number" => "Enter Job or Work Order number",
+
+        "lead_source" => "Lead Source",
+        "select_lead" => "-- Select Lead Source --",
+        "lead_website" => "Website / Chat",
+        "lead_walkin" => "Walk-in",
+        "lead_sales" => "Sales Rep Lead",
+        "lead_external" => "External Prospector (Uber/Other)",
+        "lead_referral" => "Referral",
+        "lead_existing" => "Existing Client",
+
+        "lead_finder" => "Lead Finder (If external/referral)",
+        "ph_lead_finder" => "Who found the lead? (Optional)",
+
+        "lead_closer" => "Lead Closer (Salesperson)",
+        "select_salesperson" => "Select salesperson",
+
+        "order_paid" => "Order Paid?",
+        "select_option" => "-- Select an option --",
+        "yes" => "Yes",
+        "no" => "No",
+        "partial" => "Partial",
+
+        "bill_rate" => "Bill Rate",
+        "ph_bill_rate" => "Example: 3500.00",
+
+        "operating_cost" => "Operating Cost",
+        "ph_operating_cost" => "Example: 2100.00",
+
+        "supplies" => "Supplies",
+        "ph_supplies" => "Example: 250.00",
+
+        "fixed_expenses" => "Operational & Fixed Expenses",
+        "net_utility" => "Net Utility",
+
+        "finder_commission" => "Finder Commission (%)",
+        "ph_finder_amount" => "Finder Amount ($)",
+
+        "closer_commission" => "Sales Closer Commission (%)",
+        "ph_closer_amount" => "Closer Amount ($)",
+
+        // ---------------------------------
+        // 🔹 EMPLOYEE WORK REPORT (EWR)
+        // ---------------------------------
+
+        // Section 1
+        "wr_sec1_title" => "Section 1: Employee Information",
+        "wr_employee_name" => "Employee Name",
+        "wr_ph_employee_name" => "Enter employee name",
+
+        "wr_jwo" => "Job Work Order (JWO)",
+        "wr_ph_jwo" => "Enter JWO number",
+
+        // Section 2: Before & After Photos
+        "wr_sec2_title" => "Section 2: Before & After Photos",
+        "wr_add_photo" => "Add Photos",
+        "wr_before" => "Before",
+        "wr_after" => "After",
+
+        // Section 3: Evidence Summary
+        "wr_sec3_title" => "Section 3: Service Evidence Summary",
+        "wr_sec3_statement_title" => "📌 Service Evidence Statement",
+
+        "wr_sec3_p1" =>
+            "This report contains the photographic evidence corresponding to the service performed as part of Job Work Order",
+
+        "wr_sec3_p2" =>
+            "The images included illustrate the condition of the work area prior to service (Before) and the resulting condition upon completion (After). These photos are intended to validate task completion, demonstrate service quality, and support the scope of work agreed with the client.",
+
+        "wr_sec3_p3" =>
+            "This document serves as a visual record for internal review, client reporting, and quality assurance purposes.",
+    ],
+
+
+    // =====================================
+    // 🇪🇸 SPANISH TRANSLATIONS
+    // =====================================
+    "es" => [
+
+        // ---------------------------------
+        // 🔹 GENERAL UI
+        // ---------------------------------
+        "home" => "Inicio",
+        "send" => "Enviar",
+        "preview_form" => "Previsualización del Formulario",
+        "confirm_send" => "Confirmar y Enviar",
+        "cancel" => "Cancelar",
+        "registration_form" => "Formulario de Registro",
+
+        // ---------------------------------
+        // 🔹 SALES / COMMISSION FORM
+        // ---------------------------------
+        "sec1_title" => "Sección 1: Formulario de Comisión",
+
+        "job_number" => "Número de Trabajo / Orden (JWO)",
+        "ph_job_number" => "Ingrese número de trabajo u orden",
+
+        "lead_source" => "Fuente del Lead",
+        "select_lead" => "-- Seleccione una fuente --",
+        "lead_website" => "Sitio Web / Chat",
+        "lead_walkin" => "Walk-in",
+        "lead_sales" => "Lead de Representante de Ventas",
+        "lead_external" => "Prospector Externo (Uber/Otro)",
+        "lead_referral" => "Recomendación",
+        "lead_existing" => "Cliente Existente",
+
+        "lead_finder" => "Persona que encontró el lead (si aplica)",
+        "ph_lead_finder" => "¿Quién encontró el lead? (Opcional)",
+
+        "lead_closer" => "Cerrador del Lead (Vendedor)",
+        "select_salesperson" => "Seleccione un vendedor",
+
+        "order_paid" => "¿Orden Pagada?",
+        "select_option" => "-- Seleccione una opción --",
+        "yes" => "Sí",
+        "no" => "No",
+        "partial" => "Parcial",
+
+        "bill_rate" => "Tarifa Facturada",
+        "ph_bill_rate" => "Ejemplo: 3500.00",
+
+        "operating_cost" => "Costo Operativo",
+        "ph_operating_cost" => "Ejemplo: 2100.00",
+
+        "supplies" => "Suministros",
+        "ph_supplies" => "Ejemplo: 250.00",
+
+        "fixed_expenses" => "Gastos Operativos y Fijos",
+        "net_utility" => "Utilidad Neta",
+
+        "finder_commission" => "Comisión del Finder (%)",
+        "ph_finder_amount" => "Monto del Finder ($)",
+
+        "closer_commission" => "Comisión del Closer (%)",
+        "ph_closer_amount" => "Monto del Closer ($)",
+
+        // ---------------------------------
+        // 🔹 EMPLOYEE WORK REPORT (EWR)
+        // ---------------------------------
+
+        // Section 1
+        "wr_sec1_title" => "Sección 1: Información del Empleado",
+        "wr_employee_name" => "Nombre del Empleado",
+        "wr_ph_employee_name" => "Ingrese el nombre del empleado",
+
+        "wr_jwo" => "Orden de Trabajo (JWO)",
+        "wr_ph_jwo" => "Ingrese número JWO",
+
+        // Section 2: Photos
+        "wr_sec2_title" => "Sección 2: Fotos Antes y Después",
+        "wr_add_photo" => "Agregar Fotos",
+        "wr_before" => "Antes",
+        "wr_after" => "Después",
+
+        // Section 3
+        "wr_sec3_title" => "Sección 3: Resumen de Evidencia del Servicio",
+        "wr_sec3_statement_title" => "📌 Declaración de Evidencia del Servicio",
+
+        "wr_sec3_p1" =>
+            "Este informe contiene la evidencia fotográfica correspondiente al servicio realizado como parte de la Orden de Trabajo",
+
+        "wr_sec3_p2" =>
+            "Las imágenes incluidas muestran la condición del área antes del servicio (Antes) y la condición resultante tras su finalización (Después). Estas fotos validan la finalización del trabajo, la calidad del servicio y respaldan el alcance acordado con el cliente.",
+
+        "wr_sec3_p3" =>
+            "Este documento sirve como registro visual para revisión interna, reportes al cliente y fines de control de calidad.",
+    ]
+];
+?>

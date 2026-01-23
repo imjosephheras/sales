@@ -1,0 +1,151 @@
+<?php
+/**
+ * GENERATE PDF CONTROLLER
+ * Genera PDFs basados en templates según el tipo de request
+ */
+
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
+
+// Cargar autoload de Composer
+require_once __DIR__ . '/../../../vendor/autoload.php';
+
+// Cargar configuración de base de datos
+require_once __DIR__ . '/../config/db_config.php';
+
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
+try {
+    // Verificar que se recibió un ID
+    $request_id = $_GET['id'] ?? $_POST['id'] ?? null;
+
+    if (!$request_id) {
+        throw new Exception('Request ID is required');
+    }
+
+    // ========================================
+    // OBTENER DATOS DE LA BASE DE DATOS
+    // ========================================
+
+    $sql = "SELECT * FROM requests WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':id' => $request_id]);
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$data) {
+        throw new Exception('Request not found');
+    }
+
+    // ========================================
+    // DETERMINAR QUÉ TEMPLATE USAR
+    // ========================================
+
+    $request_type = strtolower($data['Request_Type'] ?? 'quote');
+    $template_file = __DIR__ . "/../templates/{$request_type}.php";
+
+    if (!file_exists($template_file)) {
+        throw new Exception("Template not found for type: {$request_type}");
+    }
+
+    // ========================================
+    // RENDERIZAR TEMPLATE
+    // ========================================
+
+    // Capturar output del template
+    ob_start();
+    include $template_file;
+    $html = ob_get_clean();
+
+    // ========================================
+    // GENERAR PDF CON DOMPDF
+    // ========================================
+
+    $options = new Options();
+    $options->set('isRemoteEnabled', true);
+    $options->set('defaultFont', 'DejaVu Sans');
+    $options->set('isHtml5ParserEnabled', true);
+
+    $dompdf = new Dompdf($options);
+    $dompdf->loadHtml($html, 'UTF-8');
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
+
+    // ========================================
+    // DESCARGAR PDF
+    // ========================================
+
+    // Generar nombre de archivo
+    $doc_number = $data['docnum'] ?? 'DRAFT';
+    $business_name = preg_replace('/[^a-zA-Z0-9_-]/', '_', $data['Business_Name'] ?? 'Document');
+    $pdf_filename = strtoupper($request_type) . "_{$doc_number}_{$business_name}.pdf";
+
+    // Enviar headers para descarga
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: attachment; filename="' . $pdf_filename . '"');
+    header('Cache-Control: private, max-age=0, must-revalidate');
+    header('Pragma: public');
+
+    echo $dompdf->output();
+
+} catch (Exception $e) {
+    http_response_code(400);
+
+    // Si es una solicitud AJAX, devolver JSON
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+        strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    } else {
+        // Si es una solicitud normal, mostrar error HTML
+        echo "<!DOCTYPE html>
+        <html>
+        <head>
+            <title>Error</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 40px;
+                    background: #f5f5f5;
+                }
+                .error-box {
+                    background: white;
+                    padding: 30px;
+                    border-radius: 8px;
+                    border-left: 4px solid #d32f2f;
+                    max-width: 600px;
+                    margin: 0 auto;
+                }
+                h1 {
+                    color: #d32f2f;
+                    margin-top: 0;
+                }
+                .error-message {
+                    color: #666;
+                    line-height: 1.6;
+                }
+                .back-link {
+                    display: inline-block;
+                    margin-top: 20px;
+                    color: #1976d2;
+                    text-decoration: none;
+                }
+                .back-link:hover {
+                    text-decoration: underline;
+                }
+            </style>
+        </head>
+        <body>
+            <div class='error-box'>
+                <h1>⚠️ Error Generating PDF</h1>
+                <p class='error-message'>" . htmlspecialchars($e->getMessage()) . "</p>
+                <a href='javascript:history.back()' class='back-link'>← Go Back</a>
+            </div>
+        </body>
+        </html>";
+    }
+    exit;
+}
+?>

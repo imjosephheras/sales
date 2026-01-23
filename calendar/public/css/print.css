@@ -1,0 +1,556 @@
+/* ============================================================
+   PRINT STYLES - CALENDAR PROFESSIONAL VIEW
+   Optimized for printing monthly calendar with event details
+   ============================================================ */
+
+/* Hide screen-only elements when printing */
+@media print {
+    /* Force landscape orientation */
+    @page {
+        size: letter landscape; /* 11" x 8.5" horizontal */
+        margin: 0.4cm 0.5cm;
+    }
+    
+    html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    body {
+        /* No scaling needed in landscape */
+        transform: none;
+    }
+    
+    /* Remove all spacing */
+    * {
+        box-sizing: border-box !important;
+    }
+    
+    /* Restore necessary padding for elements */
+    .calendar-main,
+    .calendar-header,
+    .print-header,
+    .day-header,
+    .calendar-day,
+    .event-card,
+    .event-card-header,
+    .event-card-body,
+    .day-number {
+        margin: revert !important;
+        padding: revert !important;
+    }
+    
+    /* Hide navigation and UI elements */
+    .main-header,
+    .header-actions,
+    .btn-primary,
+    .btn-today,
+    .btn-add,
+    .btn-print,
+    .sidebar-right,
+    .sidebar-left,
+    .flash-message,
+    .theme-toggle,
+    .user-info,
+    .calendar-actions,
+    .work-status,
+    button:not(.event-card):not(.event-card *),
+    .modal,
+    .nav-arrow,
+    .print-header,
+    .print-footer {
+        display: none !important;
+    }
+    
+    /* IMPORTANT: Keep event containers visible */
+    .day-events,
+    .event-card,
+    .event-card-header,
+    .event-card-body,
+    .event-code,
+    .event-date-code,
+    .event-client,
+    .event-location {
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    /* Force calendar to fill page */
+    .calendar-layout {
+        display: block !important;
+        grid-template-columns: none !important;
+        width: 100% !important;
+        height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .calendar-main {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Calendar header compact - sin margin */
+    .calendar-header {
+        margin: 0 !important;
+        padding: 0.2cm 0.5cm !important;
+        page-break-inside: avoid !important;
+        background: white !important;
+    }
+    
+    .month-title {
+        font-size: 1.8rem !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Page setup */
+    @page {
+        size: letter landscape; /* or A4 landscape */
+        margin: 0.5in;
+    }
+    
+    body {
+        background: white !important;
+        color: black !important;
+        font-family: 'DM Sans', Arial, sans-serif;
+        font-size: 10pt;
+        line-height: 1.4;
+    }
+    
+    /* Show print header */
+    .print-header {
+        display: block !important;
+        border-bottom: 2px solid #333;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .print-header h1 {
+        font-family: 'Crimson Pro', serif;
+        font-size: 24pt;
+        font-weight: 700;
+        margin: 0;
+        color: #1a1a1a;
+    }
+    
+    .print-header .print-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.25rem;
+        font-size: 9pt;
+        color: #666;
+    }
+    
+    /* Calendar grid for print */
+    .calendar-layout {
+        display: block !important;
+        grid-template-columns: none !important;
+    }
+    
+    .calendar-main {
+        max-width: 100% !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+    
+    /* Calendar Grid - Full width with all 7 days */
+    .calendar-grid {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important; /* 7 columns = SUN to SAT */
+        width: 100% !important;
+        gap: 1px !important;
+        background: #000 !important;
+        border: 2px solid #000 !important;
+    }
+    
+    /* Day headers */
+    .day-header {
+        background: #333 !important;
+        color: white !important;
+        padding: 0.3cm !important;
+        text-align: center !important;
+        font-weight: bold !important;
+        font-size: 0.9rem !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* Calendar days */
+    .calendar-day {
+        background: white !important;
+        min-height: 4cm !important;
+        padding: 0.2cm !important;
+        position: relative !important;
+        page-break-inside: avoid !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .calendar-day.today {
+        background: #fff9e6 !important;
+    }
+    
+    .calendar-day.empty {
+        background: #f5f5f5 !important;
+    }
+    
+    .day-number {
+        font-size: 1rem !important;
+        font-weight: bold !important;
+        color: #000 !important;
+        margin-bottom: 0.1cm !important;
+    }
+    
+    /* Event cards in print - MUST BE VISIBLE */
+    .event-card {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        background: white !important;
+        border: 1px solid #ccc !important;
+        border-left: 4px solid var(--event-color, #2563eb) !important;
+        padding: 0.15cm !important;
+        margin-bottom: 0.1cm !important;
+        font-size: 0.7rem !important;
+        page-break-inside: avoid !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .event-card-header {
+        display: block !important;
+        visibility: visible !important;
+        background: var(--event-color, #2563eb) !important;
+        color: white !important;
+        padding: 0.1cm 0.15cm !important;
+        font-size: 0.65rem !important;
+        font-weight: bold !important;
+        margin-bottom: 0.08cm !important;
+        border-radius: 2px !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .event-code {
+        display: inline !important;
+        color: white !important;
+        font-weight: bold !important;
+    }
+    
+    .event-card-body {
+        display: block !important;
+        visibility: visible !important;
+        font-size: 0.6rem !important;
+        color: #333 !important;
+        line-height: 1.3 !important;
+    }
+    
+    .event-date-code,
+    .event-client,
+    .event-location {
+        display: flex !important;
+        visibility: visible !important;
+        align-items: center !important;
+        gap: 3px !important;
+        margin-bottom: 0.05cm !important;
+    }
+    
+    .event-client {
+        color: #2563eb !important;
+        font-weight: 600 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .event-client svg,
+    .event-location svg {
+        display: inline !important;
+        width: 10px !important;
+        height: 10px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .event-location {
+        color: #666 !important;
+    }
+    
+    .event-date-code {
+        color: #999 !important;
+        font-size: 0.55rem !important;
+    }
+    
+    /* Force colors in print */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .calendar-grid {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        width: 100% !important;
+        gap: 2px !important;
+        background: #ddd !important;
+        border: 2px solid #333 !important;
+        border-top: none !important; /* Sin borde superior para pegar con header */
+        page-break-after: auto !important;
+        margin: 0 !important;
+    }
+    
+    .day-header {
+        background: #f5f5f5 !important;
+        color: #333 !important;
+        border: 1px solid #ccc !important;
+        padding: 0.3cm !important;
+        text-align: center !important;
+        font-weight: 700 !important;
+        font-size: 10pt !important;
+        text-transform: uppercase;
+    }
+    
+    .calendar-day {
+        background: white !important;
+        border: 1px solid #ddd !important;
+        min-height: 4.5cm !important;
+        padding: 0.2cm !important;
+        position: relative;
+        font-size: 9pt !important;
+        page-break-inside: avoid !important;
+        overflow: visible !important; /* Permitir que eventos fluyan a siguiente página */
+    }
+    
+    .calendar-day.empty {
+        background: #fafafa !important;
+    }
+    
+    .calendar-day.today {
+        background: #fffbeb !important;
+        border: 2px solid #f59e0b !important;
+    }
+    
+    .day-number {
+        font-size: 11pt !important;
+        font-weight: 600 !important;
+        color: #333 !important;
+        margin-bottom: 0.15cm !important;
+    }
+    
+    .calendar-day.today .day-number {
+        color: #f59e0b !important;
+        font-weight: 700 !important;
+    }
+    
+    .calendar-day.empty {
+        background: #fafafa !important;
+    }
+    
+    .calendar-day.today {
+        background: #fffbeb !important;
+        border: 2px solid #f59e0b !important;
+    }
+    
+    /* Print-specific event display */
+    .print-events {
+        display: block !important;
+    }
+    
+    .print-event {
+        display: block !important;
+        font-size: 7.5pt;
+        line-height: 1.3;
+        margin-bottom: 0.15rem;
+        padding: 0.15rem 0.2rem;
+        border-left: 2px solid #666;
+        background: #f9f9f9;
+        page-break-inside: avoid;
+    }
+    
+    .print-event-time {
+        font-weight: 600;
+        color: #333;
+        display: block;
+        font-size: 7pt;
+    }
+    
+    .print-event-title {
+        color: #1a1a1a;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.1rem;
+    }
+    
+    .print-event-location {
+        color: #555;
+        font-style: italic;
+        display: block;
+        font-size: 7pt;
+    }
+    
+    .print-event-category {
+        display: inline-block;
+        font-size: 6.5pt;
+        padding: 0.05rem 0.2rem;
+        background: #e5e5e5;
+        border-radius: 2px;
+        color: #333;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-top: 0.1rem;
+    }
+    
+    /* Event type color coding */
+    .print-event.jwo {
+        border-left-color: #3b82f6;
+        background: #eff6ff;
+    }
+    
+    .print-event.contract {
+        border-left-color: #10b981;
+        background: #f0fdf4;
+    }
+    
+    .print-event.proposal {
+        border-left-color: #f59e0b;
+        background: #fffbeb;
+    }
+    
+    .print-event.hoodvent {
+        border-left-color: #ef4444;
+        background: #fef2f2;
+    }
+    
+    .print-event.janitorial {
+        border-left-color: #8b5cf6;
+        background: #faf5ff;
+    }
+    
+    .print-event.completed {
+        opacity: 0.5;
+        text-decoration: line-through;
+    }
+    
+    /* CRITICAL: Show all events in print */
+    .day-events {
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    .day-events .event-card {
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    /* Print footer */
+    .print-footer {
+        display: block !important;
+        margin-top: 1rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid #ddd;
+        font-size: 8pt;
+        color: #666;
+        text-align: center;
+    }
+    
+    /* Legend for print */
+    .print-legend {
+        display: flex !important;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 0.5rem;
+        font-size: 8pt;
+    }
+    
+    .print-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    
+    .print-legend-color {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+    }
+    
+    /* Ensure proper page breaks */
+    .calendar-layout {
+        page-break-inside: avoid;
+    }
+    
+    /* Force print all backgrounds */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    /* FINAL OVERRIDE: Ensure events are visible */
+    .calendar-day .day-events,
+    .calendar-day .event-card,
+    .event-card-header,
+    .event-card-body,
+    .event-code,
+    .event-client,
+    .event-location,
+    .event-date-code {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .event-card-header .event-code {
+        display: inline !important;
+    }
+    
+    .event-client,
+    .event-location,
+    .event-date-code {
+        display: flex !important;
+    }
+}
+
+/* ============================================================
+   PRINT BUTTON (Screen only)
+   ============================================================ */
+.btn-print {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background: white;
+    color: #1c1917;
+    border: 1px solid #e7e5e4;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 200ms;
+}
+
+.btn-print:hover {
+    background: #f5f5f4;
+    border-color: #d6d3d1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-print svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Hide print elements on screen */
+@media screen {
+    .print-header,
+    .print-events,
+    .print-footer,
+    .print-legend {
+        display: none;
+    }
+}
