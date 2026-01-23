@@ -231,6 +231,142 @@ if (!empty($photos) && isset($photos['tmp_name'])) {
 
 //
 // ===============================
+//   GUARDAR EN BASE DE DATOS
+// ===============================
+//
+
+try {
+    require_once 'db_config.php';
+    $pdo = getDBConnection();
+
+    // Preparar datos para guardar
+    $week_days_json = !empty($week_days) ? json_encode($week_days) : null;
+    $scope_json = !empty($_POST['Scope_Of_Work']) ? json_encode($_POST['Scope_Of_Work']) : null;
+    $photos_json = !empty($uploaded_photos) ? json_encode($uploaded_photos) : null;
+
+    // Arrays de la sección 18 (Janitorial)
+    $type18_json = !empty($type18) ? json_encode($type18) : null;
+    $write18_json = !empty($write18) ? json_encode($write18) : null;
+    $time18_json = !empty($time18) ? json_encode($time18) : null;
+    $freq18_json = !empty($freq18) ? json_encode($freq18) : null;
+    $desc18_json = !empty($desc18) ? json_encode($desc18) : null;
+    $subtotal18_json = !empty($subtotal18) ? json_encode($subtotal18) : null;
+
+    // Arrays de la sección 19 (Kitchen)
+    $type19_json = !empty($type19) ? json_encode($type19) : null;
+    $time19_json = !empty($time19) ? json_encode($time19) : null;
+    $freq19_json = !empty($freq19) ? json_encode($freq19) : null;
+    $desc19_json = !empty($desc19) ? json_encode($desc19) : null;
+    $subtotal19_json = !empty($subtotal19) ? json_encode($subtotal19) : null;
+
+    // Staff data
+    $base_staff_json = !empty($base_staff) ? json_encode($base_staff) : null;
+    $increase_staff_json = !empty($increase_staff) ? json_encode($increase_staff) : null;
+    $bill_staff_json = !empty($bill_staff) ? json_encode($bill_staff) : null;
+
+    // Insert into database
+    $stmt = $pdo->prepare("
+        INSERT INTO requests (
+            Service_Type, Request_Type, Priority, Requested_Service,
+            client_name, Client_Title, Email, Number_Phone,
+            Company_Name, Company_Address, Is_New_Client,
+            Site_Visit_Conducted, frequency_period, week_days, one_time,
+            Invoice_Frequency, Contract_Duration,
+            Seller, PriceInput, Prime_Quoted_Price,
+            includeJanitorial, type18, write18, time18, freq18, desc18, subtotal18,
+            total18, taxes18, grand18,
+            includeKitchen, type19, time19, freq19, desc19, subtotal19,
+            total19, taxes19, grand19,
+            includeStaff, base_staff, increase_staff, bill_staff,
+            inflationAdjustment, totalArea, buildingsIncluded, startDateServices,
+            Site_Observation, Additional_Comments, Email_Information_Sent,
+            Scope_Of_Work, photos,
+            status
+        ) VALUES (
+            :service_type, :request_type, :priority, :requested_service,
+            :client_name, :client_title, :email, :number_phone,
+            :company_name, :company_address, :is_new_client,
+            :site_visit_conducted, :frequency_period, :week_days, :one_time,
+            :invoice_frequency, :contract_duration,
+            :seller, :price_input, :prime_quoted_price,
+            :includeJanitorial, :type18, :write18, :time18, :freq18, :desc18, :subtotal18,
+            :total18, :taxes18, :grand18,
+            :includeKitchen, :type19, :time19, :freq19, :desc19, :subtotal19,
+            :total19, :taxes19, :grand19,
+            :includeStaff, :base_staff, :increase_staff, :bill_staff,
+            :inflation_adjustment, :total_area, :buildings_included, :start_date_services,
+            :site_observation, :additional_comments, :email_info_sent,
+            :scope_of_work, :photos,
+            'pending'
+        )
+    ");
+
+    // Bind parameters
+    $stmt->execute([
+        ':service_type' => $service_type,
+        ':request_type' => $request_type,
+        ':priority' => $priority,
+        ':requested_service' => $requested_service,
+        ':client_name' => $client_name,
+        ':client_title' => $client_title,
+        ':email' => $email,
+        ':number_phone' => $number_phone,
+        ':company_name' => $company_name,
+        ':company_address' => $company_address,
+        ':is_new_client' => $is_new_client,
+        ':site_visit_conducted' => $site_visit_conducted,
+        ':frequency_period' => $frequency_period,
+        ':week_days' => $week_days_json,
+        ':one_time' => $one_time,
+        ':invoice_frequency' => $invoice_frequency,
+        ':contract_duration' => $contract_duration,
+        ':seller' => $Seller,
+        ':price_input' => $PriceInput,
+        ':prime_quoted_price' => $prime_quoted_price,
+        ':includeJanitorial' => $includeJanitorial,
+        ':type18' => $type18_json,
+        ':write18' => $write18_json,
+        ':time18' => $time18_json,
+        ':freq18' => $freq18_json,
+        ':desc18' => $desc18_json,
+        ':subtotal18' => $subtotal18_json,
+        ':total18' => $total18,
+        ':taxes18' => $taxes18,
+        ':grand18' => $grand18,
+        ':includeKitchen' => $includeKitchen,
+        ':type19' => $type19_json,
+        ':time19' => $time19_json,
+        ':freq19' => $freq19_json,
+        ':desc19' => $desc19_json,
+        ':subtotal19' => $subtotal19_json,
+        ':total19' => $total19,
+        ':taxes19' => $taxes19,
+        ':grand19' => $grand19,
+        ':includeStaff' => $includeStaff,
+        ':base_staff' => $base_staff_json,
+        ':increase_staff' => $increase_staff_json,
+        ':bill_staff' => $bill_staff_json,
+        ':inflation_adjustment' => $inflation_adjustment,
+        ':total_area' => $total_area,
+        ':buildings_included' => $buildings_included,
+        ':start_date_services' => $start_date_services,
+        ':site_observation' => $site_observation,
+        ':additional_comments' => $additional_comments,
+        ':email_info_sent' => $email_info_sent,
+        ':scope_of_work' => $scope_json,
+        ':photos' => $photos_json
+    ]);
+
+    $request_id = $pdo->lastInsertId();
+
+} catch (Exception $e) {
+    // Log error but continue with email sending
+    error_log("Database save error: " . $e->getMessage());
+    $request_id = null;
+}
+
+//
+// ===============================
 //   CREAR CONTENIDO DEL PDF
 // ===============================
 //
@@ -693,38 +829,112 @@ body {
   font-family: Arial;
   display: flex;
   justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
 }
 .box {
   background:white;
   padding:40px;
   border-radius:20px;
   text-align:center;
-  width:450px;
+  width:500px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.box h2 {
+  color: #001f54;
+  margin-bottom: 20px;
+}
+.box p {
+  color: #333;
+  line-height: 1.6;
+}
+.btn-group {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
 }
 .btn {
   background:#001f54;
-  padding:12px 25px;
+  padding:14px 28px;
   color:#fff;
   display:inline-block;
-  margin-top:20px;
-  border-radius:8px;
+  border-radius:50px;
   text-decoration:none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,31,84,0.4);
+}
+.btn-primary {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+}
+.btn-primary:hover {
+  box-shadow: 0 6px 16px rgba(40,167,69,0.4);
+}
+.btn-secondary {
+  background: #6c757d;
+}
+.btn-secondary:hover {
+  background: #5a6268;
+}
+.info-box {
+  background: #f8f9fa;
+  border-left: 4px solid #001f54;
+  padding: 15px;
+  margin: 20px 0;
+  text-align: left;
+}
+.info-box strong {
+  color: #001f54;
 }
 </style>
 </head>
 
 <body>
 <div class="box">
-<h2><?= $email_status === 'success' ? '✓ Form Submitted!' : '✗ Error' ?></h2>
+<h2><?= $email_status === 'success' ? '✅ Form Submitted Successfully!' : '❌ Error' ?></h2>
 <p><?= $email_message ?></p>
 
 <?php if ($email_status === 'success'): ?>
-<p><strong>Company:</strong> <?= htmlspecialchars($company_name) ?></p>
-<p><strong>Client:</strong> <?= htmlspecialchars($client_name) ?></p>
-<p><strong>Email:</strong> <?= htmlspecialchars($email) ?></p>
+<div class="info-box">
+  <p><strong>Company:</strong> <?= htmlspecialchars($company_name) ?></p>
+  <p><strong>Client:</strong> <?= htmlspecialchars($client_name) ?></p>
+  <p><strong>Email:</strong> <?= htmlspecialchars($email) ?></p>
+  <?php if (isset($request_id) && $request_id): ?>
+  <p><strong>Request ID:</strong> #<?= $request_id ?></p>
+  <?php endif; ?>
+</div>
+
+<p style="color:#666; font-size:14px;">
+  Your request has been saved and is ready for contract generation.
+</p>
+
+<div class="btn-group">
+  <?php if (isset($request_id) && $request_id): ?>
+  <a href="../contract_generator/contract_generator/index.php?request_id=<?= $request_id ?>" class="btn btn-primary">
+    📋 Go to Contract Generator
+  </a>
+  <?php endif; ?>
+  <a href="index.php" class="btn btn-secondary">
+    ← Back to Form
+  </a>
+</div>
+
+<?php else: ?>
+
+<div class="btn-group">
+  <a href="index.php" class="btn btn-secondary">← Try Again</a>
+</div>
+
 <?php endif; ?>
 
-<a href="index.php" class="btn">← Back to Form</a>
 </div>
 </body>
 </html>

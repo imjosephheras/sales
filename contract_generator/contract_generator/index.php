@@ -73,5 +73,30 @@ $current_user = $_SESSION['user_name'] ?? 'Admin';
     <script src="js/editor.js"></script>
     <script src="js/preview.js"></script>
 
+    <!-- Auto-load request if request_id is in URL -->
+    <script>
+    (function() {
+        // Get request_id from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestId = urlParams.get('request_id');
+
+        if (requestId) {
+            console.log('📋 Auto-loading request ID:', requestId);
+
+            // Wait for the page to fully load
+            window.addEventListener('load', function() {
+                // Wait a bit for modules to initialize
+                setTimeout(function() {
+                    // Dispatch event to load this request
+                    const event = new CustomEvent('requestSelected', {
+                        detail: { id: requestId }
+                    });
+                    document.dispatchEvent(event);
+                }, 500);
+            });
+        }
+    })();
+    </script>
+
 </body>
 </html>
