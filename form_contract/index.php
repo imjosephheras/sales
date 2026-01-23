@@ -1161,74 +1161,190 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ===============================
-     POPULATE FORM - FUNCIÓN PRINCIPAL
+     POPULATE FORM - FUNCIÓN PRINCIPAL MEJORADA
      Rellena todos los campos del formulario con datos cargados
   =============================== */
   window.populateForm = function(formData, additionalData = {}) {
     console.log('📝 Populating form with data:', formData);
 
-    // Reset form first
-    form.reset();
+    // Don't reset form - just populate fields
+    // form.reset(); // REMOVED - to preserve dynamic state
 
-    // Populate simple form fields
+    // Special field mappings (when ID differs from name)
+    const fieldMappings = {
+      'Site_Visit_Conducted': 'siteVisitSelect',
+      'client_name': 'Client_Name'
+    };
+
+    // Helper function to find field by multiple methods
+    function findField(key) {
+      // Try direct ID match
+      let field = document.getElementById(key);
+      if (field) return field;
+
+      // Try mapped ID
+      if (fieldMappings[key]) {
+        field = document.getElementById(fieldMappings[key]);
+        if (field) return field;
+      }
+
+      // Try by name attribute (exact match)
+      field = document.querySelector(`[name="${key}"]`);
+      if (field) return field;
+
+      // Try lowercase version of key
+      const lowerKey = key.toLowerCase();
+      field = document.getElementById(lowerKey);
+      if (field) return field;
+
+      // Try case-insensitive name match
+      field = document.querySelector(`[name="${lowerKey}"]`);
+      if (field) return field;
+
+      // Try uppercase first letter variants
+      const variants = [
+        key.replace(/_/g, ''),
+        key.charAt(0).toLowerCase() + key.slice(1),
+        key.charAt(0).toUpperCase() + key.slice(1)
+      ];
+
+      for (const variant of variants) {
+        field = document.getElementById(variant);
+        if (field) return field;
+
+        field = document.querySelector(`[name="${variant}"]`);
+        if (field) return field;
+      }
+
+      return null;
+    }
+
+    // Populate all form fields
     Object.keys(formData).forEach(key => {
-      const field = document.getElementById(key) ||
-                    document.querySelector(`[name="${key}"]`) ||
-                    document.querySelector(`input[name="${key}"]`) ||
-                    document.querySelector(`select[name="${key}"]`) ||
-                    document.querySelector(`textarea[name="${key}"]`);
+      const value = formData[key];
 
-      if (field && formData[key] !== null && formData[key] !== undefined) {
+      // Skip null or undefined values
+      if (value === null || value === undefined || value === '') return;
+
+      const field = findField(key);
+
+      if (field) {
+        console.log(`✓ Setting ${key} = ${value}`);
+
         if (field.type === 'checkbox') {
-          field.checked = formData[key] == '1' || formData[key] === 'true' || formData[key] === true;
+          field.checked = value == '1' || value === 'true' || value === true || value === 'Yes';
         } else if (field.type === 'radio') {
-          const radio = document.querySelector(`input[name="${key}"][value="${formData[key]}"]`);
+          const radio = document.querySelector(`input[name="${field.name}"][value="${value}"]`);
           if (radio) radio.checked = true;
         } else {
-          field.value = formData[key];
+          field.value = value;
         }
 
         // Trigger change event for fields with dynamic behavior
-        field.dispatchEvent(new Event('change', { bubbles: true }));
+        // This ensures dropdowns update their dependent fields
+        setTimeout(() => {
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+        }, 50);
+      } else {
+        console.warn(`⚠ Field not found: ${key}`);
       }
     });
+
+    // Important: Trigger Service_Type change to update theme and dependent fields
+    setTimeout(() => {
+      const serviceType = document.getElementById('Service_Type');
+      if (serviceType && serviceType.value) {
+        console.log('🎨 Triggering Service_Type change for theme update');
+        serviceType.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      // Trigger Request_Type change to show/hide contract fields
+      const requestType = document.getElementById('Request_Type');
+      if (requestType && requestType.value) {
+        console.log('📋 Triggering Request_Type change for contract fields');
+        requestType.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      // Trigger Requested_Service change to update scope of work
+      const requestedService = document.getElementById('Requested_Service');
+      if (requestedService && requestedService.value) {
+        console.log('🔧 Triggering Requested_Service change');
+        requestedService.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      // Trigger Seller change to update price label
+      const seller = document.getElementById('Seller');
+      if (seller && seller.value) {
+        console.log('👤 Triggering Seller change for price label');
+        seller.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }, 100);
 
     // Handle scope_tasks if present
     if (additionalData.scope_tasks && additionalData.scope_tasks.length > 0) {
       console.log('📋 Loading scope tasks:', additionalData.scope_tasks);
-      // If you have a specific function to handle scope tasks, call it here
-      // populateScopeTasks(additionalData.scope_tasks);
+      // Call function to populate scope tasks if exists
+      if (typeof populateScopeTasks === 'function') {
+        populateScopeTasks(additionalData.scope_tasks);
+      }
     }
 
     // Handle kitchen_costs if present
     if (additionalData.kitchen_costs && additionalData.kitchen_costs.length > 0) {
       console.log('🍳 Loading kitchen costs:', additionalData.kitchen_costs);
-      // If you have a specific function to handle kitchen costs, call it here
-      // populateKitchenCosts(additionalData.kitchen_costs);
+      if (typeof populateKitchenCosts === 'function') {
+        populateKitchenCosts(additionalData.kitchen_costs);
+      }
     }
 
     // Handle hood_costs if present
     if (additionalData.hood_costs && additionalData.hood_costs.length > 0) {
       console.log('🚪 Loading hood costs:', additionalData.hood_costs);
-      // If you have a specific function to handle hood costs, call it here
-      // populateHoodCosts(additionalData.hood_costs);
+      if (typeof populateHoodCosts === 'function') {
+        populateHoodCosts(additionalData.hood_costs);
+      }
     }
 
     // Handle janitorial_costs if present
     if (additionalData.janitorial_costs && additionalData.janitorial_costs.length > 0) {
       console.log('🧹 Loading janitorial costs:', additionalData.janitorial_costs);
-      // If you have a specific function to handle janitorial costs, call it here
-      // populateJanitorialCosts(additionalData.janitorial_costs);
+      if (typeof populateJanitorialCosts === 'function') {
+        populateJanitorialCosts(additionalData.janitorial_costs);
+      }
     }
 
     // Handle photos if present
     if (additionalData.photos && additionalData.photos.length > 0) {
       console.log('📸 Loading photos:', additionalData.photos);
-      // If you have a specific function to handle photos, call it here
-      // populatePhotos(additionalData.photos);
+      if (typeof populatePhotos === 'function') {
+        populatePhotos(additionalData.photos);
+      }
     }
 
     console.log('✅ Form populated successfully');
+
+    // Show success notification
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 90px;
+      right: 20px;
+      background: #10b981;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 100001;
+      font-weight: 600;
+      animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = '✅ Formulario cargado correctamente';
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
   };
 
 /* ===============================
