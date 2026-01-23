@@ -1,102 +1,1910 @@
-<?php
-/**
- * CONTRACT GENERATOR - Main Interface
- * Pantalla principal con 3 columnas:
- * - Izquierda: Inbox de solicitudes pendientes
- * - Centro: Editor de formulario
- * - Derecha: Preview en tiempo real del contrato
- */
-
-require_once 'config/db_config.php';
-session_start();
-
-// Usuario actual (temporal, luego integrar con sistema de auth)
-$current_user = $_SESSION['user_name'] ?? 'Admin';
-?>
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contract Generator</title>
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="styles/generator.css">
-    
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
+<html lang="es">
+<?php include 'header.php'; ?>
+
+<?php
+// LANGUAGE CONTROLLER
+if (isset($_GET["lang"])) {
+    $_SESSION["lang"] = $_GET["lang"];
+}
+
+$lang = $_SESSION["lang"] ?? "en";
+?>
 <body>
+
+<!-- 🎯 FIXED TOP NAVIGATION BAR -->
+<div class="top-navbar">
+    <div class="nav-left">
+        <a href="../index.php" class="nav-btn nav-home">
+            🏠 <span>Home</span>
+        </a>
+        <button id="togglePendingPanel" class="nav-btn nav-pending">
+            📋 <span><?= ($lang=='en') ? "Pending" : "Pendientes"; ?></span>
+        </button>
+    </div>
     
-    <!-- 🎯 Header -->
-    <header class="main-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <i class="fas fa-file-contract"></i>
-                <h1>Contract Generator</h1>
+    <div class="nav-center">
+        <h1 class="nav-title">
+            <?= ($lang=='en') ? "Contract Generator" : "Generador de Contratos"; ?>
+        </h1>
+    </div>
+    
+    <div class="nav-right">
+        <button id="togglePreview" class="nav-btn nav-preview">
+            👁️ <span><?= ($lang=='en') ? "Preview" : "Vista Previa"; ?></span>
+        </button>
+        <a href="?lang=en" class="nav-btn nav-lang <?= $lang == 'en' ? 'active' : '' ?>">
+            🇺🇸 EN
+        </a>
+        <a href="?lang=es" class="nav-btn nav-lang <?= $lang == 'es' ? 'active' : '' ?>">
+            🇪🇸 ES
+        </a>
+    </div>
+</div>
+
+<style>
+/* ========================================= */
+/* TOP NAVIGATION BAR - FIXED */
+/* ========================================= */
+.top-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: linear-gradient(135deg, #001f54 0%, #003080 100%);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 100000;
+}
+
+.nav-left,
+.nav-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1;
+}
+
+.nav-left {
+    justify-content: flex-start;
+}
+
+.nav-right {
+    justify-content: flex-end;
+}
+
+.nav-center {
+    flex: 0 0 auto;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.nav-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+}
+
+.nav-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+    white-space: nowrap;
+}
+
+.nav-btn:hover {
+    background: rgba(255,255,255,0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.nav-btn.active {
+    background: #c70734;
+}
+
+.nav-btn.active:hover {
+    background: #a30000;
+}
+
+.nav-preview.active {
+    background: #28a745;
+}
+
+.nav-preview.active:hover {
+    background: #218838;
+}
+
+.nav-btn span {
+    display: inline-block;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .top-navbar {
+        padding: 0 20px;
+    }
+    
+    .nav-title {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-navbar {
+        padding: 0 15px;
+        height: 60px;
+    }
+    
+    .nav-title {
+        font-size: 14px;
+    }
+    
+    .nav-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .nav-btn span {
+        display: none;
+    }
+}
+</style>
+
+<!-- 🌍 LANGUAGE SWITCH -->
+<div class="lang-switch">
+    <a href="?lang=en" class="<?= $lang == 'en' ? 'active' : '' ?>">🇺🇸 EN</a>
+    <a href="?lang=es" class="<?= $lang == 'es' ? 'active' : '' ?>">🇪🇸 ES</a>
+</div>
+
+<style>
+.home-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: white;
+    padding: 10px 18px;
+    border-radius: 50px;
+    text-decoration: none;
+    color: #001f54;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    z-index: 99999;
+}
+
+.home-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    background: #f0f4f8;
+}
+
+.preview-btn {
+    position: fixed;
+    top: 20px;
+    right: 180px;
+    background: white;
+    padding: 10px 14px;
+    border-radius: 50px;
+    border: none;
+    color: #001f54;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    z-index: 99999;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    background: #28a745;
+    color: white;
+}
+
+.preview-btn.active {
+    background: #28a745;
+    color: white;
+}
+
+.lang-switch {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 12px;
+    z-index: 99999;
+}
+
+.lang-switch a {
+    background: white;
+    padding: 10px 18px;
+    border-radius: 50px;
+    text-decoration: none;
+    color: #001f54;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.lang-switch a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    background: #f0f4f8;
+}
+
+.lang-switch .active {
+    background: #c70734;
+    color: white;
+}
+
+.lang-switch .active:hover {
+    background: #a30000;
+}
+
+/* ========================================= */
+/* PENDING FORMS SIDEBAR */
+/* ========================================= */
+.pending-forms-sidebar {
+    width: 300px;
+    min-width: 300px;
+    background: white;
+    border-right: 3px solid #001f54;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.pending-forms-sidebar.collapsed {
+    width: 0;
+    min-width: 0;
+    border-right: none;
+}
+
+.sidebar-header {
+    background: linear-gradient(135deg, #001f54 0%, #003080 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.sidebar-toggle {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+}
+
+.pending-forms-sidebar.collapsed .sidebar-toggle span {
+    transform: rotate(180deg);
+}
+
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+.sidebar-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: #f4f7fc;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 31, 84, 0.3);
+    border-radius: 4px;
+}
+
+.pending-forms-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-card {
+    background: #f4f7fc;
+    border: 2px solid #e1e8ed;
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.form-card:hover {
+    border-color: #001f54;
+    background: #e6f0ff;
+    transform: translateX(5px);
+    box-shadow: 0 4px 12px rgba(0,31,84,0.15);
+}
+
+.form-card.active {
+    border-color: #c70734;
+    background: #ffe6ec;
+}
+
+.form-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 8px;
+}
+
+.form-card-id {
+    font-size: 12px;
+    font-weight: 700;
+    color: #001f54;
+    background: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.form-card-date {
+    font-size: 11px;
+    color: #718096;
+}
+
+.form-card-client {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a202c;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.form-card-service {
+    font-size: 12px;
+    color: #718096;
+    margin-bottom: 8px;
+}
+
+.form-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e1e8ed;
+}
+
+.form-card-status {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.form-card-status.draft {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.form-card-status.pending {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.form-card-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.form-card-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+}
+
+.form-card-btn:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.form-card-btn.delete {
+    color: #dc3545;
+}
+
+.form-card-btn.edit {
+    color: #001f54;
+}
+
+.no-forms-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #718096;
+}
+
+.no-forms-message p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.loading-indicator {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.loading-indicator .loader {
+    margin: 0 auto 15px;
+}
+
+.loading-indicator p {
+    color: #718096;
+    font-size: 14px;
+}
+
+/* ========================================= */
+/* SPLIT SCREEN LAYOUT - 3 PANELS SUPPORT */
+/* ========================================= */
+.split-screen-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    gap: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.split-screen-wrapper.preview-visible {
+    padding: 0;
+}
+
+.form-side {
+    flex: 1;
+    min-width: 0;
+    padding: 30px 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100vh;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(135deg, #001f54 0%, #003080 100%);
+}
+
+/* Custom scrollbar for form side */
+.form-side::-webkit-scrollbar {
+    width: 12px;
+}
+
+.form-side::-webkit-scrollbar-track {
+    background: rgba(0, 31, 84, 0.3);
+    border-radius: 10px;
+}
+
+.form-side::-webkit-scrollbar-thumb {
+    background: rgba(199, 7, 52, 0.6);
+    border-radius: 10px;
+    border: 2px solid rgba(0, 31, 84, 0.3);
+}
+
+.form-side::-webkit-scrollbar-thumb:hover {
+    background: rgba(199, 7, 52, 0.8);
+}
+
+.preview-side {
+    flex: 0 0 0%;
+    max-width: 0%;
+    overflow: hidden;
+    background: white;
+    border-left: 3px solid #001f54;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    height: 100vh;
+}
+
+/* ========================================= */
+/* DYNAMIC WIDTH CALCULATIONS */
+/* ========================================= */
+
+/* Solo pendientes abierto */
+.split-screen-wrapper:not(.preview-visible) .form-side {
+    flex: 1;
+}
+
+/* Solo calculadora abierta (pendientes cerrado) */
+.split-screen-wrapper.preview-visible .pending-forms-sidebar.collapsed + .form-side {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+.split-screen-wrapper.preview-visible .pending-forms-sidebar.collapsed ~ .preview-side {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+/* AMBOS abiertos: Pendientes (300px) + Form (flex) + Preview (35%) */
+.split-screen-wrapper.preview-visible .pending-forms-sidebar:not(.collapsed) ~ .form-side {
+    flex: 1;
+    min-width: 300px;
+}
+
+.split-screen-wrapper.preview-visible .preview-side {
+    flex: 0 0 35%;
+    max-width: 35%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Custom scrollbar for calculator side */
+.preview-side::-webkit-scrollbar {
+    width: 12px;
+}
+
+.preview-side::-webkit-scrollbar-track {
+    background: #f4f7fc;
+    border-radius: 10px;
+}
+
+.preview-side::-webkit-scrollbar-thumb {
+    background: rgba(0, 31, 84, 0.4);
+    border-radius: 10px;
+    border: 2px solid #f4f7fc;
+}
+
+.preview-side::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 31, 84, 0.6);
+}
+
+.preview-container {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+    padding: 60px 20px 20px;
+}
+
+.preview-iframe {
+    width: 100%;
+    min-height: calc(100vh - 80px);
+    border: none;
+    display: block;
+    background: white;
+}
+
+.preview-close {
+    position: fixed;
+    top: 80px;
+    right: 30px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    z-index: 100000;
+}
+
+.preview-close:hover {
+    background: #c82333;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+/* ========================================= */
+/* RESPONSIVE ADJUSTMENTS */
+/* ========================================= */
+
+/* Tablets: Stack calculator below */
+@media (max-width: 1400px) {
+    .split-screen-wrapper.preview-visible .preview-side {
+        flex: 0 0 40%;
+        max-width: 40%;
+    }
+}
+
+/* Small tablets: All vertical */
+@media (max-width: 1024px) {
+    .split-screen-wrapper {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    .pending-forms-sidebar {
+        width: 100%;
+        min-width: 100%;
+        height: auto;
+        max-height: 40vh;
+        border-right: none;
+        border-bottom: 3px solid #001f54;
+    }
+    
+    .pending-forms-sidebar.collapsed {
+        max-height: 0;
+        border-bottom: none;
+    }
+    
+    .form-side {
+        height: auto;
+        min-height: 50vh;
+        flex: 1;
+        max-width: 100% !important;
+    }
+    
+    .split-screen-wrapper.preview-visible {
+        flex-direction: column;
+    }
+    
+    .preview-side {
+        border-left: none;
+        border-top: 3px solid #001f54;
+        height: auto;
+        min-height: 50vh;
+        flex: 0 0 auto !important;
+        max-width: 100% !important;
+    }
+    
+    .preview-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+    
+    .preview-container {
+        min-height: 50vh;
+        padding: 60px 15px 15px;
+    }
+    
+    .preview-iframe {
+        min-height: calc(50vh - 80px);
+    }
+}
+
+/* Mobile: Even more compact */
+@media (max-width: 768px) {
+    .pending-forms-sidebar {
+        max-height: 30vh;
+    }
+    
+    .sidebar-content {
+        padding: 10px;
+    }
+    
+    .form-card {
+        padding: 12px;
+    }
+}
+</style>
+
+<!-- SPLIT SCREEN WRAPPER -->
+<div class="split-screen-wrapper" id="splitScreenWrapper">
+    
+    <!-- PENDING FORMS SIDEBAR -->
+    <div class="pending-forms-sidebar" id="inbox-panel">
+        <div class="sidebar-header">
+            <h3>
+                📋 <?= ($lang=='en') ? "Pending Tasks" : "Tareas Pendientes"; ?>
+            </h3>
+            <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+                <span>◀</span>
+            </button>
+        </div>
+        
+        <div class="sidebar-content" id="sidebar-content">
+            <div class="loading-indicator" style="display:none;">
+                <div class="loader"></div>
+                <p><?= ($lang=='en') ? "Loading..." : "Cargando..."; ?></p>
             </div>
-            <div class="user-section">
-                <i class="fas fa-user-circle"></i>
-                <span><?php echo htmlspecialchars($current_user); ?></span>
+            
+            <div class="pending-forms-list" id="inbox-list">
+                <!-- Formularios pendientes se cargarán aquí dinámicamente -->
+            </div>
+            
+            <div class="no-forms-message" style="display:none;">
+                <p>📭 <?= ($lang=='en') ? "No pending tasks" : "No hay tareas pendientes"; ?></p>
             </div>
         </div>
-    </header>
+    </div>
+    
+    <!-- FORM SIDE -->
+    <div class="form-side" id="formSide">
 
-    <!-- 🏗️ Main Layout: 3 Columnas -->
-    <div class="container">
+<div class="container">
 
-        <!-- ========================================= -->
-        <!-- 📥 COLUMNA IZQUIERDA: INBOX -->
-        <!-- ========================================= -->
-        <aside class="inbox-panel">
-            <?php include 'includes/inbox_panel.php'; ?>
-        </aside>
+<!-- 🖼️ Logo dinámico -->
+<div id="dynamicLogo" style="
+  display: none;
+  text-align: center;
+  padding: 30px 40px 20px;
+  background: white;
+  border-radius: 24px 24px 0 0;
+">
+  <img id="logoImage" src="" alt="Logo" style="
+    max-width: 280px;
+    height: auto;
+    transition: all 0.5s ease;
+  ">
+</div>
 
-        <!-- ========================================= -->
-        <!-- ✏️ COLUMNA CENTRO: EDITOR -->
-        <!-- ========================================= -->
-        <main class="editor-panel">
-            <?php include 'includes/editor_panel.php'; ?>
-        </main>
+<!-- 📋 Encabezado -->
+<div class="form-header" id="formHeader" style="border-radius: 24px 24px 0 0;">
+  <h2>
+    📄 <?= ($lang=='en') ? "Contract Generator" : "Generador de Contratos"; ?>
+  </h2>
+  <p>
+    <?= ($lang=='en') 
+        ? "Complete all required information" 
+        : "Complete toda la información requerida"; ?>
+  </p>
+</div>
 
-        <!-- ========================================= -->
-        <!-- 👁️ COLUMNA DERECHA: PREVIEW EN TIEMPO REAL -->
-        <!-- ========================================= -->
-        <aside class="preview-panel">
-            <?php include 'includes/preview_panel.php'; ?>
-        </aside>
+<!-- 📋 Contenido -->
+<div class="form-content">
 
+  <!-- 📋 FORM with enctype for photos -->
+  <form id="main_form" action="enviar_correo.php" method="POST" enctype="multipart/form-data">
+
+    <div class="section-title collapsible" data-section="1">
+      <?= ($lang=='en') ? "Section 1: Request Information" : "Sección 1: Información de Solicitud"; ?>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content hidden" data-section-content="1">
+      <?php include 'form_part1_request.php'; ?>
     </div>
 
-    <!-- Scripts -->
-    <script src="js/inbox.js"></script>
-    <script src="js/editor.js"></script>
-    <script src="js/preview.js"></script>
+    <div class="section-title collapsible" data-section="2">
+      <?= ($lang=='en') ? "Section 2: Client Information" : "Sección 2: Información del Cliente"; ?>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content hidden" data-section-content="2">
+      <?php include 'form_part2_client.php'; ?>
+    </div>
 
-    <!-- Auto-load request if request_id is in URL -->
-    <script>
-    (function() {
-        // Get request_id from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const requestId = urlParams.get('request_id');
+    <div class="section-title collapsible" data-section="3">
+      <?= ($lang=='en') ? "Section 3: Operational / Service Details" : "Sección 3: Detalles Operativos / del Servicio"; ?>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content hidden" data-section-content="3">
+      <?php include 'form_part3_operativo.php'; ?>
+    </div>
 
-        if (requestId) {
-            console.log('📋 Auto-loading request ID:', requestId);
+    <div class="section-title collapsible" data-section="4">
+      <?= ($lang=='en') ? "Section 4: Economic Information" : "Sección 4: Información Económica"; ?>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content hidden" data-section-content="4">
+      <?php include 'form_part4_economico.php'; ?>
+    </div>
 
-            // Wait for the page to fully load
-            window.addEventListener('load', function() {
-                // Wait a bit for modules to initialize
-                setTimeout(function() {
-                    // Dispatch event to load this request
-                    const event = new CustomEvent('requestSelected', {
-                        detail: { id: requestId }
-                    });
-                    document.dispatchEvent(event);
-                }, 500);
+    <div class="section-title collapsible" data-section="5">
+      <?= ($lang=='en') ? "Section 5: Contract Information" : "Sección 5: Información del Contrato"; ?>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content hidden" data-section-content="5">
+      <?php include 'form_part5_contrato.php'; ?>
+    </div>
+
+    <div class="section-title collapsible" data-section="6">
+      <?= ($lang=='en') ? "Section 6: Observations" : "Sección 6: Observaciones"; ?>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content hidden" data-section-content="6">
+      <?php include 'form_part6_observaciones.php'; ?>
+    </div>
+
+    <div class="section-title collapsible" data-section="7">
+      <?= ($lang=='en') ? "Section 7: Scope of Work" : "Sección 7: Alcance del Trabajo"; ?>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content hidden" data-section-content="7">
+      <?php include 'form_part7_scope.php'; ?>
+    </div>
+
+    <!-- 📸 SECTION 8 (PHOTOS) -->
+    <div class="section-title collapsible" data-section="8">
+      <?= ($lang=='en') ? "Section 8: Photos" : "Sección 8: Fotos"; ?>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content hidden" data-section-content="8">
+      <?php include 'form_part8_photo.php'; ?>
+    </div>
+
+    <!-- 📋 Botón principal -->
+    <div class="form-actions">
+      <button type="button" id="btnSaveDraft" class="btn-draft">
+        💾 <?= ($lang=='en') ? "Save as Draft" : "Guardar Borrador"; ?>
+      </button>
+      
+      <button type="button" id="btnPreview" class="btn-submit">
+        ✅ <?= ($lang=='en') ? "Complete" : "Completado"; ?>
+      </button>
+    </div>
+
+    <!-- 🪟 Modal de previsualización -->
+    <div id="previewModal" style="
+      display:none;
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:rgba(0,0,0,0.7);
+      justify-content:center;
+      align-items:center;
+      z-index:9999;
+      backdrop-filter: blur(4px);
+    ">
+      <div style="
+        background:white;
+        padding:35px;
+        border-radius:16px;
+        max-width:850px;
+        width:90%;
+        box-shadow:0 8px 32px rgba(0,0,0,0.3);
+        overflow-y:auto;
+        max-height:85vh;
+      ">
+        <h2 style="color:#001f54; margin-bottom:20px; font-size:24px; font-weight:700;">
+          🧾 <?= ($lang=='en') ? "Form Preview" : "Previsualización del Formulario"; ?>
+        </h2>
+
+        <div id="previewContent"
+             style="text-align:left; font-size:14px; line-height:1.6;">
+        </div>
+
+        <div style="text-align:center; margin-top:30px; display:flex; gap:15px; justify-content:center;">
+          
+          <!-- ✅ SUBMIT BUTTON -->
+          <button
+            type="submit"
+            form="main_form"
+            style="
+              background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+              color:white;
+              padding:14px 32px;
+              border:none;
+              border-radius:50px;
+              font-size:15px;
+              font-weight:600;
+              cursor:pointer;
+              box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+              transition: all 0.3s ease;
+            "
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(40,167,69,0.4)'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(40,167,69,0.3)'"
+          >
+            ✅ <?= ($lang=='en') ? "Complete" : "Completado"; ?>
+          </button>
+
+          <!-- ❌ CANCEL -->
+          <button
+            type="button"
+            id="cancelPreview"
+            style="
+              background:#6c757d;
+              color:white;
+              padding:14px 32px;
+              border:none;
+              border-radius:50px;
+              font-size:15px;
+              font-weight:600;
+              cursor:pointer;
+              transition: all 0.3s ease;
+            "
+            onmouseover="this.style.background='#5a6268'; this.style.transform='translateY(-2px)'"
+            onmouseout="this.style.background='#6c757d'; this.style.transform='translateY(0)'"
+          >
+            ❌ <?= ($lang=='en') ? "Cancel" : "Cancelar"; ?>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>
+</div>
+
+<!-- ====================================================== -->
+<!-- SCRIPT DE FOTOS -->
+<!-- ====================================================== -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const addBox = document.getElementById("add-photo-box");
+    const input = document.getElementById("photo-input");
+    const container = document.getElementById("photo-container");
+
+    if (!addBox || !input || !container) return;
+
+    let photoFiles = [];
+
+    addBox.addEventListener("click", () => {
+        input.click();
+    });
+
+    input.addEventListener("change", (event) => {
+        const files = Array.from(event.target.files);
+
+        files.forEach(file => {
+            photoFiles.push(file);
+            renderPhoto(file);
+        });
+
+        updateRealInput();
+    });
+
+    function renderPhoto(file) {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const card = document.createElement("div");
+            card.style.cssText = `
+                width:120px; height:160px; position:relative;
+                border-radius:12px; overflow:hidden;
+                box-shadow:0 4px 12px rgba(0,0,0,0.15);
+                transition: all 0.3s ease;
+            `;
+
+            card.onmouseover = () => {
+                card.style.transform = 'translateY(-5px)';
+                card.style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)';
+            };
+
+            card.onmouseout = () => {
+                card.style.transform = 'translateY(0)';
+                card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            };
+
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.style.cssText = `width:100%; height:100%; object-fit:cover;`;
+
+            const del = document.createElement("div");
+            del.textContent = "×";
+            del.style.cssText = `
+                position:absolute; top:8px; right:8px; width:28px; height:28px;
+                background:rgba(220,53,69,0.95); color:white; font-size:20px; font-weight:bold;
+                display:flex; align-items:center; justify-content:center;
+                border-radius:50%; cursor:pointer;
+                transition: all 0.2s ease;
+            `;
+
+            del.onmouseover = () => {
+                del.style.background = '#c82333';
+                del.style.transform = 'scale(1.1)';
+            };
+
+            del.onmouseout = () => {
+                del.style.background = 'rgba(220,53,69,0.95)';
+                del.style.transform = 'scale(1)';
+            };
+
+            del.addEventListener("click", () => {
+                const index = Array.from(container.children).indexOf(card);
+                photoFiles.splice(index, 1);
+                card.remove();
+                updateRealInput();
             });
+
+            card.appendChild(img);
+            card.appendChild(del);
+            container.insertBefore(card, addBox);
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    function updateRealInput() {
+        const dataTransfer = new DataTransfer();
+        photoFiles.forEach(file => dataTransfer.items.add(file));
+        input.files = dataTransfer.files;
+    }
+});
+</script>
+
+<!-- ====================================================== -->
+<!-- SCRIPT PRINCIPAL (ACCORDION AUTOMÁTICO + PREVIEW + DRAFTS) -->
+<!-- ====================================================== -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const titles = Array.from(document.querySelectorAll(".section-title"));
+  const form = document.getElementById("main_form");
+  let currentFormId = null; // Track if we're editing an existing form
+
+  /* ===============================
+     SIDEBAR TOGGLE
+  =============================== */
+    const sidebarToggle = document.getElementById("sidebarToggle");
+  const togglePendingPanel = document.getElementById("togglePendingPanel");
+  const sidebar = document.querySelector(".pending-forms-sidebar");
+  
+  // Toggle desde el botón dentro del sidebar
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+    });
+  }
+  
+  // Toggle desde el botón de la barra superior
+  if (togglePendingPanel) {
+    togglePendingPanel.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+      togglePendingPanel.classList.toggle("active");
+    });
+  }
+
+  /* ===============================
+     LOAD PENDING FORMS
+  =============================== */
+  function loadPendingForms() {
+    const loadingIndicator = document.querySelector(".loading-indicator");
+    const formsList = document.getElementById("inbox-list");
+    const noFormsMessage = document.querySelector(".no-forms-message");
+    
+    if (loadingIndicator) loadingIndicator.style.display = "block";
+    if (formsList) formsList.innerHTML = "";
+    if (noFormsMessage) noFormsMessage.style.display = "none";
+    
+    fetch("load_drafts.php")
+      .then(response => response.json())
+      .then(data => {
+        if (loadingIndicator) loadingIndicator.style.display = "none";
+        
+        if (data.success && data.forms && data.forms.length > 0) {
+          formsList.innerHTML = "";
+          data.forms.forEach(form => {
+            const card = createFormCard(form);
+            formsList.appendChild(card);
+          });
+        } else {
+          if (noFormsMessage) noFormsMessage.style.display = "block";
         }
-    })();
-    </script>
+      })
+      .catch(error => {
+        console.error("Error loading drafts:", error);
+        if (loadingIndicator) loadingIndicator.style.display = "none";
+        if (noFormsMessage) {
+          noFormsMessage.innerHTML = '<p style="color:#dc3545;">❌ Error loading forms</p>';
+          noFormsMessage.style.display = "block";
+        }
+      });
+  }
+
+  /* ===============================
+     CREATE FORM CARD
+  =============================== */
+  function createFormCard(formData) {
+    const card = document.createElement("div");
+    card.className = "form-card";
+    card.dataset.formId = formData.form_id;
+    
+    const date = new Date(formData.created_at);
+    const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    
+    card.innerHTML = `
+      <div class="form-card-header">
+        <div class="form-card-id">#${formData.form_id}</div>
+        <div class="form-card-date">${formattedDate}</div>
+      </div>
+      <div class="form-card-client">${formData.client_name || 'No Client'}</div>
+      <div class="form-card-service">${formData.requested_service || 'No Service'}</div>
+      <div class="form-card-footer">
+        <span class="form-card-status ${formData.status}">${formData.status.toUpperCase()}</span>
+        <div class="form-card-actions">
+          <button class="form-card-btn edit" title="Edit" onclick="loadFormData(${formData.form_id})">✏️</button>
+          <button class="form-card-btn delete" title="Delete" onclick="deleteDraft(${formData.form_id})">🗑️</button>
+        </div>
+      </div>
+    `;
+    
+    card.addEventListener("click", (e) => {
+      if (!e.target.closest('.form-card-actions')) {
+        loadFormData(formData.form_id);
+      }
+    });
+    
+    return card;
+  }
+
+  /* ===============================
+     POPULATE FORM - FUNCIÓN PRINCIPAL
+     Rellena todos los campos del formulario con datos cargados
+  =============================== */
+  window.populateForm = function(formData, additionalData = {}) {
+    console.log('📝 Populating form with data:', formData);
+
+    // Reset form first
+    form.reset();
+
+    // Populate simple form fields
+    Object.keys(formData).forEach(key => {
+      const field = document.getElementById(key) ||
+                    document.querySelector(`[name="${key}"]`) ||
+                    document.querySelector(`input[name="${key}"]`) ||
+                    document.querySelector(`select[name="${key}"]`) ||
+                    document.querySelector(`textarea[name="${key}"]`);
+
+      if (field && formData[key] !== null && formData[key] !== undefined) {
+        if (field.type === 'checkbox') {
+          field.checked = formData[key] == '1' || formData[key] === 'true' || formData[key] === true;
+        } else if (field.type === 'radio') {
+          const radio = document.querySelector(`input[name="${key}"][value="${formData[key]}"]`);
+          if (radio) radio.checked = true;
+        } else {
+          field.value = formData[key];
+        }
+
+        // Trigger change event for fields with dynamic behavior
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+
+    // Handle scope_tasks if present
+    if (additionalData.scope_tasks && additionalData.scope_tasks.length > 0) {
+      console.log('📋 Loading scope tasks:', additionalData.scope_tasks);
+      populateScopeTasks(additionalData.scope_tasks);
+    }
+
+    // Handle janitorial_costs if present
+    if (additionalData.janitorial_costs && additionalData.janitorial_costs.length > 0) {
+      console.log('🧹 Loading janitorial costs:', additionalData.janitorial_costs);
+      populateJanitorialCosts(additionalData.janitorial_costs);
+    }
+
+    // Handle kitchen_costs and hood_costs if present
+    if ((additionalData.kitchen_costs && additionalData.kitchen_costs.length > 0) ||
+        (additionalData.hood_costs && additionalData.hood_costs.length > 0)) {
+      console.log('🍳 Loading kitchen/hood costs:', {
+        kitchen: additionalData.kitchen_costs,
+        hood: additionalData.hood_costs
+      });
+      populateKitchenCosts(additionalData.kitchen_costs || [], additionalData.hood_costs || []);
+    }
+
+    // Handle photos if present
+    if (additionalData.photos && additionalData.photos.length > 0) {
+      console.log('📸 Loading photos:', additionalData.photos);
+      // If you have a specific function to handle photos, call it here
+      // populatePhotos(additionalData.photos);
+    }
+
+    console.log('✅ Form populated successfully');
+  };
+
+  /* ===============================
+     POPULATE SCOPE OF WORK (Q28)
+     =============================== */
+  window.populateScopeTasks = function(tasks) {
+    console.log('📋 Populating Scope of Work (Q28) with tasks:', tasks);
+
+    // Check if tasks array is valid
+    if (!tasks || tasks.length === 0) {
+      console.log('No scope tasks to populate');
+      return;
+    }
+
+    // Check if Requested_Service is already set
+    const serviceSelect = document.getElementById('Requested_Service');
+    if (!serviceSelect || !serviceSelect.value) {
+      console.warn('Requested_Service not set yet, scope tasks cannot be populated');
+      return;
+    }
+
+    // Wait for checkboxes to be generated dynamically
+    // The change event on Requested_Service generates the checkboxes
+    setTimeout(() => {
+      const scopeContainer = document.getElementById('scopeOfWorkContainer');
+      if (!scopeContainer) {
+        console.error('scopeOfWorkContainer not found');
+        return;
+      }
+
+      // Find all checkboxes in the container
+      const checkboxes = scopeContainer.querySelectorAll('input[type="checkbox"][name="Scope_Of_Work[]"]');
+
+      if (checkboxes.length === 0) {
+        console.warn('No checkboxes found in scopeOfWorkContainer. Service may not have scope options.');
+        return;
+      }
+
+      // Mark checkboxes that match the saved tasks
+      let markedCount = 0;
+      checkboxes.forEach(checkbox => {
+        if (tasks.includes(checkbox.value)) {
+          checkbox.checked = true;
+          markedCount++;
+        }
+      });
+
+      console.log(`✅ Scope of Work populated: ${markedCount} of ${tasks.length} tasks marked`);
+    }, 150); // Small delay to ensure checkboxes are generated
+  };
+
+  /* ===============================
+     POPULATE JANITORIAL COSTS (Q18)
+     =============================== */
+  window.populateJanitorialCosts = function(costs) {
+    console.log('🧹 Populating Janitorial Services (Q18) with data:', costs);
+
+    // Set includeJanitorial to "Yes"
+    const includeJanitorial = document.getElementById('includeJanitorial');
+    if (includeJanitorial) {
+      includeJanitorial.value = 'Yes';
+      includeJanitorial.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Show the section
+    const section18Container = document.getElementById('section18Container');
+    if (section18Container) {
+      section18Container.style.display = 'block';
+    }
+
+    // Get the tbody
+    const tbody = document.getElementById('table18body');
+    if (!tbody) {
+      console.error('table18body not found');
+      return;
+    }
+
+    // Clear existing rows
+    tbody.innerHTML = '';
+
+    // Add rows with data
+    costs.forEach((cost, index) => {
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td>
+          <select class="type18" name="type18[]" onchange="toggleWriteOption18(this)">
+            <option value="__write__">✍️ Write...</option>
+            <option value="">-- Select Service --</option>
+            <option>Window Cleaning</option>
+            <option>Window Tint</option>
+            <option>Carpet Cleaning</option>
+            <option>Painting</option>
+            <option>Powerwashing Facade</option>
+            <option>Furniture Upholstery Cleaning</option>
+            <option>Restroom Cleaning</option>
+          </select>
+          <input type="text" class="write-field-18" name="write18[]" style="display:none; margin-top:5px;" placeholder="Write service...">
+        </td>
+        <td>
+          <select class="time18" name="time18[]">
+            <option value="">-- Select Time --</option>
+            <option>1 Day</option>
+            <option>1-2 Days</option>
+            <option>3 Days</option>
+            <option>4 Days</option>
+            <option>5 Days</option>
+            <option>6 Days</option>
+            <option>7 Days</option>
+          </select>
+        </td>
+        <td>
+          <select class="freq18" name="freq18[]">
+            <option value="">-- Select Period --</option>
+            <option>One Time</option>
+            <option>Weekly</option>
+            <option>Every 2 Weeks</option>
+            <option>Every 3 Weeks</option>
+            <option>Monthly</option>
+            <option>Bimonthly</option>
+            <option>Quarterly</option>
+            <option>Every 4 Months</option>
+            <option>Semiannual</option>
+            <option>Annual</option>
+          </select>
+        </td>
+        <td>
+          <input type="text" class="desc18" name="desc18[]" placeholder="Write description...">
+        </td>
+        <td>
+          <input type="number" step="0.01" class="subtotal18" name="subtotal18[]" placeholder="0.00" oninput="calcTotals18()">
+        </td>
+      `;
+      tbody.appendChild(newRow);
+
+      // Set the values
+      const typeSelect = newRow.querySelector('.type18');
+      const writeField = newRow.querySelector('.write-field-18');
+      const timeSelect = newRow.querySelector('.time18');
+      const freqSelect = newRow.querySelector('.freq18');
+      const descInput = newRow.querySelector('.desc18');
+      const subtotalInput = newRow.querySelector('.subtotal18');
+
+      // Check if service_type is in the dropdown options
+      const serviceType = cost.service_type || '';
+      const optionExists = Array.from(typeSelect.options).some(opt => opt.value === serviceType || opt.text === serviceType);
+
+      if (optionExists) {
+        typeSelect.value = serviceType;
+      } else {
+        // Custom value - use write field
+        typeSelect.value = '__write__';
+        writeField.style.display = 'block';
+        writeField.value = serviceType;
+      }
+
+      if (timeSelect) timeSelect.value = cost.service_time || '';
+      if (freqSelect) freqSelect.value = cost.frequency || '';
+      if (descInput) descInput.value = cost.description || '';
+      if (subtotalInput) subtotalInput.value = cost.subtotal || '';
+    });
+
+    // Recalculate totals
+    if (typeof calcTotals18 === 'function') {
+      calcTotals18();
+    }
+
+    console.log('✅ Janitorial costs populated successfully');
+  };
+
+  /* ===============================
+     POPULATE KITCHEN COSTS (Q19)
+     =============================== */
+  window.populateKitchenCosts = function(kitchenCosts, hoodCosts) {
+    console.log('🍳 Populating Kitchen & Hood Services (Q19)');
+
+    // Combine both arrays
+    const allCosts = [...kitchenCosts, ...hoodCosts];
+
+    if (allCosts.length === 0) {
+      console.log('No kitchen/hood costs to populate');
+      return;
+    }
+
+    // Set includeKitchen to "Yes"
+    const includeKitchen = document.getElementById('includeKitchen');
+    if (includeKitchen) {
+      includeKitchen.value = 'Yes';
+      includeKitchen.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Show the section
+    const section19Container = document.getElementById('section19Container');
+    if (section19Container) {
+      section19Container.style.display = 'block';
+    }
+
+    // Get the tbody
+    const tbody = document.getElementById('table19body');
+    if (!tbody) {
+      console.error('table19body not found');
+      return;
+    }
+
+    // Clear existing rows
+    tbody.innerHTML = '';
+
+    // Add rows with data
+    allCosts.forEach((cost, index) => {
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td>
+          <select class="type19" name="type19[]" onchange="toggleWriteOption19(this)">
+            <option value="__write__">✍️ Write...</option>
+            <option value="">-- Select Service --</option>
+            <option>Kitchen Cleaning</option>
+            <option>Vent Hood</option>
+            <option>Bar Cleaning</option>
+            <option>Grease Trap Cleaning</option>
+            <option>Restroom Cleaning</option>
+            <option>Dinning Room Cleaning</option>
+          </select>
+          <input type="text" class="write-field-19" name="write19[]" style="display:none; margin-top:5px;" placeholder="Write service...">
+        </td>
+        <td>
+          <select class="time19" name="time19[]">
+            <option value="">-- Select Time --</option>
+            <option>1 Day</option>
+            <option>1-2 Days</option>
+            <option>3 Days</option>
+            <option>4 Days</option>
+            <option>5 Days</option>
+            <option>6 Days</option>
+            <option>7 Days</option>
+          </select>
+        </td>
+        <td>
+          <select class="freq19" name="freq19[]">
+            <option value="">-- Select Period --</option>
+            <option>One Time</option>
+            <option>Weekly</option>
+            <option>Every 2 Weeks</option>
+            <option>Every 3 Weeks</option>
+            <option>Monthly</option>
+            <option>Bimonthly</option>
+            <option>Quarterly</option>
+            <option>Every 4 Months</option>
+            <option>Semiannual</option>
+            <option>Annual</option>
+          </select>
+        </td>
+        <td>
+          <input type="text" class="desc19" name="desc19[]" placeholder="Write description...">
+        </td>
+        <td>
+          <input type="number" step="0.01" class="subtotal19" name="subtotal19[]" placeholder="0.00" oninput="calcTotals19()">
+        </td>
+      `;
+      tbody.appendChild(newRow);
+
+      // Set the values
+      const typeSelect = newRow.querySelector('.type19');
+      const writeField = newRow.querySelector('.write-field-19');
+      const timeSelect = newRow.querySelector('.time19');
+      const freqSelect = newRow.querySelector('.freq19');
+      const descInput = newRow.querySelector('.desc19');
+      const subtotalInput = newRow.querySelector('.subtotal19');
+
+      // Check if service_type is in the dropdown options
+      const serviceType = cost.service_type || '';
+      const optionExists = Array.from(typeSelect.options).some(opt => opt.value === serviceType || opt.text === serviceType);
+
+      if (optionExists) {
+        typeSelect.value = serviceType;
+      } else {
+        // Custom value - use write field
+        typeSelect.value = '__write__';
+        writeField.style.display = 'block';
+        writeField.value = serviceType;
+      }
+
+      if (timeSelect) timeSelect.value = cost.service_time || '';
+      if (freqSelect) freqSelect.value = cost.frequency || '';
+      if (descInput) descInput.value = cost.description || '';
+      if (subtotalInput) subtotalInput.value = cost.subtotal || '';
+    });
+
+    // Recalculate totals
+    if (typeof calcTotals19 === 'function') {
+      calcTotals19();
+    }
+
+    console.log('✅ Kitchen/Hood costs populated successfully');
+  };
+
+/* ===============================
+   LOAD FORM DATA - VERSIÓN CORREGIDA
+   ⚠️ ESTA ES LA VERSIÓN QUE DEBES USAR
+=============================== */
+window.loadFormData = function(formId) {
+  console.log('🔄 Loading form ID:', formId);
+  
+  fetch(`load_form_data.php?form_id=${formId}`)
+    .then(response => response.json())
+    .then(data => {
+      console.log('📦 Data received from server:', data);
+      
+      if (!data.success) {
+        alert('Error loading form: ' + (data.message || 'Unknown error'));
+        return;
+      }
+
+      currentFormId = formId;
+
+      // ✅ CRITICAL: Pasar datos como SEGUNDO parámetro
+      populateForm(data.form, {
+        scope_tasks: data.scope_tasks || [],
+        janitorial_costs: data.janitorial_costs || [],
+        kitchen_costs: data.kitchen_costs || [],
+        hood_costs: data.hood_costs || [],
+        photos: data.photos || []
+      });
+
+      // Mark card as active
+      document.querySelectorAll('.form-card').forEach(card =>
+        card.classList.remove('active')
+      );
+      document.querySelector(`[data-form-id="${formId}"]`)?.classList.add('active');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    })
+    .catch(err => {
+      console.error('❌ Error:', err);
+      alert('Error loading form data');
+    });
+};
+
+
+/* ===============================
+   LOAD FORM DATA - VERSIÓN ACTUALIZADA
+   Ahora pasa los datos adicionales a populateForm
+=============================== */
+
+  /* ===============================
+     DELETE DRAFT
+  =============================== */
+  window.deleteDraft = function(formId) {
+    if (!confirm('¿Está seguro de eliminar este borrador?')) return;
+    
+    fetch('delete_draft.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ form_id: formId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        loadPendingForms();
+        if (currentFormId === formId) {
+          form.reset();
+          currentFormId = null;
+        }
+      } else {
+        alert('Error deleting draft: ' + (data.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert('Error deleting draft');
+    });
+  };
+
+  /* ===============================
+     SAVE AS DRAFT
+  =============================== */
+  document.getElementById("btnSaveDraft")?.addEventListener("click", () => {
+    const formData = new FormData(form);
+    if (currentFormId) {
+      formData.append('form_id', currentFormId);
+    }
+    formData.append('status', 'draft');
+    
+    fetch("save_draft.php", {
+      method: "POST",
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        currentFormId = data.form_id;
+        alert('✅ Borrador guardado correctamente');
+        loadPendingForms();
+      } else {
+        alert('❌ Error: ' + (data.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert('❌ Error guardando el borrador');
+    });
+  });
+
+  // Load pending forms on page load
+  loadPendingForms();
+
+  /* ===============================
+     ESTADO INICIAL (TODO CERRADO)
+  =============================== */
+  titles.forEach(title => {
+    title.classList.add("collapsed");
+    title.nextElementSibling.classList.add("hidden");
+  });
+
+  /* ===============================
+     ABRIR SECCIÓN 1 AL INICIO
+  =============================== */
+  if (titles[0]) {
+    titles[0].classList.remove("collapsed");
+    titles[0].nextElementSibling.classList.remove("hidden");
+  }
+
+  /* ===============================
+     🎨 DYNAMIC LOGO AND COLOR THEME
+  =============================== */
+  const serviceTypeSelect = document.getElementById("Service_Type");
+  const dynamicLogo = document.getElementById("dynamicLogo");
+  const logoImage = document.getElementById("logoImage");
+  const formHeader = document.getElementById("formHeader");
+  const container = document.querySelector(".container");
+
+  function updateTheme() {
+    const serviceType = serviceTypeSelect.value;
+
+    if (serviceType === "Hospitality") {
+      // 🔴 HOSPITALITY - RED THEME
+      logoImage.src = "Images/Hospitality.png";
+      dynamicLogo.style.display = "block";
+      formHeader.style.borderRadius = "0";
+      
+      // Change all primary colors to red
+      document.documentElement.style.setProperty('--primary-color', '#c70734');
+      document.documentElement.style.setProperty('--primary-light', '#a30000');
+      
+      // Update header gradient
+      formHeader.style.background = 'linear-gradient(135deg, #c70734 0%, #a30000 100%)';
+      
+      // Update all section titles
+      document.querySelectorAll('.section-title').forEach(title => {
+        title.style.background = 'linear-gradient(135deg, #c70734 0%, #a30000 100%)';
+      });
+
+      // Update button colors
+      const submitBtn = document.getElementById('btnPreview');
+      if (submitBtn) {
+        submitBtn.style.background = 'linear-gradient(135deg, #c70734 0%, #a30000 100%)';
+      }
+
+    } else if (serviceType === "Janitorial") {
+      // 🔵 JANITORIAL - BLUE THEME
+      logoImage.src = "Images/Facility.png";
+      dynamicLogo.style.display = "block";
+      formHeader.style.borderRadius = "0";
+      
+      // Restore original blue colors
+      document.documentElement.style.setProperty('--primary-color', '#001f54');
+      document.documentElement.style.setProperty('--primary-light', '#003080');
+      
+      // Restore header gradient
+      formHeader.style.background = 'linear-gradient(135deg, #001f54 0%, #003080 100%)';
+      
+      // Restore section titles
+      document.querySelectorAll('.section-title').forEach(title => {
+        title.style.background = 'linear-gradient(135deg, #001f54 0%, #003080 100%)';
+      });
+
+      // Restore button colors
+      const submitBtn = document.getElementById('btnPreview');
+      if (submitBtn) {
+        submitBtn.style.background = 'linear-gradient(135deg, #c70734 0%, #a30000 100%)';
+      }
+
+    } else {
+      // No selection - hide logo
+      dynamicLogo.style.display = "none";
+      formHeader.style.borderRadius = "24px 24px 0 0";
+    }
+  }
+
+  // Listen for changes in Service Type
+  if (serviceTypeSelect) {
+    serviceTypeSelect.addEventListener("change", updateTheme);
+  }
+
+  /* ===============================
+     AUTO-OPEN/CLOSE LOGIC FOR SECTIONS 1-3
+  =============================== */
+  function setupAutoProgress() {
+    // Secciones con progresión automática
+    const guidedSections = [1, 2, 3];
+
+    guidedSections.forEach((sectionNum, index) => {
+      const currentTitle = document.querySelector(`[data-section="${sectionNum}"]`);
+      const currentContent = document.querySelector(`[data-section-content="${sectionNum}"]`);
+      
+      if (!currentTitle || !currentContent) return;
+
+      // Obtener todos los inputs requeridos de esta sección
+      const requiredFields = currentContent.querySelectorAll('[required], [data-question="true"]');
+      
+      requiredFields.forEach(field => {
+        field.addEventListener('change', () => {
+          // Verificar si todos los campos requeridos de esta sección están completos
+          const allFilled = Array.from(requiredFields).every(f => {
+            if (f.type === 'checkbox') return f.checked;
+            return f.value.trim() !== '';
+          });
+
+          // Si todos están completos, cerrar esta y abrir la siguiente
+          if (allFilled && index < guidedSections.length - 1) {
+            const nextSectionNum = guidedSections[index + 1];
+            const nextTitle = document.querySelector(`[data-section="${nextSectionNum}"]`);
+            const nextContent = document.querySelector(`[data-section-content="${nextSectionNum}"]`);
+
+            if (nextTitle && nextContent) {
+              // Cerrar sección actual
+              setTimeout(() => {
+                currentTitle.classList.add("collapsed");
+                currentContent.classList.add("hidden");
+
+                // Abrir siguiente sección
+                nextTitle.classList.remove("collapsed");
+                nextContent.classList.remove("hidden");
+
+                // Scroll suave a la siguiente sección
+                nextTitle.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start"
+                });
+              }, 300);
+            }
+          }
+        });
+      });
+    });
+  }
+
+  setupAutoProgress();
+
+  /* ===============================
+     TOGGLE MANUAL (TODAS LAS SECCIONES)
+  =============================== */
+  titles.forEach(title => {
+    title.addEventListener("click", () => {
+      title.classList.toggle("collapsed");
+      title.nextElementSibling.classList.toggle("hidden");
+    });
+  });
+
+  /* ===============================
+     PREVIEW MODAL
+  =============================== */
+  document.getElementById("btnPreview").addEventListener("click", () => {
+    const data = new FormData(form);
+
+    let html = "<table style='width:100%; border-collapse:collapse; border:2px solid #e1e8ed; border-radius:8px; overflow:hidden;'>";
+
+    data.forEach((value, key) => {
+      if (typeof value === "string" && value.trim() !== "") {
+        html += `
+          <tr style="border-bottom:1px solid #e1e8ed;">
+            <td style="font-weight:600; padding:12px; background:#f4f7fc; width:40%; color:#001f54;">
+              ${key.replaceAll("_", " ")}
+            </td>
+            <td style="padding:12px; background:white;">
+              ${value}
+            </td>
+          </tr>
+        `;
+      }
+    });
+
+    html += "</table>";
+    document.getElementById("previewContent").innerHTML = html;
+    document.getElementById("previewModal").style.display = "flex";
+  });
+
+  document.getElementById("cancelPreview").addEventListener("click", () => {
+    document.getElementById("previewModal").style.display = "none";
+  });
+
+  /* ===============================
+     VALIDACIÓN GLOBAL
+  =============================== */
+  form.addEventListener("submit", (e) => {
+    // Limpia errores previos
+    document.querySelectorAll(".section-title").forEach(t =>
+      t.classList.remove("section-error")
+    );
+
+    if (!form.checkValidity()) {
+      e.preventDefault();
+
+      const firstInvalid = form.querySelector(":invalid");
+
+      if (firstInvalid) {
+        const sectionContent = firstInvalid.closest(".section-content");
+
+        if (sectionContent) {
+          const sectionTitle = sectionContent.previousElementSibling;
+
+          // 🔴 Marcar sección con error
+          sectionTitle.classList.add("section-error");
+
+          // 📖 Abrir sección
+          sectionTitle.classList.remove("collapsed");
+          sectionContent.classList.remove("hidden");
+
+          // 🔍 Scroll
+          sectionTitle.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+
+          // ⚠️ Focus en el campo inválido
+          setTimeout(() => {
+            firstInvalid.focus();
+          }, 300);
+        }
+      }
+    }
+  });
+
+});
+</script>
+
+<?php 
+  include 'scripts_request.php';             
+  include 'scripts_operativo.php';     
+  include 'scripts_economico.php';     
+?>
+
+    </div><!-- END .form-side -->
+
+    <!-- PREVIEW SIDE -->
+    <div class="preview-side" id="previewSide">
+        <div class="preview-container">
+            <button class="preview-close" id="closePreview" title="Close Preview">×</button>
+            <div id="preview-content" style="padding: 20px; background: white; height: 100%; overflow-y: auto;">
+                <h2 style="text-align: center; color: #001f54;">
+                    <?= ($lang=='en') ? "Contract Preview" : "Vista Previa del Contrato"; ?>
+                </h2>
+                <p style="text-align: center; color: #718096;">
+                    <?= ($lang=='en') ? "Select a request to see the contract preview" : "Seleccione una solicitud para ver la vista previa del contrato"; ?>
+                </p>
+            </div>
+        </div>
+    </div><!-- END .preview-side -->
+
+</div><!-- END .split-screen-wrapper -->
+
+<!-- ====================================================== -->
+<!-- PREVIEW TOGGLE SCRIPT -->
+<!-- ====================================================== -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const toggleBtn = document.getElementById("togglePreview");
+    const closeBtn = document.getElementById("closePreview");
+    const wrapper = document.getElementById("splitScreenWrapper");
+
+    function togglePreview() {
+        wrapper.classList.toggle("preview-visible");
+        toggleBtn.classList.toggle("active");
+
+        // Scroll to top when opening preview
+        if (wrapper.classList.contains("preview-visible")) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    toggleBtn.addEventListener("click", togglePreview);
+    closeBtn.addEventListener("click", togglePreview);
+});
+</script>
 
 </body>
 </html>

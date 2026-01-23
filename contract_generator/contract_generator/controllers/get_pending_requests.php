@@ -5,7 +5,7 @@
  */
 
 header('Content-Type: application/json');
-require_once '../config/db_config.php';
+require_once __DIR__ . '/../config/db_config.php';
 
 try {
     // Get pending requests ordered by priority and date
