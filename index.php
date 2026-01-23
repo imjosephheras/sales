@@ -107,30 +107,33 @@
 
         <div class="buttons-container">
 
-    <a href="accesos/password_contract.php" class="btn btn-contract">
+    <a href="form_contract/" class="btn btn-contract">
         <span>💼</span> Form for Contract
     </a>
 
-    <a href="accesos/password_sales.php" class="btn btn-sales">
+    <a href="contract_generator/contract_generator/" class="btn btn-contract">
+        <span>📝</span> Contract Generator
+    </a>
+
+    <a href="sales/" class="btn btn-sales">
         <span>💰</span> Sales
     </a>
 
-    <a href="accesos/password_invoice.php" class="btn btn-sales">
+    <a href="invoice/" class="btn btn-sales">
         <span>🧾</span> Invoice
     </a>
 
-    <a href="accesos/password_work_report.php" class="btn btn-sales">
+    <a href="employee_work_report/" class="btn btn-sales">
         <span>🧹</span> Employee Work Report
     </a>
 
-    <a href="accesos/password_calculator.php" class="btn btn-sales">
+    <a href="calculator/" class="btn btn-sales">
         <span>📊</span> Calculator
     </a>
 
-    <a href="/sales/calendar/login.php" class="btn btn-sales">
-    <span>📅</span> Calendar
+    <a href="calendar/" class="btn btn-sales">
+        <span>📅</span> Calendar
     </a>
-
 
 </div>
 
