@@ -21,8 +21,8 @@ try {
         SELECT
             id, status, docnum, created_at, updated_at, completed_at,
 
-            -- Section 1: Request Information (excluding Priority Q3)
-            Service_Type, Request_Type, Requested_Service,
+            -- Section 1: Request Information
+            Service_Type, Request_Type, Priority, Requested_Service,
 
             -- Section 2: Client Information
             client_name, Client_Title, Email, Number_Phone,

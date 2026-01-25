@@ -26,11 +26,12 @@ try {
         throw new Exception('Request ID is required');
     }
 
-    // Campos a actualizar (excluyendo Priority Q3, Email_Information_Sent Q27, photos Q29)
+    // Campos a actualizar
     $fields = [
         // Section 1: Request Information
         'Service_Type',
         'Request_Type',
+        'Priority',
         'Requested_Service',
         'Seller',
 
@@ -53,6 +54,8 @@ try {
         'Prime_Quoted_Price',
         'Total_Price',
         'Currency',
+        'includeJanitorial',
+        'includeKitchen',
 
         // Section 5: Contract Information
         'inflationAdjustment',

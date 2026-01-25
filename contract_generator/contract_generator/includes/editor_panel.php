@@ -50,6 +50,7 @@
                             <div class="form-group">
                                 <label>Service Type</label>
                                 <select name="Service_Type" id="Service_Type">
+                                    <option value="">-- Select --</option>
                                     <option value="Janitorial">Janitorial</option>
                                     <option value="Hospitality">Hospitality</option>
                                 </select>
@@ -57,6 +58,7 @@
                             <div class="form-group">
                                 <label>Request Type</label>
                                 <select name="Request_Type" id="Request_Type">
+                                    <option value="">-- Select --</option>
                                     <option value="Quote">Quote</option>
                                     <option value="JWO">JWO</option>
                                     <option value="Proposal">Proposal</option>
@@ -66,12 +68,43 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group">
+                                <label>Priority</label>
+                                <select name="Priority" id="Priority">
+                                    <option value="">-- Select --</option>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Rush">Rush</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
                                 <label>Requested Service</label>
-                                <input type="text" name="Requested_Service" id="Requested_Service">
+                                <select name="Requested_Service" id="Requested_Service">
+                                    <option value="">-- Select --</option>
+                                    <!-- Janitorial Options -->
+                                    <option value="Restaurant">Restaurant</option>
+                                    <option value="Schools and Universities">Schools and Universities</option>
+                                    <option value="Corporate Offices">Corporate Offices</option>
+                                    <option value="Airports">Airports</option>
+                                    <option value="Churches">Churches</option>
+                                    <option value="Stadiums and Sports Arenas">Stadiums and Sports Arenas</option>
+                                    <option value="Warehouses and Industrial Facilities">Warehouses and Industrial Facilities</option>
+                                    <!-- Hospitality Options -->
+                                    <option value="Kitchen Cleaning & Hood Vent">Kitchen Cleaning & Hood Vent</option>
+                                    <option value="Staff">Staff</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Seller / Sales Person</label>
-                                <input type="text" name="Seller" id="Seller">
+                                <select name="Seller" id="Seller">
+                                    <option value="">-- Select --</option>
+                                    <option value="Keny Howe">Keny Howe</option>
+                                    <option value="Norma Bustos">Norma Bustos</option>
+                                    <option value="Sandra Hernandez">Sandra Hernandez</option>
+                                    <option value="Miguel Palma">Miguel Palma</option>
+                                    <option value="Rafael Perez JR">Rafael Perez JR</option>
+                                    <option value="Patty Perez">Patty Perez</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -136,6 +169,7 @@
                             <div class="form-group">
                                 <label>Invoice Frequency</label>
                                 <select name="Invoice_Frequency" id="Invoice_Frequency">
+                                    <option value="">-- Select --</option>
                                     <option value="15">Every 15 days</option>
                                     <option value="30">Every 30 days</option>
                                     <option value="50_deposit">50% Deposit / 50% Completion</option>
@@ -183,6 +217,24 @@
                                 <select name="Currency" id="Currency">
                                     <option value="USD">USD</option>
                                     <option value="MXN">MXN</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Include Janitorial Services</label>
+                                <select name="includeJanitorial" id="includeJanitorial">
+                                    <option value="">-- Select --</option>
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Include Kitchen & Hood Services</label>
+                                <select name="includeKitchen" id="includeKitchen">
+                                    <option value="">-- Select --</option>
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
                                 </select>
                             </div>
                         </div>
