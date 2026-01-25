@@ -41,10 +41,20 @@
             </div>
         `;
 
-        // Fetch both tasks and requests in parallel
+        // Helper function to safely fetch and parse JSON
+        const safeFetch = (url) => {
+            return fetch(url)
+                .then(r => r.json())
+                .catch(err => {
+                    console.warn(`Warning: ${url} failed:`, err);
+                    return { success: false, data: [], error: err.message };
+                });
+        };
+
+        // Fetch both tasks and requests in parallel - handle failures independently
         Promise.all([
-            fetch('controllers/get_pending_tasks.php').then(r => r.json()),
-            fetch('controllers/get_pending_requests.php').then(r => r.json())
+            safeFetch('controllers/get_pending_tasks.php'),
+            safeFetch('controllers/get_pending_requests.php')
         ])
         .then(([tasksData, requestsData]) => {
             let allItems = [];
@@ -97,6 +107,7 @@
 
     function loadCompletedRequests() {
         const completedList = document.getElementById('completed-list');
+        console.log('📋 Loading completed requests...');
 
         // Show loading
         completedList.innerHTML = `
@@ -107,18 +118,24 @@
         `;
 
         fetch('controllers/get_completed_requests.php')
-            .then(response => response.json())
+            .then(response => {
+                console.log('📥 Completed requests response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('📥 Completed requests data:', data);
                 if (data.success) {
                     completedTasks = data.data || [];
+                    console.log('✅ Found', completedTasks.length, 'completed contracts');
                     renderCompletedTasks(completedTasks);
                     updateCompletedCount(completedTasks.length);
                 } else {
+                    console.error('❌ Error in completed requests:', data.error);
                     showError('completed-list', 'Error loading contracts: ' + data.error);
                 }
             })
             .catch(error => {
-                console.error('Error loading completed requests:', error);
+                console.error('❌ Error loading completed requests:', error);
                 showError('completed-list', 'Connection error. Please try again.');
             });
     }
@@ -493,6 +510,7 @@
     // ========================================
 
     function refreshAll() {
+        console.log('🔄 Refreshing all inbox data...');
         loadPendingTasks();
         loadCompletedRequests();
     }

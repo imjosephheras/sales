@@ -319,11 +319,19 @@
     // ========================================
 
     function markAsReady() {
+        const requestId = document.getElementById('request_id').value;
+
+        // Check if request has been saved first
+        if (!requestId || requestId.trim() === '') {
+            showNotification('❌ Please save the request first before marking it as ready.', 'error');
+            return;
+        }
+
         if (!confirm('Are you sure you want to mark this request as READY? This will generate the DOCNUM.')) {
             return;
         }
 
-        const requestId = document.getElementById('request_id').value;
+        console.log('📤 Marking request as ready:', requestId);
 
         fetch('controllers/mark_ready.php', {
             method: 'POST',
@@ -332,21 +340,26 @@
             },
             body: JSON.stringify({ request_id: requestId })
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('📥 Mark ready response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('📥 Mark ready response data:', data);
             if (data.success) {
                 showNotification('✅ Marked as ready! DOCNUM: ' + data.docnum, 'success');
                 // Actualizar docnum en pantalla
                 document.getElementById('doc-number').textContent = data.docnum;
-                // Refrescar inbox
+                // Refrescar inbox para mover el item a Generated Contracts
+                console.log('🔄 Refreshing inbox...');
                 window.InboxModule.refresh();
             } else {
                 showNotification('❌ Error: ' + data.error, 'error');
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            showNotification('❌ Connection error', 'error');
+            console.error('❌ Error marking as ready:', error);
+            showNotification('❌ Connection error: ' + error.message, 'error');
         });
     }
 
