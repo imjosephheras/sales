@@ -194,12 +194,13 @@
 
         // Clear specific fields that might not reset properly
         const fields = [
-            'Service_Type', 'Request_Type', 'Requested_Service', 'Seller',
+            'Service_Type', 'Request_Type', 'Priority', 'Requested_Service', 'Seller',
             'Company_Name', 'Is_New_Client', 'client_name', 'Client_Title',
             'Email', 'Number_Phone', 'Company_Address',
             'Site_Visit_Conducted', 'Invoice_Frequency', 'Contract_Duration',
             'PriceInput', 'Prime_Quoted_Price', 'Total_Price', 'Currency',
-            'total18', 'taxes18', 'grand18', 'total19', 'taxes19', 'grand19',
+            'includeJanitorial', 'total18', 'taxes18', 'grand18',
+            'includeKitchen', 'total19', 'taxes19', 'grand19',
             'inflationAdjustment', 'totalArea', 'buildingsIncluded',
             'startDateServices', 'Site_Observation', 'Additional_Comments'
         ];
@@ -239,6 +240,7 @@
         // Section 1: Request Info
         setValue('Service_Type', data.Service_Type);
         setValue('Request_Type', data.Request_Type);
+        setValue('Priority', data.Priority);
         setValue('Requested_Service', data.Requested_Service);
         setValue('Seller', data.Seller);
 
@@ -261,6 +263,8 @@
         setValue('Prime_Quoted_Price', data.Prime_Quoted_Price);
         setValue('Total_Price', data.Total_Price);
         setValue('Currency', data.Currency);
+        setValue('includeJanitorial', data.includeJanitorial);
+        setValue('includeKitchen', data.includeKitchen);
 
         // Display Janitorial Services if available
         displayJanitorialServices(data);
