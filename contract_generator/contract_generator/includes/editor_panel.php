@@ -66,15 +66,12 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label>Priority</label>
-                                <select name="Priority" id="Priority">
-                                    <option value="Standard">Standard</option>
-                                    <option value="Rush">Rush</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
                                 <label>Requested Service</label>
                                 <input type="text" name="Requested_Service" id="Requested_Service">
+                            </div>
+                            <div class="form-group">
+                                <label>Seller / Sales Person</label>
+                                <input type="text" name="Seller" id="Seller">
                             </div>
                         </div>
                     </div>
@@ -83,43 +80,43 @@
                     <div class="form-section">
                         <h3><i class="fas fa-building"></i> Client Information</h3>
                         <div class="form-row">
-                            <div class="form-group full-width">
+                            <div class="form-group">
                                 <label>Company Name *</label>
                                 <input type="text" name="Company_Name" id="Company_Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Is New Client?</label>
+                                <select name="Is_New_Client" id="Is_New_Client">
+                                    <option value="">-- Select --</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Contact Name</label>
-                                <input type="text" name="Contact_Name" id="Contact_Name">
+                                <input type="text" name="client_name" id="client_name">
                             </div>
+                            <div class="form-group">
+                                <label>Contact Title</label>
+                                <input type="text" name="Client_Title" id="Client_Title">
+                            </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label>Contact Email</label>
-                                <input type="email" name="Contact_Email" id="Contact_Email">
+                                <input type="email" name="Email" id="Email">
                             </div>
-                        </div>
-                        <div class="form-row">
                             <div class="form-group">
                                 <label>Contact Phone</label>
-                                <input type="tel" name="Contact_Phone" id="Contact_Phone">
-                            </div>
-                            <div class="form-group">
-                                <label>Address</label>
-                                <input type="text" name="Address" id="Address">
+                                <input type="tel" name="Number_Phone" id="Number_Phone">
                             </div>
                         </div>
                         <div class="form-row">
-                            <div class="form-group">
-                                <label>City</label>
-                                <input type="text" name="City" id="City">
-                            </div>
-                            <div class="form-group">
-                                <label>State</label>
-                                <input type="text" name="State" id="State">
-                            </div>
-                            <div class="form-group">
-                                <label>Zip Code</label>
-                                <input type="text" name="Zip_Code" id="Zip_Code">
+                            <div class="form-group full-width">
+                                <label>Company Address</label>
+                                <input type="text" name="Company_Address" id="Company_Address">
                             </div>
                         </div>
                     </div>
@@ -168,6 +165,16 @@
                         <h3><i class="fas fa-dollar-sign"></i> Economic Details</h3>
                         <div class="form-row">
                             <div class="form-group">
+                                <label>Price Input</label>
+                                <input type="text" name="PriceInput" id="PriceInput">
+                            </div>
+                            <div class="form-group">
+                                <label>Prime Quoted Price</label>
+                                <input type="text" name="Prime_Quoted_Price" id="Prime_Quoted_Price">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
                                 <label>Total Price</label>
                                 <input type="number" step="0.01" name="Total_Price" id="Total_Price">
                             </div>
@@ -177,6 +184,50 @@
                                     <option value="USD">USD</option>
                                     <option value="MXN">MXN</option>
                                 </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🔹 SECTION: Janitorial Services (if applicable) -->
+                    <div class="form-section" id="janitorial-section" style="display: none;">
+                        <h3><i class="fas fa-broom"></i> Janitorial Services</h3>
+                        <div id="janitorial-services-display" class="services-display">
+                            <!-- Dynamic content loaded from database -->
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Janitorial Total</label>
+                                <input type="text" name="total18" id="total18" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Taxes</label>
+                                <input type="text" name="taxes18" id="taxes18" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Grand Total</label>
+                                <input type="text" name="grand18" id="grand18" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🔹 SECTION: Kitchen/Hood Services (if applicable) -->
+                    <div class="form-section" id="kitchen-section" style="display: none;">
+                        <h3><i class="fas fa-utensils"></i> Kitchen & Hood Services</h3>
+                        <div id="kitchen-services-display" class="services-display">
+                            <!-- Dynamic content loaded from database -->
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Kitchen Total</label>
+                                <input type="text" name="total19" id="total19" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Taxes</label>
+                                <input type="text" name="taxes19" id="taxes19" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Grand Total</label>
+                                <input type="text" name="grand19" id="grand19" readonly>
                             </div>
                         </div>
                     </div>

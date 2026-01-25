@@ -194,10 +194,12 @@
 
         // Clear specific fields that might not reset properly
         const fields = [
-            'Service_Type', 'Request_Type', 'Priority', 'Requested_Service',
-            'Company_Name', 'Contact_Name', 'Contact_Email', 'Contact_Phone',
-            'Address', 'City', 'State', 'Zip_Code', 'Site_Visit_Conducted',
-            'Invoice_Frequency', 'Contract_Duration', 'Total_Price', 'Currency',
+            'Service_Type', 'Request_Type', 'Requested_Service', 'Seller',
+            'Company_Name', 'Is_New_Client', 'client_name', 'Client_Title',
+            'Email', 'Number_Phone', 'Company_Address',
+            'Site_Visit_Conducted', 'Invoice_Frequency', 'Contract_Duration',
+            'PriceInput', 'Prime_Quoted_Price', 'Total_Price', 'Currency',
+            'total18', 'taxes18', 'grand18', 'total19', 'taxes19', 'grand19',
             'inflationAdjustment', 'totalArea', 'buildingsIncluded',
             'startDateServices', 'Site_Observation', 'Additional_Comments'
         ];
@@ -218,6 +220,12 @@
         if (scopeContainer) {
             scopeContainer.innerHTML = '';
         }
+
+        // Hide services sections
+        const janitorialSection = document.getElementById('janitorial-section');
+        const kitchenSection = document.getElementById('kitchen-section');
+        if (janitorialSection) janitorialSection.style.display = 'none';
+        if (kitchenSection) kitchenSection.style.display = 'none';
     }
 
     // ========================================
@@ -231,27 +239,34 @@
         // Section 1: Request Info
         setValue('Service_Type', data.Service_Type);
         setValue('Request_Type', data.Request_Type);
-        setValue('Priority', data.Priority);
         setValue('Requested_Service', data.Requested_Service);
+        setValue('Seller', data.Seller);
 
-        // Section 2: Client Info
+        // Section 2: Client Info (expanded)
         setValue('Company_Name', data.Company_Name);
-        setValue('Contact_Name', data.Contact_Name);
-        setValue('Contact_Email', data.Contact_Email);
-        setValue('Contact_Phone', data.Contact_Phone);
-        setValue('Address', data.Address);
-        setValue('City', data.City);
-        setValue('State', data.State);
-        setValue('Zip_Code', data.Zip_Code);
+        setValue('Is_New_Client', data.Is_New_Client);
+        setValue('client_name', data.client_name);
+        setValue('Client_Title', data.Client_Title);
+        setValue('Email', data.Email);
+        setValue('Number_Phone', data.Number_Phone);
+        setValue('Company_Address', data.Company_Address);
 
         // Section 3: Operational
         setValue('Site_Visit_Conducted', data.Site_Visit_Conducted);
         setValue('Invoice_Frequency', data.Invoice_Frequency);
         setValue('Contract_Duration', data.Contract_Duration);
 
-        // Section 4: Economic
+        // Section 4: Economic (expanded)
+        setValue('PriceInput', data.PriceInput);
+        setValue('Prime_Quoted_Price', data.Prime_Quoted_Price);
         setValue('Total_Price', data.Total_Price);
         setValue('Currency', data.Currency);
+
+        // Display Janitorial Services if available
+        displayJanitorialServices(data);
+
+        // Display Kitchen Services if available
+        displayKitchenServices(data);
 
         // Section 5: Contract Specific
         setValue('inflationAdjustment', data.inflationAdjustment);
@@ -278,6 +293,118 @@
 
         // Mostrar/ocultar campos de Contract
         toggleContractFields();
+    }
+
+    // ========================================
+    // DISPLAY JANITORIAL SERVICES
+    // ========================================
+
+    function displayJanitorialServices(data) {
+        const section = document.getElementById('janitorial-section');
+        const display = document.getElementById('janitorial-services-display');
+
+        if (!section || !display) return;
+
+        // Check if janitorial services are included
+        if (data.includeJanitorial !== 'Yes' || !data.type18) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+
+        // Parse JSON arrays
+        const types = parseJSONSafe(data.type18);
+        const times = parseJSONSafe(data.time18);
+        const freqs = parseJSONSafe(data.freq18);
+        const descs = parseJSONSafe(data.desc18);
+        const subtotals = parseJSONSafe(data.subtotal18);
+
+        let html = '';
+        if (Array.isArray(types) && types.length > 0) {
+            types.forEach((type, i) => {
+                if (type) {
+                    html += `
+                        <div class="service-item">
+                            <span class="service-type">${escapeHtml(type)}</span>
+                            <span class="service-detail">${escapeHtml(times[i] || '')}</span>
+                            <span class="service-detail">${escapeHtml(freqs[i] || '')}</span>
+                            <span class="service-price">$${subtotals[i] || '0.00'}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        display.innerHTML = html || '<p style="color: var(--text-gray);">No services defined</p>';
+
+        // Set totals
+        setValue('total18', data.total18);
+        setValue('taxes18', data.taxes18);
+        setValue('grand18', data.grand18);
+    }
+
+    // ========================================
+    // DISPLAY KITCHEN SERVICES
+    // ========================================
+
+    function displayKitchenServices(data) {
+        const section = document.getElementById('kitchen-section');
+        const display = document.getElementById('kitchen-services-display');
+
+        if (!section || !display) return;
+
+        // Check if kitchen services are included
+        if (data.includeKitchen !== 'Yes' || !data.type19) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+
+        // Parse JSON arrays
+        const types = parseJSONSafe(data.type19);
+        const times = parseJSONSafe(data.time19);
+        const freqs = parseJSONSafe(data.freq19);
+        const descs = parseJSONSafe(data.desc19);
+        const subtotals = parseJSONSafe(data.subtotal19);
+
+        let html = '';
+        if (Array.isArray(types) && types.length > 0) {
+            types.forEach((type, i) => {
+                if (type) {
+                    html += `
+                        <div class="service-item">
+                            <span class="service-type">${escapeHtml(type)}</span>
+                            <span class="service-detail">${escapeHtml(times[i] || '')}</span>
+                            <span class="service-detail">${escapeHtml(freqs[i] || '')}</span>
+                            <span class="service-price">$${subtotals[i] || '0.00'}</span>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        display.innerHTML = html || '<p style="color: var(--text-gray);">No services defined</p>';
+
+        // Set totals
+        setValue('total19', data.total19);
+        setValue('taxes19', data.taxes19);
+        setValue('grand19', data.grand19);
+    }
+
+    // ========================================
+    // PARSE JSON SAFELY
+    // ========================================
+
+    function parseJSONSafe(value) {
+        if (!value) return [];
+        if (Array.isArray(value)) return value;
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            return [];
+        }
     }
 
     // ========================================

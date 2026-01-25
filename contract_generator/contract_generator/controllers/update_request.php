@@ -26,29 +26,41 @@ try {
         throw new Exception('Request ID is required');
     }
 
-    // Campos a actualizar
+    // Campos a actualizar (excluyendo Priority Q3, Email_Information_Sent Q27, photos Q29)
     $fields = [
+        // Section 1: Request Information
         'Service_Type',
         'Request_Type',
-        'Priority',
         'Requested_Service',
+        'Seller',
+
+        // Section 2: Client Information
+        'client_name',
+        'Client_Title',
+        'Email',
+        'Number_Phone',
         'Company_Name',
-        'Contact_Name',
-        'Contact_Email',
-        'Contact_Phone',
-        'Address',
-        'City',
-        'State',
-        'Zip_Code',
+        'Company_Address',
+        'Is_New_Client',
+
+        // Section 3: Operational Details
         'Site_Visit_Conducted',
         'Invoice_Frequency',
         'Contract_Duration',
+
+        // Section 4: Economic Information
+        'PriceInput',
+        'Prime_Quoted_Price',
         'Total_Price',
         'Currency',
+
+        // Section 5: Contract Information
         'inflationAdjustment',
         'totalArea',
         'buildingsIncluded',
         'startDateServices',
+
+        // Section 6: Observations
         'Site_Observation',
         'Additional_Comments'
     ];
