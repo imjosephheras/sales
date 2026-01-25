@@ -671,9 +671,15 @@
       #markupLabel,
       #subcontractMarkupLabel,
       #markupLabelPrint,
-      #subcontractMarkupLabelPrint {
+      #subcontractMarkupLabelPrint,
+      #sellerCommissionLabel,
+      #sellerCommissionLabelPrint {
         color: var(--white) !important;
         font-weight: 600;
+      }
+
+      .print-only-bar {
+        display: block !important;
       }
 
       table thead {
@@ -1113,6 +1119,46 @@ function calculateFixedCosts() {
       span.textContent = netEl.value;
     }
   }
+
+  // Update seller commission when net profit changes
+  calculateSellerCommission();
+}
+
+/* =====================================================
+   SELLER COMMISSION
+===================================================== */
+function calculateSellerCommission() {
+  const netProfit =
+    +document.querySelector('[name="Fixed_Subtotal"]')?.value || 0;
+
+  const pct =
+    +document.getElementById('SellerCommissionSlider')?.value || 0;
+
+  const commission = netProfit * pct / 100;
+
+  const commissionEl = document.querySelector('[name="Seller_Commission"]');
+  if (commissionEl) {
+    commissionEl.value = commission.toFixed(2);
+
+    // print mirror
+    const span = commissionEl.nextElementSibling;
+    if (span && span.classList.contains('print-only')) {
+      span.textContent = commissionEl.value;
+    }
+  }
+
+  // Update visual bar
+  const label = document.getElementById('sellerCommissionLabel');
+  const fill  = document.getElementById('sellerCommissionFill');
+
+  if (label) label.textContent = pct.toFixed(1) + '%';
+  if (fill)  fill.style.width  = Math.min(Math.max(pct, 0), 100) * (100/30) + '%';
+
+  // print mirror %
+  const labelPrint = document.getElementById('sellerCommissionLabelPrint');
+  const fillPrint  = document.getElementById('sellerCommissionFillPrint');
+  if (labelPrint) labelPrint.textContent = pct.toFixed(1) + '%';
+  if (fillPrint)  fillPrint.style.width  = Math.min(Math.max(pct, 0), 100) * (100/30) + '%';
 }
 
 /* =====================================================
@@ -1208,6 +1254,12 @@ document.addEventListener('input', (e) => {
   // SUBCONTRACT slider
   if (e.target.id === 'SubcontractMarkupSlider') {
     calculateMarkup();
+    return;
+  }
+
+  // SELLER COMMISSION slider
+  if (e.target.id === 'SellerCommissionSlider') {
+    calculateSellerCommission();
     return;
   }
 });

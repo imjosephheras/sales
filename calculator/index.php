@@ -49,6 +49,7 @@ if ($serviceType == "hoodvent") {
     include "form_profit.php";
     include "form_taxes.php";
     include "form_fixed.php";
+    include "form_seller.php";
     include "form_gauge.php";
 }
 elseif ($serviceType == "timesheet") {
@@ -57,6 +58,7 @@ elseif ($serviceType == "timesheet") {
     include "form_profit.php";
     include "form_taxes.php";
     include "form_fixed.php";
+    include "form_seller.php";
     include "form_gauge.php";
 }
 elseif ($serviceType == "subcontract") {
@@ -64,6 +66,7 @@ elseif ($serviceType == "subcontract") {
     include "form_profit.php";
     include "form_taxes.php";
     include "form_fixed.php";
+    include "form_seller.php";
     include "form_gauge.php";
 }
 ?>
