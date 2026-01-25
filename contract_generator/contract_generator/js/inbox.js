@@ -1,6 +1,6 @@
 /**
  * INBOX.JS
- * Manages pending tasks inbox: loading, selection, and form opening
+ * Manages pending tasks inbox and generated contracts: loading, selection, and form opening
  */
 
 (function() {
@@ -11,6 +11,7 @@
     // ========================================
 
     let currentTasks = [];
+    let completedTasks = [];
     let selectedTaskId = null;
 
     // ========================================
@@ -18,10 +19,11 @@
     // ========================================
 
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('📥 Inbox module loaded - Pending Tasks Mode');
+        console.log('📥 Inbox module loaded - Pending Tasks & Generated Contracts Mode');
 
-        // Load pending tasks
+        // Load both pending tasks and completed requests
         loadPendingTasks();
+        loadCompletedRequests();
     });
 
     // ========================================
@@ -80,20 +82,52 @@
             });
 
             currentTasks = allItems;
-            renderTasks(allItems);
-            updateTaskCount(allItems.length);
+            renderPendingTasks(allItems);
+            updatePendingCount(allItems.length);
         })
         .catch(error => {
             console.error('Error:', error);
-            showError('Database error: ' + error.message + '<br><br>Please ensure MySQL is running and the database schema is imported.');
+            showError('inbox-list', 'Database error: ' + error.message + '<br><br>Please ensure MySQL is running and the database schema is imported.');
         });
     }
 
     // ========================================
-    // RENDER TASKS
+    // LOAD COMPLETED REQUESTS
     // ========================================
 
-    function renderTasks(tasks) {
+    function loadCompletedRequests() {
+        const completedList = document.getElementById('completed-list');
+
+        // Show loading
+        completedList.innerHTML = `
+            <div class="loading-state">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading generated contracts...</p>
+            </div>
+        `;
+
+        fetch('controllers/get_completed_requests.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    completedTasks = data.data || [];
+                    renderCompletedTasks(completedTasks);
+                    updateCompletedCount(completedTasks.length);
+                } else {
+                    showError('completed-list', 'Error loading contracts: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading completed requests:', error);
+                showError('completed-list', 'Connection error. Please try again.');
+            });
+    }
+
+    // ========================================
+    // RENDER PENDING TASKS
+    // ========================================
+
+    function renderPendingTasks(tasks) {
         const inboxList = document.getElementById('inbox-list');
 
         if (tasks.length === 0) {
@@ -116,7 +150,33 @@
     }
 
     // ========================================
-    // CREATE TASK ITEM
+    // RENDER COMPLETED TASKS
+    // ========================================
+
+    function renderCompletedTasks(tasks) {
+        const completedList = document.getElementById('completed-list');
+
+        if (tasks.length === 0) {
+            completedList.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-folder-open"></i>
+                    <p>No contracts generated yet</p>
+                    <small>Complete pending tasks to see them here</small>
+                </div>
+            `;
+            return;
+        }
+
+        completedList.innerHTML = '';
+
+        tasks.forEach(task => {
+            const item = createCompletedItem(task);
+            completedList.appendChild(item);
+        });
+    }
+
+    // ========================================
+    // CREATE TASK ITEM (PENDING)
     // ========================================
 
     function createTaskItem(task) {
@@ -182,6 +242,67 @@
     }
 
     // ========================================
+    // CREATE COMPLETED ITEM
+    // ========================================
+
+    function createCompletedItem(task) {
+        const div = document.createElement('div');
+        div.className = 'task-item completed-item';
+        div.dataset.id = task.id;
+        div.dataset.type = 'completed';
+
+        // Mark as active if selected
+        if (selectedTaskId == 'completed_' + task.id) {
+            div.classList.add('active');
+        }
+
+        // Build type badge
+        const typeIcon = task.type_icon || '📋';
+        const typeColor = task.type_color || '#28a745';
+        const requestType = task.Request_Type || 'JWO';
+
+        // Build category badge
+        const categoryIcon = task.category_icon || '📋';
+        const categoryColor = task.category_color || '#999';
+        const serviceType = task.Service_Type || 'Service';
+
+        // Get date formatted
+        const dateFormatted = task.completed_at_formatted || task.created_at_formatted || 'No date';
+
+        // Get company name
+        const companyName = task.Business_Name || task.Company_Name || 'Unknown';
+
+        div.innerHTML = `
+            <div class="task-header">
+                <span class="task-type-badge" style="background-color: ${typeColor}">
+                    ${typeIcon} ${requestType}
+                </span>
+                <span class="task-category-badge" style="background-color: ${categoryColor}">
+                    ${categoryIcon} ${serviceType}
+                </span>
+            </div>
+            <div class="task-body">
+                <h3 class="task-title">${escapeHtml(companyName)}</h3>
+                ${task.docnum ? `<p class="task-docnum"><i class="fas fa-hashtag"></i> ${escapeHtml(task.docnum)}</p>` : ''}
+                <p class="task-description">${escapeHtml(task.description || task.Requested_Service || '')}</p>
+                <div class="task-meta">
+                    <span class="completed-date">
+                        <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                        <span class="date-text">${dateFormatted}</span>
+                    </span>
+                </div>
+            </div>
+        `;
+
+        // Event listener to select and view completed contract
+        div.addEventListener('click', function() {
+            selectCompletedTask(task);
+        });
+
+        return div;
+    }
+
+    // ========================================
     // SELECT TASK AND OPEN FORM
     // ========================================
 
@@ -198,6 +319,27 @@
 
         // Open form and auto-generate contract
         openFormForTask(task);
+    }
+
+    // ========================================
+    // SELECT COMPLETED TASK
+    // ========================================
+
+    function selectCompletedTask(task) {
+        selectedTaskId = 'completed_' + task.id;
+
+        // Update UI (mark active)
+        document.querySelectorAll('.task-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.querySelectorAll('.completed-item').forEach(item => {
+            if (item.dataset.id == task.id) {
+                item.classList.add('active');
+            }
+        });
+
+        // Load the completed request in the editor (view mode)
+        loadExistingRequest(task.id);
     }
 
     // ========================================
@@ -288,11 +430,11 @@
     }
 
     // ========================================
-    // UPDATE TASK COUNT
+    // UPDATE COUNTS
     // ========================================
 
-    function updateTaskCount(count) {
-        const countElement = document.querySelector('.task-count');
+    function updatePendingCount(count) {
+        const countElement = document.getElementById('pending-count');
         if (countElement) {
             countElement.textContent = count === 0
                 ? 'No pending tasks'
@@ -302,18 +444,31 @@
         }
     }
 
+    function updateCompletedCount(count) {
+        const countElement = document.getElementById('completed-count');
+        if (countElement) {
+            countElement.textContent = count === 0
+                ? 'No contracts yet'
+                : count === 1
+                ? '1 contract'
+                : `${count} contracts`;
+        }
+    }
+
     // ========================================
     // UTILITY FUNCTIONS
     // ========================================
 
-    function showError(message) {
-        const inboxList = document.getElementById('inbox-list');
-        inboxList.innerHTML = `
-            <div class="error-state">
-                <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i>
-                <p>${message}</p>
-            </div>
-        `;
+    function showError(containerId, message) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
     }
 
     function escapeHtml(text) {
@@ -334,11 +489,22 @@
     }
 
     // ========================================
+    // REFRESH FUNCTION (called after mark ready)
+    // ========================================
+
+    function refreshAll() {
+        loadPendingTasks();
+        loadCompletedRequests();
+    }
+
+    // ========================================
     // EXPORT FUNCTIONS
     // ========================================
 
     window.InboxModule = {
-        refresh: loadPendingTasks,
+        refresh: refreshAll,
+        refreshPending: loadPendingTasks,
+        refreshCompleted: loadCompletedRequests,
         getCurrentTaskId: () => selectedTaskId
     };
 

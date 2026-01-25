@@ -461,6 +461,127 @@ body {
   gap: 0.25rem;
 }
 
+/* ============================================
+   INBOX SECTIONS
+   ============================================ */
+
+.inbox-section {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.inbox-section:last-child {
+  border-bottom: none;
+  flex: 1;
+}
+
+.inbox-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inbox-header .header-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.inbox-header .header-toggle:hover {
+  opacity: 0.8;
+}
+
+.inbox-header .section-arrow {
+  font-size: 0.85rem;
+  color: var(--text-gray);
+  transition: transform 0.2s ease;
+}
+
+.inbox-header h2 {
+  font-size: 1.1rem;
+  margin: 0;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inbox-header .task-count {
+  font-size: 0.8rem;
+  color: var(--text-gray);
+  margin: 0;
+  background: var(--bg-white);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+}
+
+/* Completed section header styling */
+.completed-header {
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+}
+
+.completed-header h2 {
+  color: #2e7d32;
+}
+
+/* Completed item styling */
+.completed-item {
+  border-left: 4px solid var(--success-color);
+  background: linear-gradient(135deg, #fafffe 0%, #f8fff8 100%);
+}
+
+.completed-item:hover {
+  border-left-color: #1b5e20;
+}
+
+.completed-item.active {
+  border-left-color: #1b5e20;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+}
+
+/* Type badge for completed items */
+.task-type-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+}
+
+/* DOCNUM styling */
+.task-docnum {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: var(--primary-color);
+  background: rgba(0, 31, 84, 0.08);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.task-docnum i {
+  font-size: 0.7rem;
+  opacity: 0.7;
+}
+
+/* Completed date styling */
+.completed-date {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--success-color);
+}
+
 /* Estados de carga */
 .loading-state,
 .empty-state,
