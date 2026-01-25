@@ -195,7 +195,7 @@
         // Clear specific fields that might not reset properly
         const fields = [
             'Service_Type', 'Request_Type', 'Priority', 'Requested_Service', 'Seller',
-            'Company_Name', 'Is_New_Client', 'client_name', 'Client_Title',
+            'Company_Name', 'Is_New_Client', 'client_name', 'Client_Name', 'Client_Title',
             'Email', 'Number_Phone', 'Company_Address',
             'Site_Visit_Conducted', 'Invoice_Frequency', 'Contract_Duration',
             'PriceInput', 'Prime_Quoted_Price', 'Total_Price', 'Currency',
@@ -247,7 +247,8 @@
         // Section 2: Client Info (expanded)
         setValue('Company_Name', data.Company_Name);
         setValue('Is_New_Client', data.Is_New_Client);
-        setValue('client_name', data.client_name);
+        // Support both Client_Name and client_name for backwards compatibility
+        setValue('client_name', data.Client_Name || data.client_name);
         setValue('Client_Title', data.Client_Title);
         setValue('Email', data.Email);
         setValue('Number_Phone', data.Number_Phone);

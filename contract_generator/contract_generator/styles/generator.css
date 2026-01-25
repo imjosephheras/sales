@@ -90,10 +90,16 @@ body {
   display: grid;
   grid-template-columns: 350px 1fr 600px;
   gap: 0;
-  height: calc(100vh - 80px);
+  height: calc(100vh - 60px);
   max-width: 1920px;
   margin: 0 auto;
   overflow: hidden;
+}
+
+/* Ensure body doesn't scroll */
+body {
+  overflow: hidden;
+  height: 100vh;
 }
 
 /* ============================================
@@ -666,8 +672,8 @@ body {
   background: var(--bg-white);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
+  height: 100%;
 }
 
 /* Scrollbar for editor panel */
@@ -694,6 +700,15 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow: hidden;
+}
+
+/* Editor active state - when a request is selected */
+#editor-active-state {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 /* Empty state */
@@ -793,6 +808,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
 }
 
 .editor-form-section::-webkit-scrollbar {
@@ -976,8 +992,7 @@ body {
   border-left: 2px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   height: 100%;
 }
 
