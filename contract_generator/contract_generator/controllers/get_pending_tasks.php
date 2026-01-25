@@ -2,9 +2,13 @@
 /**
  * GET PENDING TASKS CONTROLLER
  * Returns pending tasks with associated event information
+ * Note: This connects to calendar_system database (separate from form database)
  */
 
 header('Content-Type: application/json');
+
+// Ensure we always output JSON, even on fatal errors
+ob_start();
 
 try {
     // Connect to calendar_system database
@@ -19,7 +23,22 @@ try {
         ]
     );
 
+    // First check if the tables exist
+    $tableCheck = $pdo->query("SHOW TABLES LIKE 'tasks'");
+    if ($tableCheck->rowCount() === 0) {
+        // Tasks table doesn't exist - return empty but successful response
+        ob_end_clean();
+        echo json_encode([
+            'success' => true,
+            'data' => [],
+            'count' => 0,
+            'note' => 'Tasks table not found in calendar_system'
+        ]);
+        exit;
+    }
+
     // Get pending tasks with event and category information
+    // Use IFNULL to handle potentially missing columns gracefully
     $sql = "SELECT
                 t.task_id,
                 t.event_id,
@@ -30,9 +49,9 @@ try {
                 e.title as event_title,
                 e.status as event_status,
                 e.client,
-                c.category_name as category_name,
-                c.color_hex as category_color,
-                c.icon as category_icon
+                IFNULL(c.category_name, '') as category_name,
+                IFNULL(c.color_hex, '#6c757d') as category_color,
+                IFNULL(c.icon, '📋') as category_icon
             FROM tasks t
             LEFT JOIN events e ON t.event_id = e.event_id
             LEFT JOIN event_categories c ON e.category_id = c.category_id
@@ -58,6 +77,7 @@ try {
         $task['client'] = $task['client'] ?? 'No client';
     }
 
+    ob_end_clean();
     echo json_encode([
         'success' => true,
         'data' => $tasks,
@@ -65,10 +85,20 @@ try {
     ]);
 
 } catch (PDOException $e) {
+    ob_end_clean();
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Database error: ' . $e->getMessage()
+        'error' => 'Database error: ' . $e->getMessage(),
+        'data' => []
+    ]);
+} catch (Exception $e) {
+    ob_end_clean();
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Error: ' . $e->getMessage(),
+        'data' => []
     ]);
 }
 ?>
