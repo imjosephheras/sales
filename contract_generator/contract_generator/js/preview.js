@@ -112,10 +112,10 @@
     }
 
     function renderJWO(data) {
-        const address = [data.Address, data.City, data.State, data.Zip_Code]
-            .filter(x => x).join(', ') || 'N/A';
+        // Use Company_Address or fallback
+        const address = data.Company_Address || 'N/A';
 
-        const totalPrice = formatPrice(data.Total_Price);
+        const totalPrice = formatPrice(data.Total_Price || data.Prime_Quoted_Price || data.PriceInput);
 
         const termsMap = {
             '15': 'Net 15',
@@ -124,6 +124,30 @@
             'completion': 'Upon Completion'
         };
         const terms = termsMap[data.Invoice_Frequency] || 'Upon Completion';
+
+        // Get contact info with fallbacks
+        const contactName = data.client_name || '';
+        const contactTitle = data.Client_Title || '';
+        const contactEmail = data.Email || '';
+        const contactPhone = data.Number_Phone || '';
+        const seller = data.Seller || 'N/A';
+        const isNewClient = data.Is_New_Client === 'Yes' ? ' (New Client)' : '';
+
+        // Build scope of work list
+        let scopeWorkHtml = '';
+        if (data.Scope_Of_Work && Array.isArray(data.Scope_Of_Work) && data.Scope_Of_Work.length > 0) {
+            scopeWorkHtml = '<ul>' + data.Scope_Of_Work.map(item => `<li>${escapeHtml(item)}</li>`).join('') + '</ul>';
+        } else {
+            scopeWorkHtml = `
+                <ul>
+                    <li>Pre-cleaning and preparation of all areas listed above</li>
+                    <li>Professional execution of requested services</li>
+                    <li>Quality inspection during and after service completion</li>
+                    <li>Cleaning of work area to maintain professional standards</li>
+                    <li>Final inspection to ensure quality standards are met</li>
+                </ul>
+            `;
+        }
 
         return `
             <div class="document-preview jwo-preview">
@@ -179,10 +203,10 @@
                             <strong>BILL TO</strong>
                         </td>
                         <td>
-                            <strong>${data.Company_Name || 'N/A'}</strong><br>
-                            ${data.Contact_Name || ''}<br>
-                            ${data.Contact_Email || ''}<br>
-                            ${data.Contact_Phone || ''}
+                            <strong>${data.Company_Name || 'N/A'}${isNewClient}</strong><br>
+                            ${contactName}${contactTitle ? ' - ' + contactTitle : ''}<br>
+                            ${contactEmail}<br>
+                            ${contactPhone}
                         </td>
                     </tr>
                 </table>
@@ -193,7 +217,7 @@
                         <td class="label-sm">Work Site</td>
                         <td style="width: 30%;">${address}</td>
                         <td class="label-sm">Sales Person</td>
-                        <td style="width: 30%;">${data.Sales_Person || 'N/A'}</td>
+                        <td style="width: 30%;">${seller}</td>
                     </tr>
                     <tr>
                         <td class="label-sm">Work Date</td>
@@ -249,13 +273,7 @@
                         ` : ''}
 
                         <h4>Work to be Performed:</h4>
-                        <ul>
-                            <li>Pre-cleaning and preparation of all areas listed above</li>
-                            <li>Professional execution of requested services</li>
-                            <li>Quality inspection during and after service completion</li>
-                            <li>Cleaning of work area to maintain professional standards</li>
-                            <li>Final inspection to ensure quality standards are met</li>
-                        </ul>
+                        ${scopeWorkHtml}
 
                         ${data.Additional_Comments ? `
                             <h4>Additional Notes:</h4>
@@ -273,6 +291,13 @@
                 </div>
             </div>
         `;
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     function renderProposal(data) {
