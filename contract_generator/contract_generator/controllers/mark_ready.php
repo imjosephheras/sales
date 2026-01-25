@@ -32,8 +32,8 @@ try {
     }
 
     // Verificar que tenga los datos mínimos
-    if (empty($request['Business_Name'])) {
-        throw new Exception('Business Name is required to mark as ready');
+    if (empty($request['Company_Name'])) {
+        throw new Exception('Company Name is required to mark as ready');
     }
 
     // ========================================
@@ -59,8 +59,8 @@ try {
     $date_part = date('mdY');
     
     // BIZ: Iniciales del negocio (primeras 3 letras, mayúsculas)
-    $business_name = strtoupper($request['Business_Name']);
-    $biz_part = substr(preg_replace('/[^A-Z]/', '', $business_name), 0, 3);
+    $company_name = strtoupper($request['Company_Name']);
+    $biz_part = substr(preg_replace('/[^A-Z]/', '', $company_name), 0, 3);
     if (strlen($biz_part) < 3) {
         $biz_part = str_pad($biz_part, 3, 'X', STR_PAD_RIGHT);
     }

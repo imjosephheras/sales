@@ -15,11 +15,11 @@ try {
     $search = $_GET['search'] ?? '';
 
     // Construir query base
-    $sql = "SELECT 
+    $sql = "SELECT
                 id,
                 Request_Type,
                 Priority,
-                Business_Name,
+                Company_Name,
                 Requested_Service,
                 status,
                 created_at,
@@ -46,7 +46,7 @@ try {
     }
 
     if (!empty($search)) {
-        $sql .= " AND (Business_Name LIKE :search OR Requested_Service LIKE :search)";
+        $sql .= " AND (Company_Name LIKE :search OR Requested_Service LIKE :search)";
         $params[':search'] = '%' . $search . '%';
     }
 
@@ -61,7 +61,7 @@ try {
     // Formatear fechas
     foreach ($requests as &$request) {
         $request['created_at_formatted'] = date('M d, Y', strtotime($request['created_at']));
-        $request['Business_Name'] = $request['Business_Name'] ?? 'No Business Name';
+        $request['Company_Name'] = $request['Company_Name'] ?? 'No Company Name';
         $request['Requested_Service'] = $request['Requested_Service'] ?? 'No Service';
     }
 

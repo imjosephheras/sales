@@ -76,8 +76,8 @@ try {
 
     // Generar nombre de archivo
     $doc_number = $data['docnum'] ?? 'DRAFT';
-    $business_name = preg_replace('/[^a-zA-Z0-9_-]/', '_', $data['Business_Name'] ?? 'Document');
-    $pdf_filename = strtoupper($request_type) . "_{$doc_number}_{$business_name}.pdf";
+    $company_name = preg_replace('/[^a-zA-Z0-9_-]/', '_', $data['Company_Name'] ?? 'Document');
+    $pdf_filename = strtoupper($request_type) . "_{$doc_number}_{$company_name}.pdf";
 
     // Enviar headers para descarga
     header('Content-Type: application/pdf');

@@ -84,8 +84,8 @@
                         <h3><i class="fas fa-building"></i> Client Information</h3>
                         <div class="form-row">
                             <div class="form-group full-width">
-                                <label>Business Name *</label>
-                                <input type="text" name="Business_Name" id="Business_Name" required>
+                                <label>Company Name *</label>
+                                <input type="text" name="Company_Name" id="Company_Name" required>
                             </div>
                         </div>
                         <div class="form-row">

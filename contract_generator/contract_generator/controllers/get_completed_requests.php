@@ -15,7 +15,6 @@ try {
                 Request_Type,
                 Priority,
                 Company_Name,
-                Business_Name,
                 client_name,
                 Email,
                 Requested_Service,
@@ -42,9 +41,8 @@ try {
             $request['created_at_formatted'] = date('M d, Y g:i A', strtotime($request['created_at']));
         }
 
-        // Use Business_Name if Company_Name is empty
-        $company = $request['Business_Name'] ?? $request['Company_Name'] ?? 'No company';
-        $request['Company_Name'] = $company;
+        // Use Company_Name
+        $company = $request['Company_Name'] ?? 'No company';
 
         // Ensure fields are not null
         $request['client_name'] = $request['client_name'] ?? 'No client';

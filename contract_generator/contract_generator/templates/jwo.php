@@ -305,7 +305,7 @@
                 <strong>BILL TO</strong>
             </td>
             <td class="value">
-                <strong><?php echo htmlspecialchars($data['Business_Name'] ?? 'N/A'); ?></strong><br>
+                <strong><?php echo htmlspecialchars($data['Company_Name'] ?? 'N/A'); ?></strong><br>
                 <?php echo htmlspecialchars($data['Contact_Name'] ?? ''); ?><br>
                 <?php echo htmlspecialchars($data['Contact_Email'] ?? ''); ?><br>
                 <?php echo htmlspecialchars($data['Contact_Phone'] ?? ''); ?>

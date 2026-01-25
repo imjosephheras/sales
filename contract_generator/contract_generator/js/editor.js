@@ -128,8 +128,8 @@
         };
         setValue('Priority', priorityMapping[taskData.priority] || 'Standard');
 
-        // Set business name from client
-        setValue('Business_Name', taskData.client);
+        // Set company name from client
+        setValue('Company_Name', taskData.client);
 
         // Set requested service from task title or description
         setValue('Requested_Service', taskData.title);
@@ -195,7 +195,7 @@
         // Clear specific fields that might not reset properly
         const fields = [
             'Service_Type', 'Request_Type', 'Priority', 'Requested_Service',
-            'Business_Name', 'Contact_Name', 'Contact_Email', 'Contact_Phone',
+            'Company_Name', 'Contact_Name', 'Contact_Email', 'Contact_Phone',
             'Address', 'City', 'State', 'Zip_Code', 'Site_Visit_Conducted',
             'Invoice_Frequency', 'Contract_Duration', 'Total_Price', 'Currency',
             'inflationAdjustment', 'totalArea', 'buildingsIncluded',
@@ -235,7 +235,7 @@
         setValue('Requested_Service', data.Requested_Service);
 
         // Section 2: Client Info
-        setValue('Business_Name', data.Business_Name);
+        setValue('Company_Name', data.Company_Name);
         setValue('Contact_Name', data.Contact_Name);
         setValue('Contact_Email', data.Contact_Email);
         setValue('Contact_Phone', data.Contact_Phone);
@@ -267,7 +267,7 @@
         displayScope(data.Scope_Of_Work);
 
         // Actualizar header
-        document.getElementById('doc-title').textContent = data.Business_Name || 'Untitled Request';
+        document.getElementById('doc-title').textContent = data.Company_Name || 'Untitled Request';
         document.getElementById('doc-number').textContent = data.docnum || 'Not generated yet';
 
         // Actualizar badge de tipo de documento en preview panel
