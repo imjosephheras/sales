@@ -21,9 +21,14 @@ try {
     }
 
     $id = $input['request_id'] ?? null;
-    
+
     if (!$id) {
         throw new Exception('Request ID is required');
+    }
+
+    // Map Client_Name to client_name for compatibility with form_contract
+    if (isset($input['Client_Name']) && !isset($input['client_name'])) {
+        $input['client_name'] = $input['Client_Name'];
     }
 
     // Campos a actualizar

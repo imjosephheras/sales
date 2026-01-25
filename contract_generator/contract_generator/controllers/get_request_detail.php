@@ -68,6 +68,11 @@ try {
         throw new Exception('Request not found');
     }
 
+    // Add Client_Name alias for compatibility with form_contract
+    if (isset($request['client_name'])) {
+        $request['Client_Name'] = $request['client_name'];
+    }
+
     // Decodificar campos JSON
     if (!empty($request['Scope_Of_Work'])) {
         $request['Scope_Of_Work'] = json_decode($request['Scope_Of_Work'], true);

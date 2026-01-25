@@ -126,7 +126,7 @@
         const terms = termsMap[data.Invoice_Frequency] || 'Upon Completion';
 
         // Get contact info with fallbacks
-        const contactName = data.client_name || '';
+        const contactName = data.Client_Name || data.client_name || '';
         const contactTitle = data.Client_Title || '';
         const contactEmail = data.Email || '';
         const contactPhone = data.Number_Phone || '';

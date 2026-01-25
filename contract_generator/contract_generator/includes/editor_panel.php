@@ -129,7 +129,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Contact Name</label>
-                                <input type="text" name="client_name" id="client_name">
+                                <input type="text" name="Client_Name" id="client_name">
                             </div>
                             <div class="form-group">
                                 <label>Contact Title</label>
