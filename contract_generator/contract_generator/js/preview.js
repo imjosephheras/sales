@@ -87,7 +87,7 @@
                 
                 <div class="doc-section">
                     <h2>Client Information</h2>
-                    <p><strong>Business Name:</strong> ${data.Business_Name || 'N/A'}</p>
+                    <p><strong>Company Name:</strong> ${data.Company_Name || 'N/A'}</p>
                     <p><strong>Contact:</strong> ${data.Contact_Name || 'N/A'}</p>
                     <p><strong>Email:</strong> ${data.Contact_Email || 'N/A'}</p>
                     <p><strong>Phone:</strong> ${data.Contact_Phone || 'N/A'}</p>
@@ -179,7 +179,7 @@
                             <strong>BILL TO</strong>
                         </td>
                         <td>
-                            <strong>${data.Business_Name || 'N/A'}</strong><br>
+                            <strong>${data.Company_Name || 'N/A'}</strong><br>
                             ${data.Contact_Name || ''}<br>
                             ${data.Contact_Email || ''}<br>
                             ${data.Contact_Phone || ''}
@@ -285,7 +285,7 @@
                 
                 <div class="doc-section">
                     <h2>Proposal For</h2>
-                    <p><strong>${data.Business_Name || 'N/A'}</strong></p>
+                    <p><strong>${data.Company_Name || 'N/A'}</strong></p>
                     <p>${data.Address || 'N/A'}</p>
                     <p>${data.City || ''}, ${data.State || ''} ${data.Zip_Code || ''}</p>
                 </div>
@@ -319,7 +319,7 @@
                 
                 <div class="doc-section">
                     <h2>Contract Between</h2>
-                    <p><strong>Client:</strong> ${data.Business_Name || 'N/A'}</p>
+                    <p><strong>Client:</strong> ${data.Company_Name || 'N/A'}</p>
                     <p><strong>Service Provider:</strong> [Company Name]</p>
                 </div>
 

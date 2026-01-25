@@ -38,10 +38,10 @@ try {
         exit;
     }
 
-    // Try to find request by business name (client) or docnum (event title)
-    $sql = "SELECT id, Request_Type, Business_Name, docnum, status
+    // Try to find request by company name (client) or docnum (event title)
+    $sql = "SELECT id, Request_Type, Company_Name, docnum, status
             FROM requests
-            WHERE Business_Name = :client OR docnum = :title
+            WHERE Company_Name = :client OR docnum = :title
             ORDER BY created_at DESC
             LIMIT 1";
 

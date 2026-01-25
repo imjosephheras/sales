@@ -32,7 +32,7 @@ try {
         'Request_Type',
         'Priority',
         'Requested_Service',
-        'Business_Name',
+        'Company_Name',
         'Contact_Name',
         'Contact_Email',
         'Contact_Phone',

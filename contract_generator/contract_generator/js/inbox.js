@@ -270,7 +270,7 @@
         const dateFormatted = task.completed_at_formatted || task.created_at_formatted || 'No date';
 
         // Get company name
-        const companyName = task.Business_Name || task.Company_Name || 'Unknown';
+        const companyName = task.Company_Name || 'Unknown';
 
         div.innerHTML = `
             <div class="task-header">
