@@ -30,12 +30,12 @@ try {
                 e.title as event_title,
                 e.status as event_status,
                 e.client,
-                c.name as category_name,
-                c.color as category_color,
+                c.category_name as category_name,
+                c.color_hex as category_color,
                 c.icon as category_icon
             FROM tasks t
             LEFT JOIN events e ON t.event_id = e.event_id
-            LEFT JOIN categories c ON e.category_id = c.category_id
+            LEFT JOIN event_categories c ON e.category_id = c.category_id
             WHERE t.is_completed = 0
             ORDER BY
                 FIELD(t.priority, 'urgent', 'high', 'normal', 'low'),
