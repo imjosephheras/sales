@@ -95,18 +95,46 @@ function initializeRequestsTable($pdo) {
       `status` VARCHAR(50) DEFAULT 'pending',
       `document_type` VARCHAR(50) DEFAULT NULL,
       `document_number` VARCHAR(50) DEFAULT NULL,
+      `docnum` VARCHAR(100) DEFAULT NULL,
       `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      `completed_at` TIMESTAMP NULL DEFAULT NULL,
 
       INDEX `idx_status` (`status`),
       INDEX `idx_company` (`Company_Name`),
       INDEX `idx_service_type` (`Service_Type`),
-      INDEX `idx_created` (`created_at`)
+      INDEX `idx_created` (`created_at`),
+      INDEX `idx_docnum` (`docnum`)
 
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ";
 
     $pdo->exec($createTableSQL);
+
+    // Add missing columns to existing table
+    addMissingColumnsFormContract($pdo);
+}
+
+/**
+ * Add missing columns to existing requests table
+ */
+function addMissingColumnsFormContract($pdo) {
+    try {
+        // Check and add docnum column
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'docnum'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `docnum` VARCHAR(100) DEFAULT NULL");
+            $pdo->exec("ALTER TABLE `requests` ADD INDEX `idx_docnum` (`docnum`)");
+        }
+
+        // Check and add completed_at column
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'completed_at'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `completed_at` TIMESTAMP NULL DEFAULT NULL");
+        }
+    } catch (Exception $e) {
+        error_log("Error adding missing columns: " . $e->getMessage());
+    }
 }
 
 // Crear conexión PDO

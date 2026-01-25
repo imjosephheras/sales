@@ -190,6 +190,11 @@ try {
     require_once 'db_config.php';
     $pdo = getDBConnection();
 
+    // Helper function to convert empty strings to null
+    function emptyToNull($value) {
+        return ($value === '' || $value === null) ? null : $value;
+    }
+
     // Preparar datos para guardar
     $week_days_json = !empty($week_days) ? json_encode($week_days) : null;
     $scope_json = !empty($_POST['Scope_Of_Work']) ? json_encode($_POST['Scope_Of_Work']) : null;
@@ -214,6 +219,9 @@ try {
     $base_staff_json = !empty($base_staff) ? json_encode($base_staff) : null;
     $increase_staff_json = !empty($increase_staff) ? json_encode($increase_staff) : null;
     $bill_staff_json = !empty($bill_staff) ? json_encode($bill_staff) : null;
+
+    // Convert empty date to null for startDateServices (DATE column)
+    $start_date_services_db = emptyToNull($start_date_services);
 
     // Insert into database
     $stmt = $pdo->prepare("
@@ -297,10 +305,10 @@ try {
         ':base_staff' => $base_staff_json,
         ':increase_staff' => $increase_staff_json,
         ':bill_staff' => $bill_staff_json,
-        ':inflation_adjustment' => $inflation_adjustment,
-        ':total_area' => $total_area,
-        ':buildings_included' => $buildings_included,
-        ':start_date_services' => $start_date_services,
+        ':inflation_adjustment' => emptyToNull($inflation_adjustment),
+        ':total_area' => emptyToNull($total_area),
+        ':buildings_included' => emptyToNull($buildings_included),
+        ':start_date_services' => $start_date_services_db,
         ':site_observation' => $site_observation,
         ':additional_comments' => $additional_comments,
         ':email_info_sent' => $email_info_sent,
@@ -311,9 +319,11 @@ try {
     $request_id = $pdo->lastInsertId();
 
 } catch (Exception $e) {
-    // Log error but continue with email sending
+    // Log error with full details
     error_log("Database save error: " . $e->getMessage());
+    error_log("Stack trace: " . $e->getTraceAsString());
     $request_id = null;
+    $db_error = $e->getMessage();
 }
 
 //
@@ -711,8 +721,16 @@ $dompdf->render();
 // ==============================
 
 // Set success status for redirect
-$email_status = 'success';
-$email_message = 'Form submitted successfully!';
+if (isset($db_error)) {
+    $email_status = 'error';
+    $email_message = 'Database error: ' . $db_error;
+} elseif ($request_id) {
+    $email_status = 'success';
+    $email_message = 'Form submitted successfully!';
+} else {
+    $email_status = 'error';
+    $email_message = 'Unknown error: Form could not be saved to database.';
+}
 
 ?>
 
