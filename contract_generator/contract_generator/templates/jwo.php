@@ -26,125 +26,68 @@
         .header {
             display: table;
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             border-bottom: 3px solid #8B1A1A;
         }
 
         .header-left {
             display: table-cell;
-            width: 40%;
+            width: 45%;
             vertical-align: middle;
             padding: 10px 0;
         }
 
         .header-right {
             display: table-cell;
-            width: 60%;
+            width: 55%;
             vertical-align: middle;
-            text-align: right;
-            padding: 10px 0;
+            text-align: left;
+            padding: 10px 0 10px 15px;
         }
 
-        .company-logo {
-            background-color: #8B1A1A;
-            color: white;
-            padding: 15px 20px;
-            display: inline-block;
-            position: relative;
-        }
-
-        .company-logo::after {
-            content: '';
-            position: absolute;
-            right: -20px;
-            top: 0;
-            width: 0;
-            height: 0;
-            border-left: 20px solid #8B1A1A;
-            border-top: 33px solid transparent;
-            border-bottom: 33px solid transparent;
-        }
-
-        .company-name {
-            font-size: 24pt;
-            font-weight: bold;
-            line-height: 1;
-            letter-spacing: 2px;
-        }
-
-        .company-tagline {
-            font-size: 7pt;
-            margin-top: 2px;
+        .header-logo {
+            max-height: 70px;
+            width: auto;
         }
 
         .doc-title {
             color: #8B1A1A;
-            font-size: 18pt;
+            font-size: 22pt;
             font-weight: bold;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
         }
 
         .doc-subtitle {
-            font-size: 8pt;
+            font-size: 10pt;
             color: #000;
             font-style: italic;
         }
 
-        /* Header Logo */
-        .header-logo {
-            max-height: 60px;
-            width: auto;
-        }
-
-        /* Info Table with borders */
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: 9pt;
-        }
-
-        .info-table td {
-            padding: 6px 10px;
-            border: 1px solid #ccc;
-        }
-
-        .info-table .label-small {
-            background-color: #f5f5f5;
-            font-weight: bold;
-            width: 15%;
-        }
-
-        .info-table .value-small {
-            width: 35%;
-        }
-
-        /* 7 Column Info Table - Invisible borders with centered content */
+        /* 7 Column Info Table - Invisible borders */
         .info-columns {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
-            font-size: 8pt;
+            font-size: 7pt;
         }
 
         .info-columns td {
-            padding: 4px 6px;
+            padding: 3px 5px;
             vertical-align: top;
             border: none;
-            text-align: center;
         }
 
         .info-columns .col-header {
             font-weight: bold;
             text-transform: uppercase;
             font-size: 7pt;
-            padding-bottom: 2px;
+            padding-bottom: 3px;
             text-align: center;
         }
 
         .info-columns .col-content {
-            font-size: 8pt;
-            line-height: 1.4;
+            font-size: 7pt;
+            line-height: 1.3;
             text-align: center;
         }
 
@@ -162,13 +105,15 @@
             padding: 8px 6px;
             text-align: center;
             border: 1px solid #000;
-            font-size: 9pt;
+            font-size: 8pt;
+            text-transform: uppercase;
         }
 
         .services-table td {
             border: 1px solid #000;
             padding: 6px 8px;
             text-align: center;
+            font-size: 8pt;
         }
 
         .services-table .service-desc {
@@ -180,37 +125,42 @@
             font-weight: bold;
         }
 
-        /* Totals Table */
+        /* Totals Table - Right aligned */
         .totals-table {
-            width: 250px;
+            width: 220px;
             border-collapse: collapse;
             margin-left: auto;
             margin-bottom: 15px;
         }
 
         .totals-table td {
-            padding: 6px 10px;
+            padding: 5px 10px;
             font-size: 9pt;
+            border: 1px solid #000;
         }
 
         .totals-table .label-cell {
             text-align: right;
             font-weight: bold;
-            border: none;
+            background-color: #f5f5f5;
+            text-transform: uppercase;
         }
 
         .totals-table .value-cell {
             text-align: right;
-            border: 1px solid #000;
             width: 100px;
             background-color: #fff;
         }
 
-        .totals-table .header-cell {
+        .totals-table .header-row .label-cell {
+            background-color: #8B1A1A;
+            color: white;
+        }
+
+        .totals-table .header-row .value-cell {
             background-color: #8B1A1A;
             color: white;
             font-weight: bold;
-            text-align: center;
         }
 
         /* Scope Section */
@@ -225,6 +175,7 @@
             padding: 6px 10px;
             margin-bottom: 8px;
             font-size: 9pt;
+            text-transform: uppercase;
         }
 
         .scope-content {
@@ -238,6 +189,7 @@
             font-weight: bold;
             margin: 8px 0 4px 0;
             text-decoration: underline;
+            text-transform: uppercase;
         }
 
         .scope-content ul {
@@ -255,7 +207,7 @@
             font-size: 9pt;
         }
 
-        /* Terms Section - Clean without red borders */
+        /* Terms Section */
         .terms-section {
             margin-top: 20px;
             page-break-before: always;
@@ -268,6 +220,7 @@
             padding: 8px 10px;
             font-size: 10pt;
             margin-bottom: 15px;
+            text-transform: uppercase;
         }
 
         .term-box {
@@ -279,6 +232,7 @@
             font-weight: bold;
             font-size: 9pt;
             margin-bottom: 5px;
+            text-transform: uppercase;
         }
 
         .term-box ul {
@@ -296,7 +250,7 @@
             margin-bottom: 5px;
         }
 
-        /* Signature and Contact Section */
+        /* Final Section */
         .final-section {
             display: table;
             width: 100%;
@@ -322,6 +276,7 @@
             font-size: 9pt;
             margin-bottom: 8px;
             text-decoration: underline;
+            text-transform: uppercase;
         }
 
         .contact-info {
@@ -334,6 +289,7 @@
             font-size: 9pt;
             margin-bottom: 10px;
             text-decoration: underline;
+            text-transform: uppercase;
         }
 
         .signature-box {
@@ -347,6 +303,7 @@
             font-weight: bold;
             font-size: 9pt;
             margin-bottom: 5px;
+            text-transform: uppercase;
         }
 
         .sig-line {
@@ -378,77 +335,90 @@
 <body>
 
     <!-- HEADER -->
-<div class="header">
-  <div class="header-left">
-    <img
-      class="header-logo"
-      src="<?php
-        // Logo según departamento (opcional). Si no lo quieres dinámico, pon directo el archivo.
-        $dept = strtolower(trim($data['Service_Type'] ?? ''));
-        if (strpos($dept, 'hospitality') !== false) {
-          echo '/sales/Images/phospitality.png';
-        } else {
-          echo '/sales/Images/pfacility.png';
-        }
-      ?>"
-      alt="Prime Facility Services Group"
-    >
-  </div>
+    <div class="header">
+        <div class="header-left">
+            <img
+                class="header-logo"
+                src="<?php
+                    $dept = strtolower(trim($data['Service_Type'] ?? ''));
+                    if (strpos($dept, 'hospitality') !== false) {
+                        echo '/sales/Images/phospitality.png';
+                    } else {
+                        echo '/sales/Images/pfacility.png';
+                    }
+                ?>"
+                alt="Prime Facility Services Group"
+            >
+        </div>
+        <div class="header-right">
+            <div class="doc-title">JOB WORK ORDER</div>
+            <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
+        </div>
+    </div>
 
-  <div class="header-right">
-    <div class="doc-title">JOB WORK ORDER</div>
-    <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
-  </div>
-</div>
+    <!-- CLIENT & WORK INFO - 7 COLUMNS INVISIBLE -->
+    <?php
+    // Prepare data
+    $client_name = htmlspecialchars($data['Contact_Name'] ?? 'N/A');
+    $client_title = htmlspecialchars($data['Contact_Title'] ?? '');
+    $client_email = htmlspecialchars($data['Contact_Email'] ?? 'N/A');
+    $client_phone = htmlspecialchars($data['Contact_Phone'] ?? 'N/A');
 
-    <!-- CLIENT & WORK INFO - 7 COLUMNS CENTERED -->
+    $company_name = htmlspecialchars($data['Company_Name'] ?? 'N/A');
+    $address = trim(($data['Address'] ?? '') . ', ' . ($data['City'] ?? '') . ', ' . ($data['State'] ?? '') . ' ' . ($data['Zip_Code'] ?? ''), ', ');
+    $company_address = htmlspecialchars($address ?: 'N/A');
+
+    $seller = htmlspecialchars($data['Sales_Person'] ?? 'N/A');
+    $work_date = date('m/d/Y');
+    $department = htmlspecialchars($data['Service_Type'] ?? 'N/A');
+
+    // Payment terms mapping
+    $freq_map = [
+        '15' => 'Net 15',
+        '30' => 'Net 30',
+        '50_deposit' => '50% Deposit',
+        'completion' => 'Upon Completion'
+    ];
+    $payment_terms = $freq_map[$data['Invoice_Frequency'] ?? ''] ?? 'Upon Completion';
+
+    $wo_number = htmlspecialchars($data['docnum'] ?? '');
+    ?>
     <table class="info-columns">
         <tr>
-            <td class="label" rowspan="3" style="vertical-align: middle; text-align: center;">
-                <strong>BILL TO</strong>
-            </td>
-            <td class="value">
-                <strong><?php echo htmlspecialchars($data['Company_Name'] ?? 'N/A'); ?></strong><br>
-                <?php echo htmlspecialchars($data['Contact_Name'] ?? ''); ?><br>
-                <?php echo htmlspecialchars($data['Contact_Email'] ?? ''); ?><br>
-                <?php echo htmlspecialchars($data['Contact_Phone'] ?? ''); ?>
-            </td>
-        </tr>
-    </table>
-
-    <table class="info-table">
-        <tr>
-            <td class="label-small">Work Site</td>
-            <td class="value-small">
-                <?php
-                $address = trim(($data['Address'] ?? '') . ', ' . ($data['City'] ?? '') . ', ' . ($data['State'] ?? '') . ' ' . ($data['Zip_Code'] ?? ''), ', ');
-                echo htmlspecialchars($address ?: 'N/A');
-                ?>
-            </td>
-            <td class="label-small">Sales Person</td>
-            <td class="value-small"><?php echo htmlspecialchars($data['Sales_Person'] ?? 'N/A'); ?></td>
+            <td class="col-header">BILL TO</td>
+            <td class="col-header">WORK SITE</td>
+            <td class="col-header">SALES PERSON</td>
+            <td class="col-header">WORK DATE</td>
+            <td class="col-header">DEPARTMENT</td>
+            <td class="col-header">PAYMENT TERMS</td>
+            <td class="col-header">W.O. NO.</td>
         </tr>
         <tr>
-            <td class="label-small">Work Date</td>
-            <td class="value-small"><?php echo htmlspecialchars($data['Work_Date'] ?? date('m/d/Y')); ?></td>
-            <td class="label-small">Department</td>
-            <td class="value-small"><?php echo htmlspecialchars($data['Service_Type'] ?? 'N/A'); ?></td>
-        </tr>
-        <tr>
-            <td class="label-small">Terms</td>
-            <td class="value-small">
-                <?php
-                $freq_map = [
-                    '15' => 'Net 15',
-                    '30' => 'Net 30',
-                    '50_deposit' => '50% Deposit',
-                    'completion' => 'Upon Completion'
-                ];
-                echo htmlspecialchars($freq_map[$data['Invoice_Frequency'] ?? ''] ?? 'Upon Completion');
-                ?>
+            <td class="col-content">
+                <?php echo $client_name; ?><br>
+                <?php if ($client_title): ?><?php echo $client_title; ?><br><?php endif; ?>
+                <?php echo $client_email; ?><br>
+                <?php echo $client_phone; ?>
             </td>
-            <td class="label-small">Work Order Number</td>
-            <td class="value-small"><strong><?php echo htmlspecialchars($data['docnum'] ?? 'DRAFT'); ?></strong></td>
+            <td class="col-content">
+                <?php echo $company_name; ?><br>
+                <?php echo $company_address; ?>
+            </td>
+            <td class="col-content">
+                <?php echo $seller; ?>
+            </td>
+            <td class="col-content">
+                <?php echo $work_date; ?>
+            </td>
+            <td class="col-content">
+                <?php echo $department; ?>
+            </td>
+            <td class="col-content">
+                <?php echo $payment_terms; ?>
+            </td>
+            <td class="col-content">
+                <?php echo $wo_number ?: '-'; ?>
+            </td>
         </tr>
     </table>
 
@@ -460,16 +430,7 @@
     $taxes = $subtotal * $tax_rate;
     $grand_total = $subtotal + $taxes;
 
-    // Get invoice frequency for terms display
-    $freq_text_map = [
-        '15' => 'Net 15',
-        '30' => 'Net 30',
-        '50_deposit' => '50% Deposit',
-        'completion' => 'Upon Completion'
-    ];
-    $terms_text = $freq_text_map[$data['Invoice_Frequency'] ?? ''] ?? 'Upon Completion';
-
-    // Build service description from Site_Observation or default
+    // Build service description
     $service_description = '';
     if (!empty($data['Site_Observation'])) {
         $service_description = htmlspecialchars($data['Site_Observation']);
@@ -478,20 +439,26 @@
     } else {
         $service_description = 'Professional service as per client requirements. All work performed to industry standards with quality assurance.';
     }
+
+    // Service time and frequency
+    $service_time = htmlspecialchars($data['Service_Time'] ?? 'One Day');
+    $frequency = htmlspecialchars($data['Service_Frequency'] ?? 'One Time');
     ?>
     <table class="services-table">
         <thead>
             <tr>
-                <th style="width: 30%;">Type of Services</th>
-                <th style="width: 15%;">Terms</th>
-                <th style="width: 40%;">Service Description</th>
+                <th style="width: 25%;">TYPE OF SERVICES</th>
+                <th style="width: 12%;">SERVICE TIME</th>
+                <th style="width: 12%;">FREQUENCY</th>
+                <th style="width: 36%;">SERVICE DESCRIPTION</th>
                 <th style="width: 15%;">SUBTOTAL</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td class="service-desc"><?php echo htmlspecialchars($data['Requested_Service'] ?? 'Service'); ?></td>
-                <td><?php echo $terms_text; ?></td>
+                <td><?php echo $service_time; ?></td>
+                <td><?php echo $frequency; ?></td>
                 <td class="service-desc"><?php echo $service_description; ?></td>
                 <td class="amount">$<?php echo number_format($subtotal, 2); ?></td>
             </tr>
@@ -500,9 +467,9 @@
 
     <!-- TOTALS TABLE -->
     <table class="totals-table">
-        <tr>
+        <tr class="header-row">
             <td class="label-cell">TOTAL</td>
-            <td class="value-cell header-cell">TOTAL</td>
+            <td class="value-cell">TOTAL</td>
         </tr>
         <tr>
             <td class="label-cell">TOTAL</td>
@@ -522,7 +489,7 @@
     <div class="scope-section">
         <div class="scope-header">SCOPE OF WORK - <?php echo strtoupper(htmlspecialchars($data['Requested_Service'] ?? 'SERVICE DESCRIPTION')); ?></div>
         <div class="scope-content">
-            <h4>Work to be Performed:</h4>
+            <h4>WORK TO BE PERFORMED:</h4>
             <?php if (!empty($data['scope_of_work'])): ?>
                 <?php echo $data['scope_of_work']; ?>
             <?php else: ?>
@@ -537,7 +504,7 @@
             <?php endif; ?>
 
             <?php if (!empty($data['Additional_Comments'])): ?>
-                <h4>Additional Notes:</h4>
+                <h4>ADDITIONAL NOTES:</h4>
                 <p><?php echo nl2br(htmlspecialchars($data['Additional_Comments'])); ?></p>
             <?php endif; ?>
         </div>
@@ -558,7 +525,6 @@
         </div>
 
         <?php
-        // Check if this is a kitchen cleaning service
         $requested_service = strtolower($data['Requested_Service'] ?? '');
         $is_kitchen_service = (strpos($requested_service, 'kitchen') !== false || strpos($requested_service, 'hood') !== false);
 
@@ -653,11 +619,11 @@
             </div>
             <div class="signature-column">
                 <div class="signature-box">
-                    <div class="sig-label">Authorized by:</div>
+                    <div class="sig-label">AUTHORIZED BY:</div>
                     <div class="sig-line">Signature & Date</div>
                 </div>
                 <div class="signature-box">
-                    <div class="sig-label">Print Name:</div>
+                    <div class="sig-label">PRINT NAME:</div>
                     <div class="sig-line">Name & Title</div>
                 </div>
             </div>
