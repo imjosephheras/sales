@@ -72,6 +72,11 @@
             box-shadow: 0 4px 15px rgba(0,31,84,0.35);
         }
 
+        .btn-reports {
+            background: linear-gradient(135deg, #1a5f1a, #2d8a2d);
+            box-shadow: 0 4px 15px rgba(26,95,26,0.35);
+        }
+
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.35);
@@ -115,24 +120,16 @@
         <span>📝</span> Contract Generator
     </a>
 
-    <a href="sales/" class="btn btn-sales">
-        <span>💰</span> Sales
-    </a>
-
-    <a href="invoice/" class="btn btn-sales">
-        <span>🧾</span> Invoice
-    </a>
-
     <a href="employee_work_report/" class="btn btn-sales">
         <span>🧹</span> Employee Work Report
     </a>
 
-    <a href="calculator/" class="btn btn-sales">
-        <span>📊</span> Calculator
-    </a>
-
     <a href="calendar/" class="btn btn-sales">
         <span>📅</span> Calendar
+    </a>
+
+    <a href="reports/" class="btn btn-reports">
+        <span>📋</span> Reports
     </a>
 
 </div>
