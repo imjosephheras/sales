@@ -209,11 +209,12 @@
             page-break-before: always;
         }
 
-        .req-box {
-            border: 2px solid #8B1A1A;
-            padding: 8px;
-            margin-bottom: 10px;
+        .req-box{
+          border: none;
+          padding: 8px;
+          margin-bottom: 10px;
         }
+
 
         .req-title {
             color: #8B1A1A;
@@ -285,18 +286,29 @@
 <body>
 
     <!-- HEADER -->
-    <div class="header">
-        <div class="header-left">
-            <div class="company-logo">
-                <div class="company-name">PRIME</div>
-                <div class="company-tagline">Facility Services Group</div>
-            </div>
-        </div>
-        <div class="header-right">
-            <div class="doc-title">JOB WORK ORDER</div>
-            <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
-        </div>
-    </div>
+<div class="header">
+  <div class="header-left">
+    <img
+      class="header-logo"
+      src="<?php
+        // Logo según departamento (opcional). Si no lo quieres dinámico, pon directo el archivo.
+        $dept = strtolower(trim($data['Service_Type'] ?? ''));
+        if (strpos($dept, 'hospitality') !== false) {
+          echo '/sales/Images/phospitality.png';
+        } else {
+          echo '/sales/Images/pfacility.png';
+        }
+      ?>"
+      alt="Prime Facility Services Group"
+    >
+  </div>
+
+  <div class="header-right">
+    <div class="doc-title">JOB WORK ORDER</div>
+    <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
+  </div>
+</div>
+
 
     <!-- CLIENT & WORK INFO -->
     <table class="info-table">
@@ -407,64 +419,143 @@
         </div>
     </div>
 
-    <!-- PAGE 2: REQUIREMENTS -->
-    <div class="requirements-section">
+<!-- TERMS AND CONDITIONS -->
+<div class="requirements-section">
 
-        <div class="req-box">
-            <div class="req-title">TAXES:</div>
-            <ul>
-                <li>Prices exclude Texas state tax (8.25%), which will be added to the final bill</li>
-            </ul>
-        </div>
+  <div class="req-box">
+    <div class="req-title">TERMS AND CONDITIONS</div>
+  </div>
 
-        <div class="req-box">
-            <div class="req-title">POST-SERVICE REQUIREMENTS:</div>
-            <ul>
-                <li>Client management must verify completion</li>
-                <li>Any concerns must be reported within 24 hours</li>
-                <li>Follow recommended maintenance schedule</li>
-            </ul>
-        </div>
+  <div class="req-box">
+    <div class="req-title">1. SERVICE LIMITATIONS</div>
+    <ul>
+      <li>Work will be performed during approved service windows.</li>
+      <li>Additional charges may apply for emergency service requests.</li>
+      <li>Separate scheduling is required for areas containing wood-burning equipment.</li>
+    </ul>
+  </div>
 
-        <div class="req-box">
-            <div class="req-title">SITE ACCESS REQUIREMENTS:</div>
-            <ul>
-                <li>Client must ensure the front parking area is clear or accessible for ladder placement</li>
-                <li>Access to water and power outlets if needed</li>
-                <li>All approved interior access as needed</li>
-                <li>Any obstructions near the glass (signs, displays, etc.) must be moved</li>
-            </ul>
-        </div>
+  <div class="req-box">
+    <div class="req-title">2. AREA PREPARATION</div>
+    <ul>
+      <li>All cooking equipment must be turned off at least two (2) hours before service.</li>
+    </ul>
+  </div>
 
-        <div class="req-box">
-            <div class="req-title">PREPARATION REQUIREMENTS:</div>
-            <ul>
-                <li>Remove posters, decals, or temporary signs from the glass (if requested)</li>
-                <li>Move items blocking the lower portion of the windows</li>
-                <li>Ensure exterior areas are safe for services and equipment</li>
-            </ul>
-        </div>
+  <div class="req-box">
+    <div class="req-title">3. KITCHEN PREPARATION</div>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      The Client must ensure that the kitchen is ready for service, including:
+    </p>
+    <ul>
+      <li>Turning off all kitchen equipment and allowing it to cool completely</li>
+      <li>Removing food, utensils, and personal items from work surfaces</li>
+      <li>Keeping access areas clear for the cleaning crew</li>
+    </ul>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      Additional time caused by lack of preparation may be billed at <strong>$30.00 USD per hour</strong>.
+    </p>
+  </div>
 
-        <div class="req-box">
-            <div class="req-title">PLEASE SEND TWO COPIES OF YOUR WORK ORDER:</div>
-            <p style="margin-left: 15px; font-size: 9pt;">
-                Both copies should be signed with the prices, terms, and specifications.
-            </p>
-        </div>
+  <div class="req-box">
+    <div class="req-title">4. PROPOSAL VALIDITY PERIOD</div>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      The proposal issued for this Work Order will be valid for fourteen (14) days from the date of issuance.
+      Prime Facility Services Group may revise pricing, scope, or terms if approval is not received within this period.
+    </p>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      If actual site conditions differ from those observed during the initial inspection, a revised proposal may be issued.
+    </p>
+  </div>
 
-        <div class="req-box">
-            <div class="req-title">SEND ALL CORRESPONDENCE TO:</div>
-            <p style="margin-left: 15px; font-size: 9pt;">
-                <strong>Prime Facility Services Group, Inc</strong><br>
-                8303 Westglen Drive<br>
-                Houston, TX 77063
-            </p>
-            <p style="margin-left: 15px; font-size: 9pt; margin-top: 10px;">
-                <strong>Email:</strong> customerservice@primefacilityservicesgroup.com<br>
-                <strong>Phone:</strong> (713) 338-2553<br>
-                <strong>Fax:</strong> 713-574-3065
-            </p>
-        </div>
+  <div class="req-box">
+    <div class="req-title">5. CANCELLATIONS</div>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      Cancellations made with less than twenty-four (24) hours’ notice will incur a charge equal to one hundred percent (100%)
+      of the minimum scheduled labor.
+    </p>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      Cancellations made with more than twenty-four (24) hours’ notice will not incur charges unless otherwise specified in the applicable price list.
+    </p>
+  </div>
+
+  <div class="req-box">
+    <div class="req-title">6. RESCHEDULING</div>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      Rescheduling requests must be submitted at least twenty-four (24) hours in advance. Requests made within 24 hours may incur a fee
+      of up to the total scheduled labor and are subject to personnel and equipment availability.
+    </p>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      Availability for rescheduled dates or times is not guaranteed.
+    </p>
+  </div>
+
+  <div class="req-box">
+    <div class="req-title">7. LACK OF ACCESS</div>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      If personnel arrive on site and are unable to begin work due to lack of access, incomplete area preparation, or delays caused by the Client,
+      the situation will be treated as a same-day cancellation and the corresponding charges will apply.
+    </p>
+  </div>
+
+  <div class="req-box">
+    <div class="req-title">8. WEATHER OR SAFETY DELAYS</div>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      If work cannot be safely performed due to weather conditions, hazardous environments, or other safety-related circumstances beyond the company’s control,
+      the service will be rescheduled to the next available date.
+    </p>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      No penalties will apply; however, labor or material costs may be adjusted if conditions change significantly.
+    </p>
+  </div>
+
+  <div class="req-box">
+    <div class="req-title">9. POST-SERVICE REQUIREMENTS</div>
+    <ul>
+      <li>Kitchen management must verify completion.</li>
+      <li>Any concerns must be reported within twenty-four (24) hours.</li>
+      <li>Recommended maintenance schedules must be followed.</li>
+    </ul>
+  </div>
+
+  <div class="req-box">
+    <div class="req-title">10. SITE ACCESS AND SECURITY COORDINATION</div>
+    <ul>
+      <li>The Client must notify on-site security personnel or building management in advance that services will be performed.</li>
+      <li>
+        If the service requires access to rooftops, ceilings, ventilation systems, or other restricted areas,
+        the Client must ensure safe and full access.
+      </li>
+      <li>
+        The Client must provide clear instructions and prior authorization to security or access-control personnel
+        to allow entry for the service team.
+      </li>
+    </ul>
+  </div>
+
+  <!-- SIGNATURES -->
+  <div class="req-box">
+    <div class="req-title">ACCEPTANCE / SIGNATURES</div>
+
+    <p style="margin-left: 15px; font-size: 9pt; margin-top: 6px;">
+      <strong>Client Name (Print):</strong> _______________________________
+    </p>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      <strong>Client Signature:</strong> _________________________________
+      <span style="margin-left: 20px;"><strong>Date:</strong> _______________</span>
+    </p>
+
+    <p style="margin-left: 15px; font-size: 9pt; margin-top: 10px;">
+      <strong>Prime Facility Services Group, Inc.</strong>
+    </p>
+    <p style="margin-left: 15px; font-size: 9pt;">
+      <strong>Authorized Signature:</strong> _____________________________
+      <span style="margin-left: 20px;"><strong>Date:</strong> _______________</span>
+    </p>
+  </div>
+
+</div>
+
 
         <!-- Signature Section -->
         <div class="signature-section">
