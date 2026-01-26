@@ -112,182 +112,320 @@
     }
 
     function renderJWO(data) {
-        // Use Company_Address or fallback
-        const address = data.Company_Address || 'N/A';
+        // Use Company_Address or fallback (matching PDF template)
+        const companyAddress = data.Company_Address || 'N/A';
 
         // Get total price with fallback chain (same as PDF)
         const rawPrice = parseFloat(data.Total_Price || data.Prime_Quoted_Price || data.PriceInput || 0);
-        const totalPrice = formatPrice(rawPrice);
+        const subtotal = formatPrice(rawPrice);
 
         // Calculate taxes and grand total (same as PDF: 8.25%)
         const taxRate = 0.0825;
         const taxes = rawPrice * taxRate;
         const grandTotal = rawPrice + taxes;
 
+        // Payment terms mapping (same as PDF)
         const termsMap = {
             '15': 'Net 15',
             '30': 'Net 30',
             '50_deposit': '50% Deposit',
             'completion': 'Upon Completion'
         };
-        const terms = termsMap[data.Invoice_Frequency] || 'Upon Completion';
+        const paymentTerms = termsMap[data.Invoice_Frequency] || 'Upon Completion';
 
-        // Get contact info with fallbacks
-        const contactName = data.Client_Name || data.client_name || '';
-        const contactTitle = data.Client_Title || '';
-        const contactEmail = data.Email || '';
-        const contactPhone = data.Number_Phone || '';
+        // Get contact info with fallbacks (matching PDF field names)
+        const clientName = data.client_name || data.Client_Name || 'N/A';
+        const clientTitle = data.Client_Title || '';
+        const clientEmail = data.Email || 'N/A';
+        const clientPhone = data.Number_Phone || 'N/A';
         const seller = data.Seller || 'N/A';
-        const isNewClient = data.Is_New_Client === 'Yes' ? ' (New Client)' : '';
+        const companyName = data.Company_Name || 'N/A';
+        const department = data.Service_Type || 'N/A';
+        const woNumber = data.docnum || 'DRAFT';
+        const workDate = new Date().toLocaleDateString('en-US');
+
+        // Service details
+        const requestedService = data.Requested_Service || 'Service';
+        const serviceTime = data.Service_Time || 'One Day';
+        const serviceFrequency = data.Service_Frequency || 'One Time';
 
         // Build service description (same logic as PDF)
         let serviceDescription = '';
         if (data.Site_Observation) {
             serviceDescription = escapeHtml(data.Site_Observation);
-        } else if (data.Scope_Of_Work && Array.isArray(data.Scope_Of_Work) && data.Scope_Of_Work.length > 0) {
-            serviceDescription = data.Scope_Of_Work.map(item => escapeHtml(item)).join('. ');
+        } else if (data.scope_of_work) {
+            serviceDescription = escapeHtml(data.scope_of_work.replace(/<[^>]*>/g, ''));
         } else {
             serviceDescription = 'Professional service as per client requirements. All work performed to industry standards with quality assurance.';
         }
 
-        // Build scope of work list for bottom section
+        // Build scope of work for bottom section
         let scopeWorkHtml = '';
-        if (data.Scope_Of_Work && Array.isArray(data.Scope_Of_Work) && data.Scope_Of_Work.length > 0) {
-            scopeWorkHtml = '<ul>' + data.Scope_Of_Work.map(item => `<li>${escapeHtml(item)}</li>`).join('') + '</ul>';
+        if (data.scope_of_work) {
+            scopeWorkHtml = data.scope_of_work;
         } else {
             scopeWorkHtml = `
                 <ul>
-                    <li>Pre-cleaning and preparation of all areas listed above</li>
-                    <li>Professional execution of requested services</li>
-                    <li>Quality inspection during and after service completion</li>
-                    <li>Cleaning of work area to maintain professional standards</li>
-                    <li>Final inspection to ensure quality standards are met</li>
+                    <li>Pre-cleaning and preparation of all exterior glass panels listed above</li>
+                    <li>Removal of fingerprints, dust, and any residues to ensure proper film adhesion</li>
+                    <li>Installation of window tint on doors, side panels, and upper transom window</li>
+                    <li>Removal of bubbles and inspection of adhesion during installation</li>
+                    <li>Cleaning of the work area to maintain a professional finish</li>
+                    <li>Final inspection to ensure an even and uniform appearance across the entire storefront</li>
                 </ul>
             `;
         }
 
+        // Determine logo based on Service_Type (same as PDF)
+        const dept = (data.Service_Type || '').toLowerCase();
+        const logoSrc = dept.includes('hospitality') ? '/sales/Images/phospitality.png' : '/sales/Images/pfacility.png';
+
         return `
-            <div class="document-preview jwo-preview">
+            <div class="document-preview jwo-preview-exact">
                 <style>
-                    .jwo-preview { font-family: Arial, sans-serif; font-size: 11pt; }
-                    .jwo-header { display: flex; justify-content: space-between; align-items: center;
-                                  border-bottom: 3px solid #8B1A1A; padding-bottom: 10px; margin-bottom: 15px; }
-                    .jwo-logo { background: #8B1A1A; color: white; padding: 12px 20px;
-                                position: relative; display: inline-block; }
-                    .jwo-logo-name { font-size: 20pt; font-weight: bold; letter-spacing: 2px; }
-                    .jwo-logo-tag { font-size: 7pt; margin-top: 2px; }
-                    .jwo-title { text-align: right; }
-                    .jwo-title h1 { color: #8B1A1A; font-size: 18pt; margin: 0; }
-                    .jwo-title p { font-size: 8pt; font-style: italic; margin: 5px 0 0 0; }
+                    .jwo-preview-exact {
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 10pt;
+                        color: #000;
+                        line-height: 1.3;
+                        background: white;
+                        padding: 20px;
+                    }
 
-                    .jwo-info-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-                    .jwo-info-table td { border: 1px solid #ccc; padding: 8px; }
-                    .jwo-info-table .label { background: #f5f5f5; font-weight: bold; width: 25%; }
-                    .jwo-info-table .label-sm { background: #f5f5f5; font-weight: bold; width: 15%; }
+                    /* Header - Exact match to PDF */
+                    .jwo-header-exact {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        border-bottom: 3px solid #8B1A1A;
+                        padding-bottom: 10px;
+                        margin-bottom: 10px;
+                    }
+                    .jwo-header-exact img {
+                        max-height: 70px;
+                        width: auto;
+                    }
+                    .jwo-header-exact .title-section {
+                        text-align: left;
+                        padding-left: 15px;
+                    }
+                    .jwo-header-exact .doc-title {
+                        color: #8B1A1A;
+                        font-size: 22pt;
+                        font-weight: bold;
+                        margin-bottom: 5px;
+                    }
+                    .jwo-header-exact .doc-subtitle {
+                        font-size: 10pt;
+                        color: #000;
+                        font-style: italic;
+                    }
 
-                    .jwo-services { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-                    .jwo-services th { background: #8B1A1A; color: white; padding: 8px;
-                                      border: 1px solid #000; font-size: 9pt; }
-                    .jwo-services td { border: 1px solid #000; padding: 6px 8px; text-align: center; }
-                    .jwo-services .service-desc { text-align: left; }
-                    .jwo-services .amount { text-align: right; font-weight: bold; }
+                    /* 7 Column Info Table - Exact match to PDF */
+                    .jwo-info-columns {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 15px;
+                        font-size: 7pt;
+                    }
+                    .jwo-info-columns td {
+                        padding: 3px 5px;
+                        vertical-align: top;
+                        border: none;
+                    }
+                    .jwo-info-columns .col-header {
+                        font-weight: bold;
+                        text-transform: uppercase;
+                        font-size: 7pt;
+                        padding-bottom: 3px;
+                        text-align: center;
+                    }
+                    .jwo-info-columns .col-content {
+                        font-size: 7pt;
+                        line-height: 1.3;
+                        text-align: center;
+                    }
 
-                    .jwo-totals { width: 250px; margin-left: auto; margin-bottom: 15px; border-collapse: collapse; }
-                    .jwo-totals td { padding: 6px 10px; font-size: 9pt; }
-                    .jwo-totals .label-cell { text-align: right; font-weight: bold; }
-                    .jwo-totals .value-cell { text-align: right; border: 1px solid #000; width: 100px; }
-                    .jwo-totals .header-cell { background: #8B1A1A; color: white; font-weight: bold; text-align: center; }
+                    /* Services Table - Exact match to PDF */
+                    .jwo-services-exact {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 10px;
+                    }
+                    .jwo-services-exact th {
+                        background-color: #8B1A1A;
+                        color: white;
+                        font-weight: bold;
+                        padding: 8px 6px;
+                        text-align: center;
+                        border: 1px solid #000;
+                        font-size: 8pt;
+                        text-transform: uppercase;
+                    }
+                    .jwo-services-exact td {
+                        border: 1px solid #000;
+                        padding: 6px 8px;
+                        text-align: center;
+                        font-size: 8pt;
+                    }
+                    .jwo-services-exact .service-desc {
+                        text-align: left;
+                    }
+                    .jwo-services-exact .amount {
+                        text-align: right;
+                        font-weight: bold;
+                    }
 
-                    .jwo-scope { margin-top: 15px; }
-                    .jwo-scope-header { background: #8B1A1A; color: white; padding: 6px 10px;
-                                       font-weight: bold; font-size: 9pt; margin-bottom: 8px; }
-                    .jwo-scope-content { border: 1px solid #000; padding: 10px; font-size: 9pt; }
-                    .jwo-scope-content h4 { font-size: 9pt; text-decoration: underline; margin: 8px 0 4px 0; }
-                    .jwo-scope-content ul { margin-left: 20px; }
-                    .jwo-scope-content li { margin-bottom: 3px; }
+                    /* Totals Table - Exact match to PDF (3 rows only) */
+                    .jwo-totals-exact {
+                        width: 250px;
+                        border-collapse: collapse;
+                        margin-left: auto;
+                        margin-bottom: 15px;
+                    }
+                    .jwo-totals-exact td {
+                        padding: 6px 12px;
+                        font-size: 9pt;
+                        border: 1px solid #000;
+                    }
+                    .jwo-totals-exact .label-cell {
+                        text-align: left;
+                        font-weight: bold;
+                        background-color: #f5f5f5;
+                        text-transform: uppercase;
+                        width: 120px;
+                    }
+                    .jwo-totals-exact .value-cell {
+                        text-align: right;
+                        width: 130px;
+                        background-color: #fff;
+                        font-weight: bold;
+                    }
+                    .jwo-totals-exact tr:last-child .label-cell,
+                    .jwo-totals-exact tr:last-child .value-cell {
+                        background-color: #8B1A1A;
+                        color: white;
+                    }
+
+                    /* Scope Section - Exact match to PDF */
+                    .jwo-scope-exact {
+                        margin-bottom: 15px;
+                    }
+                    .jwo-scope-header-exact {
+                        background-color: #8B1A1A;
+                        color: white;
+                        font-weight: bold;
+                        padding: 6px 10px;
+                        margin-bottom: 8px;
+                        font-size: 9pt;
+                        text-transform: uppercase;
+                    }
+                    .jwo-scope-content-exact {
+                        border: 1px solid #000;
+                        padding: 10px;
+                        background-color: #fff;
+                    }
+                    .jwo-scope-content-exact h4 {
+                        font-size: 9pt;
+                        font-weight: bold;
+                        margin: 8px 0 4px 0;
+                        text-decoration: underline;
+                        text-transform: uppercase;
+                    }
+                    .jwo-scope-content-exact ul {
+                        margin-left: 20px;
+                        margin-bottom: 8px;
+                    }
+                    .jwo-scope-content-exact li {
+                        margin-bottom: 3px;
+                        font-size: 9pt;
+                    }
+                    .jwo-scope-content-exact p {
+                        margin-bottom: 6px;
+                        font-size: 9pt;
+                    }
+
+                    /* Preview note */
+                    .jwo-preview-note {
+                        margin-top: 20px;
+                        padding: 10px;
+                        background: #f0f0f0;
+                        border: 1px dashed #999;
+                        text-align: center;
+                        font-size: 8pt;
+                        color: #666;
+                    }
                 </style>
 
-                <!-- Header -->
-                <div class="jwo-header">
-                    <div class="jwo-logo">
-                        <div class="jwo-logo-name">PRIME</div>
-                        <div class="jwo-logo-tag">Facility Services Group</div>
-                    </div>
-                    <div class="jwo-title">
-                        <h1>JOB WORK ORDER</h1>
-                        <p>"The best services in the industry or nothing at all"</p>
+                <!-- HEADER - Exact match to PDF -->
+                <div class="jwo-header-exact">
+                    <img src="${logoSrc}" alt="Prime Facility Services Group" onerror="this.style.display='none'">
+                    <div class="title-section">
+                        <div class="doc-title">JOB WORK ORDER</div>
+                        <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
                     </div>
                 </div>
 
-                <!-- Bill To -->
-                <table class="jwo-info-table">
+                <!-- CLIENT & WORK INFO - 7 COLUMNS (Exact match to PDF) -->
+                <table class="jwo-info-columns">
                     <tr>
-                        <td class="label" rowspan="3" style="vertical-align: middle; text-align: center;">
-                            <strong>BILL TO</strong>
+                        <td class="col-header">BILL TO</td>
+                        <td class="col-header">WORK SITE</td>
+                        <td class="col-header">SALES PERSON</td>
+                        <td class="col-header">WORK DATE</td>
+                        <td class="col-header">DEPARTMENT</td>
+                        <td class="col-header">PAYMENT TERMS</td>
+                        <td class="col-header">W.O. NO.</td>
+                    </tr>
+                    <tr>
+                        <td class="col-content">
+                            ${escapeHtml(clientName)}<br>
+                            ${clientTitle ? escapeHtml(clientTitle) + '<br>' : ''}
+                            ${escapeHtml(clientEmail)}<br>
+                            ${escapeHtml(clientPhone)}
                         </td>
-                        <td>
-                            <strong>${escapeHtml(data.Company_Name) || 'N/A'}${isNewClient}</strong><br>
-                            ${escapeHtml(contactName)}${contactTitle ? ' - ' + escapeHtml(contactTitle) : ''}<br>
-                            ${escapeHtml(contactEmail)}<br>
-                            ${escapeHtml(contactPhone)}
+                        <td class="col-content">
+                            ${escapeHtml(companyName)}<br>
+                            ${escapeHtml(companyAddress)}
                         </td>
+                        <td class="col-content">${escapeHtml(seller)}</td>
+                        <td class="col-content">${workDate}</td>
+                        <td class="col-content">${escapeHtml(department)}</td>
+                        <td class="col-content">${paymentTerms}</td>
+                        <td class="col-content">${woNumber || '-'}</td>
                     </tr>
                 </table>
 
-                <!-- Work Info -->
-                <table class="jwo-info-table">
-                    <tr>
-                        <td class="label-sm">Work Site</td>
-                        <td style="width: 35%;">${escapeHtml(address)}</td>
-                        <td class="label-sm">Sales Person</td>
-                        <td style="width: 35%;">${escapeHtml(seller)}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-sm">Work Date</td>
-                        <td>${data.Work_Date || new Date().toLocaleDateString()}</td>
-                        <td class="label-sm">Department</td>
-                        <td>${escapeHtml(data.Service_Type) || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-sm">Terms</td>
-                        <td>${terms}</td>
-                        <td class="label-sm">Work Order Number</td>
-                        <td><strong>${data.docnum || 'DRAFT'}</strong></td>
-                    </tr>
-                </table>
-
-                <!-- Services Table (matching PDF structure) -->
-                <table class="jwo-services">
+                <!-- SERVICES TABLE - Exact match to PDF -->
+                <table class="jwo-services-exact">
                     <thead>
                         <tr>
-                            <th style="width: 30%;">Type of Services</th>
-                            <th style="width: 15%;">Terms</th>
-                            <th style="width: 40%;">Service Description</th>
+                            <th style="width: 25%;">TYPE OF SERVICES</th>
+                            <th style="width: 12%;">SERVICE TIME</th>
+                            <th style="width: 12%;">FREQUENCY</th>
+                            <th style="width: 36%;">SERVICE DESCRIPTION</th>
                             <th style="width: 15%;">SUBTOTAL</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="service-desc">${escapeHtml(data.Requested_Service) || 'Service'}</td>
-                            <td>${terms}</td>
+                            <td class="service-desc">${escapeHtml(requestedService)}</td>
+                            <td>${escapeHtml(serviceTime)}</td>
+                            <td>${escapeHtml(serviceFrequency)}</td>
                             <td class="service-desc">${serviceDescription}</td>
-                            <td class="amount">$${totalPrice}</td>
+                            <td class="amount">$${subtotal}</td>
                         </tr>
                     </tbody>
                 </table>
 
-                <!-- Totals Table (matching PDF structure) -->
-                <table class="jwo-totals">
+                <!-- TOTALS TABLE - Exact match to PDF (3 rows only) -->
+                <table class="jwo-totals-exact">
                     <tr>
                         <td class="label-cell">TOTAL</td>
-                        <td class="value-cell header-cell">TOTAL</td>
+                        <td class="value-cell">$${subtotal}</td>
                     </tr>
                     <tr>
-                        <td class="label-cell">TOTAL</td>
-                        <td class="value-cell">$${totalPrice}</td>
-                    </tr>
-                    <tr>
-                        <td class="label-cell">TAXES</td>
+                        <td class="label-cell">TAXES (8.25%)</td>
                         <td class="value-cell">$${formatPrice(taxes)}</td>
                     </tr>
                     <tr>
@@ -296,32 +434,25 @@
                     </tr>
                 </table>
 
-                <!-- Scope -->
-                <div class="jwo-scope">
-                    <div class="jwo-scope-header">
-                        SCOPE OF WORK - ${(data.Requested_Service || 'SERVICE').toUpperCase()}
+                <!-- SCOPE OF WORK - Exact match to PDF -->
+                <div class="jwo-scope-exact">
+                    <div class="jwo-scope-header-exact">
+                        SCOPE OF WORK - ${escapeHtml(requestedService).toUpperCase()}
                     </div>
-                    <div class="jwo-scope-content">
-                        ${data.Site_Observation ? `
-                            <h4>Area to be Serviced:</h4>
-                            <p>${data.Site_Observation.replace(/\n/g, '<br>')}</p>
-                        ` : ''}
-
-                        <h4>Work to be Performed:</h4>
+                    <div class="jwo-scope-content-exact">
+                        <h4>WORK TO BE PERFORMED:</h4>
                         ${scopeWorkHtml}
 
                         ${data.Additional_Comments ? `
-                            <h4>Additional Notes:</h4>
-                            <p>${data.Additional_Comments.replace(/\n/g, '<br>')}</p>
+                            <h4>ADDITIONAL NOTES:</h4>
+                            <p>${escapeHtml(data.Additional_Comments).replace(/\n/g, '<br>')}</p>
                         ` : ''}
                     </div>
                 </div>
 
-                <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd;
-                            border-radius: 4px; text-align: center; font-size: 9pt; color: #666;">
-                    <p style="margin: 0;">
-                        This is a preview. The PDF includes Terms & Conditions and signature sections.
-                    </p>
+                <!-- Preview Note -->
+                <div class="jwo-preview-note">
+                    <strong>PREVIEW</strong> - The PDF includes Terms & Conditions (page 2) and signature sections.
                 </div>
             </div>
         `;
