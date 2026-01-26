@@ -90,6 +90,35 @@
             font-style: italic;
         }
 
+        /* Header Logo */
+        .header-logo {
+            max-height: 60px;
+            width: auto;
+        }
+
+        /* Info Table with borders */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 9pt;
+        }
+
+        .info-table td {
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+        }
+
+        .info-table .label-small {
+            background-color: #f5f5f5;
+            font-weight: bold;
+            width: 15%;
+        }
+
+        .info-table .value-small {
+            width: 35%;
+        }
+
         /* 7 Column Info Table - Invisible borders with centered content */
         .info-columns {
             width: 100%;
@@ -426,33 +455,44 @@
     <!-- SERVICES TABLE -->
     <?php
     // Calculate totals
-    $subtotal = (float)($data['Total_Price'] ?? 0);
+    $subtotal = (float)($data['Total_Price'] ?? $data['Prime_Quoted_Price'] ?? $data['PriceInput'] ?? 0);
     $tax_rate = 0.0825;
     $taxes = $subtotal * $tax_rate;
     $grand_total = $subtotal + $taxes;
+
+    // Get invoice frequency for terms display
+    $freq_text_map = [
+        '15' => 'Net 15',
+        '30' => 'Net 30',
+        '50_deposit' => '50% Deposit',
+        'completion' => 'Upon Completion'
+    ];
+    $terms_text = $freq_text_map[$data['Invoice_Frequency'] ?? ''] ?? 'Upon Completion';
+
+    // Build service description from Site_Observation or default
+    $service_description = '';
+    if (!empty($data['Site_Observation'])) {
+        $service_description = htmlspecialchars($data['Site_Observation']);
+    } elseif (!empty($data['scope_of_work'])) {
+        $service_description = strip_tags($data['scope_of_work']);
+    } else {
+        $service_description = 'Professional service as per client requirements. All work performed to industry standards with quality assurance.';
+    }
     ?>
     <table class="services-table">
         <thead>
             <tr>
-                <th style="width: 25%;">Type of Services</th>
-                <th style="width: 12%;">Service Time</th>
-                <th style="width: 12%;">Frequency</th>
-                <th style="width: 36%;">Service Description</th>
+                <th style="width: 30%;">Type of Services</th>
+                <th style="width: 15%;">Terms</th>
+                <th style="width: 40%;">Service Description</th>
                 <th style="width: 15%;">SUBTOTAL</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td class="service-desc"><?php echo htmlspecialchars($data['Requested_Service'] ?? 'Window Cleaning'); ?></td>
-                <td><?php echo htmlspecialchars($data['Service_Duration'] ?? 'One Day'); ?></td>
-                <td><?php echo htmlspecialchars($data['Service_Frequency'] ?? 'One Time'); ?></td>
-                <td class="service-desc">
-                    <?php if (!empty($data['scope_of_work'])): ?>
-                        <?php echo strip_tags($data['scope_of_work']); ?>
-                    <?php else: ?>
-                        Interior cleaning of accessible glass surfaces, including windows, doors, and partitions, removing dust, fingerprints, and residue for a clean, streak-free finish.
-                    <?php endif; ?>
-                </td>
+                <td class="service-desc"><?php echo htmlspecialchars($data['Requested_Service'] ?? 'Service'); ?></td>
+                <td><?php echo $terms_text; ?></td>
+                <td class="service-desc"><?php echo $service_description; ?></td>
                 <td class="amount">$<?php echo number_format($subtotal, 2); ?></td>
             </tr>
         </tbody>
