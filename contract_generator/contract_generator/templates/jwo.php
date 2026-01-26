@@ -6,7 +6,7 @@
     <title>Job Work Order</title>
     <style>
         @page {
-            margin: 0.5in 0.5in 0.75in 0.5in;
+            margin: 1.5cm 1.5cm 2cm 1.5cm;
         }
 
         * {
@@ -64,44 +64,6 @@
             font-style: italic;
         }
 
-        /* Info Tables */
-        .info-section {
-            width: 100%;
-            margin-bottom: 15px;
-        }
-
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 10px;
-        }
-
-        .info-table td {
-            border: 1px solid #000;
-            padding: 6px 8px;
-            vertical-align: top;
-        }
-
-        .info-table .label {
-            font-weight: bold;
-            background-color: #f0f0f0;
-            width: 25%;
-        }
-
-        .info-table .value {
-            width: 75%;
-        }
-
-        .info-table .label-small {
-            font-weight: bold;
-            background-color: #f0f0f0;
-            width: 20%;
-        }
-
-        .info-table .value-small {
-            width: 30%;
-        }
-
         /* 7 Column Info Table - Invisible borders */
         .info-columns {
             width: 100%;
@@ -114,6 +76,7 @@
             padding: 4px 6px;
             vertical-align: top;
             border: none;
+            text-align: center;
         }
 
         .info-columns .col-header {
@@ -121,18 +84,20 @@
             text-transform: uppercase;
             font-size: 7pt;
             padding-bottom: 2px;
+            text-align: center;
         }
 
         .info-columns .col-content {
             font-size: 8pt;
             line-height: 1.4;
+            text-align: center;
         }
 
         /* Services Table */
         .services-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
 
         .services-table th {
@@ -156,9 +121,36 @@
             font-weight: bold;
         }
 
-        .services-table .total-row {
-            background-color: #f0f0f0;
+        /* Totals Summary Table */
+        .totals-table {
+            width: 250px;
+            border-collapse: collapse;
+            margin-left: auto;
+            margin-bottom: 15px;
+        }
+
+        .totals-table td {
+            border: 1px solid #000;
+            padding: 5px 10px;
+            font-size: 9pt;
+        }
+
+        .totals-table .label {
+            text-align: right;
             font-weight: bold;
+            background-color: #f0f0f0;
+        }
+
+        .totals-table .value {
+            text-align: right;
+            width: 100px;
+        }
+
+        .totals-table .total-header {
+            background-color: #8B1A1A;
+            color: white;
+            font-weight: bold;
+            text-align: center;
         }
 
         /* Scope Section */
@@ -176,7 +168,6 @@
         }
 
         .scope-content {
-            border: 1px solid #000;
             padding: 10px;
             background-color: #fff;
         }
@@ -185,7 +176,7 @@
             font-size: 9pt;
             font-weight: bold;
             margin: 8px 0 4px 0;
-            text-decoration: underline;
+            color: #8B1A1A;
         }
 
         .scope-content ul {
@@ -210,16 +201,14 @@
         }
 
         .req-box {
-            border: 2px solid #8B1A1A;
-            padding: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .req-title {
             color: #8B1A1A;
             font-weight: bold;
             font-size: 9pt;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .req-box ul {
@@ -227,40 +216,12 @@
         }
 
         .req-box li {
-            margin-bottom: 3px;
+            margin-bottom: 2px;
             font-size: 9pt;
         }
 
-        /* Signature Section */
-        .signature-section {
-            display: table;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .signature-box {
-            display: table-cell;
-            width: 48%;
-            border: 1px solid #000;
-            padding: 10px;
-            height: 80px;
-        }
-
-        .signature-box.right {
-            margin-left: 4%;
-        }
-
-        .sig-label {
-            font-weight: bold;
+        .req-box p {
             font-size: 9pt;
-            margin-bottom: 5px;
-        }
-
-        .sig-line {
-            border-top: 1px solid #000;
-            margin-top: 40px;
-            padding-top: 3px;
-            font-size: 8pt;
         }
 
         /* Footer */
@@ -318,13 +279,13 @@
     <!-- CLIENT & WORK INFO - 7 COLUMNS -->
     <table class="info-columns">
         <tr>
-            <td class="col-header" style="width: 18%;">BILL TO</td>
-            <td class="col-header" style="width: 16%;">WORK SITE</td>
-            <td class="col-header" style="width: 12%;">SALES PERSON</td>
-            <td class="col-header" style="width: 12%;">WORK DATE</td>
-            <td class="col-header" style="width: 14%;">DEPARTMENT</td>
-            <td class="col-header" style="width: 14%;">PAYMENT TERMS</td>
-            <td class="col-header" style="width: 14%;">W.O. NO.</td>
+            <td class="col-header" style="width: 14.28%;">BILL TO</td>
+            <td class="col-header" style="width: 14.28%;">WORK SITE</td>
+            <td class="col-header" style="width: 14.28%;">SALES PERSON</td>
+            <td class="col-header" style="width: 14.28%;">WORK DATE</td>
+            <td class="col-header" style="width: 14.28%;">DEPARTMENT</td>
+            <td class="col-header" style="width: 14.28%;">PAYMENT TERMS</td>
+            <td class="col-header" style="width: 14.28%;">W.O. NO.</td>
         </tr>
         <tr>
             <td class="col-content">
@@ -356,7 +317,7 @@
                     '50_deposit' => '50% Deposit',
                     'completion' => 'Upon Completion'
                 ];
-                echo htmlspecialchars($freq_map[$data['Invoice_Frequency'] ?? ''] ?? 'Upon Completion');
+                echo htmlspecialchars($freq_map[$data['Invoice_Frequency'] ?? ''] ?? ($data['Invoice_Frequency'] ?? ''));
                 ?>
             </td>
             <td class="col-content">
@@ -366,53 +327,67 @@
     </table>
 
     <!-- SERVICES TABLE -->
+    <?php
+    // Calculate totals
+    $subtotal = (float)($data['Total_Price'] ?? 0);
+    $tax_rate = 0.0825; // 8.25% Texas tax
+    $taxes = $subtotal * $tax_rate;
+    $grand_total = $subtotal + $taxes;
+    ?>
     <table class="services-table">
         <thead>
             <tr>
-                <th style="width: 30%;">Type of Services</th>
-                <th style="width: 10%;">Day</th>
+                <th style="width: 25%;">Type of Services</th>
+                <th style="width: 15%;">Service Time</th>
                 <th style="width: 15%;">Frequency</th>
-                <th style="width: 15%;">Duration</th>
-                <th style="width: 15%;">Amount per Service</th>
-                <th style="width: 15%;">TOTAL</th>
+                <th style="width: 30%;">Service Description</th>
+                <th style="width: 15%;">SUBTOTAL</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td style="text-align: left;"><?php echo htmlspecialchars($data['Requested_Service'] ?? 'Window Cleaning'); ?></td>
-                <td><?php echo htmlspecialchars($data['Service_Day'] ?? '1'); ?></td>
-                <td><?php echo htmlspecialchars($data['Service_Frequency'] ?? 'One Time'); ?></td>
-                <td><?php echo htmlspecialchars($data['Service_Duration'] ?? '4-5 Hours'); ?></td>
-                <td class="amount">$<?php echo number_format((float)($data['Total_Price'] ?? 0), 2); ?></td>
-                <td class="amount">$<?php echo number_format((float)($data['Total_Price'] ?? 0), 2); ?></td>
-            </tr>
-            <tr class="total-row">
-                <td colspan="5" style="text-align: right; padding-right: 10px;">TOTAL</td>
-                <td class="amount">$<?php echo number_format((float)($data['Total_Price'] ?? 0), 2); ?></td>
+                <td style="text-align: left;"><?php echo htmlspecialchars($data['Requested_Service'] ?? ''); ?></td>
+                <td><?php echo htmlspecialchars($data['Service_Duration'] ?? $data['Service_Day'] ?? ''); ?></td>
+                <td><?php echo htmlspecialchars($data['Service_Frequency'] ?? ''); ?></td>
+                <td style="text-align: left;"><?php echo htmlspecialchars($data['Service_Description'] ?? ($data['Requested_Service'] ? $data['Requested_Service'] . ' service at ' . ($data['Company_Name'] ?? 'location') . '.' : '')); ?></td>
+                <td class="amount">$<?php echo number_format($subtotal, 2); ?></td>
             </tr>
         </tbody>
     </table>
 
+    <!-- TOTALS SUMMARY TABLE -->
+    <table class="totals-table">
+        <tr>
+            <td class="total-header" colspan="2">TOTAL</td>
+        </tr>
+        <tr>
+            <td class="label">TOTAL</td>
+            <td class="value">$<?php echo number_format($subtotal, 2); ?></td>
+        </tr>
+        <tr>
+            <td class="label">TAXES</td>
+            <td class="value">$<?php echo number_format($taxes, 2); ?></td>
+        </tr>
+        <tr>
+            <td class="label">GRAND TOTAL</td>
+            <td class="value"><strong>$<?php echo number_format($grand_total, 2); ?></strong></td>
+        </tr>
+    </table>
+
     <!-- SCOPE OF WORK -->
     <div class="scope-section">
-        <div class="scope-header">SCOPE OF WORK - <?php echo strtoupper(htmlspecialchars($data['Requested_Service'] ?? 'SERVICE DESCRIPTION')); ?></div>
+        <div class="scope-header">SCOPE OF WORK &mdash; <?php echo strtoupper(htmlspecialchars($data['Requested_Service'] ?? 'SERVICE DESCRIPTION')); ?></div>
         <div class="scope-content">
-            <?php if (!empty($data['Site_Observation'])): ?>
-                <h4>Area to be Serviced (Measured Glass Panels):</h4>
-                <p><?php echo nl2br(htmlspecialchars($data['Site_Observation'])); ?></p>
-            <?php endif; ?>
-
             <h4>Work to be Performed:</h4>
             <?php if (!empty($data['scope_of_work'])): ?>
                 <?php echo $data['scope_of_work']; ?>
             <?php else: ?>
                 <ul>
-                    <li>Pre-cleaning and preparation of all exterior glass panels listed above</li>
-                    <li>Removal of fingerprints, dust, and any residues to ensure proper film adhesion</li>
-                    <li>Installation of window tint on doors, side panels, and upper transom window</li>
-                    <li>Removal of bubbles and inspection of adhesion during installation</li>
-                    <li>Cleaning of the work area to maintain a professional finish</li>
-                    <li>Final inspection to ensure an even and uniform appearance across the entire storefront</li>
+                    <li>Perform service as described above</li>
+                    <li>Follow all required safety procedures during the performance of the service</li>
+                    <li>Coordinate access and work conditions with the Client prior to service</li>
+                    <li>Perform a final inspection upon completion to confirm proper service delivery</li>
+                    <li>Leave the work area clean, safe, and ready for normal operations upon completion of the service</li>
                 </ul>
             <?php endif; ?>
 
@@ -423,75 +398,139 @@
         </div>
     </div>
 
-    <!-- PAGE 2: REQUIREMENTS -->
+    <!-- TERMS AND CONDITIONS -->
     <div class="requirements-section">
 
         <div class="req-box">
-            <div class="req-title">TAXES:</div>
+            <div class="req-title">TERMS AND CONDITIONS</div>
+        </div>
+
+        <div class="req-box">
+            <div class="req-title">1. SERVICE LIMITATIONS</div>
             <ul>
-                <li>Prices exclude Texas state tax (8.25%), which will be added to the final bill</li>
+                <li>Work will be performed during approved service windows.</li>
+                <li>Additional charges may apply for emergency service requests.</li>
+                <li>Separate scheduling is required for areas containing wood-burning equipment.</li>
             </ul>
         </div>
 
         <div class="req-box">
-            <div class="req-title">POST-SERVICE REQUIREMENTS:</div>
+            <div class="req-title">2. AREA PREPARATION</div>
             <ul>
-                <li>Client management must verify completion</li>
-                <li>Any concerns must be reported within 24 hours</li>
-                <li>Follow recommended maintenance schedule</li>
+                <li>All cooking equipment must be turned off at least two (2) hours before service.</li>
             </ul>
         </div>
 
         <div class="req-box">
-            <div class="req-title">SITE ACCESS REQUIREMENTS:</div>
-            <ul>
-                <li>Client must ensure the front parking area is clear or accessible for ladder placement</li>
-                <li>Access to water and power outlets if needed</li>
-                <li>All approved interior access as needed</li>
-                <li>Any obstructions near the glass (signs, displays, etc.) must be moved</li>
-            </ul>
-        </div>
-
-        <div class="req-box">
-            <div class="req-title">PREPARATION REQUIREMENTS:</div>
-            <ul>
-                <li>Remove posters, decals, or temporary signs from the glass (if requested)</li>
-                <li>Move items blocking the lower portion of the windows</li>
-                <li>Ensure exterior areas are safe for services and equipment</li>
-            </ul>
-        </div>
-
-        <div class="req-box">
-            <div class="req-title">PLEASE SEND TWO COPIES OF YOUR WORK ORDER:</div>
+            <div class="req-title">3. KITCHEN PREPARATION</div>
             <p style="margin-left: 15px; font-size: 9pt;">
-                Both copies should be signed with the prices, terms, and specifications.
+                The Client must ensure that the kitchen is ready for service, including:
+            </p>
+            <ul>
+                <li>Turning off all kitchen equipment and allowing it to cool completely</li>
+                <li>Removing food, utensils, and personal items from work surfaces</li>
+                <li>Keeping access areas clear for the cleaning crew</li>
+            </ul>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                Additional time caused by lack of preparation may be billed at <strong>$30.00 USD per hour</strong>.
             </p>
         </div>
 
         <div class="req-box">
-            <div class="req-title">SEND ALL CORRESPONDENCE TO:</div>
+            <div class="req-title">4. PROPOSAL VALIDITY PERIOD</div>
             <p style="margin-left: 15px; font-size: 9pt;">
-                <strong>Prime Facility Services Group, Inc</strong><br>
-                8303 Westglen Drive<br>
-                Houston, TX 77063
+                The proposal issued for this Work Order will be valid for fourteen (14) days from the date of issuance.
+                Prime Facility Services Group may revise pricing, scope, or terms if approval is not received within this period.
             </p>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                If actual site conditions differ from those observed during the initial inspection, a revised proposal may be issued.
+            </p>
+        </div>
+
+        <div class="req-box">
+            <div class="req-title">5. CANCELLATIONS</div>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                Cancellations made with less than twenty-four (24) hours' notice will incur a charge equal to one hundred percent (100%)
+                of the minimum scheduled labor.
+            </p>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                Cancellations made with more than twenty-four (24) hours' notice will not incur charges unless otherwise specified in the applicable price list.
+            </p>
+        </div>
+
+        <div class="req-box">
+            <div class="req-title">6. RESCHEDULING</div>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                Rescheduling requests must be submitted at least twenty-four (24) hours in advance. Requests made within 24 hours may incur a fee
+                of up to the total scheduled labor and are subject to personnel and equipment availability.
+            </p>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                Availability for rescheduled dates or times is not guaranteed.
+            </p>
+        </div>
+
+        <div class="req-box">
+            <div class="req-title">7. LACK OF ACCESS</div>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                If personnel arrive on site and are unable to begin work due to lack of access, incomplete area preparation, or delays caused by the Client,
+                the situation will be treated as a same-day cancellation and the corresponding charges will apply.
+            </p>
+        </div>
+
+        <div class="req-box">
+            <div class="req-title">8. WEATHER OR SAFETY DELAYS</div>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                If work cannot be safely performed due to weather conditions, hazardous environments, or other safety-related circumstances beyond the company's control,
+                the service will be rescheduled to the next available date.
+            </p>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                No penalties will apply; however, labor or material costs may be adjusted if conditions change significantly.
+            </p>
+        </div>
+
+        <div class="req-box">
+            <div class="req-title">9. POST-SERVICE REQUIREMENTS</div>
+            <ul>
+                <li>Kitchen management must verify completion.</li>
+                <li>Any concerns must be reported within twenty-four (24) hours.</li>
+                <li>Recommended maintenance schedules must be followed.</li>
+            </ul>
+        </div>
+
+        <div class="req-box">
+            <div class="req-title">10. SITE ACCESS AND SECURITY COORDINATION</div>
+            <ul>
+                <li>The Client must notify on-site security personnel or building management in advance that services will be performed.</li>
+                <li>
+                    If the service requires access to rooftops, ceilings, ventilation systems, or other restricted areas,
+                    the Client must ensure safe and full access.
+                </li>
+                <li>
+                    The Client must provide clear instructions and prior authorization to security or access-control personnel
+                    to allow entry for the service team.
+                </li>
+            </ul>
+        </div>
+
+        <!-- SIGNATURES -->
+        <div class="req-box">
+            <div class="req-title">ACCEPTANCE / SIGNATURES</div>
+
+            <p style="margin-left: 15px; font-size: 9pt; margin-top: 6px;">
+                <strong>Client Name (Print):</strong> _______________________________
+            </p>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                <strong>Client Signature:</strong> _________________________________
+                <span style="margin-left: 20px;"><strong>Date:</strong> _______________</span>
+            </p>
+
             <p style="margin-left: 15px; font-size: 9pt; margin-top: 10px;">
-                <strong>Email:</strong> customerservice@primefacilityservicesgroup.com<br>
-                <strong>Phone:</strong> (713) 338-2553<br>
-                <strong>Fax:</strong> 713-574-3065
+                <strong>Prime Facility Services Group, Inc.</strong>
             </p>
-        </div>
-
-        <!-- Signature Section -->
-        <div class="signature-section">
-            <div class="signature-box">
-                <div class="sig-label">Authorized by:</div>
-                <div class="sig-line">Signature & Date</div>
-            </div>
-            <div class="signature-box" style="margin-left: 20px;">
-                <div class="sig-label">Print Name:</div>
-                <div class="sig-line">Name & Title</div>
-            </div>
+            <p style="margin-left: 15px; font-size: 9pt;">
+                <strong>Authorized Signature:</strong> _____________________________
+                <span style="margin-left: 20px;"><strong>Date:</strong> _______________</span>
+            </p>
         </div>
 
     </div>
