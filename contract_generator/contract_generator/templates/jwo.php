@@ -32,60 +32,34 @@
 
         .header-left {
             display: table-cell;
-            width: 40%;
+            width: 45%;
             vertical-align: middle;
             padding: 10px 0;
         }
 
         .header-right {
             display: table-cell;
-            width: 60%;
+            width: 55%;
             vertical-align: middle;
-            text-align: right;
+            text-align: left;
             padding: 10px 0;
+            padding-left: 20px;
         }
 
-        .company-logo {
-            background-color: #8B1A1A;
-            color: white;
-            padding: 15px 20px;
-            display: inline-block;
-            position: relative;
-        }
-
-        .company-logo::after {
-            content: '';
-            position: absolute;
-            right: -20px;
-            top: 0;
-            width: 0;
-            height: 0;
-            border-left: 20px solid #8B1A1A;
-            border-top: 33px solid transparent;
-            border-bottom: 33px solid transparent;
-        }
-
-        .company-name {
-            font-size: 24pt;
-            font-weight: bold;
-            line-height: 1;
-            letter-spacing: 2px;
-        }
-
-        .company-tagline {
-            font-size: 7pt;
-            margin-top: 2px;
+        .company-logo img {
+            max-height: 70px;
+            width: auto;
         }
 
         .doc-title {
             color: #8B1A1A;
-            font-size: 18pt;
+            font-size: 26pt;
             font-weight: bold;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
         }
 
         .doc-subtitle {
-            font-size: 8pt;
+            font-size: 10pt;
             color: #000;
             font-style: italic;
         }
@@ -126,6 +100,32 @@
 
         .info-table .value-small {
             width: 30%;
+        }
+
+        /* 7 Column Info Table - Invisible borders */
+        .info-columns {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 8pt;
+        }
+
+        .info-columns td {
+            padding: 4px 6px;
+            vertical-align: top;
+            border: none;
+        }
+
+        .info-columns .col-header {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 7pt;
+            padding-bottom: 2px;
+        }
+
+        .info-columns .col-content {
+            font-size: 8pt;
+            line-height: 1.4;
         }
 
         /* Services Table */
@@ -288,8 +288,25 @@
     <div class="header">
         <div class="header-left">
             <div class="company-logo">
-                <div class="company-name">PRIME</div>
-                <div class="company-tagline">Facility Services Group</div>
+                <?php
+                // Determine logo based on Service_Type
+                $service_type = strtolower($data['Service_Type'] ?? 'facility');
+                $logo_file = (strpos($service_type, 'hospitality') !== false) ? 'Hospitality.png' : 'Facility.png';
+                $logo_path = __DIR__ . '/../../../Images/' . $logo_file;
+
+                // Convert to base64 for PDF embedding
+                if (file_exists($logo_path)) {
+                    $logo_data = base64_encode(file_get_contents($logo_path));
+                    $logo_mime = 'image/png';
+                    echo '<img src="data:' . $logo_mime . ';base64,' . $logo_data . '" alt="Prime Logo">';
+                } else {
+                    // Fallback text logo if image not found
+                    echo '<div style="background-color: #8B1A1A; color: white; padding: 15px 20px; display: inline-block;">
+                        <div style="font-size: 24pt; font-weight: bold; letter-spacing: 2px;">PRIME</div>
+                        <div style="font-size: 7pt; margin-top: 2px;">' . ($service_type === 'hospitality' ? 'Hospitality Services of Texas' : 'Facility Services Group') . '</div>
+                    </div>';
+                }
+                ?>
             </div>
         </div>
         <div class="header-right">
@@ -298,42 +315,40 @@
         </div>
     </div>
 
-    <!-- CLIENT & WORK INFO -->
-    <table class="info-table">
+    <!-- CLIENT & WORK INFO - 7 COLUMNS -->
+    <table class="info-columns">
         <tr>
-            <td class="label" rowspan="3" style="vertical-align: middle; text-align: center;">
-                <strong>BILL TO</strong>
-            </td>
-            <td class="value">
-                <strong><?php echo htmlspecialchars($data['Company_Name'] ?? 'N/A'); ?></strong><br>
-                <?php echo htmlspecialchars($data['Contact_Name'] ?? ''); ?><br>
-                <?php echo htmlspecialchars($data['Contact_Email'] ?? ''); ?><br>
-                <?php echo htmlspecialchars($data['Contact_Phone'] ?? ''); ?>
-            </td>
-        </tr>
-    </table>
-
-    <table class="info-table">
-        <tr>
-            <td class="label-small">Work Site</td>
-            <td class="value-small">
-                <?php
-                $address = trim(($data['Address'] ?? '') . ', ' . ($data['City'] ?? '') . ', ' . ($data['State'] ?? '') . ' ' . ($data['Zip_Code'] ?? ''), ', ');
-                echo htmlspecialchars($address ?: 'N/A');
-                ?>
-            </td>
-            <td class="label-small">Sales Person</td>
-            <td class="value-small"><?php echo htmlspecialchars($data['Sales_Person'] ?? 'N/A'); ?></td>
+            <td class="col-header" style="width: 18%;">BILL TO</td>
+            <td class="col-header" style="width: 16%;">WORK SITE</td>
+            <td class="col-header" style="width: 12%;">SALES PERSON</td>
+            <td class="col-header" style="width: 12%;">WORK DATE</td>
+            <td class="col-header" style="width: 14%;">DEPARTMENT</td>
+            <td class="col-header" style="width: 14%;">PAYMENT TERMS</td>
+            <td class="col-header" style="width: 14%;">W.O. NO.</td>
         </tr>
         <tr>
-            <td class="label-small">Work Date</td>
-            <td class="value-small"><?php echo htmlspecialchars($data['Work_Date'] ?? date('m/d/Y')); ?></td>
-            <td class="label-small">Department</td>
-            <td class="value-small"><?php echo htmlspecialchars($data['Service_Type'] ?? 'N/A'); ?></td>
-        </tr>
-        <tr>
-            <td class="label-small">Terms</td>
-            <td class="value-small">
+            <td class="col-content">
+                <?php echo htmlspecialchars($data['client_name'] ?? 'N/A'); ?><br>
+                <?php if (!empty($data['Client_Title'])): ?>
+                    <?php echo htmlspecialchars($data['Client_Title']); ?><br>
+                <?php endif; ?>
+                <?php echo htmlspecialchars($data['Email'] ?? ''); ?><br>
+                <?php echo htmlspecialchars($data['Number_Phone'] ?? ''); ?>
+            </td>
+            <td class="col-content">
+                <?php echo htmlspecialchars($data['Company_Name'] ?? 'N/A'); ?><br>
+                <?php echo htmlspecialchars($data['Company_Address'] ?? ''); ?>
+            </td>
+            <td class="col-content">
+                <?php echo htmlspecialchars($data['Seller'] ?? 'N/A'); ?>
+            </td>
+            <td class="col-content">
+                <?php echo date('m/d/Y'); ?>
+            </td>
+            <td class="col-content">
+                <?php echo htmlspecialchars($data['Service_Type'] ?? 'N/A'); ?>
+            </td>
+            <td class="col-content">
                 <?php
                 $freq_map = [
                     '15' => 'Net 15',
@@ -344,8 +359,9 @@
                 echo htmlspecialchars($freq_map[$data['Invoice_Frequency'] ?? ''] ?? 'Upon Completion');
                 ?>
             </td>
-            <td class="label-small">Work Order Number</td>
-            <td class="value-small"><strong><?php echo htmlspecialchars($data['docnum'] ?? 'DRAFT'); ?></strong></td>
+            <td class="col-content">
+                <strong><?php echo htmlspecialchars($data['docnum'] ?? ''); ?></strong>
+            </td>
         </tr>
     </table>
 
