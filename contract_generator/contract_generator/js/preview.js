@@ -115,7 +115,14 @@
         // Use Company_Address or fallback
         const address = data.Company_Address || 'N/A';
 
-        const totalPrice = formatPrice(data.Total_Price || data.Prime_Quoted_Price || data.PriceInput);
+        // Get total price with fallback chain (same as PDF)
+        const rawPrice = parseFloat(data.Total_Price || data.Prime_Quoted_Price || data.PriceInput || 0);
+        const totalPrice = formatPrice(rawPrice);
+
+        // Calculate taxes and grand total (same as PDF: 8.25%)
+        const taxRate = 0.0825;
+        const taxes = rawPrice * taxRate;
+        const grandTotal = rawPrice + taxes;
 
         const termsMap = {
             '15': 'Net 15',
@@ -133,7 +140,17 @@
         const seller = data.Seller || 'N/A';
         const isNewClient = data.Is_New_Client === 'Yes' ? ' (New Client)' : '';
 
-        // Build scope of work list
+        // Build service description (same logic as PDF)
+        let serviceDescription = '';
+        if (data.Site_Observation) {
+            serviceDescription = escapeHtml(data.Site_Observation);
+        } else if (data.Scope_Of_Work && Array.isArray(data.Scope_Of_Work) && data.Scope_Of_Work.length > 0) {
+            serviceDescription = data.Scope_Of_Work.map(item => escapeHtml(item)).join('. ');
+        } else {
+            serviceDescription = 'Professional service as per client requirements. All work performed to industry standards with quality assurance.';
+        }
+
+        // Build scope of work list for bottom section
         let scopeWorkHtml = '';
         if (data.Scope_Of_Work && Array.isArray(data.Scope_Of_Work) && data.Scope_Of_Work.length > 0) {
             scopeWorkHtml = '<ul>' + data.Scope_Of_Work.map(item => `<li>${escapeHtml(item)}</li>`).join('') + '</ul>';
@@ -164,21 +181,27 @@
                     .jwo-title p { font-size: 8pt; font-style: italic; margin: 5px 0 0 0; }
 
                     .jwo-info-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-                    .jwo-info-table td { border: 1px solid #333; padding: 8px; }
-                    .jwo-info-table .label { background: #f0f0f0; font-weight: bold; width: 25%; }
-                    .jwo-info-table .label-sm { background: #f0f0f0; font-weight: bold; width: 20%; }
+                    .jwo-info-table td { border: 1px solid #ccc; padding: 8px; }
+                    .jwo-info-table .label { background: #f5f5f5; font-weight: bold; width: 25%; }
+                    .jwo-info-table .label-sm { background: #f5f5f5; font-weight: bold; width: 15%; }
 
-                    .jwo-services { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+                    .jwo-services { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
                     .jwo-services th { background: #8B1A1A; color: white; padding: 8px;
-                                      border: 1px solid #333; font-size: 9pt; }
-                    .jwo-services td { border: 1px solid #333; padding: 6px 8px; text-align: center; }
+                                      border: 1px solid #000; font-size: 9pt; }
+                    .jwo-services td { border: 1px solid #000; padding: 6px 8px; text-align: center; }
+                    .jwo-services .service-desc { text-align: left; }
                     .jwo-services .amount { text-align: right; font-weight: bold; }
-                    .jwo-services .total-row { background: #f0f0f0; font-weight: bold; }
+
+                    .jwo-totals { width: 250px; margin-left: auto; margin-bottom: 15px; border-collapse: collapse; }
+                    .jwo-totals td { padding: 6px 10px; font-size: 9pt; }
+                    .jwo-totals .label-cell { text-align: right; font-weight: bold; }
+                    .jwo-totals .value-cell { text-align: right; border: 1px solid #000; width: 100px; }
+                    .jwo-totals .header-cell { background: #8B1A1A; color: white; font-weight: bold; text-align: center; }
 
                     .jwo-scope { margin-top: 15px; }
                     .jwo-scope-header { background: #8B1A1A; color: white; padding: 6px 10px;
                                        font-weight: bold; font-size: 9pt; margin-bottom: 8px; }
-                    .jwo-scope-content { border: 1px solid #333; padding: 10px; font-size: 9pt; }
+                    .jwo-scope-content { border: 1px solid #000; padding: 10px; font-size: 9pt; }
                     .jwo-scope-content h4 { font-size: 9pt; text-decoration: underline; margin: 8px 0 4px 0; }
                     .jwo-scope-content ul { margin-left: 20px; }
                     .jwo-scope-content li { margin-bottom: 3px; }
@@ -203,10 +226,10 @@
                             <strong>BILL TO</strong>
                         </td>
                         <td>
-                            <strong>${data.Company_Name || 'N/A'}${isNewClient}</strong><br>
-                            ${contactName}${contactTitle ? ' - ' + contactTitle : ''}<br>
-                            ${contactEmail}<br>
-                            ${contactPhone}
+                            <strong>${escapeHtml(data.Company_Name) || 'N/A'}${isNewClient}</strong><br>
+                            ${escapeHtml(contactName)}${contactTitle ? ' - ' + escapeHtml(contactTitle) : ''}<br>
+                            ${escapeHtml(contactEmail)}<br>
+                            ${escapeHtml(contactPhone)}
                         </td>
                     </tr>
                 </table>
@@ -215,15 +238,15 @@
                 <table class="jwo-info-table">
                     <tr>
                         <td class="label-sm">Work Site</td>
-                        <td style="width: 30%;">${address}</td>
+                        <td style="width: 35%;">${escapeHtml(address)}</td>
                         <td class="label-sm">Sales Person</td>
-                        <td style="width: 30%;">${seller}</td>
+                        <td style="width: 35%;">${escapeHtml(seller)}</td>
                     </tr>
                     <tr>
                         <td class="label-sm">Work Date</td>
                         <td>${data.Work_Date || new Date().toLocaleDateString()}</td>
                         <td class="label-sm">Department</td>
-                        <td>${data.Service_Type || 'N/A'}</td>
+                        <td>${escapeHtml(data.Service_Type) || 'N/A'}</td>
                     </tr>
                     <tr>
                         <td class="label-sm">Terms</td>
@@ -233,32 +256,44 @@
                     </tr>
                 </table>
 
-                <!-- Services -->
+                <!-- Services Table (matching PDF structure) -->
                 <table class="jwo-services">
                     <thead>
                         <tr>
                             <th style="width: 30%;">Type of Services</th>
-                            <th style="width: 10%;">Day</th>
-                            <th style="width: 15%;">Frequency</th>
-                            <th style="width: 15%;">Duration</th>
-                            <th style="width: 15%;">Amount per Service</th>
-                            <th style="width: 15%;">TOTAL</th>
+                            <th style="width: 15%;">Terms</th>
+                            <th style="width: 40%;">Service Description</th>
+                            <th style="width: 15%;">SUBTOTAL</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td style="text-align: left;">${data.Requested_Service || 'Service'}</td>
-                            <td>${data.Service_Day || '1'}</td>
-                            <td>${data.Service_Frequency || 'One Time'}</td>
-                            <td>${data.Service_Duration || '4-5 Hours'}</td>
-                            <td class="amount">$${totalPrice}</td>
-                            <td class="amount">$${totalPrice}</td>
-                        </tr>
-                        <tr class="total-row">
-                            <td colspan="5" style="text-align: right; padding-right: 10px;">TOTAL</td>
+                            <td class="service-desc">${escapeHtml(data.Requested_Service) || 'Service'}</td>
+                            <td>${terms}</td>
+                            <td class="service-desc">${serviceDescription}</td>
                             <td class="amount">$${totalPrice}</td>
                         </tr>
                     </tbody>
+                </table>
+
+                <!-- Totals Table (matching PDF structure) -->
+                <table class="jwo-totals">
+                    <tr>
+                        <td class="label-cell">TOTAL</td>
+                        <td class="value-cell header-cell">TOTAL</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">TOTAL</td>
+                        <td class="value-cell">$${totalPrice}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">TAXES</td>
+                        <td class="value-cell">$${formatPrice(taxes)}</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">GRAND TOTAL</td>
+                        <td class="value-cell">$${formatPrice(grandTotal)}</td>
+                    </tr>
                 </table>
 
                 <!-- Scope -->
@@ -285,8 +320,7 @@
                 <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border: 1px solid #ddd;
                             border-radius: 4px; text-align: center; font-size: 9pt; color: #666;">
                     <p style="margin: 0;">
-                        📄 <strong>Preview Mode</strong> - This is a simplified preview.
-                        The PDF will include additional pages with requirements and signature sections.
+                        This is a preview. The PDF includes Terms & Conditions and signature sections.
                     </p>
                 </div>
             </div>
