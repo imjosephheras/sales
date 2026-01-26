@@ -483,11 +483,11 @@ function formatCurrency($value) {
                 <i class="fas fa-download"></i>
                 Export CSV
             </button>
-            <button class="btn btn-secondary" onclick="window.print()">
-                <i class="fas fa-print"></i>
-                Print
-            </button>
-            <button class="btn btn-primary" onclick="location.reload()">
+            <a href="dashboard.php" class="btn btn-primary">
+                <i class="fas fa-chart-pie"></i>
+                Dashboard
+            </a>
+            <button class="btn btn-secondary" onclick="location.reload()">
                 <i class="fas fa-sync-alt"></i>
                 Refresh
             </button>

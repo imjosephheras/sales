@@ -125,42 +125,43 @@
             font-weight: bold;
         }
 
-        /* Totals Table - Right aligned */
+        /* Totals Table - Right aligned, 3 rows only */
         .totals-table {
-            width: 220px;
+            width: 250px;
             border-collapse: collapse;
             margin-left: auto;
             margin-bottom: 15px;
         }
 
         .totals-table td {
-            padding: 5px 10px;
+            padding: 6px 12px;
             font-size: 9pt;
             border: 1px solid #000;
         }
 
         .totals-table .label-cell {
-            text-align: right;
+            text-align: left;
             font-weight: bold;
             background-color: #f5f5f5;
             text-transform: uppercase;
+            width: 120px;
         }
 
         .totals-table .value-cell {
             text-align: right;
-            width: 100px;
+            width: 130px;
             background-color: #fff;
-        }
-
-        .totals-table .header-row .label-cell {
-            background-color: #8B1A1A;
-            color: white;
-        }
-
-        .totals-table .header-row .value-cell {
-            background-color: #8B1A1A;
-            color: white;
             font-weight: bold;
+        }
+
+        .totals-table tr:last-child .label-cell {
+            background-color: #8B1A1A;
+            color: white;
+        }
+
+        .totals-table tr:last-child .value-cell {
+            background-color: #8B1A1A;
+            color: white;
         }
 
         /* Scope Section */
@@ -358,17 +359,16 @@
 
     <!-- CLIENT & WORK INFO - 7 COLUMNS INVISIBLE -->
     <?php
-    // Prepare data
-    $client_name = htmlspecialchars($data['Contact_Name'] ?? 'N/A');
-    $client_title = htmlspecialchars($data['Contact_Title'] ?? '');
-    $client_email = htmlspecialchars($data['Contact_Email'] ?? 'N/A');
-    $client_phone = htmlspecialchars($data['Contact_Phone'] ?? 'N/A');
+    // Prepare data - using correct database field names
+    $client_name = htmlspecialchars($data['client_name'] ?? $data['Client_Name'] ?? 'N/A');
+    $client_title = htmlspecialchars($data['Client_Title'] ?? '');
+    $client_email = htmlspecialchars($data['Email'] ?? 'N/A');
+    $client_phone = htmlspecialchars($data['Number_Phone'] ?? 'N/A');
 
     $company_name = htmlspecialchars($data['Company_Name'] ?? 'N/A');
-    $address = trim(($data['Address'] ?? '') . ', ' . ($data['City'] ?? '') . ', ' . ($data['State'] ?? '') . ' ' . ($data['Zip_Code'] ?? ''), ', ');
-    $company_address = htmlspecialchars($address ?: 'N/A');
+    $company_address = htmlspecialchars($data['Company_Address'] ?? 'N/A');
 
-    $seller = htmlspecialchars($data['Sales_Person'] ?? 'N/A');
+    $seller = htmlspecialchars($data['Seller'] ?? 'N/A');
     $work_date = date('m/d/Y');
     $department = htmlspecialchars($data['Service_Type'] ?? 'N/A');
 
@@ -467,16 +467,12 @@
 
     <!-- TOTALS TABLE -->
     <table class="totals-table">
-        <tr class="header-row">
-            <td class="label-cell">TOTAL</td>
-            <td class="value-cell">TOTAL</td>
-        </tr>
         <tr>
             <td class="label-cell">TOTAL</td>
             <td class="value-cell">$<?php echo number_format($subtotal, 2); ?></td>
         </tr>
         <tr>
-            <td class="label-cell">TAXES</td>
+            <td class="label-cell">TAXES (8.25%)</td>
             <td class="value-cell">$<?php echo number_format($taxes, 2); ?></td>
         </tr>
         <tr>
