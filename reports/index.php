@@ -42,7 +42,7 @@ $stmt = $pdo->query("
         order_number,
         Order_Nomenclature,
         created_at
-    FROM requests
+    FROM forms
     ORDER BY created_at DESC
 ");
 $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);

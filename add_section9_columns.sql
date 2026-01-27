@@ -7,22 +7,22 @@
 USE `form`;
 
 -- Add Document Date column (Q30)
-ALTER TABLE `requests`
+ALTER TABLE `forms`
   ADD COLUMN `Document_Date` DATE DEFAULT NULL COMMENT 'Fecha del documento (Q30)' AFTER `photos`;
 
 -- Add Work Date column (Q31)
-ALTER TABLE `requests`
+ALTER TABLE `forms`
   ADD COLUMN `Work_Date` DATE DEFAULT NULL COMMENT 'Fecha del trabajo (Q31)' AFTER `Document_Date`;
 
 -- Add Order Number (1000-9999, reusable when deleted)
-ALTER TABLE `requests`
+ALTER TABLE `forms`
   ADD COLUMN `order_number` INT DEFAULT NULL COMMENT 'Order number 1000-9999, reusable' AFTER `Work_Date`;
 
 -- Add Order Nomenclature (auto-generated)
-ALTER TABLE `requests`
+ALTER TABLE `forms`
   ADD COLUMN `Order_Nomenclature` VARCHAR(50) DEFAULT NULL COMMENT 'Auto-generated: [ST][RT]-[OrderNum][MMDDYYYY]' AFTER `order_number`;
 
 -- Add indexes
-ALTER TABLE `requests`
+ALTER TABLE `forms`
   ADD INDEX `idx_order_number` (`order_number`),
   ADD INDEX `idx_nomenclature` (`Order_Nomenclature`);
