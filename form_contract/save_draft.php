@@ -58,6 +58,10 @@ try {
             email_information_sent = :email_information_sent,
             seller = :seller,
             include_staff = :include_staff,
+            Document_Date = :document_date,
+            Work_Date = :work_date,
+            order_number = :order_number,
+            Order_Nomenclature = :order_nomenclature,
             status = :status,
             updated_at = NOW()
         WHERE form_id = :form_id";
@@ -75,6 +79,7 @@ try {
             inflation_adjustment, total_area, buildings_included, start_date_services,
             site_observation, additional_comments, email_information_sent,
             seller, include_staff,
+            Document_Date, Work_Date, order_number, Order_Nomenclature,
             status, submitted_by, created_at
         ) VALUES (
             :service_type, :request_type, :priority, :requested_service,
@@ -84,6 +89,7 @@ try {
             :inflation_adjustment, :total_area, :buildings_included, :start_date_services,
             :site_observation, :additional_comments, :email_information_sent,
             :seller, :include_staff,
+            :document_date, :work_date, :order_number, :order_nomenclature,
             :status, :submitted_by, NOW()
         )";
         
@@ -135,9 +141,63 @@ try {
     $stmt->bindValue(':additional_comments', emptyToNull($_POST['Additional_Comments'] ?? null));
     $stmt->bindValue(':email_information_sent', emptyToNull($_POST['Email_Information_Sent'] ?? null));
     
+    // Section 9: Document & Work Dates
+    $document_date_val = emptyToNull($_POST['Document_Date'] ?? null);
+    $work_date_val = emptyToNull($_POST['Work_Date'] ?? null);
+
+    // Generate order number for new drafts
+    $order_number_val = null;
+    $nomenclature_val = null;
+    if (!$form_id) {
+        // New form - generate order number
+        $stmtNums = $pdo->query("SELECT order_number FROM forms WHERE order_number IS NOT NULL ORDER BY order_number ASC");
+        $usedNumbers = $stmtNums->fetchAll(PDO::FETCH_COLUMN);
+        $usedSet = array_flip($usedNumbers);
+        for ($i = 1000; $i <= 9999; $i++) {
+            if (!isset($usedSet[(string)$i])) {
+                $order_number_val = $i;
+                break;
+            }
+        }
+        if ($order_number_val === null) $order_number_val = 1000;
+    } else {
+        // Existing form - keep existing order number
+        $stmtExisting = $pdo->prepare("SELECT order_number FROM forms WHERE form_id = ?");
+        $stmtExisting->execute([$form_id]);
+        $order_number_val = $stmtExisting->fetchColumn() ?: null;
+        if ($order_number_val === null) {
+            $stmtNums = $pdo->query("SELECT order_number FROM forms WHERE order_number IS NOT NULL ORDER BY order_number ASC");
+            $usedNumbers = $stmtNums->fetchAll(PDO::FETCH_COLUMN);
+            $usedSet = array_flip($usedNumbers);
+            for ($i = 1000; $i <= 9999; $i++) {
+                if (!isset($usedSet[(string)$i])) {
+                    $order_number_val = $i;
+                    break;
+                }
+            }
+            if ($order_number_val === null) $order_number_val = 1000;
+        }
+    }
+
+    // Build nomenclature
+    $st_val = $_POST['Service_Type'] ?? '';
+    $rt_val = $_POST['Request_Type'] ?? '';
+    if (!empty($document_date_val) && !empty($st_val) && !empty($rt_val) && $order_number_val) {
+        $st_initial = strtoupper($st_val[0]);
+        $rt_initial = strtoupper($rt_val[0]);
+        $dateParts = explode('-', $document_date_val);
+        $dateFormatted = $dateParts[1] . $dateParts[2] . $dateParts[0];
+        $nomenclature_val = $st_initial . $rt_initial . '-' . $order_number_val . $dateFormatted;
+    }
+
+    $stmt->bindValue(':document_date', $document_date_val);
+    $stmt->bindValue(':work_date', $work_date_val);
+    $stmt->bindValue(':order_number', $order_number_val);
+    $stmt->bindValue(':order_nomenclature', $nomenclature_val);
+
     // Status
     $stmt->bindValue(':status', $status);
-    
+
     $stmt->execute();
     
     // Get the form_id
