@@ -56,6 +56,25 @@ body {
   margin: 0 auto;
 }
 
+.home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.2s;
+  margin-right: 12px;
+}
+
+.home-btn:hover {
+  background: rgba(255,255,255,0.3);
+}
+
 .logo-section {
   display: flex;
   align-items: center;
