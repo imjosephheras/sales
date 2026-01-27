@@ -147,6 +147,10 @@ $scope_of_work = isset($_POST['Scope_Of_Work'])
                  ? implode(', ', $_POST['Scope_Of_Work']) 
                  : '';
 
+// SECTION 9 — Document & Work Dates
+$document_date = $_POST['Document_Date'] ?? '';
+$work_date     = $_POST['Work_Date']     ?? '';
+
 // SECTION 8 — PHOTOS
 $photos = $_FILES['photos'] ?? null;
 
@@ -223,6 +227,40 @@ try {
     // Convert empty date to null for startDateServices (DATE column)
     $start_date_services_db = emptyToNull($start_date_services);
 
+    // Convert empty dates to null for Document_Date and Work_Date
+    $document_date_db = emptyToNull($document_date);
+    $work_date_db     = emptyToNull($work_date);
+
+    // =============================================
+    // GENERATE ORDER NUMBER & NOMENCLATURE
+    // =============================================
+    // Order number: 1000-9999, reuses gaps from deleted records
+    $stmtNums = $pdo->query("SELECT order_number FROM requests WHERE order_number IS NOT NULL ORDER BY order_number ASC");
+    $usedNumbers = $stmtNums->fetchAll(PDO::FETCH_COLUMN);
+    $usedSet = array_flip($usedNumbers);
+
+    $order_number = null;
+    for ($i = 1000; $i <= 9999; $i++) {
+        if (!isset($usedSet[(string)$i])) {
+            $order_number = $i;
+            break;
+        }
+    }
+    if ($order_number === null) {
+        $order_number = 1000; // wrap around
+    }
+
+    // Build nomenclature: [ServiceTypeInitial][RequestTypeInitial]-[OrderNumber][MMDDYYYY]
+    $st_initial = !empty($service_type) ? strtoupper($service_type[0]) : 'X';
+    $rt_initial = !empty($request_type) ? strtoupper($request_type[0]) : 'X';
+
+    $nomenclature = '';
+    if (!empty($document_date)) {
+        $dateParts = explode('-', $document_date); // yyyy-mm-dd
+        $dateFormatted = $dateParts[1] . $dateParts[2] . $dateParts[0]; // MMDDYYYY
+        $nomenclature = $st_initial . $rt_initial . '-' . $order_number . $dateFormatted;
+    }
+
     // Insert into database
     $stmt = $pdo->prepare("
         INSERT INTO requests (
@@ -240,6 +278,7 @@ try {
             inflationAdjustment, totalArea, buildingsIncluded, startDateServices,
             Site_Observation, Additional_Comments, Email_Information_Sent,
             Scope_Of_Work, photos,
+            Document_Date, Work_Date, order_number, Order_Nomenclature,
             status
         ) VALUES (
             :service_type, :request_type, :priority, :requested_service,
@@ -256,6 +295,7 @@ try {
             :inflation_adjustment, :total_area, :buildings_included, :start_date_services,
             :site_observation, :additional_comments, :email_info_sent,
             :scope_of_work, :photos,
+            :document_date, :work_date, :order_number, :order_nomenclature,
             'pending'
         )
     ");
@@ -313,7 +353,11 @@ try {
         ':additional_comments' => $additional_comments,
         ':email_info_sent' => $email_info_sent,
         ':scope_of_work' => $scope_json,
-        ':photos' => $photos_json
+        ':photos' => $photos_json,
+        ':document_date' => $document_date_db,
+        ':work_date' => $work_date_db,
+        ':order_number' => $order_number,
+        ':order_nomenclature' => emptyToNull($nomenclature)
     ]);
 
     $request_id = $pdo->lastInsertId();

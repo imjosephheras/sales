@@ -104,6 +104,14 @@ CREATE TABLE IF NOT EXISTS `requests` (
   `photos` TEXT DEFAULT NULL COMMENT 'JSON array of photo paths',
 
   -- ========================
+  -- SECTION 9: Document & Work Dates
+  -- ========================
+  `Document_Date` DATE DEFAULT NULL COMMENT 'Fecha del documento (Q30)',
+  `Work_Date` DATE DEFAULT NULL COMMENT 'Fecha del trabajo (Q31)',
+  `order_number` INT DEFAULT NULL COMMENT 'Order number 1000-9999, reusable',
+  `Order_Nomenclature` VARCHAR(50) DEFAULT NULL COMMENT 'Auto-generated: [ST][RT]-[OrderNum][MMDDYYYY]',
+
+  -- ========================
   -- Status & Metadata
   -- ========================
   `status` VARCHAR(50) DEFAULT 'pending' COMMENT 'pending, in_progress, completed',
@@ -115,7 +123,9 @@ CREATE TABLE IF NOT EXISTS `requests` (
   INDEX `idx_status` (`status`),
   INDEX `idx_company` (`Company_Name`),
   INDEX `idx_service_type` (`Service_Type`),
-  INDEX `idx_created` (`created_at`)
+  INDEX `idx_created` (`created_at`),
+  INDEX `idx_order_number` (`order_number`),
+  INDEX `idx_nomenclature` (`Order_Nomenclature`)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

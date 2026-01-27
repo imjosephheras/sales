@@ -37,6 +37,10 @@ $stmt = $pdo->query("
         startDateServices,
         Site_Observation,
         Additional_Comments,
+        Document_Date,
+        Work_Date,
+        order_number,
+        Order_Nomenclature,
         created_at
     FROM requests
     ORDER BY created_at DESC
@@ -65,7 +69,11 @@ $columns = [
     'Buildings Included' => 'buildingsIncluded',
     'Start Date' => 'startDateServices',
     'Site Observation' => 'Site_Observation',
-    'Additional Comments' => 'Additional_Comments'
+    'Additional Comments' => 'Additional_Comments',
+    'Document Date' => 'Document_Date',
+    'Work Date' => 'Work_Date',
+    'Order #' => 'order_number',
+    'Nomenclature' => 'Order_Nomenclature'
 ];
 
 // Helper function to calculate totals from sections 18 and 19
