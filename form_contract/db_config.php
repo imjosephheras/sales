@@ -144,6 +144,37 @@ function initializeFormsTable($pdo) {
       INDEX `idx_form_id` (`form_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
+        // Add missing columns to existing forms table
+    addMissingColumnsToForms($pdo);
+}
+ 
+/**
+ * Add missing columns to existing forms table (handles upgrades)
+ */
+function addMissingColumnsToForms($pdo) {
+    $columnsToAdd = [
+        'Document_Date'       => 'DATE DEFAULT NULL',
+        'Work_Date'           => 'DATE DEFAULT NULL',
+        'order_number'        => 'INT DEFAULT NULL',
+        'Order_Nomenclature'  => 'VARCHAR(100) DEFAULT NULL',
+        'payment_terms'       => 'VARCHAR(100) DEFAULT NULL',
+        'contact_name'        => 'VARCHAR(100) DEFAULT NULL',
+        'city'                => 'VARCHAR(100) DEFAULT NULL',
+        'state'               => 'VARCHAR(100) DEFAULT NULL',
+        'submitted_by'        => 'VARCHAR(100) DEFAULT NULL',
+        'include_staff'       => 'VARCHAR(10) DEFAULT NULL',
+    ];
+ 
+    try {
+        foreach ($columnsToAdd as $col => $definition) {
+            $stmt = $pdo->query("SHOW COLUMNS FROM `forms` LIKE '$col'");
+            if ($stmt->rowCount() == 0) {
+                $pdo->exec("ALTER TABLE `forms` ADD COLUMN `$col` $definition");
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Error adding missing columns to forms: " . $e->getMessage());
+    }
 }
 
 /**
