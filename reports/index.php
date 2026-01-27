@@ -13,30 +13,25 @@ $pdo = getDBConnection();
 // Fetch all requests
 $stmt = $pdo->query("
     SELECT
-        Service_Type,
-        Request_Type,
-        Requested_Service,
+        service_type,
+        request_type,
+        requested_service,
         client_name,
-        Client_Title,
-        Email,
-        Number_Phone,
-        Company_Name,
-        Company_Address,
-        Invoice_Frequency,
-        Contract_Duration,
-        Seller,
-        total18,
-        taxes18,
-        grand18,
-        total19,
-        taxes19,
-        grand19,
-        inflationAdjustment,
-        totalArea,
-        buildingsIncluded,
-        startDateServices,
-        Site_Observation,
-        Additional_Comments,
+        contact_name,
+        email,
+        phone,
+        company_name,
+        address,
+        invoice_frequency,
+        contract_duration,
+        seller,
+        total_cost,
+        inflation_adjustment,
+        total_area,
+        buildings_included,
+        start_date_services,
+        site_observation,
+        additional_comments,
         Document_Date,
         Work_Date,
         order_number,
@@ -49,48 +44,30 @@ $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Column definitions (question -> database field)
 $columns = [
-    'Service Type' => 'Service_Type',
-    'Request Type' => 'Request_Type',
-    'Requested Service' => 'Requested_Service',
+    'Service Type' => 'service_type',
+    'Request Type' => 'request_type',
+    'Requested Service' => 'requested_service',
     'Client Name' => 'client_name',
-    'Client Title' => 'Client_Title',
-    'Email' => 'Email',
-    'Phone Number' => 'Number_Phone',
-    'Company Name' => 'Company_Name',
-    'Company Address' => 'Company_Address',
-    'Invoice Frequency' => 'Invoice_Frequency',
-    'Contract Duration' => 'Contract_Duration',
-    'Seller' => 'Seller',
-    'Total' => 'calculated_total',
-    'Taxes (8.25%)' => 'calculated_taxes',
-    'Grand Total' => 'calculated_grand',
-    'Inflation Adjustment' => 'inflationAdjustment',
-    'Total Area (sq ft)' => 'totalArea',
-    'Buildings Included' => 'buildingsIncluded',
-    'Start Date' => 'startDateServices',
-    'Site Observation' => 'Site_Observation',
-    'Additional Comments' => 'Additional_Comments',
+    'Contact Name' => 'contact_name',
+    'Email' => 'email',
+    'Phone Number' => 'phone',
+    'Company Name' => 'company_name',
+    'Address' => 'address',
+    'Invoice Frequency' => 'invoice_frequency',
+    'Contract Duration' => 'contract_duration',
+    'Seller' => 'seller',
+    'Total Cost' => 'total_cost',
+    'Inflation Adjustment' => 'inflation_adjustment',
+    'Total Area (sq ft)' => 'total_area',
+    'Buildings Included' => 'buildings_included',
+    'Start Date' => 'start_date_services',
+    'Site Observation' => 'site_observation',
+    'Additional Comments' => 'additional_comments',
     'Document Date' => 'Document_Date',
     'Work Date' => 'Work_Date',
     'Order #' => 'order_number',
     'Nomenclature' => 'Order_Nomenclature'
 ];
-
-// Helper function to calculate totals from sections 18 and 19
-function calculateTotals($row) {
-    $total18 = floatval(str_replace(['$', ','], '', $row['total18'] ?? '0'));
-    $total19 = floatval(str_replace(['$', ','], '', $row['total19'] ?? '0'));
-    $taxes18 = floatval(str_replace(['$', ','], '', $row['taxes18'] ?? '0'));
-    $taxes19 = floatval(str_replace(['$', ','], '', $row['taxes19'] ?? '0'));
-    $grand18 = floatval(str_replace(['$', ','], '', $row['grand18'] ?? '0'));
-    $grand19 = floatval(str_replace(['$', ','], '', $row['grand19'] ?? '0'));
-
-    return [
-        'total' => $total18 + $total19,
-        'taxes' => $taxes18 + $taxes19,
-        'grand' => $grand18 + $grand19
-    ];
-}
 
 // Format currency
 function formatCurrency($value) {
@@ -525,38 +502,27 @@ function formatCurrency($value) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($requests as $index => $row):
-                            $totals = calculateTotals($row);
-                        ?>
+                        <?php foreach ($requests as $index => $row): ?>
                             <tr>
                                 <td class="row-num"><?= $index + 1 ?></td>
                                 <?php foreach ($columns as $label => $field): ?>
                                     <?php
-                                    // Handle calculated fields
-                                    if ($field === 'calculated_total') {
-                                        $value = formatCurrency($totals['total']);
-                                        $cellClass = 'cell-currency';
-                                    } elseif ($field === 'calculated_taxes') {
-                                        $value = formatCurrency($totals['taxes']);
-                                        $cellClass = 'cell-currency';
-                                    } elseif ($field === 'calculated_grand') {
-                                        $value = formatCurrency($totals['grand']);
-                                        $cellClass = 'cell-currency';
-                                    } else {
-                                        $value = $row[$field] ?? '';
-                                        $cellClass = '';
+                                    $value = $row[$field] ?? '';
+                                    $cellClass = '';
 
-                                        // Apply specific cell types
-                                        if ($field === 'Email') {
-                                            $cellClass = 'cell-email';
-                                        } elseif ($field === 'Number_Phone') {
-                                            $cellClass = 'cell-phone';
-                                        } elseif ($field === 'startDateServices') {
-                                            $cellClass = 'cell-date';
-                                            if ($value) {
-                                                $date = new DateTime($value);
-                                                $value = $date->format('M d, Y');
-                                            }
+                                    // Apply specific cell types
+                                    if ($field === 'total_cost') {
+                                        $cellClass = 'cell-currency';
+                                        if ($value) $value = formatCurrency(floatval(str_replace(['$', ','], '', $value)));
+                                    } elseif ($field === 'email') {
+                                        $cellClass = 'cell-email';
+                                    } elseif ($field === 'phone') {
+                                        $cellClass = 'cell-phone';
+                                    } elseif ($field === 'start_date_services' || $field === 'Document_Date' || $field === 'Work_Date') {
+                                        $cellClass = 'cell-date';
+                                        if ($value) {
+                                            $date = new DateTime($value);
+                                            $value = $date->format('M d, Y');
                                         }
                                     }
 
