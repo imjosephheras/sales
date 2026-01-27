@@ -10,6 +10,143 @@ define('DB_USER', 'root');  // ← CAMBIAR SEGÚN TU USUARIO
 define('DB_PASS', '');      // ← CAMBIAR SEGÚN TU CONTRASEÑA
 
 /**
+ * Initialize the forms table and related tables used by form_contract module
+ */
+function initializeFormsTable($pdo) {
+    // Main forms table
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `forms` (
+      `form_id` INT AUTO_INCREMENT PRIMARY KEY,
+
+      -- SECTION 1: Request Information
+      `service_type` VARCHAR(100) DEFAULT NULL,
+      `request_type` VARCHAR(100) DEFAULT NULL,
+      `priority` VARCHAR(50) DEFAULT NULL,
+      `requested_service` VARCHAR(200) DEFAULT NULL,
+
+      -- SECTION 2: Client Information
+      `client_name` VARCHAR(200) DEFAULT NULL,
+      `contact_name` VARCHAR(100) DEFAULT NULL,
+      `email` VARCHAR(200) DEFAULT NULL,
+      `phone` VARCHAR(50) DEFAULT NULL,
+      `company_name` VARCHAR(200) DEFAULT NULL,
+      `address` TEXT DEFAULT NULL,
+      `city` VARCHAR(100) DEFAULT NULL,
+      `state` VARCHAR(100) DEFAULT NULL,
+      `is_new_client` VARCHAR(10) DEFAULT NULL,
+
+      -- SECTION 3: Operational Details
+      `site_visit_conducted` VARCHAR(10) DEFAULT NULL,
+      `invoice_frequency` VARCHAR(50) DEFAULT NULL,
+      `contract_duration` VARCHAR(100) DEFAULT NULL,
+
+      -- SECTION 4: Economic Information
+      `seller` VARCHAR(100) DEFAULT NULL,
+      `total_cost` DECIMAL(12,2) DEFAULT NULL,
+      `payment_terms` VARCHAR(100) DEFAULT NULL,
+      `include_staff` VARCHAR(10) DEFAULT NULL,
+
+      -- SECTION 5: Contract Information
+      `inflation_adjustment` VARCHAR(50) DEFAULT NULL,
+      `total_area` VARCHAR(100) DEFAULT NULL,
+      `buildings_included` TEXT DEFAULT NULL,
+      `start_date_services` DATE DEFAULT NULL,
+
+      -- SECTION 6: Observations
+      `site_observation` TEXT DEFAULT NULL,
+      `additional_comments` TEXT DEFAULT NULL,
+      `email_information_sent` TEXT DEFAULT NULL,
+
+      -- SECTION 9: Document & Work Dates
+      `Document_Date` DATE DEFAULT NULL,
+      `Work_Date` DATE DEFAULT NULL,
+      `order_number` INT DEFAULT NULL,
+      `Order_Nomenclature` VARCHAR(100) DEFAULT NULL,
+
+      -- Status & Metadata
+      `status` VARCHAR(50) DEFAULT 'pending',
+      `submitted_by` VARCHAR(100) DEFAULT NULL,
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+      INDEX `idx_status` (`status`),
+      INDEX `idx_company` (`company_name`),
+      INDEX `idx_order_number` (`order_number`),
+      INDEX `idx_created` (`created_at`)
+
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // Scope of work tasks
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `scope_of_work` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `form_id` INT NOT NULL,
+      `task_name` VARCHAR(255) DEFAULT NULL,
+      INDEX `idx_form_id` (`form_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // Janitorial services costs (Section 18)
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `janitorial_services_costs` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `form_id` INT NOT NULL,
+      `service_number` INT DEFAULT NULL,
+      `service_type` VARCHAR(200) DEFAULT NULL,
+      `service_time` VARCHAR(100) DEFAULT NULL,
+      `frequency` VARCHAR(100) DEFAULT NULL,
+      `description` TEXT DEFAULT NULL,
+      `subtotal` DECIMAL(12,2) DEFAULT NULL,
+      INDEX `idx_form_id` (`form_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // Kitchen cleaning costs (Section 19)
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `kitchen_cleaning_costs` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `form_id` INT NOT NULL,
+      `service_number` INT DEFAULT NULL,
+      `service_type` VARCHAR(200) DEFAULT NULL,
+      `service_time` VARCHAR(100) DEFAULT NULL,
+      `frequency` VARCHAR(100) DEFAULT NULL,
+      `description` TEXT DEFAULT NULL,
+      `subtotal` DECIMAL(12,2) DEFAULT NULL,
+      INDEX `idx_form_id` (`form_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // Hood vent costs (Section 19)
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `hood_vent_costs` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `form_id` INT NOT NULL,
+      `service_number` INT DEFAULT NULL,
+      `service_type` VARCHAR(200) DEFAULT NULL,
+      `service_time` VARCHAR(100) DEFAULT NULL,
+      `frequency` VARCHAR(100) DEFAULT NULL,
+      `description` TEXT DEFAULT NULL,
+      `subtotal` DECIMAL(12,2) DEFAULT NULL,
+      INDEX `idx_form_id` (`form_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // Form photos (Section 8)
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `form_photos` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `form_id` INT NOT NULL,
+      `photo_filename` VARCHAR(255) DEFAULT NULL,
+      `photo_path` VARCHAR(500) DEFAULT NULL,
+      `photo_size` INT DEFAULT NULL,
+      `photo_type` VARCHAR(100) DEFAULT NULL,
+      INDEX `idx_form_id` (`form_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+}
+
+/**
  * Initialize the requests table if it doesn't exist
  */
 function initializeRequestsTable($pdo) {
@@ -151,7 +288,8 @@ function getDBConnection() {
             ]
         );
 
-        // Initialize requests table if it doesn't exist
+        // Initialize tables if they don't exist
+        initializeFormsTable($pdo);
         initializeRequestsTable($pdo);
 
         return $pdo;
