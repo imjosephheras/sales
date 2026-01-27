@@ -77,6 +77,11 @@
             box-shadow: 0 4px 15px rgba(26,95,26,0.35);
         }
 
+        .btn-billing {
+            background: linear-gradient(135deg, #6f42c1, #8257d8);
+            box-shadow: 0 4px 15px rgba(111,66,193,0.35);
+        }
+
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.35);
@@ -130,6 +135,10 @@
 
     <a href="reports/" class="btn btn-reports">
         <span>📋</span> Reports
+    </a>
+
+    <a href="billing/" class="btn btn-billing">
+        <span>💰</span> Billing / Accounting
     </a>
 
 </div>
