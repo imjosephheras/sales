@@ -88,9 +88,9 @@
                 <div class="doc-section">
                     <h2>Client Information</h2>
                     <p><strong>Company Name:</strong> ${data.Company_Name || 'N/A'}</p>
-                    <p><strong>Contact:</strong> ${data.Contact_Name || 'N/A'}</p>
-                    <p><strong>Email:</strong> ${data.Contact_Email || 'N/A'}</p>
-                    <p><strong>Phone:</strong> ${data.Contact_Phone || 'N/A'}</p>
+                    <p><strong>Client Name:</strong> ${data.client_name || data.Client_Name || 'N/A'}</p>
+                    <p><strong>Email:</strong> ${data.Email || 'N/A'}</p>
+                    <p><strong>Phone:</strong> ${data.Number_Phone || 'N/A'}</p>
                 </div>
 
                 <div class="doc-section">

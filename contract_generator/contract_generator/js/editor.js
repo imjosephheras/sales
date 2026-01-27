@@ -334,6 +334,7 @@
                             <span class="service-type">${escapeHtml(type)}</span>
                             <span class="service-detail">${escapeHtml(times[i] || '')}</span>
                             <span class="service-detail">${escapeHtml(freqs[i] || '')}</span>
+                            <span class="service-desc">${escapeHtml(descs[i] || '')}</span>
                             <span class="service-price">$${subtotals[i] || '0.00'}</span>
                         </div>
                     `;
@@ -383,6 +384,7 @@
                             <span class="service-type">${escapeHtml(type)}</span>
                             <span class="service-detail">${escapeHtml(times[i] || '')}</span>
                             <span class="service-detail">${escapeHtml(freqs[i] || '')}</span>
+                            <span class="service-desc">${escapeHtml(descs[i] || '')}</span>
                             <span class="service-price">$${subtotals[i] || '0.00'}</span>
                         </div>
                     `;
