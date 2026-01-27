@@ -865,6 +865,15 @@ $lang = $_SESSION["lang"] ?? "en";
       <?php include 'form_part8_photo.php'; ?>
     </div>
 
+    <!-- 📅 SECTION 9 (DATES & NOMENCLATURE) -->
+    <div class="section-title collapsible" data-section="9">
+      <?= ($lang=='en') ? "Section 9: Document & Work Dates" : "Sección 9: Fechas de Documento y Trabajo"; ?>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content hidden" data-section-content="9">
+      <?php include 'form_part9_dates.php'; ?>
+    </div>
+
     <!-- 📋 Botón principal -->
     <div class="form-actions">
       <button type="button" id="btnSaveDraft" class="btn-draft">
