@@ -13,17 +13,12 @@ $pdo = getDBConnection();
 // Fetch all requests for analytics
 $stmt = $pdo->query("
     SELECT
-        id,
-        Request_Type,
-        Requested_Service,
-        total18,
-        taxes18,
-        grand18,
-        total19,
-        taxes19,
-        grand19,
+        form_id,
+        request_type,
+        requested_service,
+        total_cost,
         created_at
-    FROM requests
+    FROM forms
     ORDER BY created_at DESC
 ");
 $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -35,9 +30,7 @@ function parseCurrency($value) {
 
 // Calculate totals for each request
 function getRequestTotal($row) {
-    $grand18 = parseCurrency($row['grand18']);
-    $grand19 = parseCurrency($row['grand19']);
-    return $grand18 + $grand19;
+    return parseCurrency($row['total_cost']);
 }
 
 // Prepare data for analytics
@@ -78,14 +71,14 @@ foreach ($requests as $row) {
     $salesByYear[$yearKey]['count']++;
 
     // Request types
-    $type = $row['Request_Type'] ?: 'Unknown';
+    $type = $row['request_type'] ?: 'Unknown';
     if (!isset($requestTypes[$type])) {
         $requestTypes[$type] = 0;
     }
     $requestTypes[$type]++;
 
     // Requested services
-    $service = $row['Requested_Service'] ?: 'Unknown';
+    $service = $row['requested_service'] ?: 'Unknown';
     if (!isset($requestServices[$service])) {
         $requestServices[$service] = 0;
     }
