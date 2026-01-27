@@ -12,7 +12,7 @@ try {
     $pdo = getDBConnection();
 
     // Get all currently used order numbers
-    $stmt = $pdo->query("SELECT order_number FROM requests WHERE order_number IS NOT NULL ORDER BY order_number ASC");
+    $stmt = $pdo->query("SELECT order_number FROM forms WHERE order_number IS NOT NULL ORDER BY order_number ASC");
     $used = $stmt->fetchAll(PDO::FETCH_COLUMN);
     $usedSet = array_flip($used);
 

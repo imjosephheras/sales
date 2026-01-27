@@ -397,7 +397,7 @@
                 </table>
 
                 <!-- SERVICES TABLE - Exact match to PDF -->
-                <table class="jwo-services-exact">
+                <table class="jwo-services-exact">  
                     <thead>
                         <tr>
                             <th style="width: 25%;">TYPE OF SERVICES</th>

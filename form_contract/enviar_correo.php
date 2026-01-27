@@ -235,7 +235,7 @@ try {
     // GENERATE ORDER NUMBER & NOMENCLATURE
     // =============================================
     // Order number: 1000-9999, reuses gaps from deleted records
-    $stmtNums = $pdo->query("SELECT order_number FROM requests WHERE order_number IS NOT NULL ORDER BY order_number ASC");
+    $stmtNums = $pdo->query("SELECT order_number FROM forms WHERE order_number IS NOT NULL ORDER BY order_number ASC");
     $usedNumbers = $stmtNums->fetchAll(PDO::FETCH_COLUMN);
     $usedSet = array_flip($usedNumbers);
 
@@ -263,7 +263,7 @@ try {
 
     // Insert into database
     $stmt = $pdo->prepare("
-        INSERT INTO requests (
+        INSERT INTO forms (
             Service_Type, Request_Type, Priority, Requested_Service,
             client_name, Client_Title, Email, Number_Phone,
             Company_Name, Company_Address, Is_New_Client,
