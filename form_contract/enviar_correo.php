@@ -313,7 +313,13 @@ try {
         ':invoice_frequency' => $invoice_frequency,
         ':contract_duration' => $contract_duration,
         ':seller' => $Seller,
-        ':total_cost' => emptyToNull($PriceInput),
+        ':total_cost' => (function() use ($PriceInput, $grand18, $grand19) {
+            $p = floatval(str_replace(['$', ','], '', $PriceInput ?: '0'));
+            $g18 = floatval(str_replace(['$', ','], '', $grand18 ?: '0'));
+            $g19 = floatval(str_replace(['$', ','], '', $grand19 ?: '0'));
+            $sum = $p + $g18 + $g19;
+            return $sum > 0 ? $sum : null;
+        })(),
         ':include_staff' => $includeStaff,
         ':inflation_adjustment' => emptyToNull($inflation_adjustment),
         ':total_area' => emptyToNull($total_area),

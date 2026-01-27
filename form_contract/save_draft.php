@@ -125,7 +125,12 @@ try {
     
     // Section 4: Economic Information
     // ⚠️ CRÍTICO: Campos DECIMAL deben ser NULL si están vacíos
-    $stmt->bindValue(':total_cost', emptyToNull($_POST['PriceInput'] ?? null));
+    // Calculate total_cost as sum of PriceInput + grand18 (Janitorial) + grand19 (Kitchen/Hood Vent)
+    $priceInput = floatval(str_replace(['$', ','], '', $_POST['PriceInput'] ?? '0'));
+    $grand18 = floatval(str_replace(['$', ','], '', $_POST['grand18'] ?? '0'));
+    $grand19 = floatval(str_replace(['$', ','], '', $_POST['grand19'] ?? '0'));
+    $calculatedTotalCost = $priceInput + $grand18 + $grand19;
+    $stmt->bindValue(':total_cost', $calculatedTotalCost > 0 ? $calculatedTotalCost : null);
     $stmt->bindValue(':payment_terms', emptyToNull($_POST['payment_terms'] ?? null));
     $stmt->bindValue(':seller', emptyToNull($_POST['Seller'] ?? null));
     $stmt->bindValue(':include_staff', emptyToNull($_POST['includeStaff'] ?? null));
