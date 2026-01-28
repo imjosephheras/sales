@@ -17,9 +17,10 @@ $stmt = $pdo->query("
         request_type,
         requested_service,
         total_cost,
-        created_at
+        created_at,
+        Work_Date
     FROM forms
-    ORDER BY created_at DESC
+    ORDER BY Work_Date DESC, created_at DESC
 ");
 $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -42,7 +43,9 @@ $requestServices = [];
 
 foreach ($requests as $row) {
     $total = getRequestTotal($row);
-    $date = new DateTime($row['created_at']);
+    // Use Work_Date if available, otherwise fallback to created_at
+    $dateValue = !empty($row['Work_Date']) ? $row['Work_Date'] : $row['created_at'];
+    $date = new DateTime($dateValue);
 
     // Sales by week (ISO week)
     $weekKey = $date->format('Y-W');
