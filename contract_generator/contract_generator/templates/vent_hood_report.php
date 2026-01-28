@@ -20,7 +20,6 @@ if (file_exists($logo_path)) {
 
 // Get data from request
 $work_order = $data['docnum'] ?? '';
-$invoice_number = $data['docnum'] ?? '';
 $service_date = date('m/d/Y');
 $next_service_date = '';
 $frequency = '';
@@ -28,9 +27,7 @@ $frequency = '';
 // Client info from database
 $client_name = $data['Company_Name'] ?? '';
 $client_address = $data['Company_Address'] ?? '';
-$client_city_state_zip = '';
 $client_contact = $data['Client_Name'] ?? '';
-$client_phone = $data['Number_Phone'] ?? '';
 $client_email = $data['Email'] ?? '';
 ?>
 <!DOCTYPE html>
@@ -450,10 +447,6 @@ $client_email = $data['Email'] ?? '';
                             <div class="info-cell info-label">Address:</div>
                             <div class="info-cell info-value"><?php echo htmlspecialchars($client_address); ?></div>
                         </div>
-                        <div class="info-row">
-                            <div class="info-cell info-label">City / State / ZIP:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($client_city_state_zip); ?></div>
-                        </div>
                     </div>
                 </div>
                 <div class="column">
@@ -461,10 +454,6 @@ $client_email = $data['Email'] ?? '';
                         <div class="info-row">
                             <div class="info-cell info-label">Contact Person:</div>
                             <div class="info-cell info-value"><?php echo htmlspecialchars($client_contact); ?></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-cell info-label">Site Phone:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($client_phone); ?></div>
                         </div>
                         <div class="info-row">
                             <div class="info-cell info-label">Email:</div>
