@@ -115,6 +115,7 @@ $client_email = $data['Email'] ?? '';
             border: 1px solid #ddd;
             border-radius: 5px;
             overflow: hidden;
+            page-break-inside: avoid;
         }
 
         .section-header {
@@ -198,6 +199,7 @@ $client_email = $data['Email'] ?? '';
             width: 100%;
             border-collapse: collapse;
             margin: 5px 0;
+            page-break-inside: avoid;
         }
 
         .checklist-table th,
@@ -242,6 +244,7 @@ $client_email = $data['Email'] ?? '';
             display: table;
             width: 100%;
             margin-top: 15px;
+            page-break-inside: avoid;
         }
 
         .signature-box {
@@ -312,6 +315,7 @@ $client_email = $data['Email'] ?? '';
             background: white;
             border: 1px solid #eee;
             border-radius: 4px;
+            page-break-inside: avoid;
         }
 
         .sub-section-title {
@@ -401,10 +405,6 @@ $client_email = $data['Email'] ?? '';
                             <div class="info-cell info-value"><?php echo htmlspecialchars($work_order); ?></div>
                         </div>
                         <div class="info-row">
-                            <div class="info-cell info-label">Invoice #:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($invoice_number); ?></div>
-                        </div>
-                        <div class="info-row">
                             <div class="info-cell info-label">Service Date:</div>
                             <div class="info-cell info-value"><?php echo htmlspecialchars($service_date); ?></div>
                         </div>
@@ -471,14 +471,14 @@ $client_email = $data['Email'] ?? '';
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
-                    <div class="checkbox-item">&square; Main Hood (Campana principal)</div>
-                    <div class="checkbox-item">&square; Extraction Ducts (Ductos de extraccion)</div>
-                    <div class="checkbox-item">&square; Roof Fan (Ventilador en techo)</div>
+                    <div class="checkbox-item">Main Hood (Campana principal)</div>
+                    <div class="checkbox-item">Extraction Ducts (Ductos de extraccion)</div>
+                    <div class="checkbox-item">Roof Fan (Ventilador en techo)</div>
                 </div>
                 <div class="column">
-                    <div class="checkbox-item">&square; Grease Gutter</div>
-                    <div class="checkbox-item">&square; Fire System (inspection only)</div>
-                    <div class="checkbox-item">&square; Other: _______________________</div>
+                    <div class="checkbox-item">Grease Gutter</div>
+                    <div class="checkbox-item">Fire System (inspection only)</div>
+                    <div class="checkbox-item">Other: _______________________</div>
                 </div>
             </div>
         </div>
@@ -545,16 +545,16 @@ $client_email = $data['Email'] ?? '';
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
-                    <div class="checkbox-item">&square; Complete hood cleaning</div>
-                    <div class="checkbox-item">&square; Filter cleaning</div>
-                    <div class="checkbox-item">&square; Duct cleaning</div>
-                    <div class="checkbox-item">&square; Extractor/fan cleaning</div>
+                    <div class="checkbox-item">Complete hood cleaning</div>
+                    <div class="checkbox-item">Filter cleaning</div>
+                    <div class="checkbox-item">Duct cleaning</div>
+                    <div class="checkbox-item">Extractor/fan cleaning</div>
                 </div>
                 <div class="column">
-                    <div class="checkbox-item">&square; Grease gutter cleaning</div>
-                    <div class="checkbox-item">&square; Kitchen area cleaning (affected)</div>
-                    <div class="checkbox-item">&square; Sticker placed on site</div>
-                    <div class="checkbox-item">&square; Before/after photos taken</div>
+                    <div class="checkbox-item">Grease gutter cleaning</div>
+                    <div class="checkbox-item">Kitchen area cleaning (affected)</div>
+                    <div class="checkbox-item">Sticker placed on site</div>
+                    <div class="checkbox-item">Before/after photos taken</div>
                 </div>
             </div>
         </div>
@@ -597,9 +597,6 @@ $client_email = $data['Email'] ?? '';
             </table>
         </div>
     </div>
-
-    <!-- PAGE BREAK -->
-    <div class="page-break"></div>
 
     <!-- 7. INSPECCION DE TECHO (ROOF INSPECTION) -->
     <div class="section">
@@ -720,12 +717,12 @@ $client_email = $data['Email'] ?? '';
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
-                    <div class="checkbox-item">&square; Before photos taken</div>
-                    <div class="checkbox-item">&square; After photos taken</div>
+                    <div class="checkbox-item">Before photos taken</div>
+                    <div class="checkbox-item">After photos taken</div>
                 </div>
                 <div class="column">
-                    <div class="checkbox-item">&square; Roof photos taken</div>
-                    <div class="checkbox-item">&square; Sticker placement photos taken</div>
+                    <div class="checkbox-item">Roof photos taken</div>
+                    <div class="checkbox-item">Sticker placement photos taken</div>
                 </div>
             </div>
             <p style="margin-top: 10px; font-size: 9px; color: #666; font-style: italic;">(Attach in PDF or folder)</p>
