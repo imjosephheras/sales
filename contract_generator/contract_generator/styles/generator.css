@@ -819,6 +819,18 @@ body {
   color: white;
 }
 
+.btn-vent-hood {
+  background: linear-gradient(135deg, #e65100 0%, #ff9800 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  margin-right: 1rem;
+}
+
+.btn-vent-hood:hover {
+  background: linear-gradient(135deg, #bf360c 0%, #e65100 100%);
+}
+
 /* Editor form section */
 .editor-form-section {
   flex: 1;
