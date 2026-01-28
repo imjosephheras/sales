@@ -583,52 +583,47 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 7. INSPECCION DE TECHO (ROOF INSPECTION) -->
+    <!-- ROOF INSPECTION -->
     <div class="section">
-        <div class="section-header">7. ROOF INSPECTION</div>
+        <div class="section-header">ROOF INSPECTION</div>
         <div class="section-content">
-
-            <div class="sub-section">
-                <div class="sub-section-title">7.1 Grease on Roof</div>
-                <p>Is there grease accumulation on the roof? <span class="inline-checkbox">&square; Yes</span> <span class="inline-checkbox">&square; No</span></p>
-                <p style="margin-top: 5px;">If yes, describe: _______________________________________________</p>
-            </div>
-
-            <div class="sub-section">
-                <div class="sub-section-title">7.2 Problem Severity</div>
-                <p>Is it a severe problem? <span class="inline-checkbox">&square; Yes</span> <span class="inline-checkbox">&square; No</span></p>
-            </div>
-
-
-            <div class="sub-section">
-                <div class="sub-section-title">7.4 Grease Absorption Units</div>
-                <p>Is there an installed system?</p>
-                <div style="margin-top: 5px;">
-                    <span class="inline-checkbox">&square; Rock Box</span>
-                    <span class="inline-checkbox">&square; Grease Guard</span>
-                    <span class="inline-checkbox">&square; Grease Gutter</span>
-                    <span class="inline-checkbox">&square; Other: _________</span>
-                    <span class="inline-checkbox">&square; None</span>
-                </div>
-            </div>
-
-            <div class="sub-section">
-                <div class="sub-section-title">7.5 Preventive Recommendation</div>
-                <p>Is absorption unit installation recommended? <span class="inline-checkbox">&square; Yes</span> <span class="inline-checkbox">&square; No</span></p>
-            </div>
-
-            <div class="sub-section">
-                <div class="sub-section-title">7.6 Existing Damage</div>
-                <p>Is there roof damage from grease? <span class="inline-checkbox">&square; Yes</span> <span class="inline-checkbox">&square; No</span></p>
-                <p style="margin-top: 5px;">If yes, describe and attach photos: ________________________________</p>
-            </div>
-
+            <table class="checklist-table">
+                <thead>
+                    <tr>
+                        <th>Element</th>
+                        <th class="center">Yes</th>
+                        <th class="center">No</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Grease accumulation on roof?</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <tr>
+                        <td>Is it a severe problem?</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <tr>
+                        <td>Absorption unit installation recommended?</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <tr>
+                        <td>Roof damage from grease?</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- 8. DATOS TECNICOS DEL SISTEMA -->
+    <!-- 7. DATOS TECNICOS DEL SISTEMA -->
     <div class="section">
-        <div class="section-header">8. TECHNICAL SYSTEM DATA</div>
+        <div class="section-header">7. TECHNICAL SYSTEM DATA</div>
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
@@ -660,9 +655,9 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 9. TIEMPOS DEL SERVICIO -->
+    <!-- 8. TIEMPOS DEL SERVICIO -->
     <div class="section">
-        <div class="section-header">9. SERVICE TIMES</div>
+        <div class="section-header">8. SERVICE TIMES</div>
         <div class="section-content">
             <div class="time-section">
                 <div class="time-box">
@@ -677,9 +672,9 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 10. NOTAS DEL TECNICO / OBSERVACIONES -->
+    <!-- 9. NOTAS DEL TECNICO / OBSERVACIONES -->
     <div class="section">
-        <div class="section-header">10. TECHNICIAN NOTES / OBSERVATIONS</div>
+        <div class="section-header">9. TECHNICIAN NOTES / OBSERVATIONS</div>
         <div class="section-content">
             <div class="notes-area" style="min-height: 80px;">
 
@@ -689,9 +684,9 @@ $client_email = $data['Email'] ?? '';
 
 
 
-    <!-- 12. FIRMAS Y CONFIRMACION -->
+    <!-- 10. FIRMAS Y CONFIRMACION -->
     <div class="section">
-        <div class="section-header">12. SIGNATURES AND CONFIRMATION</div>
+        <div class="section-header">10. SIGNATURES AND CONFIRMATION</div>
         <div class="section-content">
             <div class="signature-section">
                 <div class="signature-box">
