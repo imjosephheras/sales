@@ -409,22 +409,7 @@ $client_email = $data['Email'] ?? '';
                             <div class="info-cell info-value"><?php echo htmlspecialchars($service_date); ?></div>
                         </div>
                     </div>
-                </div>
-                <div class="column">
-                    <div class="info-grid">
-                        <div class="info-row">
-                            <div class="info-cell info-label">Next Service Date:</div>
-                            <div class="info-cell info-value">____/____/______</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-cell info-label">Frequency:</div>
-                            <div class="info-cell info-value">
-                                <span class="inline-checkbox">&square; 30 days</span>
-                                <span class="inline-checkbox">&square; 60 days</span>
-                                <span class="inline-checkbox">&square; 90 days</span>
-                                <span class="inline-checkbox">&square; 120 days</span>
-                                <span class="inline-checkbox">&square; Other: ____</span>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -614,11 +599,6 @@ $client_email = $data['Email'] ?? '';
                 <p>Is it a severe problem? <span class="inline-checkbox">&square; Yes</span> <span class="inline-checkbox">&square; No</span></p>
             </div>
 
-            <div class="sub-section">
-                <div class="sub-section-title">7.3 Roof Drainage</div>
-                <p>Is there adequate drainage? <span class="inline-checkbox">&square; Yes</span> <span class="inline-checkbox">&square; No</span></p>
-                <p style="margin-top: 5px;">If no, recommended corrections: _________________________________</p>
-            </div>
 
             <div class="sub-section">
                 <div class="sub-section-title">7.4 Grease Absorption Units</div>
@@ -693,10 +673,6 @@ $client_email = $data['Email'] ?? '';
                     <div class="time-value"></div>
                     <div class="time-label">TIME OUT (Hora de salida)</div>
                 </div>
-                <div class="time-box">
-                    <div class="time-value"></div>
-                    <div class="time-label">TOTAL HOURS (Total horas)</div>
-                </div>
             </div>
         </div>
     </div>
@@ -711,23 +687,7 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 11. FOTOS -->
-    <div class="section">
-        <div class="section-header">11. PHOTOS</div>
-        <div class="section-content">
-            <div class="two-columns">
-                <div class="column">
-                    <div class="checkbox-item">Before photos taken</div>
-                    <div class="checkbox-item">After photos taken</div>
-                </div>
-                <div class="column">
-                    <div class="checkbox-item">Roof photos taken</div>
-                    <div class="checkbox-item">Sticker placement photos taken</div>
-                </div>
-            </div>
-            <p style="margin-top: 10px; font-size: 9px; color: #666; font-style: italic;">(Attach in PDF or folder)</p>
-        </div>
-    </div>
+
 
     <!-- 12. FIRMAS Y CONFIRMACION -->
     <div class="section">
