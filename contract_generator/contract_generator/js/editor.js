@@ -24,6 +24,12 @@
         document.getElementById('btn-mark-ready').addEventListener('click', markAsReady);
         document.getElementById('btn-download-pdf').addEventListener('click', downloadPDF);
 
+        // Event listener para botón de Vent Hood Report
+        const ventHoodBtn = document.getElementById('btn-vent-hood-report');
+        if (ventHoodBtn) {
+            ventHoodBtn.addEventListener('click', downloadVentHoodReport);
+        }
+
         // Event listener para refresh preview button
         const refreshBtn = document.getElementById('btn-refresh-preview');
         if (refreshBtn) {
@@ -503,7 +509,7 @@
 
     function downloadPDF() {
         const requestId = document.getElementById('request_id').value;
-        
+
         if (!requestId) {
             alert('No request selected');
             return;
@@ -511,6 +517,22 @@
 
         // Abrir en nueva ventana
         window.open(`controllers/generate_pdf.php?id=${requestId}`, '_blank');
+    }
+
+    // ========================================
+    // DESCARGAR VENT HOOD REPORT PDF
+    // ========================================
+
+    function downloadVentHoodReport() {
+        const requestId = document.getElementById('request_id').value;
+
+        if (!requestId) {
+            alert('Please select a request first to generate the Vent Hood Report');
+            return;
+        }
+
+        // Abrir en nueva ventana
+        window.open(`controllers/generate_vent_hood_report.php?id=${requestId}`, '_blank');
     }
 
     // ========================================

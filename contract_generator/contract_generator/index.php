@@ -39,6 +39,9 @@ $current_user = $_SESSION['user_name'] ?? 'Admin';
                 <h1>Contract Generator</h1>
             </div>
             <div class="user-section">
+                <button id="btn-vent-hood-report" class="btn btn-vent-hood" title="Generar Reporte Vent Hoods">
+                    <i class="fas fa-file-pdf"></i> Reporte Vent Hoods
+                </button>
                 <i class="fas fa-user-circle"></i>
                 <span><?php echo htmlspecialchars($current_user); ?></span>
             </div>
