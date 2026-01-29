@@ -85,6 +85,15 @@ $before_photos = processPhotos($before, $upload_dir);
 $after_photos  = processPhotos($after,  $upload_dir);
 
 // =====================================
+//  LOGO BASE64 PARA PDF
+// =====================================
+$logo_path = __DIR__ . '/Images/Facility.png';
+$logo_base64 = '';
+if (file_exists($logo_path)) {
+    $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_path));
+}
+
+// =====================================
 //  GENERAR HTML PARA PDF
 // =====================================
 ob_start();
@@ -96,22 +105,29 @@ ob_start();
 <style>
 body { font-family: Arial, sans-serif; }
 
-h1 { text-align:center; color:#a30000; margin-bottom:5px; }
+.logo-container {
+    text-align: center;
+    margin-bottom: 15px;
+}
+.logo-container img {
+    max-width: 200px;
+    height: auto;
+}
+
+h1 { text-align:center; color:#a30000; margin-bottom:5px; margin-top: 10px; }
 h3 { text-align:center; margin-top:5px; }
-h2 { 
-  color:#a30000; 
-  margin-top:25px; 
-  border-bottom:1px solid #ddd; 
-  padding-bottom:5px; 
+h2 {
+  color:#a30000;
+  margin-top:25px;
+  border-bottom:1px solid #ddd;
+  padding-bottom:5px;
 }
 
 .template-box {
-    background: #f7f7f7;
     padding: 12px;
     margin-top:20px;
-    border-left: 4px solid #a30000;
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 /* TABLA DE FOTOS */
@@ -139,10 +155,10 @@ h2 {
 }
 
 .photo-table img {
-    width: 100%;
-    height: auto;
-    max-height: 200px;
-    object-fit: contain;
+    width: auto;
+    max-width: 140px;
+    height: 200px;
+    object-fit: cover;
 }
 
 .photo-row {
@@ -153,6 +169,13 @@ h2 {
 </head>
 
 <body>
+
+<!-- LOGO -->
+<div class="logo-container">
+    <?php if ($logo_base64): ?>
+        <img src="<?= $logo_base64 ?>" alt="Prime Facility Services Logo">
+    <?php endif; ?>
+</div>
 
 <h1>Employee Work Report</h1>
 <h3>JWO #: <?= htmlspecialchars($jwo_number) ?></h3>
