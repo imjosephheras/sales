@@ -202,11 +202,13 @@ document.addEventListener("DOMContentLoaded", () => {
         before: "<?= $t['wr_before'] ?? 'Before' ?>",
         after: "<?= $t['wr_after'] ?? 'After' ?>",
         plus: "<?= $t['wr_plus'] ?? '+' ?>",
-        photosSelected: "<?= $t['wr_photos_selected'] ?? 'photos selected' ?>"
+        photosSelected: "<?= $t['wr_photos_selected'] ?? 'photos selected' ?>",
+        maxPhotosReached: "<?= $t['wr_max_photos_reached'] ?? 'Maximum 100 photos allowed' ?>"
     };
 
     // Store bulk uploaded files
     let bulkFiles = [];
+    const MAX_PHOTOS = 100;
 
     // ==========================================
     // BEFORE & AFTER MODE FUNCTIONS
@@ -298,7 +300,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     bulkPhotoInput.addEventListener("change", () => {
         const newFiles = Array.from(bulkPhotoInput.files);
-        bulkFiles = bulkFiles.concat(newFiles);
+
+        // Check if adding new files would exceed the limit
+        const remainingSlots = MAX_PHOTOS - bulkFiles.length;
+        if (remainingSlots <= 0) {
+            alert(labels.maxPhotosReached);
+            return;
+        }
+
+        // Only add files up to the limit
+        const filesToAdd = newFiles.slice(0, remainingSlots);
+        if (filesToAdd.length < newFiles.length) {
+            alert(labels.maxPhotosReached + " (" + (newFiles.length - filesToAdd.length) + " photos not added)");
+        }
+
+        bulkFiles = bulkFiles.concat(filesToAdd);
         renderBulkPhotos();
         updateFileInput();
     });
@@ -329,7 +345,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Update count
         if (bulkFiles.length > 0) {
-            photosCountEl.textContent = bulkFiles.length + " " + labels.photosSelected;
+            photosCountEl.textContent = bulkFiles.length + " / " + MAX_PHOTOS + " " + labels.photosSelected;
+            if (bulkFiles.length >= MAX_PHOTOS) {
+                photosCountEl.style.color = "#a30000";
+                photosCountEl.style.fontWeight = "bold";
+            } else {
+                photosCountEl.style.color = "#666";
+                photosCountEl.style.fontWeight = "normal";
+            }
         } else {
             photosCountEl.textContent = "";
         }

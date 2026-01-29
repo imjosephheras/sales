@@ -85,6 +85,10 @@ function processPhotos($files, $upload_dir) {
 $before_photos = processPhotos($before, $upload_dir);
 $after_photos  = processPhotos($after,  $upload_dir);
 
+// Process all_photos for bulk upload mode (option 2)
+$all_photos_input = $_FILES['all_photos'] ?? null;
+$bulk_photos = processPhotos($all_photos_input, $upload_dir);
+
 // Get action type (print_only or send)
 $action = $_POST['action'] ?? 'send';
 
@@ -157,10 +161,17 @@ if ($report_type === 'all_photos') {
     // =====================================
     // REPORT TYPE 2: ALL PHOTOS GRID (max 20 per page)
     // =====================================
-    $all_photos = array_merge($before_photos, $after_photos);
+    // Use bulk photos if available, otherwise merge before/after
+    $all_photos = count($bulk_photos) > 0 ? $bulk_photos : array_merge($before_photos, $after_photos);
+
+    // Limit to 100 photos maximum
+    if (count($all_photos) > 100) {
+        $all_photos = array_slice($all_photos, 0, 100);
+    }
+
     $photos_per_page = 20;
     $photos_per_row = 4;
-    $total_pages = ceil(count($all_photos) / $photos_per_page);
+    $total_pages = max(1, ceil(count($all_photos) / $photos_per_page));
 
     ?>
 <html>
@@ -196,19 +207,46 @@ if ($report_type === 'all_photos') {
 .page-break {
     page-break-after: always;
 }
+.content-wrapper {
+    padding-bottom: 25mm;
+}
 </style>
 </head>
 <body>
 
+<!-- Fixed Footer - appears on every page -->
 <div class="footer">
     <span class="company-name">Prime Facility Services</span><br>
     Service Completion Photo Report - JWO #<?= htmlspecialchars($jwo_number) ?>
 </div>
 
+<div class="content-wrapper">
 <?php
     $photo_index = 0;
     $page_num = 1;
 
+    if (count($all_photos) === 0):
+?>
+<!-- NO PHOTOS - Show message -->
+<div class="logo-container">
+    <?php if ($logo_base64): ?>
+        <img src="<?= $logo_base64 ?>" alt="Prime Facility Services Logo">
+    <?php endif; ?>
+</div>
+
+<h1>Service Completion Photo Report</h1>
+<h3>JWO #: <?= htmlspecialchars($jwo_number) ?></h3>
+
+<div class="template-box">
+<b>This document contains photographic evidence captured by our field team in connection with the assigned Job Work Order (JWO).</b><br><br>
+This report has been prepared to support transparency, quality assurance, and accurate documentation of the services performed.
+</div>
+
+<h2>Photo Evidence</h2>
+<p style="text-align: center; color: #666; padding: 40px;">No photos were uploaded for this report.</p>
+
+<?php
+    else:
     while ($photo_index < count($all_photos)):
         $photos_on_page = array_slice($all_photos, $photo_index, $photos_per_page);
 ?>
@@ -265,7 +303,9 @@ This report has been prepared to support transparency, quality assurance, and ac
 <?php
         endif;
     endwhile;
+    endif;
 ?>
+</div><!-- end content-wrapper -->
 
 </body>
 </html>
@@ -316,15 +356,21 @@ This report has been prepared to support transparency, quality assurance, and ac
 .photo-row {
     page-break-inside: avoid;
 }
+
+.content-wrapper {
+    padding-bottom: 25mm;
+}
 </style>
 </head>
 <body>
 
+<!-- Fixed Footer - appears on every page -->
 <div class="footer">
     <span class="company-name">Prime Facility Services</span><br>
     Service Completion Photo Report - JWO #<?= htmlspecialchars($jwo_number) ?>
 </div>
 
+<div class="content-wrapper">
 <!-- LOGO -->
 <div class="logo-container">
     <?php if ($logo_base64): ?>
@@ -375,6 +421,8 @@ This report has been prepared to support transparency, quality assurance, and ac
     </tbody>
 </table>
 
+</div><!-- end content-wrapper -->
+
 </body>
 </html>
 <?php
@@ -408,6 +456,9 @@ foreach ($before_photos as $photo) {
     if (file_exists($photo)) unlink($photo);
 }
 foreach ($after_photos as $photo) {
+    if (file_exists($photo)) unlink($photo);
+}
+foreach ($bulk_photos as $photo) {
     if (file_exists($photo)) unlink($photo);
 }
 
