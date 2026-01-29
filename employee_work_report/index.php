@@ -88,6 +88,31 @@ $t = $translations[$lang];
 <form id="main_form" action="enviar_correo.php" method="POST" enctype="multipart/form-data">
 
     <!-- ===================== -->
+    <!-- REPORT TYPE SELECTION -->
+    <!-- ===================== -->
+    <div class="report-type-section">
+        <h3 class="report-type-title"><?= $t["wr_report_type"] ?? "Select Report Type" ?></h3>
+        <div class="report-type-buttons">
+            <label class="report-type-btn selected">
+                <input type="radio" name="report_type" value="before_after" checked>
+                <div class="btn-content">
+                    <span class="btn-icon">1</span>
+                    <span class="btn-label"><?= $t["wr_btn_before_after"] ?? "Before & After" ?></span>
+                    <span class="btn-desc"><?= $t["wr_btn_before_after_desc"] ?? "Side-by-side comparison photos" ?></span>
+                </div>
+            </label>
+            <label class="report-type-btn">
+                <input type="radio" name="report_type" value="all_photos">
+                <div class="btn-content">
+                    <span class="btn-icon">2</span>
+                    <span class="btn-label"><?= $t["wr_btn_all_photos"] ?? "All Photos" ?></span>
+                    <span class="btn-desc"><?= $t["wr_btn_all_photos_desc"] ?? "All photos together (max 20 per page)" ?></span>
+                </div>
+            </label>
+        </div>
+    </div>
+
+    <!-- ===================== -->
     <!-- SECTION 1 -->
     <!-- ===================== -->
     <div class="section-title collapsible">
@@ -202,6 +227,76 @@ $t = $translations[$lang];
 .section-internal-only {
     display: none;
 }
+
+/* REPORT TYPE SELECTION */
+.report-type-section {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 2px solid #e0e0e0;
+}
+.report-type-title {
+    color: #001f54;
+    margin: 0 0 15px 0;
+    text-align: center;
+    font-size: 16px;
+}
+.report-type-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+.report-type-btn {
+    flex: 1;
+    max-width: 250px;
+    cursor: pointer;
+}
+.report-type-btn input[type="radio"] {
+    display: none;
+}
+.report-type-btn .btn-content {
+    background: white;
+    border: 3px solid #ddd;
+    border-radius: 12px;
+    padding: 20px 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+.report-type-btn:hover .btn-content {
+    border-color: #a30000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.report-type-btn.selected .btn-content {
+    border-color: #a30000;
+    background: #fff5f5;
+    box-shadow: 0 4px 12px rgba(163,0,0,0.2);
+}
+.report-type-btn .btn-icon {
+    display: block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    background: #a30000;
+    color: white;
+    border-radius: 50%;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 auto 10px;
+}
+.report-type-btn .btn-label {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+.report-type-btn .btn-desc {
+    display: block;
+    font-size: 12px;
+    color: #666;
+}
 </style>
 
 <!-- ===================== -->
@@ -209,6 +304,14 @@ $t = $translations[$lang];
 <!-- ===================== -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+
+    // Report type button selection
+    document.querySelectorAll(".report-type-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll(".report-type-btn").forEach(b => b.classList.remove("selected"));
+            btn.classList.add("selected");
+        });
+    });
 
     document.querySelectorAll(".section-title").forEach(section => {
         const content = section.nextElementSibling;
