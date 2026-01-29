@@ -125,8 +125,10 @@ $t = $translations[$lang];
     <!-- ===================== -->
     <!-- SECTION 2 -->
     <!-- ===================== -->
-    <div class="section-title collapsible">
-        <?= $t["wr_sec2_title"] ?> <span class="toggle-icon">▼</span>
+    <div class="section-title collapsible" id="section2-title"
+         data-title-before-after="<?= $t["wr_sec2_title"] ?>"
+         data-title-all-photos="<?= $t["wr_sec2_title_all"] ?>">
+        <span id="section2-title-text"><?= $t["wr_sec2_title"] ?></span> <span class="toggle-icon">▼</span>
     </div>
     <div class="section-content hidden">
         <?php include 'form_part2_photos.php'; ?>
@@ -306,10 +308,33 @@ $t = $translations[$lang];
 document.addEventListener("DOMContentLoaded", () => {
 
     // Report type button selection
+    const section2Title = document.getElementById("section2-title");
+    const section2TitleText = document.getElementById("section2-title-text");
+
     document.querySelectorAll(".report-type-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             document.querySelectorAll(".report-type-btn").forEach(b => b.classList.remove("selected"));
             btn.classList.add("selected");
+
+            // Switch photo mode based on selection
+            const radioInput = btn.querySelector('input[type="radio"]');
+            if (radioInput) {
+                const mode = radioInput.value;
+
+                // Update section title
+                if (section2Title && section2TitleText) {
+                    if (mode === "all_photos") {
+                        section2TitleText.textContent = section2Title.dataset.titleAllPhotos;
+                    } else {
+                        section2TitleText.textContent = section2Title.dataset.titleBeforeAfter;
+                    }
+                }
+
+                // Switch photo upload mode
+                if (typeof window.switchPhotoMode === 'function') {
+                    window.switchPhotoMode(mode);
+                }
+            }
         });
     });
 

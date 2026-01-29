@@ -89,9 +89,14 @@ $translations = [
 
         // Section 2: Before & After Photos
         "wr_sec2_title" => "Section 2: Before & After Photos",
+        "wr_sec2_title_all" => "Section 2: All Photos",
         "wr_add_photo" => "Add Photos",
+        "wr_add_row" => "+ Add Before & After",
         "wr_before" => "Before",
         "wr_after" => "After",
+        "wr_bulk_upload_text" => "Click to add photos",
+        "wr_bulk_upload_hint" => "Select multiple photos at once",
+        "wr_photos_selected" => "photos selected",
 
         // Section 3: Evidence Summary
         "wr_sec3_title" => "Section 3: Service Evidence Summary",
@@ -196,9 +201,14 @@ $translations = [
 
         // Section 2: Photos
         "wr_sec2_title" => "Sección 2: Fotos Antes y Después",
+        "wr_sec2_title_all" => "Sección 2: Todas las Fotos",
         "wr_add_photo" => "Agregar Fotos",
+        "wr_add_row" => "+ Agregar Antes y Después",
         "wr_before" => "Antes",
         "wr_after" => "Después",
+        "wr_bulk_upload_text" => "Clic para agregar fotos",
+        "wr_bulk_upload_hint" => "Seleccione varias fotos a la vez",
+        "wr_photos_selected" => "fotos seleccionadas",
 
         // Section 3
         "wr_sec3_title" => "Sección 3: Resumen de Evidencia del Servicio",
