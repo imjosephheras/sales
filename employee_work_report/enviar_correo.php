@@ -17,6 +17,7 @@ $mail_config = require '../mail_config.php';
 //  CAPTURAR DATOS DEL FORM
 // =====================================
 $jwo_number = $_POST['JWO_Number'] ?? 'N/A';
+$report_type = $_POST['report_type'] ?? 'before_after';
 $before = $_FILES['before'] ?? null;
 $after  = $_FILES['after']  ?? null;
 
@@ -100,13 +101,14 @@ if (file_exists($logo_path)) {
 //  GENERAR HTML PARA PDF
 // =====================================
 ob_start();
-?>
-<html>
-<head>
-<meta charset="UTF-8">
 
-<style>
-body { font-family: Arial, sans-serif; }
+// Common styles for both report types
+$common_styles = "
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+
+@page {
+    margin: 20mm 15mm 25mm 15mm;
+}
 
 .logo-container {
     text-align: center;
@@ -117,8 +119,8 @@ body { font-family: Arial, sans-serif; }
     height: auto;
 }
 
-h1 { text-align:center; color:#a30000; margin-bottom:5px; margin-top: 10px; }
-h3 { text-align:center; margin-top:5px; }
+h1 { text-align:center; color:#a30000; margin-bottom:5px; margin-top: 10px; font-size: 22px; }
+h3 { text-align:center; margin-top:5px; font-size: 14px; }
 h2 {
   color:#a30000;
   margin-top:25px;
@@ -132,6 +134,153 @@ h2 {
     font-size: 13px;
     line-height: 1.5;
 }
+
+.footer {
+    position: fixed;
+    bottom: 0mm;
+    left: 0;
+    right: 0;
+    height: 20mm;
+    text-align: center;
+    font-size: 10px;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding-top: 5px;
+}
+.footer .company-name {
+    font-weight: bold;
+    color: #a30000;
+}
+";
+
+if ($report_type === 'all_photos') {
+    // =====================================
+    // REPORT TYPE 2: ALL PHOTOS GRID (max 20 per page)
+    // =====================================
+    $all_photos = array_merge($before_photos, $after_photos);
+    $photos_per_page = 20;
+    $photos_per_row = 4;
+    $total_pages = ceil(count($all_photos) / $photos_per_page);
+
+    ?>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+<?= $common_styles ?>
+
+.photo-grid {
+    width: 100%;
+    margin-top: 15px;
+}
+.photo-grid-row {
+    display: block;
+    width: 100%;
+    margin-bottom: 5px;
+    page-break-inside: avoid;
+}
+.photo-grid-cell {
+    display: inline-block;
+    width: 23%;
+    text-align: center;
+    vertical-align: top;
+    margin: 1%;
+}
+.photo-grid-cell img {
+    width: 100%;
+    max-width: 120px;
+    height: 90px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+.page-break {
+    page-break-after: always;
+}
+</style>
+</head>
+<body>
+
+<div class="footer">
+    <span class="company-name">Prime Facility Services</span><br>
+    Service Completion Photo Report - JWO #<?= htmlspecialchars($jwo_number) ?>
+</div>
+
+<?php
+    $photo_index = 0;
+    $page_num = 1;
+
+    while ($photo_index < count($all_photos)):
+        $photos_on_page = array_slice($all_photos, $photo_index, $photos_per_page);
+?>
+
+<!-- LOGO -->
+<div class="logo-container">
+    <?php if ($logo_base64): ?>
+        <img src="<?= $logo_base64 ?>" alt="Prime Facility Services Logo">
+    <?php endif; ?>
+</div>
+
+<h1>Service Completion Photo Report</h1>
+<h3>JWO #: <?= htmlspecialchars($jwo_number) ?></h3>
+
+<?php if ($page_num === 1): ?>
+<div class="template-box">
+<b>This document contains photographic evidence captured by our field team in connection with the assigned Job Work Order (JWO).</b><br><br>
+This report has been prepared to support transparency, quality assurance, and accurate documentation of the services performed.
+</div>
+<?php endif; ?>
+
+<h2>Photo Evidence <?php if ($total_pages > 1): ?>(Page <?= $page_num ?> of <?= $total_pages ?>)<?php endif; ?></h2>
+
+<div class="photo-grid">
+<?php
+    $row_photos = [];
+    foreach ($photos_on_page as $idx => $photo):
+        $row_photos[] = $photo;
+        if (count($row_photos) === $photos_per_row || $idx === count($photos_on_page) - 1):
+?>
+    <div class="photo-grid-row">
+        <?php foreach ($row_photos as $row_photo):
+            $mime = mime_content_type($row_photo);
+            $base64 = base64_encode(file_get_contents($row_photo));
+        ?>
+        <div class="photo-grid-cell">
+            <img src="data:<?= $mime ?>;base64,<?= $base64 ?>">
+        </div>
+        <?php endforeach; ?>
+    </div>
+<?php
+            $row_photos = [];
+        endif;
+    endforeach;
+?>
+</div>
+
+<?php
+        $photo_index += $photos_per_page;
+        $page_num++;
+        if ($photo_index < count($all_photos)):
+?>
+<div class="page-break"></div>
+<?php
+        endif;
+    endwhile;
+?>
+
+</body>
+</html>
+<?php
+
+} else {
+    // =====================================
+    // REPORT TYPE 1: BEFORE & AFTER (default)
+    // =====================================
+    ?>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+<?= $common_styles ?>
 
 /* TABLA DE FOTOS */
 .photo-table {
@@ -168,10 +317,13 @@ h2 {
     page-break-inside: avoid;
 }
 </style>
-
 </head>
-
 <body>
+
+<div class="footer">
+    <span class="company-name">Prime Facility Services</span><br>
+    Service Completion Photo Report - JWO #<?= htmlspecialchars($jwo_number) ?>
+</div>
 
 <!-- LOGO -->
 <div class="logo-container">
@@ -180,7 +332,7 @@ h2 {
     <?php endif; ?>
 </div>
 
-<h1>Employee Work Report</h1>
+<h1>Service Completion Photo Report</h1>
 <h3>JWO #: <?= htmlspecialchars($jwo_number) ?></h3>
 
 <div class="template-box">
@@ -225,6 +377,8 @@ This report has been prepared to support transparency, quality assurance, and ac
 
 </body>
 </html>
+<?php
+}
 
 <?php
 $html = ob_get_clean();
@@ -243,7 +397,7 @@ $pdf->loadHtml($html);
 $pdf->setPaper('A4', 'portrait');
 $pdf->render();
 
-$pdf_filename = "WorkReport_" . str_replace("/", "_", $jwo_number) . "_" . date("Ymd_His") . ".pdf";
+$pdf_filename = "ServicePhotoReport_" . str_replace("/", "_", $jwo_number) . "_" . date("Ymd_His") . ".pdf";
 $pdf_path = $upload_dir . $pdf_filename;
 
 file_put_contents($pdf_path, $pdf->output());
@@ -285,8 +439,8 @@ try {
     $mail->setFrom($mail_config['from_email'], $mail_config['from_name']);
     $mail->addAddress($mail_config['to_email']);
 
-    $mail->Subject = "Employee Work Report - JWO $jwo_number";
-    $mail->Body    = "Attached is the Employee Work Report.<br><br>JWO: $jwo_number";
+    $mail->Subject = "Service Completion Photo Report - JWO $jwo_number";
+    $mail->Body    = "Attached is the Service Completion Photo Report.<br><br>JWO: $jwo_number";
     $mail->isHTML(true);
 
     // SOLO PDF
@@ -339,7 +493,7 @@ body { background:#f0f0f0; text-align:center; padding:40px; font-family:Arial; }
 </head>
 <body>
 <div class="box">
-<h2 style="color:#2e7d32;">✓ Report Submitted Successfully</h2>
+<h2 style="color:#2e7d32;">✓ Service Completion Photo Report Submitted Successfully</h2>
 <p>JWO #: <?= htmlspecialchars($jwo_number) ?></p>
 <div style="margin-top:20px;">
     <a href="Uploads/<?= htmlspecialchars($pdf_filename) ?>" target="_blank" class="btn btn-print">Print Report</a>

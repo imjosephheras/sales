@@ -68,6 +68,17 @@ $translations = [
         // 🔹 EMPLOYEE WORK REPORT (EWR)
         // ---------------------------------
 
+        // Page Title
+        "wr_title" => "Service Completion Photo Report",
+        "wr_subtitle" => "Photo documentation for completed services",
+
+        // Report Type Buttons
+        "wr_report_type" => "Select Report Type",
+        "wr_btn_before_after" => "Before & After",
+        "wr_btn_before_after_desc" => "Side-by-side comparison photos",
+        "wr_btn_all_photos" => "All Photos",
+        "wr_btn_all_photos_desc" => "All photos together (max 20 per page)",
+
         // Section 1
         "wr_sec1_title" => "Section 1: Employee Information",
         "wr_employee_name" => "Employee Name",
@@ -163,6 +174,17 @@ $translations = [
         // ---------------------------------
         // 🔹 EMPLOYEE WORK REPORT (EWR)
         // ---------------------------------
+
+        // Page Title
+        "wr_title" => "Reporte de Fotos de Servicio Completado",
+        "wr_subtitle" => "Documentación fotográfica de servicios completados",
+
+        // Report Type Buttons
+        "wr_report_type" => "Seleccionar Tipo de Reporte",
+        "wr_btn_before_after" => "Antes y Después",
+        "wr_btn_before_after_desc" => "Fotos comparativas lado a lado",
+        "wr_btn_all_photos" => "Todas las Fotos",
+        "wr_btn_all_photos_desc" => "Todas las fotos juntas (máx 20 por página)",
 
         // Section 1
         "wr_sec1_title" => "Sección 1: Información del Empleado",
