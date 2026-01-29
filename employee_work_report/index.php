@@ -117,12 +117,13 @@ $t = $translations[$lang];
     <!-- ===================== -->
     <!-- SUBMIT -->
     <!-- ===================== -->
+    <input type="hidden" name="action" id="formAction" value="send">
     <div class="form-actions" style="text-align:center; margin-top:25px;">
         <button type="button" id="btnPreview"
                 style="padding:10px 25px; font-size:16px; font-weight:600;
                        background:#a30000; color:white; border:none;
                        border-radius:6px; cursor:pointer;">
-            📧 <?= $t["send"] ?>
+            📧 <?= $t["send"] ?? "Send" ?>
         </button>
     </div>
 
@@ -149,15 +150,23 @@ $t = $translations[$lang];
             </div>
 
             <div style="text-align:center; margin-top:20px;">
+                <button id="btnPrint"
+                        style="background:#a30000; color:white;
+                               padding:10px 20px; border:none; border-radius:6px;
+                               font-weight:600; margin:5px; cursor:pointer;">
+                    🖨️ <?= $t["print"] ?? "Print" ?>
+                </button>
                 <button id="confirmSend"
                         style="background:#007bff; color:white;
-                               padding:8px 18px; border:none; border-radius:6px;">
-                    ✅ <?= $t["confirm_send"] ?>
+                               padding:10px 20px; border:none; border-radius:6px;
+                               font-weight:600; margin:5px; cursor:pointer;">
+                    📧 <?= $t["confirm_send"] ?? "Send" ?>
                 </button>
                 <button id="cancelPreview"
-                        style="background:#ccc;
-                               padding:8px 18px; border:none; border-radius:6px;">
-                    ❌ <?= $t["cancel"] ?>
+                        style="background:#666; color:white;
+                               padding:10px 20px; border:none; border-radius:6px;
+                               font-weight:600; margin:5px; cursor:pointer;">
+                    ❌ <?= $t["cancel"] ?? "Cancel" ?>
                 </button>
             </div>
 
@@ -239,8 +248,24 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("cancelPreview").onclick =
         () => document.getElementById("previewModal").style.display = "none";
 
-    document.getElementById("confirmSend").onclick =
-        () => document.getElementById("main_form").submit();
+    // PRINT BUTTON - Generate PDF without sending email
+    document.getElementById("btnPrint").onclick = () => {
+        document.getElementById("formAction").value = "print_only";
+        document.getElementById("main_form").target = "_blank";
+        document.getElementById("main_form").submit();
+        // Reset form target for future submissions
+        setTimeout(() => {
+            document.getElementById("main_form").target = "_self";
+            document.getElementById("previewModal").style.display = "none";
+        }, 500);
+    };
+
+    // SEND BUTTON - Generate PDF and send email
+    document.getElementById("confirmSend").onclick = () => {
+        document.getElementById("formAction").value = "send";
+        document.getElementById("main_form").target = "_self";
+        document.getElementById("main_form").submit();
+    };
 });
 </script>
 

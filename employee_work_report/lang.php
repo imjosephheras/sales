@@ -11,6 +11,7 @@ $translations = [
         // ---------------------------------
         "home" => "Home",
         "send" => "Send",
+        "print" => "Print",
         "preview_form" => "Form Preview",
         "confirm_send" => "Confirm and Send",
         "cancel" => "Cancel",
@@ -106,6 +107,7 @@ $translations = [
         // ---------------------------------
         "home" => "Inicio",
         "send" => "Enviar",
+        "print" => "Imprimir",
         "preview_form" => "Previsualización del Formulario",
         "confirm_send" => "Confirmar y Enviar",
         "cancel" => "Cancelar",
