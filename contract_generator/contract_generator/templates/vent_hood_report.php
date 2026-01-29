@@ -51,36 +51,17 @@ $client_email = $data['Email'] ?? '';
         }
 
         .header {
-            display: table;
             width: 100%;
             border-bottom: 3px solid #001f54;
             padding-bottom: 10px;
             margin-bottom: 15px;
-        }
-
-        .header-left {
-            display: table-cell;
-            width: 30%;
-            vertical-align: middle;
-        }
-
-        .header-center {
-            display: table-cell;
-            width: 40%;
             text-align: center;
-            vertical-align: middle;
-        }
-
-        .header-right {
-            display: table-cell;
-            width: 30%;
-            text-align: right;
-            vertical-align: middle;
         }
 
         .company-logo {
-            max-width: 120px;
-            max-height: 60px;
+            max-width: 200px;
+            max-height: 100px;
+            margin-bottom: 8px;
         }
 
         .company-name {
@@ -265,34 +246,6 @@ $client_email = $data['Email'] ?? '';
             color: #666;
         }
 
-        .time-section {
-            display: table;
-            width: 100%;
-        }
-
-        .time-box {
-            display: table-cell;
-            width: 33.33%;
-            padding: 5px;
-            text-align: center;
-        }
-
-        .time-value {
-            font-size: 14px;
-            font-weight: bold;
-            color: #001f54;
-            padding: 5px;
-            border: 1px solid #ddd;
-            background: white;
-            min-height: 25px;
-        }
-
-        .time-label {
-            font-size: 8px;
-            color: #666;
-            margin-top: 3px;
-        }
-
         .page-break {
             page-break-before: always;
         }
@@ -344,53 +297,66 @@ $client_email = $data['Email'] ?? '';
             text-align: center;
         }
 
-        .work-order-box {
-            background: #001f54;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            display: inline-block;
-        }
-
-        .work-order-label {
-            font-size: 8px;
-            opacity: 0.8;
-        }
-
-        .work-order-number {
-            font-size: 16px;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
 
     <!-- HEADER -->
     <div class="header">
-        <div class="header-left">
-            <?php if ($logo_base64): ?>
-                <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Logo">
-            <?php endif; ?>
-        </div>
-        <div class="header-center">
-            <div class="company-name"><?php echo htmlspecialchars($company_name); ?></div>
-            <div class="company-info">
-                <?php echo htmlspecialchars($company_address); ?><br>
-                Phone: <?php echo htmlspecialchars($company_phone); ?> ~ Fax: <?php echo htmlspecialchars($company_fax); ?><br>
-                <?php echo htmlspecialchars($company_website); ?>
-            </div>
-        </div>
-        <div class="header-right">
-            <div class="work-order-box">
-                <div class="work-order-label">WORK ORDER #</div>
-                <div class="work-order-number"><?php echo htmlspecialchars($work_order); ?></div>
-            </div>
+        <?php if ($logo_base64): ?>
+            <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Logo">
+        <?php endif; ?>
+        <div class="company-name"><?php echo htmlspecialchars($company_name); ?></div>
+        <div class="company-info">
+            <?php echo htmlspecialchars($company_address); ?><br>
+            Phone: <?php echo htmlspecialchars($company_phone); ?> ~ Fax: <?php echo htmlspecialchars($company_fax); ?><br>
+            <?php echo htmlspecialchars($company_website); ?>
         </div>
     </div>
 
     <div style="text-align: center; margin-bottom: 15px;">
-        <div class="report-title">SERVICE REPORT / WORK ORDER</div>
-        <div class="report-subtitle">Kitchen Exhaust Cleaning and Grease Gutter Service Report</div>
+        <div class="report-title" style="font-size: 22px;">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
+    </div>
+
+    <!-- SERVICE REPORT / WORK ORDER INFO -->
+    <div class="section">
+        <div class="section-header">SERVICE REPORT / WORK ORDER</div>
+        <div class="section-content">
+            <div class="two-columns">
+                <div class="column">
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <div class="info-cell info-label">Work Order #:</div>
+                            <div class="info-cell info-value">__________________________</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-cell info-label">Invoice #:</div>
+                            <div class="info-cell info-value">__________________________</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <div class="info-cell info-label">Fecha de servicio:</div>
+                            <div class="info-cell info-value">____ / ____ / ______</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-cell info-label">Próxima fecha recomendada:</div>
+                            <div class="info-cell info-value">____ / ____ / ______</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 10px;">
+                <span style="font-weight: bold; color: #001f54;">Frecuencia:</span>
+                <span class="inline-checkbox">&square; 30 días</span>
+                <span class="inline-checkbox">&square; 60 días</span>
+                <span class="inline-checkbox">&square; 90 días</span>
+                <span class="inline-checkbox">&square; 120 días</span>
+                <span class="inline-checkbox">&square; Otro: ______</span>
+            </div>
+        </div>
     </div>
 
     <!-- 1. ENCABEZADO - INFORMACION DE SERVICIO -->
@@ -616,6 +582,11 @@ $client_email = $data['Email'] ?? '';
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                     </tr>
+                    <tr>
+                        <td>¿Existe drenaje adecuado?</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -655,26 +626,9 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 8. TIEMPOS DEL SERVICIO -->
+    <!-- 8. NOTAS DEL TECNICO / OBSERVACIONES -->
     <div class="section">
-        <div class="section-header">8. SERVICE TIMES</div>
-        <div class="section-content">
-            <div class="time-section">
-                <div class="time-box">
-                    <div class="time-value"></div>
-                    <div class="time-label">TIME IN (Hora de entrada)</div>
-                </div>
-                <div class="time-box">
-                    <div class="time-value"></div>
-                    <div class="time-label">TIME OUT (Hora de salida)</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 9. NOTAS DEL TECNICO / OBSERVACIONES -->
-    <div class="section">
-        <div class="section-header">9. TECHNICIAN NOTES / OBSERVATIONS</div>
+        <div class="section-header">8. TECHNICIAN NOTES / OBSERVATIONS</div>
         <div class="section-content">
             <div class="notes-area" style="min-height: 80px;">
 
@@ -684,9 +638,9 @@ $client_email = $data['Email'] ?? '';
 
 
 
-    <!-- 10. FIRMAS Y CONFIRMACION -->
+    <!-- 9. FIRMAS Y CONFIRMACION -->
     <div class="section">
-        <div class="section-header">10. SIGNATURES AND CONFIRMATION</div>
+        <div class="section-header">9. SIGNATURES AND CONFIRMATION</div>
         <div class="section-content">
             <div class="signature-section">
                 <div class="signature-box">
