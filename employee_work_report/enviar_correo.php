@@ -114,37 +114,39 @@ h2 {
     line-height: 1.4;
 }
 
-/* SECCION CON PAGINACION */
-.page-section {
-    page-break-inside: avoid;
-    page-break-after: auto;
-    overflow: hidden;
+/* TABLA DE FOTOS */
+.photo-table {
     width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
 }
 
-/* 2 COLUMNAS COMPATIBLES */
-.photo-box {
-    width: 45%;
-    float: left;
-    border: 1px solid #aaa;
-    padding: 4px;
-    margin-right: 12px;
-    margin-bottom: 15px;
-    page-break-inside: avoid;
+.photo-table th {
+    background: #a30000;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 14px;
+    width: 50%;
 }
 
-/* Imagen comprimida */
-.photo-box img {
+.photo-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    vertical-align: top;
+    width: 50%;
+}
+
+.photo-table img {
     width: 100%;
     height: auto;
-    max-height: 150px;
+    max-height: 200px;
     object-fit: contain;
 }
 
-.clearfix {
-    clear: both;
-    width: 100%;
-    height: 1px;
+.photo-row {
+    page-break-inside: avoid;
 }
 </style>
 
@@ -156,36 +158,44 @@ h2 {
 <h3>JWO #: <?= htmlspecialchars($jwo_number) ?></h3>
 
 <div class="template-box">
-<b>This document includes photographic evidence taken by our field team as part of the assigned Job Work Order (JWO).</b><br><br>
-All images represent the condition of the service area <b>before and after</b> work was completed.
-This report is generated to ensure transparency, quality assurance, and proper documentation of services rendered.
+<b>This document contains photographic evidence captured by our field team in connection with the assigned Job Work Order (JWO).</b><br><br>
+The images illustrate the condition of the service area both <b>before and after</b> the completion of the work.<br><br>
+This report has been prepared to support transparency, quality assurance, and accurate documentation of the services performed.
 </div>
 
-<!-- BEFORE -->
-<h2>Before Photos</h2>
-<div class="page-section">
-<?php foreach ($before_photos as $p):
-    $mime = mime_content_type($p);
-    $base64 = base64_encode(file_get_contents($p)); ?>
-    <div class="photo-box">
-        <img src="data:<?= $mime ?>;base64,<?= $base64 ?>">
-    </div>
-<?php endforeach; ?>
-<div class="clearfix"></div>
-</div>
-
-<!-- AFTER -->
-<h2>After Photos</h2>
-<div class="page-section">
-<?php foreach ($after_photos as $p):
-    $mime = mime_content_type($p);
-    $base64 = base64_encode(file_get_contents($p)); ?>
-    <div class="photo-box">
-        <img src="data:<?= $mime ?>;base64,<?= $base64 ?>">
-    </div>
-<?php endforeach; ?>
-<div class="clearfix"></div>
-</div>
+<!-- PHOTO COMPARISON TABLE -->
+<h2>Photo Evidence</h2>
+<table class="photo-table">
+    <thead>
+        <tr>
+            <th>Before</th>
+            <th>After</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php
+    $max_photos = max(count($before_photos), count($after_photos));
+    for ($i = 0; $i < $max_photos; $i++):
+    ?>
+        <tr class="photo-row">
+            <td>
+                <?php if (isset($before_photos[$i])):
+                    $mime = mime_content_type($before_photos[$i]);
+                    $base64 = base64_encode(file_get_contents($before_photos[$i])); ?>
+                    <img src="data:<?= $mime ?>;base64,<?= $base64 ?>">
+                <?php endif; ?>
+            </td>
+            <td>
+                <?php if (isset($after_photos[$i])):
+                    $mime = mime_content_type($after_photos[$i]);
+                    $base64 = base64_encode(file_get_contents($after_photos[$i])); ?>
+                    <img src="data:<?= $mime ?>;base64,<?= $base64 ?>">
+                <?php endif; ?>
+            </td>
+        </tr>
+    <?php endfor; ?>
+    </tbody>
+</table>
 
 </body>
 </html>
@@ -254,14 +264,42 @@ try {
 <title>Success</title>
 <style>
 body { background:#f0f0f0; text-align:center; padding:40px; font-family:Arial; }
-.box { background:white; padding:30px; border-radius:12px; display:inline-block; }
+.box { background:white; padding:30px; border-radius:12px; display:inline-block; max-width:500px; }
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    margin: 10px 5px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    font-size: 14px;
+}
+.btn-print {
+    background: #a30000;
+    color: white;
+}
+.btn-print:hover {
+    background: #8a0000;
+}
+.btn-back {
+    background: #666;
+    color: white;
+}
+.btn-back:hover {
+    background: #555;
+}
 </style>
 </head>
 <body>
 <div class="box">
-<h2>✓ Report Submitted Successfully</h2>
+<h2 style="color:#2e7d32;">✓ Report Submitted Successfully</h2>
 <p>JWO #: <?= htmlspecialchars($jwo_number) ?></p>
-<a href="index.php">Back</a>
+<div style="margin-top:20px;">
+    <a href="Uploads/<?= htmlspecialchars($pdf_filename) ?>" target="_blank" class="btn btn-print">Print Report</a>
+    <a href="index.php" class="btn btn-back">Back</a>
+</div>
 </div>
 </body>
 </html>
