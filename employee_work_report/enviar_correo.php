@@ -380,7 +380,6 @@ This report has been prepared to support transparency, quality assurance, and ac
 <?php
 }
 
-<?php
 $html = ob_get_clean();
 
 // =====================================
