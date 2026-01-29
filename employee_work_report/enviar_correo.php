@@ -84,6 +84,9 @@ function processPhotos($files, $upload_dir) {
 $before_photos = processPhotos($before, $upload_dir);
 $after_photos  = processPhotos($after,  $upload_dir);
 
+// Get action type (print_only or send)
+$action = $_POST['action'] ?? 'send';
+
 // =====================================
 //  LOGO BASE64 PARA PDF
 // =====================================
@@ -244,6 +247,25 @@ $pdf_filename = "WorkReport_" . str_replace("/", "_", $jwo_number) . "_" . date(
 $pdf_path = $upload_dir . $pdf_filename;
 
 file_put_contents($pdf_path, $pdf->output());
+
+// =====================================
+//  DELETE COMPRESSED PHOTOS (no longer needed)
+// =====================================
+foreach ($before_photos as $photo) {
+    if (file_exists($photo)) unlink($photo);
+}
+foreach ($after_photos as $photo) {
+    if (file_exists($photo)) unlink($photo);
+}
+
+// =====================================
+//  PRINT ONLY - Just show PDF, no email
+// =====================================
+if ($action === 'print_only') {
+    // Redirect to PDF for printing
+    header('Location: Uploads/' . $pdf_filename);
+    exit;
+}
 
 // =====================================
 //  ENVIAR EMAIL (solo PDF, NO fotos)
