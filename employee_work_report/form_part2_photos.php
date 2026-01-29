@@ -1,9 +1,5 @@
 <?php $t = $t ?? []; ?>
 
-<div class="section-title">
-  <?= $t["wr_sec2_title"] ?? "SECTION 2: BEFORE & AFTER PHOTOS" ?>
-</div>
-
 <style>
 .photo-row {
     display: flex;
@@ -73,25 +69,148 @@
     cursor: pointer;
     border: none;
 }
+
+/* BULK UPLOAD STYLES */
+.bulk-upload-container {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+.bulk-upload-box {
+    width: 100%;
+    max-width: 400px;
+    min-height: 200px;
+    border: 3px dashed #999;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin: 0 auto 20px;
+    background: #fafafa;
+    transition: all 0.3s ease;
+}
+
+.bulk-upload-box:hover {
+    border-color: #001f54;
+    background: #f0f4ff;
+}
+
+.bulk-upload-box .upload-icon {
+    font-size: 50px;
+    color: #999;
+    margin-bottom: 10px;
+}
+
+.bulk-upload-box .upload-text {
+    font-size: 16px;
+    color: #666;
+    font-weight: 600;
+}
+
+.bulk-upload-box .upload-hint {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+}
+
+.bulk-photos-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.bulk-photo-item {
+    width: 120px;
+    height: 120px;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.bulk-photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bulk-photo-item .delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-weight: bold;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.bulk-photo-item .delete-btn:hover {
+    background: #a30000;
+}
+
+.photos-count {
+    font-size: 14px;
+    color: #666;
+    margin-top: 10px;
+}
 </style>
 
-<div id="photo-rows-container"></div>
+<!-- BEFORE & AFTER MODE -->
+<div id="before-after-container">
+    <div id="photo-rows-container"></div>
+    <button type="button" class="add-row-btn" id="add-row-btn">
+      <?= $t["wr_add_row"] ?? "+ Add Before & After" ?>
+    </button>
+</div>
 
-<button type="button" class="add-row-btn" id="add-row-btn">
-  <?= $t["wr_add_row"] ?? "+ Add Before & After" ?>
-</button>
+<!-- ALL PHOTOS MODE (BULK UPLOAD) -->
+<div id="bulk-upload-container" class="bulk-upload-container">
+    <div class="bulk-upload-box" id="bulk-upload-box">
+        <div class="upload-icon">+</div>
+        <div class="upload-text"><?= $t["wr_bulk_upload_text"] ?? "Click to add photos" ?></div>
+        <div class="upload-hint"><?= $t["wr_bulk_upload_hint"] ?? "Select multiple photos at once" ?></div>
+    </div>
+    <input type="file" id="bulk-photo-input" name="all_photos[]" accept="image/*" multiple style="display:none;">
+    <div class="bulk-photos-grid" id="bulk-photos-grid"></div>
+    <div class="photos-count" id="photos-count"></div>
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("photo-rows-container");
     const addBtn = document.getElementById("add-row-btn");
+    const beforeAfterContainer = document.getElementById("before-after-container");
+    const bulkUploadContainer = document.getElementById("bulk-upload-container");
+    const bulkUploadBox = document.getElementById("bulk-upload-box");
+    const bulkPhotoInput = document.getElementById("bulk-photo-input");
+    const bulkPhotosGrid = document.getElementById("bulk-photos-grid");
+    const photosCountEl = document.getElementById("photos-count");
 
     const labels = {
-        before: "<?= $t['wr_before'] ?? 'BEFORE' ?>",
-        after: "<?= $t['wr_after'] ?? 'AFTER' ?>",
-        plus: "<?= $t['wr_plus'] ?? '+' ?>"
+        before: "<?= $t['wr_before'] ?? 'Before' ?>",
+        after: "<?= $t['wr_after'] ?? 'After' ?>",
+        plus: "<?= $t['wr_plus'] ?? '+' ?>",
+        photosSelected: "<?= $t['wr_photos_selected'] ?? 'photos selected' ?>"
     };
 
+    // Store bulk uploaded files
+    let bulkFiles = [];
+
+    // ==========================================
+    // BEFORE & AFTER MODE FUNCTIONS
+    // ==========================================
     function createPhotoBox(type) {
         const box = document.createElement("div");
         box.className = "photo-box";
@@ -170,7 +289,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Fila inicial
     addRow();
-
     addBtn.addEventListener("click", addRow);
+
+    // ==========================================
+    // BULK UPLOAD MODE FUNCTIONS
+    // ==========================================
+    bulkUploadBox.addEventListener("click", () => bulkPhotoInput.click());
+
+    bulkPhotoInput.addEventListener("change", () => {
+        const newFiles = Array.from(bulkPhotoInput.files);
+        bulkFiles = bulkFiles.concat(newFiles);
+        renderBulkPhotos();
+        updateFileInput();
+    });
+
+    function renderBulkPhotos() {
+        bulkPhotosGrid.innerHTML = "";
+
+        bulkFiles.forEach((file, index) => {
+            const item = document.createElement("div");
+            item.className = "bulk-photo-item";
+
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(file);
+            item.appendChild(img);
+
+            const del = document.createElement("div");
+            del.className = "delete-btn";
+            del.textContent = "×";
+            del.onclick = () => {
+                bulkFiles.splice(index, 1);
+                renderBulkPhotos();
+                updateFileInput();
+            };
+            item.appendChild(del);
+
+            bulkPhotosGrid.appendChild(item);
+        });
+
+        // Update count
+        if (bulkFiles.length > 0) {
+            photosCountEl.textContent = bulkFiles.length + " " + labels.photosSelected;
+        } else {
+            photosCountEl.textContent = "";
+        }
+    }
+
+    function updateFileInput() {
+        // Create a new DataTransfer to hold the files
+        const dataTransfer = new DataTransfer();
+        bulkFiles.forEach(file => dataTransfer.items.add(file));
+        bulkPhotoInput.files = dataTransfer.files;
+    }
+
+    // ==========================================
+    // MODE SWITCHING (called from index.php)
+    // ==========================================
+    window.switchPhotoMode = function(mode) {
+        if (mode === "all_photos") {
+            beforeAfterContainer.style.display = "none";
+            bulkUploadContainer.style.display = "block";
+        } else {
+            beforeAfterContainer.style.display = "block";
+            bulkUploadContainer.style.display = "none";
+        }
+    };
 });
 </script>
