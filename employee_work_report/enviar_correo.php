@@ -37,6 +37,8 @@ function compressImage($source, $destination, $quality = 55) {
     switch ($info['mime']) {
         case 'image/jpeg':
             $image = imagecreatefromjpeg($source);
+            // Corregir orientación EXIF para JPEGs
+            $image = fixImageOrientation($source, $image);
             break;
         case 'image/png':
             $image = imagecreatefrompng($source);
@@ -50,7 +52,38 @@ function compressImage($source, $destination, $quality = 55) {
     }
 
     imagejpeg($image, $destination, $quality);
+    imagedestroy($image);
     return true;
+}
+
+// =====================================
+//  FUNCION PARA CORREGIR ORIENTACION EXIF
+// =====================================
+function fixImageOrientation($source, $image) {
+    if (!function_exists('exif_read_data')) {
+        return $image;
+    }
+
+    $exif = @exif_read_data($source);
+    if (!$exif || !isset($exif['Orientation'])) {
+        return $image;
+    }
+
+    $orientation = $exif['Orientation'];
+
+    switch ($orientation) {
+        case 3: // 180 grados
+            $image = imagerotate($image, 180, 0);
+            break;
+        case 6: // 90 grados en sentido horario (foto vertical tomada con el teléfono girado a la derecha)
+            $image = imagerotate($image, -90, 0);
+            break;
+        case 8: // 90 grados en sentido antihorario (foto vertical tomada con el teléfono girado a la izquierda)
+            $image = imagerotate($image, 90, 0);
+            break;
+    }
+
+    return $image;
 }
 
 // =====================================
@@ -182,25 +215,26 @@ if ($report_type === 'all_photos') {
 
 .photo-grid {
     width: 100%;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 .photo-grid-row {
     display: block;
     width: 100%;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     page-break-inside: avoid;
+    text-align: center;
 }
 .photo-grid-cell {
     display: inline-block;
     width: 23%;
     text-align: center;
     vertical-align: top;
-    margin: 1%;
+    margin: 0 0.5%;
 }
 .photo-grid-cell img {
     width: 100%;
-    max-width: 120px;
-    height: 90px;
+    max-width: 110px;
+    height: 140px;
     object-fit: cover;
     border: 1px solid #ddd;
 }
