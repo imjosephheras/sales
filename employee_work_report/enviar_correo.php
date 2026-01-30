@@ -144,7 +144,7 @@ $common_styles = "
 body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
 
 @page {
-    margin: 20mm 15mm 25mm 15mm;
+    margin: 15mm 15mm 15mm 15mm;
 }
 
 .logo-container {
@@ -172,22 +172,6 @@ h2 {
     line-height: 1.5;
 }
 
-.footer {
-    position: fixed;
-    bottom: 0mm;
-    left: 0;
-    right: 0;
-    height: 20mm;
-    text-align: center;
-    font-size: 10px;
-    color: #666;
-    border-top: 1px solid #ddd;
-    padding-top: 5px;
-}
-.footer .company-name {
-    font-weight: bold;
-    color: #a30000;
-}
 ";
 
 if ($report_type === 'all_photos') {
@@ -242,17 +226,11 @@ if ($report_type === 'all_photos') {
     page-break-after: always;
 }
 .content-wrapper {
-    padding-bottom: 25mm;
+    padding-bottom: 10mm;
 }
 </style>
 </head>
 <body>
-
-<!-- Fixed Footer - appears on every page -->
-<div class="footer">
-    <span class="company-name">Prime Facility Services</span><br>
-    Service Completion Photo Report - JWO #<?= htmlspecialchars($jwo_number) ?>
-</div>
 
 <div class="content-wrapper">
 <?php
@@ -272,8 +250,7 @@ if ($report_type === 'all_photos') {
 <h3>JWO #: <?= htmlspecialchars($jwo_number) ?></h3>
 
 <div class="template-box">
-<b>This document contains photographic evidence captured by our field team in connection with the assigned Job Work Order (JWO).</b><br><br>
-This report has been prepared to support transparency, quality assurance, and accurate documentation of the services performed.
+This document includes photographic evidence captured by our field team in relation to the assigned Job Work Order (JWO). The images serve as supporting material to verify the work completed and to provide a clear visual record of the service conditions. This report has been prepared to promote transparency, ensure compliance with quality assurance standards, and maintain accurate documentation of all services performed.
 </div>
 
 <h2>Photo Evidence</h2>
@@ -297,8 +274,7 @@ This report has been prepared to support transparency, quality assurance, and ac
 
 <?php if ($page_num === 1): ?>
 <div class="template-box">
-<b>This document contains photographic evidence captured by our field team in connection with the assigned Job Work Order (JWO).</b><br><br>
-This report has been prepared to support transparency, quality assurance, and accurate documentation of the services performed.
+This document includes photographic evidence captured by our field team in relation to the assigned Job Work Order (JWO). The images serve as supporting material to verify the work completed and to provide a clear visual record of the service conditions. This report has been prepared to promote transparency, ensure compliance with quality assurance standards, and maintain accurate documentation of all services performed.
 </div>
 <?php endif; ?>
 
@@ -392,17 +368,11 @@ This report has been prepared to support transparency, quality assurance, and ac
 }
 
 .content-wrapper {
-    padding-bottom: 25mm;
+    padding-bottom: 10mm;
 }
 </style>
 </head>
 <body>
-
-<!-- Fixed Footer - appears on every page -->
-<div class="footer">
-    <span class="company-name">Prime Facility Services</span><br>
-    Service Completion Photo Report - JWO #<?= htmlspecialchars($jwo_number) ?>
-</div>
 
 <div class="content-wrapper">
 <!-- LOGO -->
@@ -416,9 +386,7 @@ This report has been prepared to support transparency, quality assurance, and ac
 <h3>JWO #: <?= htmlspecialchars($jwo_number) ?></h3>
 
 <div class="template-box">
-<b>This document contains photographic evidence captured by our field team in connection with the assigned Job Work Order (JWO).</b><br><br>
-The images illustrate the condition of the service area both <b>before and after</b> the completion of the work.<br><br>
-This report has been prepared to support transparency, quality assurance, and accurate documentation of the services performed.
+This document provides photographic evidence collected by our field team in connection with the assigned Job Work Order (JWO). The images are intended to clearly and objectively illustrate the condition of the service area prior to the start of the work, as well as the results achieved upon completion. This report has been prepared as part of our monitoring and documentation process to ensure transparency, support quality assurance standards, and provide a detailed and verifiable record of the services performed.
 </div>
 
 <!-- PHOTO COMPARISON TABLE -->
