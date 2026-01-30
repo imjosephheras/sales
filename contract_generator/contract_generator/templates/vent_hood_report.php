@@ -27,7 +27,7 @@ $frequency = '';
 // Client info from database
 $client_name = $data['Company_Name'] ?? '';
 $client_address = $data['Company_Address'] ?? '';
-$client_contact = $data['Client_Name'] ?? '';
+$client_contact = $data['client_name'] ?? '';
 $client_email = $data['Email'] ?? '';
 ?>
 <!DOCTYPE html>
@@ -44,17 +44,17 @@ $client_email = $data['Email'] ?? '';
 
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 10px;
-            line-height: 1.4;
+            font-size: 9px;
+            line-height: 1.3;
             color: #333;
-            padding: 15px;
+            padding: 10px 15px;
         }
 
         .header {
             width: 100%;
             border-bottom: 3px solid #001f54;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
             text-align: center;
         }
 
@@ -92,7 +92,7 @@ $client_email = $data['Email'] ?? '';
         }
 
         .section {
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             border: 1px solid #ddd;
             border-radius: 5px;
             overflow: hidden;
@@ -108,7 +108,7 @@ $client_email = $data['Email'] ?? '';
         }
 
         .section-content {
-            padding: 10px;
+            padding: 8px;
             background: #fafafa;
         }
 
@@ -186,7 +186,7 @@ $client_email = $data['Email'] ?? '';
         .checklist-table th,
         .checklist-table td {
             border: 1px solid #ddd;
-            padding: 5px 8px;
+            padding: 3px 6px;
             text-align: left;
         }
 
@@ -224,7 +224,7 @@ $client_email = $data['Email'] ?? '';
         .signature-section {
             display: table;
             width: 100%;
-            margin-top: 15px;
+            margin-top: 8px;
             page-break-inside: avoid;
         }
 
@@ -237,8 +237,8 @@ $client_email = $data['Email'] ?? '';
 
         .signature-line {
             border-bottom: 1px solid #333;
-            height: 30px;
-            margin-bottom: 5px;
+            height: 25px;
+            margin-bottom: 3px;
         }
 
         .signature-label {
@@ -359,29 +359,6 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 1. ENCABEZADO - INFORMACION DE SERVICIO -->
-    <div class="section">
-        <div class="section-header">1. SERVICE INFORMATION</div>
-        <div class="section-content">
-            <div class="two-columns">
-                <div class="column">
-                    <div class="info-grid">
-                        <div class="info-row">
-                            <div class="info-cell info-label">Work Order #:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($work_order); ?></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-cell info-label">Service Date:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($service_date); ?></div>
-                        </div>
-                    </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- 2. INFORMACION DEL CLIENTE -->
     <div class="section">
@@ -435,9 +412,9 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 4. CHECKLIST DE INSPECCION (ANTES DE LIMPIEZA) -->
+    <!-- 4. INSPECTION CHECKLIST -->
     <div class="section">
-        <div class="section-header">4. INSPECTION CHECKLIST (BEFORE CLEANING)</div>
+        <div class="section-header">4. INSPECTION CHECKLIST</div>
         <div class="section-content">
             <table class="checklist-table">
                 <thead>
@@ -449,6 +426,10 @@ $client_email = $data['Email'] ?? '';
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Before Cleaning -->
+                    <tr style="background: #e3f2fd;">
+                        <td colspan="4" style="font-weight: bold; color: #001f54;">Before Cleaning</td>
+                    </tr>
                     <tr>
                         <td>Fans working correctly?</td>
                         <td class="center">&square;</td>
@@ -485,12 +466,74 @@ $client_email = $data['Email'] ?? '';
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                     </tr>
+                    <!-- After Cleaning -->
+                    <tr style="background: #e8f5e9;">
+                        <td colspan="4" style="font-weight: bold; color: #001f54;">After Cleaning</td>
+                    </tr>
+                    <tr>
+                        <td>System clean and operative</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <tr>
+                        <td>Fan working at completion</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <tr>
+                        <td>Work area delivered clean</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <tr>
+                        <td>Client informed of final status</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <!-- Roof Inspection -->
+                    <tr style="background: #fff3e0;">
+                        <td colspan="4" style="font-weight: bold; color: #001f54;">Roof Inspection</td>
+                    </tr>
+                    <tr>
+                        <td>Grease accumulation on roof?</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <tr>
+                        <td>Is it a severe problem?</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <tr>
+                        <td>Absorption unit installation recommended?</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <tr>
+                        <td>Roof damage from grease?</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
+                    <tr>
+                        <td>Adequate drainage exists?</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                        <td class="center">&square;</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- 5. SERVICIO REALIZADO (LIMPIEZA) -->
+    <!-- 5. SERVICE PERFORMED (CLEANING) -->
     <div class="section">
         <div class="section-header">5. SERVICE PERFORMED (CLEANING)</div>
         <div class="section-content">
@@ -511,90 +554,9 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 6. RESULTADO DESPUES DE LIMPIEZA -->
+    <!-- 6. DATOS TECNICOS DEL SISTEMA -->
     <div class="section">
-        <div class="section-header">6. RESULT AFTER CLEANING</div>
-        <div class="section-content">
-            <table class="checklist-table">
-                <thead>
-                    <tr>
-                        <th>Element</th>
-                        <th class="center">Yes</th>
-                        <th class="center">No</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>System clean and operative</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                    </tr>
-                    <tr>
-                        <td>Fan working at completion</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                    </tr>
-                    <tr>
-                        <td>Work area delivered clean</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                    </tr>
-                    <tr>
-                        <td>Client informed of final status</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ROOF INSPECTION -->
-    <div class="section">
-        <div class="section-header">ROOF INSPECTION</div>
-        <div class="section-content">
-            <table class="checklist-table">
-                <thead>
-                    <tr>
-                        <th>Element</th>
-                        <th class="center">Yes</th>
-                        <th class="center">No</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Grease accumulation on roof?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                    </tr>
-                    <tr>
-                        <td>Is it a severe problem?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                    </tr>
-                    <tr>
-                        <td>Absorption unit installation recommended?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                    </tr>
-                    <tr>
-                        <td>Roof damage from grease?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                    </tr>
-                    <tr>
-                        <td>¿Existe drenaje adecuado?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- 7. DATOS TECNICOS DEL SISTEMA -->
-    <div class="section">
-        <div class="section-header">7. TECHNICAL SYSTEM DATA</div>
+        <div class="section-header">6. TECHNICAL SYSTEM DATA</div>
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
@@ -626,21 +588,19 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 8. NOTAS DEL TECNICO / OBSERVACIONES -->
+    <!-- 7. NOTAS DEL TECNICO / OBSERVACIONES -->
     <div class="section">
-        <div class="section-header">8. TECHNICIAN NOTES / OBSERVATIONS</div>
+        <div class="section-header">7. TECHNICIAN NOTES / OBSERVATIONS</div>
         <div class="section-content">
-            <div class="notes-area" style="min-height: 80px;">
+            <div class="notes-area" style="min-height: 40px;">
 
             </div>
         </div>
     </div>
 
-
-
-    <!-- 9. FIRMAS Y CONFIRMACION -->
+    <!-- 8. FIRMAS Y CONFIRMACION -->
     <div class="section">
-        <div class="section-header">9. SIGNATURES AND CONFIRMATION</div>
+        <div class="section-header">8. SIGNATURES AND CONFIRMATION</div>
         <div class="section-content">
             <div class="signature-section">
                 <div class="signature-box">
