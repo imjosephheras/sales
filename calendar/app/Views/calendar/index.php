@@ -27,22 +27,23 @@ include VIEWS_PATH . '/layouts/header.php';
         <!-- Calendar Header -->
         <div class="calendar-header">
             <div class="month-navigation">
-                <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="nav-arrow">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </a>
-                
+                <div class="nav-arrows">
+                    <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="nav-arrow">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </a>
+                    <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="nav-arrow">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M8 4L14 10L8 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </a>
+                </div>
+
                 <h1 class="month-title">
                     <span class="month"><?= $monthName ?></span>
                     <span class="year"><?= $year ?></span>
                 </h1>
-                
-                <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="nav-arrow">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M8 4L14 10L8 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </a>
             </div>
             
             <div class="calendar-actions">

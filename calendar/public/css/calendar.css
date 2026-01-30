@@ -503,7 +503,12 @@ body {
 .month-navigation {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xl);
+    gap: var(--spacing-lg);
+}
+
+.nav-arrows {
+    display: flex;
+    gap: var(--spacing-xs);
 }
 
 .nav-arrow {
