@@ -44,71 +44,71 @@ $client_email = $data['Email'] ?? '';
 
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 9px;
-            line-height: 1.2;
+            font-size: 8px;
+            line-height: 1.1;
             color: #333;
-            padding: 10px;
+            padding: 5px 8px;
         }
 
         .header {
             width: 100%;
             border-bottom: 2px solid #001f54;
-            padding-bottom: 5px;
-            margin-bottom: 8px;
+            padding-bottom: 3px;
+            margin-bottom: 4px;
             text-align: center;
         }
 
         .company-logo {
-            max-width: 150px;
-            max-height: 60px;
-            margin-bottom: 4px;
-        }
-
-        .company-name {
-            font-size: 14px;
-            font-weight: bold;
-            color: #001f54;
+            max-width: 120px;
+            max-height: 45px;
             margin-bottom: 2px;
         }
 
+        .company-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #001f54;
+            margin-bottom: 1px;
+        }
+
         .company-info {
-            font-size: 8px;
+            font-size: 7px;
             color: #666;
-            line-height: 1.3;
+            line-height: 1.2;
         }
 
         .report-title {
-            font-size: 18px;
+            font-size: 12px;
             font-weight: bold;
             color: #001f54;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .report-subtitle {
-            font-size: 10px;
+            font-size: 8px;
             color: #666;
-            margin-top: 3px;
+            margin-top: 2px;
         }
 
         .section {
-            margin-bottom: 6px;
+            margin-bottom: 3px;
             border: 1px solid #ddd;
-            border-radius: 3px;
+            border-radius: 2px;
             overflow: hidden;
             page-break-inside: avoid;
         }
 
         .section-header {
-            background: linear-gradient(135deg, #001f54 0%, #003080 100%);
-            color: white;
-            padding: 4px 8px;
+            background: #001f54;
+            color: #ffffff;
+            padding: 2px 6px;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 8px;
         }
 
         .section-content {
-            padding: 5px 8px;
+            padding: 3px 6px;
             background: #fafafa;
         }
 
@@ -123,14 +123,14 @@ $client_email = $data['Email'] ?? '';
 
         .info-cell {
             display: table-cell;
-            padding: 2px 5px;
+            padding: 1px 3px;
             border-bottom: 1px solid #eee;
         }
 
         .info-label {
             font-weight: bold;
             color: #001f54;
-            width: 40%;
+            width: 35%;
         }
 
         .info-value {
@@ -146,30 +146,31 @@ $client_email = $data['Email'] ?? '';
             display: table-cell;
             width: 50%;
             vertical-align: top;
-            padding-right: 10px;
+            padding-right: 5px;
         }
 
         .column:last-child {
             padding-right: 0;
-            padding-left: 10px;
+            padding-left: 5px;
         }
 
         .checkbox-group {
-            margin: 2px 0;
+            margin: 1px 0;
         }
 
         .checkbox-item {
             display: block;
-            margin: 1px 0;
-            padding-left: 15px;
+            margin: 0;
+            padding-left: 12px;
             position: relative;
+            font-size: 7px;
         }
 
         .checkbox-item:before {
             content: "\2610";
             position: absolute;
             left: 0;
-            font-size: 12px;
+            font-size: 10px;
         }
 
         .checkbox-item.checked:before {
@@ -186,9 +187,9 @@ $client_email = $data['Email'] ?? '';
         .checklist-table th,
         .checklist-table td {
             border: 1px solid #ddd;
-            padding: 2px 5px;
+            padding: 1px 3px;
             text-align: left;
-            font-size: 8px;
+            font-size: 7px;
         }
 
         .checklist-table th {
@@ -199,7 +200,7 @@ $client_email = $data['Email'] ?? '';
 
         .checklist-table td.center {
             text-align: center;
-            width: 40px;
+            width: 30px;
         }
 
         .frequency-options {
@@ -209,41 +210,41 @@ $client_email = $data['Email'] ?? '';
 
         .freq-option {
             display: table-cell;
-            padding: 3px 8px;
+            padding: 2px 5px;
             text-align: center;
         }
 
         .notes-area {
-            min-height: 30px;
+            min-height: 18px;
             border: 1px solid #ddd;
-            border-radius: 3px;
-            padding: 4px;
+            border-radius: 2px;
+            padding: 2px;
             background: white;
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
         .signature-section {
             display: table;
             width: 100%;
-            margin-top: 5px;
+            margin-top: 3px;
             page-break-inside: avoid;
         }
 
         .signature-box {
             display: table-cell;
             width: 50%;
-            padding: 5px;
+            padding: 2px;
             vertical-align: top;
         }
 
         .signature-line {
             border-bottom: 1px solid #333;
-            height: 20px;
-            margin-bottom: 3px;
+            height: 15px;
+            margin-bottom: 2px;
         }
 
         .signature-label {
-            font-size: 9px;
+            font-size: 7px;
             color: #666;
         }
 
@@ -253,31 +254,31 @@ $client_email = $data['Email'] ?? '';
 
         .footer {
             position: fixed;
-            bottom: 5px;
-            left: 10px;
-            right: 10px;
+            bottom: 3px;
+            left: 8px;
+            right: 8px;
             text-align: center;
-            font-size: 7px;
+            font-size: 6px;
             color: #999;
             border-top: 1px solid #ddd;
-            padding-top: 3px;
+            padding-top: 2px;
         }
 
         .sub-section {
-            margin: 3px 0;
-            padding: 4px;
+            margin: 2px 0;
+            padding: 2px;
             background: white;
             border: 1px solid #eee;
-            border-radius: 3px;
+            border-radius: 2px;
             page-break-inside: avoid;
         }
 
         .sub-section-title {
             font-weight: bold;
             color: #001f54;
-            font-size: 9px;
-            margin-bottom: 3px;
-            padding-bottom: 2px;
+            font-size: 8px;
+            margin-bottom: 2px;
+            padding-bottom: 1px;
             border-bottom: 1px solid #eee;
         }
 
@@ -290,7 +291,8 @@ $client_email = $data['Email'] ?? '';
 
         .inline-checkbox {
             display: inline-block;
-            margin-right: 15px;
+            margin-right: 8px;
+            font-size: 7px;
         }
 
         .photos-grid {
@@ -301,7 +303,7 @@ $client_email = $data['Email'] ?? '';
         .photo-item {
             display: table-cell;
             width: 25%;
-            padding: 5px;
+            padding: 3px;
             text-align: center;
         }
 
@@ -322,8 +324,8 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <div style="text-align: center; margin-bottom: 8px;">
-        <div class="report-title" style="font-size: 16px;">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
+    <div style="text-align: center; margin-bottom: 4px;">
+        <div class="report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
     </div>
 
     <!-- SERVICE REPORT / WORK ORDER INFO -->
@@ -335,10 +337,6 @@ $client_email = $data['Email'] ?? '';
                     <div class="info-grid">
                         <div class="info-row">
                             <div class="info-cell info-label">Work Order #:</div>
-                            <div class="info-cell info-value">__________________________</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-cell info-label">Invoice #:</div>
                             <div class="info-cell info-value">__________________________</div>
                         </div>
                     </div>
@@ -356,41 +354,20 @@ $client_email = $data['Email'] ?? '';
                     </div>
                 </div>
             </div>
-            <div style="margin-top: 10px;">
-                <span style="font-weight: bold; color: #001f54;">Frecuency:</span>
+            <div style="margin-top: 3px;">
+                <span style="font-weight: bold; color: #001f54; font-size: 7px;">Frequency:</span>
                 <span class="inline-checkbox">&square; 30 days</span>
                 <span class="inline-checkbox">&square; 60 days</span>
                 <span class="inline-checkbox">&square; 90 days</span>
                 <span class="inline-checkbox">&square; 120 days</span>
-                <span class="inline-checkbox">&square; Other: ______</span>
+                <span class="inline-checkbox">&square; Other: ____</span>
             </div>
         </div>
     </div>
 
-    <!-- 1. SERVICE INFORMATION -->
+    <!-- 1. INFORMACION DEL CLIENTE -->
     <div class="section">
-        <div class="section-header">1. SERVICE INFORMATION</div>
-        <div class="section-content">
-            <div class="two-columns">
-                <div class="column">
-                    <div class="info-grid">
-                        <div class="info-row">
-                            <div class="info-cell info-label">Work Order #:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($work_order); ?></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-cell info-label">Service Date:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($service_date); ?></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. INFORMACION DEL CLIENTE -->
-    <div class="section">
-        <div class="section-header">2. CLIENT INFORMATION</div>
+        <div class="section-header">1. CLIENT INFORMATION</div>
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
@@ -405,25 +382,13 @@ $client_email = $data['Email'] ?? '';
                         </div>
                     </div>
                 </div>
-                <div class="column">
-                    <div class="info-grid">
-                        <div class="info-row">
-                            <div class="info-cell info-label">Contact Person:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($client_contact); ?></div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-cell info-label">Email:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($client_email); ?></div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. SISTEMA SERVICIADO -->
+    <!-- 2. SISTEMA SERVICIADO -->
     <div class="section">
-        <div class="section-header">3. SYSTEM SERVICED</div>
+        <div class="section-header">2. SYSTEM SERVICED</div>
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
@@ -440,9 +405,9 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 4. INSPECTION CHECKLIST, RESULTS & ROOF INSPECTION (CONSOLIDATED) -->
+    <!-- 3. INSPECTION CHECKLIST, RESULTS & ROOF INSPECTION (CONSOLIDATED) -->
     <div class="section">
-        <div class="section-header">4. INSPECTION CHECKLIST, RESULTS & ROOF INSPECTION</div>
+        <div class="section-header">3. INSPECTION CHECKLIST, RESULTS & ROOF INSPECTION</div>
         <div class="section-content">
             <table class="checklist-table">
                 <thead>
@@ -555,9 +520,9 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 5. SERVICE PERFORMED (CLEANING) -->
+    <!-- 4. SERVICE PERFORMED (CLEANING) -->
     <div class="section">
-        <div class="section-header">5. SERVICE PERFORMED (CLEANING)</div>
+        <div class="section-header">4. SERVICE PERFORMED (CLEANING)</div>
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
@@ -576,9 +541,9 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 6. TECHNICAL SYSTEM DATA -->
+    <!-- 5. TECHNICAL SYSTEM DATA -->
     <div class="section">
-        <div class="section-header">6. TECHNICAL SYSTEM DATA</div>
+        <div class="section-header">5. TECHNICAL SYSTEM DATA</div>
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
@@ -610,29 +575,29 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 7. TECHNICIAN NOTES & SIGNATURES -->
+    <!-- 6. TECHNICIAN NOTES & SIGNATURES -->
     <div class="section">
-        <div class="section-header">7. TECHNICIAN NOTES & SIGNATURES</div>
+        <div class="section-header">6. TECHNICIAN NOTES & SIGNATURES</div>
         <div class="section-content">
-            <p style="font-weight: bold; color: #001f54; font-size: 9px; margin-bottom: 2px;">Notes / Observations:</p>
-            <div class="notes-area" style="min-height: 35px;"></div>
+            <p style="font-weight: bold; color: #001f54; font-size: 7px; margin-bottom: 1px;">Notes / Observations:</p>
+            <div class="notes-area" style="min-height: 15px;"></div>
 
-            <div class="signature-section" style="margin-top: 8px;">
+            <div class="signature-section" style="margin-top: 3px;">
                 <div class="signature-box">
-                    <p style="font-weight: bold; margin-bottom: 3px; color: #001f54; font-size: 9px;">Responsible Technician:</p>
-                    <p style="font-size: 8px;">Name: _____________________ Signature: _____________________</p>
-                    <p style="font-size: 8px; margin-top: 3px;">Date: ____/____/______</p>
+                    <p style="font-weight: bold; margin-bottom: 1px; color: #001f54; font-size: 7px;">Responsible Technician:</p>
+                    <p style="font-size: 7px;">Name: _________________ Signature: _________________</p>
+                    <p style="font-size: 7px; margin-top: 1px;">Date: ____/____/______</p>
                 </div>
                 <div class="signature-box">
-                    <p style="font-weight: bold; margin-bottom: 3px; color: #001f54; font-size: 9px;">Client / Manager:</p>
-                    <p style="font-size: 8px;">Name: _____________________ Signature: _____________________</p>
-                    <p style="font-size: 8px; margin-top: 3px;">Date: ____/____/______</p>
+                    <p style="font-weight: bold; margin-bottom: 1px; color: #001f54; font-size: 7px;">Client / Manager:</p>
+                    <p style="font-size: 7px;">Name: _________________ Signature: _________________</p>
+                    <p style="font-size: 7px; margin-top: 1px;">Date: ____/____/______</p>
                 </div>
             </div>
 
-            <div style="margin-top: 6px; padding: 5px; background: #e8f5e9; border-radius: 3px; border-left: 3px solid #28a745;">
-                <p style="font-weight: bold; color: #1b5e20; font-size: 8px;">ACKNOWLEDGEMENT OF KITCHEN CONDITION & SERVICE COMPLETED</p>
-                <p style="font-size: 7px; color: #333; margin-top: 2px;">By signing above, the customer acknowledges that the service was completed and the kitchen was left clean and in satisfactory condition.</p>
+            <div style="margin-top: 3px; padding: 3px; background: #e8f5e9; border-radius: 2px; border-left: 2px solid #28a745;">
+                <p style="font-weight: bold; color: #1b5e20; font-size: 7px;">ACKNOWLEDGEMENT OF KITCHEN CONDITION & SERVICE COMPLETED</p>
+                <p style="font-size: 6px; color: #333; margin-top: 1px;">By signing above, the customer acknowledges that the service was completed and the kitchen was left clean and in satisfactory condition.</p>
             </div>
         </div>
     </div>
