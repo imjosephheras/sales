@@ -37,15 +37,15 @@ try {
     $db = Database::getInstance()->getConnection();
     $userId = getCurrentUserId();
     
-    $query = "SELECT 
+    $query = "SELECT
                 e.*,
-                c.name as category_name,
-                c.code as category_code,
-                c.color as category_color
+                c.category_name,
+                c.color_hex as category_color,
+                c.icon as category_icon
               FROM events e
-              LEFT JOIN event_categories c ON e.category_id = c.id
-              WHERE e.id = :event_id 
-              AND e.user_id = :user_id 
+              LEFT JOIN event_categories c ON e.category_id = c.category_id
+              WHERE e.event_id = :event_id
+              AND e.user_id = :user_id
               AND e.is_active = TRUE";
     
     $stmt = $db->prepare($query);
