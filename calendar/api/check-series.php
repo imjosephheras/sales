@@ -23,9 +23,9 @@ try {
     $userId = getCurrentUserId();
     
     // Get event
-    $query = "SELECT id, title, series_master_id, series_index, series_total 
-              FROM events 
-              WHERE id = :event_id AND user_id = :user_id AND is_active = TRUE";
+    $query = "SELECT event_id, title, series_master_id, series_index, series_total
+              FROM events
+              WHERE event_id = :event_id AND user_id = :user_id AND is_active = TRUE";
     $stmt = $db->prepare($query);
     $stmt->bindParam(':event_id', $eventId, PDO::PARAM_INT);
     $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
@@ -45,9 +45,9 @@ try {
     // Get master info if this is a child
     $masterInfo = null;
     if ($isChild) {
-        $masterQuery = "SELECT id, title, start_date, document_date 
-                        FROM events 
-                        WHERE id = :master_id";
+        $masterQuery = "SELECT event_id, title, start_date, document_date
+                        FROM events
+                        WHERE event_id = :master_id";
         $masterStmt = $db->prepare($masterQuery);
         $masterStmt->bindParam(':master_id', $event['series_master_id'], PDO::PARAM_INT);
         $masterStmt->execute();
