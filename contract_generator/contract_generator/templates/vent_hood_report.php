@@ -338,23 +338,23 @@ $client_email = $data['Email'] ?? '';
                 <div class="column">
                     <div class="info-grid">
                         <div class="info-row">
-                            <div class="info-cell info-label">Fecha de servicio:</div>
+                            <div class="info-cell info-label">Service date:</div>
                             <div class="info-cell info-value">____ / ____ / ______</div>
                         </div>
                         <div class="info-row">
-                            <div class="info-cell info-label">Próxima fecha recomendada:</div>
+                            <div class="info-cell info-label">Next recommended date:</div>
                             <div class="info-cell info-value">____ / ____ / ______</div>
                         </div>
                     </div>
                 </div>
             </div>
             <div style="margin-top: 10px;">
-                <span style="font-weight: bold; color: #001f54;">Frecuencia:</span>
-                <span class="inline-checkbox">&square; 30 días</span>
-                <span class="inline-checkbox">&square; 60 días</span>
-                <span class="inline-checkbox">&square; 90 días</span>
-                <span class="inline-checkbox">&square; 120 días</span>
-                <span class="inline-checkbox">&square; Otro: ______</span>
+                <span style="font-weight: bold; color: #001f54;">Frecuency:</span>
+                <span class="inline-checkbox">&square; 30 days</span>
+                <span class="inline-checkbox">&square; 60 days</span>
+                <span class="inline-checkbox">&square; 90 days</span>
+                <span class="inline-checkbox">&square; 120 days</span>
+                <span class="inline-checkbox">&square; Other: ______</span>
             </div>
         </div>
     </div>
@@ -422,9 +422,9 @@ $client_email = $data['Email'] ?? '';
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
-                    <div class="checkbox-item">Main Hood (Campana principal)</div>
-                    <div class="checkbox-item">Extraction Ducts (Ductos de extraccion)</div>
-                    <div class="checkbox-item">Roof Fan (Ventilador en techo)</div>
+                    <div class="checkbox-item">Main Hood </div>
+                    <div class="checkbox-item">Extraction Ducts </div>
+                    <div class="checkbox-item">Roof Fan </div>
                 </div>
                 <div class="column">
                     <div class="checkbox-item">Grease Gutter</div>
