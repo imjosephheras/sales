@@ -82,6 +82,11 @@
             box-shadow: 0 4px 15px rgba(111,66,193,0.35);
         }
 
+        .btn-confirmation {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            box-shadow: 0 4px 15px rgba(23,162,184,0.35);
+        }
+
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.35);
@@ -139,6 +144,10 @@
 
     <a href="billing/" class="btn btn-billing">
         <span>💰</span> Billing / Accounting
+    </a>
+
+    <a href="service_confirmation/" class="btn btn-confirmation">
+        <span>✅</span> Service Confirmation
     </a>
 
 </div>
