@@ -32,18 +32,47 @@
     // ==========================================
 
     function loadPending(search) {
-        const url = 'controllers/get_pending.php' + (search ? '?search=' + encodeURIComponent(search) : '');
-        fetch(url)
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    pendingDocs = data.data;
-                    renderPendingList();
-                }
-            })
-            .catch(() => {
-                pendingList.innerHTML = '<div class="error-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading documents</p></div>';
+        // Load from billing_documents table
+        const url1 = 'controllers/get_pending.php' + (search ? '?search=' + encodeURIComponent(search) : '');
+        // Load from requests table (services marked as ready to invoice from Module 10)
+        const url2 = 'controllers/get_ready_to_invoice.php' + (search ? '?search=' + encodeURIComponent(search) : '');
+
+        Promise.all([
+            fetch(url1).then(r => r.json()).catch(() => ({ success: false, data: [] })),
+            fetch(url2).then(r => r.json()).catch(() => ({ success: false, data: [] }))
+        ])
+        .then(([billingData, servicesData]) => {
+            pendingDocs = [];
+
+            // Add billing documents
+            if (billingData.success && billingData.data) {
+                billingData.data.forEach(doc => {
+                    doc.source = 'billing';
+                    pendingDocs.push(doc);
+                });
+            }
+
+            // Add completed services from Module 10 (ready to invoice)
+            if (servicesData.success && servicesData.data) {
+                servicesData.data.forEach(service => {
+                    service.source = 'service_confirmation';
+                    service.document_type = 'Service Completed';
+                    pendingDocs.push(service);
+                });
+            }
+
+            // Sort by date (newest first)
+            pendingDocs.sort((a, b) => {
+                const dateA = new Date(a.completed_at || a.created_at);
+                const dateB = new Date(b.completed_at || b.created_at);
+                return dateB - dateA;
             });
+
+            renderPendingList();
+        })
+        .catch(() => {
+            pendingList.innerHTML = '<div class="error-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading documents</p></div>';
+        });
     }
 
     function loadHistory(search) {
@@ -73,24 +102,39 @@
             return;
         }
 
-        pendingList.innerHTML = pendingDocs.map(doc => `
-            <div class="doc-card ${doc.id == selectedDocId ? 'active' : ''}" data-id="${doc.id}" onclick="BillingApp.selectDocument(${doc.id})">
+        pendingList.innerHTML = pendingDocs.map(doc => {
+            const isFromService = doc.source === 'service_confirmation';
+            const badgeClass = isFromService ? 'service-badge' : '';
+            const badgeIcon = isFromService ? 'fa-clipboard-check' : 'fa-file-pdf';
+
+            return `
+            <div class="doc-card ${doc.id == selectedDocId ? 'active' : ''} ${isFromService ? 'from-service' : ''}"
+                 data-id="${doc.id}"
+                 data-source="${doc.source || 'billing'}"
+                 onclick="BillingApp.selectDocument(${doc.id})">
                 <div class="doc-card-header">
-                    <span class="doc-type-badge">${escapeHtml(doc.document_type || 'Invoice')}</span>
-                    <i class="fas fa-file-pdf doc-pdf-icon"></i>
+                    <span class="doc-type-badge ${badgeClass}">${escapeHtml(doc.document_type || 'Invoice')}</span>
+                    <i class="fas ${badgeIcon} doc-pdf-icon"></i>
                 </div>
                 <div class="doc-card-body">
                     <div class="doc-order-number">
-                        <i class="fas fa-hashtag"></i> ${escapeHtml(doc.order_number)}
+                        <i class="fas fa-hashtag"></i> ${escapeHtml(doc.order_number || 'N/A')}
                     </div>
                     <h3>${escapeHtml(doc.client_name || doc.company_name || 'N/A')}</h3>
                     <p>${escapeHtml(doc.company_name || '')}</p>
+                    ${isFromService ? `
+                    <div class="service-info">
+                        <span class="service-type"><i class="fas fa-tools"></i> ${escapeHtml(doc.service_type || '')}</span>
+                        <span class="seller"><i class="fas fa-user"></i> ${escapeHtml(doc.seller || '')}</span>
+                    </div>
+                    ` : ''}
                 </div>
                 <div class="doc-card-meta">
-                    <span class="doc-date"><i class="fas fa-calendar-alt"></i> ${formatDate(doc.created_at)}</span>
+                    <span class="doc-date"><i class="fas fa-calendar-alt"></i> ${formatDate(doc.completed_at || doc.created_at)}</span>
+                    ${doc.price ? `<span class="doc-price"><i class="fas fa-dollar-sign"></i> ${escapeHtml(doc.price)}</span>` : ''}
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     }
 
     function renderHistoryList() {

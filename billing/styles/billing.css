@@ -337,6 +337,50 @@ body {
     gap: 0.25rem;
 }
 
+.doc-price {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--success-color);
+    font-weight: 600;
+}
+
+/* Service cards from Module 10 */
+.doc-card.from-service {
+    border-left: 4px solid var(--info-color);
+}
+
+.doc-card.from-service:hover {
+    border-left-color: var(--info-color);
+}
+
+.doc-type-badge.service-badge {
+    background: #e0f7fa;
+    color: #00838f;
+}
+
+.service-info {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-gray);
+}
+
+.service-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.service-type {
+    color: var(--info-color);
+}
+
+.seller {
+    color: var(--primary-color);
+}
+
 /* ============================================
    COLUMN 2: VIEWER PANEL
    ============================================ */
