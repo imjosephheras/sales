@@ -1,19 +1,22 @@
 <?php
 /**
- * ADMIN PANEL (Module 10)
+ * ADMIN PANEL (Module 10) - Task Tracking
  * 3-column layout:
- * - Left: Pending services (awaiting confirmation)
- * - Center: Service details viewer
+ * - Left: All services with progress indicators
+ * - Center: Task tracking checklist with multiple checkboxes
  * - Right: Complete history
  *
  * This panel shows ALL forms from ALL sellers.
- * Used to manage and confirm all service requests.
+ * Used to TRACK progress of all service requests internally.
  *
- * Workflow:
- * 1. Services appear in pending after contract is completed
- * 2. User marks service as Completed/Not Completed
- * 3. If Completed -> PDF generated, moved to billing "Ready to Invoice"
- * 4. All records remain in history (never deleted)
+ * Purpose:
+ * - See at a glance what has been done and what is pending
+ * - Mark individual tasks as completed (site visit, quote sent, etc.)
+ * - Keep internal notes for each service
+ * - No need to ask sellers - just check the panel
+ *
+ * Note: Sellers confirm from their Request Form.
+ * This panel is for internal management/tracking only.
  */
 require_once 'config/db_config.php';
 session_start();

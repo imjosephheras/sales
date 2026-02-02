@@ -1,8 +1,8 @@
 <?php
 /**
  * get_pending_services.php
- * Returns all services with status = 'pending' (awaiting confirmation)
- * Also returns services with document status = 'completed' (contract generated)
+ * Returns all services for tracking in Admin Panel
+ * Shows all completed documents with their task tracking progress
  */
 
 header('Content-Type: application/json');
@@ -12,22 +12,16 @@ try {
     $pdo = getDBConnection();
 
     // Get filter from query string
-    $filter = $_GET['filter'] ?? 'pending';
     $seller = $_GET['seller'] ?? '';
     $search = $_GET['search'] ?? '';
+    $progress = $_GET['progress'] ?? ''; // not_started, in_progress, completed
 
     // Build query based on filter
     $whereConditions = [];
     $params = [];
 
-    if ($filter === 'pending') {
-        // Services pending confirmation (document is completed but service not done yet)
-        $whereConditions[] = "(service_status = 'pending' OR service_status IS NULL)";
-        $whereConditions[] = "status = 'completed'"; // Document/contract is completed
-    } elseif ($filter === 'all_pending') {
-        // All pending (document pending + service pending)
-        $whereConditions[] = "(service_status = 'pending' OR service_status IS NULL)";
-    }
+    // Only show completed documents (contract generated)
+    $whereConditions[] = "status = 'completed'";
 
     // Filter by seller if provided
     if (!empty($seller)) {
@@ -62,6 +56,8 @@ try {
             order_number,
             status,
             service_status,
+            task_tracking,
+            admin_notes,
             document_type,
             created_at,
             updated_at
@@ -74,31 +70,53 @@ try {
     $stmt->execute($params);
     $services = $stmt->fetchAll();
 
-    // Get count by service_status for summary
-    $countSql = "
-        SELECT
-            COALESCE(service_status, 'pending') as status,
-            COUNT(*) as count
-        FROM requests
-        WHERE status = 'completed'
-        GROUP BY COALESCE(service_status, 'pending')
-    ";
-    $countStmt = $pdo->query($countSql);
-    $counts = $countStmt->fetchAll(PDO::FETCH_KEY_PAIR);
+    // Define total number of tasks
+    $total_tasks = 9;
+
+    // Filter by progress if provided (done in PHP to handle JSON parsing)
+    if (!empty($progress)) {
+        $services = array_filter($services, function($service) use ($progress, $total_tasks) {
+            $tracking = json_decode($service['task_tracking'] ?? '{}', true) ?: [];
+            $completed = count(array_filter($tracking, function($v) { return $v === true; }));
+
+            switch ($progress) {
+                case 'not_started':
+                    return $completed === 0;
+                case 'in_progress':
+                    return $completed > 0 && $completed < $total_tasks;
+                case 'completed':
+                    return $completed === $total_tasks;
+                default:
+                    return true;
+            }
+        });
+        $services = array_values($services); // Re-index array
+    }
+
+    // Calculate progress stats
+    $stats = ['not_started' => 0, 'in_progress' => 0, 'completed' => 0];
+    foreach ($services as $service) {
+        $tracking = json_decode($service['task_tracking'] ?? '{}', true) ?: [];
+        $completed = count(array_filter($tracking, function($v) { return $v === true; }));
+
+        if ($completed === 0) {
+            $stats['not_started']++;
+        } elseif ($completed === $total_tasks) {
+            $stats['completed']++;
+        } else {
+            $stats['in_progress']++;
+        }
+    }
 
     echo json_encode([
         'success' => true,
         'services' => $services,
-        'counts' => [
-            'pending' => (int)($counts['pending'] ?? 0),
-            'completed' => (int)($counts['completed'] ?? 0),
-            'not_completed' => (int)($counts['not_completed'] ?? 0)
-        ],
+        'stats' => $stats,
         'total' => count($services)
     ]);
 
 } catch (Exception $e) {
-    error_log("Error getting pending services: " . $e->getMessage());
+    error_log("Error getting services: " . $e->getMessage());
     echo json_encode([
         'success' => false,
         'message' => 'Error loading services: ' . $e->getMessage()

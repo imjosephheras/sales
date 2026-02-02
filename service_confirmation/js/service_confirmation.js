@@ -1,6 +1,6 @@
 /**
- * Service Confirmation Module - JavaScript
- * Module 10: Handles service status confirmation workflow
+ * Admin Panel - Task Tracking Module
+ * Manages service task tracking with multiple checkboxes
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -8,14 +8,28 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPage = 1;
     let totalPages = 1;
     let selectedServiceId = null;
-    let pendingServices = [];
+    let services = [];
     let historyData = [];
+    let saveTimeout = null;
+
+    // Task definitions
+    const TASKS = [
+        'site_visit',
+        'quote_sent',
+        'contract_signed',
+        'staff_assigned',
+        'equipment_ready',
+        'work_started',
+        'work_completed',
+        'client_approved',
+        'invoice_ready'
+    ];
 
     // Initialize
     init();
 
     function init() {
-        loadPendingServices();
+        loadServices();
         loadHistory();
         setupEventListeners();
     }
@@ -24,14 +38,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event Listeners
     // ========================================
     function setupEventListeners() {
-        // Search pending
+        // Search services
         document.getElementById('search-pending').addEventListener('input', debounce(function(e) {
-            loadPendingServices({ search: e.target.value });
+            loadServices({ search: e.target.value });
         }, 300));
 
         // Filter by seller
         document.getElementById('filter-seller').addEventListener('change', function(e) {
-            loadPendingServices({ seller: e.target.value });
+            loadServices({ seller: e.target.value });
+        });
+
+        // Filter by progress
+        document.getElementById('filter-progress').addEventListener('change', function(e) {
+            loadServices({ progress: e.target.value });
         });
 
         // Search history
@@ -61,44 +80,41 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ========================================
-    // Load Pending Services
+    // Load Services
     // ========================================
-    function loadPendingServices(filters = {}) {
+    function loadServices(filters = {}) {
         const pendingList = document.getElementById('pending-list');
         pendingList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
 
-        const params = new URLSearchParams({
-            filter: 'pending',
-            ...filters
-        });
+        const params = new URLSearchParams(filters);
 
         fetch(`controllers/get_pending_services.php?${params}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    pendingServices = data.services;
-                    renderPendingServices(data.services);
-                    updatePendingCount(data.total);
+                    services = data.services;
+                    renderServices(data.services);
+                    updateServiceCount(data.total);
                     populateSellerFilter(data.services);
                 } else {
                     pendingList.innerHTML = `<div class="error-message">${data.message}</div>`;
                 }
             })
             .catch(error => {
-                console.error('Error loading pending services:', error);
+                console.error('Error loading services:', error);
                 pendingList.innerHTML = '<div class="error-message">Error loading services</div>';
             });
     }
 
-    function renderPendingServices(services) {
+    function renderServices(serviceList) {
         const pendingList = document.getElementById('pending-list');
         const template = document.getElementById('service-card-template');
 
-        if (services.length === 0) {
+        if (serviceList.length === 0) {
             pendingList.innerHTML = `
                 <div class="empty-state">
-                    <i class="fas fa-check-double"></i>
-                    <p>No pending services</p>
+                    <i class="fas fa-clipboard-check"></i>
+                    <p>No services found</p>
                 </div>
             `;
             return;
@@ -106,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         pendingList.innerHTML = '';
 
-        services.forEach(service => {
+        serviceList.forEach(service => {
             const card = template.content.cloneNode(true);
             const cardEl = card.querySelector('.service-card');
 
@@ -119,38 +135,45 @@ document.addEventListener('DOMContentLoaded', function() {
             card.querySelector('.seller').textContent = service.Seller || '';
             card.querySelector('.price').textContent = service.PriceInput || '';
 
-            // Event: View details
-            cardEl.addEventListener('click', function(e) {
-                if (!e.target.closest('.btn-action')) {
-                    selectService(service.id);
-                }
-            });
+            // Calculate progress
+            const tracking = parseTaskTracking(service.task_tracking);
+            const completedTasks = countCompletedTasks(tracking);
+            const progressPercent = (completedTasks / TASKS.length) * 100;
 
-            // Event: Mark as completed
-            card.querySelector('.btn-complete').addEventListener('click', function(e) {
-                e.stopPropagation();
-                updateServiceStatus(service.id, 'completed');
-            });
+            // Update progress bar
+            const progressFill = card.querySelector('.progress-fill-mini');
+            const progressLabel = card.querySelector('.progress-label');
+            progressFill.style.width = `${progressPercent}%`;
+            progressLabel.textContent = `${completedTasks}/${TASKS.length}`;
 
-            // Event: Mark as not completed
-            card.querySelector('.btn-not-complete').addEventListener('click', function(e) {
-                e.stopPropagation();
-                updateServiceStatus(service.id, 'not_completed');
+            // Color based on progress
+            if (progressPercent === 100) {
+                progressFill.classList.add('complete');
+                cardEl.classList.add('card-complete');
+            } else if (progressPercent > 0) {
+                progressFill.classList.add('in-progress');
+            }
+
+            // Click to select
+            cardEl.addEventListener('click', function() {
+                selectService(service.id);
             });
 
             pendingList.appendChild(card);
         });
     }
 
-    function updatePendingCount(count) {
+    function updateServiceCount(count) {
         document.querySelector('.pending-count').textContent = count;
     }
 
-    function populateSellerFilter(services) {
+    function populateSellerFilter(serviceList) {
         const select = document.getElementById('filter-seller');
-        const sellers = [...new Set(services.map(s => s.Seller).filter(Boolean))];
+        const sellers = [...new Set(serviceList.map(s => s.Seller).filter(Boolean))];
 
-        // Keep first option
+        // Keep current selection
+        const currentValue = select.value;
+
         select.innerHTML = '<option value="">All Sellers</option>';
         sellers.forEach(seller => {
             const option = document.createElement('option');
@@ -158,6 +181,8 @@ document.addEventListener('DOMContentLoaded', function() {
             option.textContent = seller;
             select.appendChild(option);
         });
+
+        select.value = currentValue;
     }
 
     // ========================================
@@ -165,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================
     function loadHistory(filters = {}) {
         const historyList = document.getElementById('history-list');
-        historyList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading history...</div>';
+        historyList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
 
         const params = new URLSearchParams({
             page: currentPage,
@@ -213,23 +238,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
             itemEl.dataset.id = record.id;
 
-            // Status icon and badge
-            const status = record.service_status || 'pending';
+            // Calculate progress for status
+            const tracking = parseTaskTracking(record.task_tracking);
+            const completedTasks = countCompletedTasks(tracking);
+            const progressPercent = (completedTasks / TASKS.length) * 100;
+
             const statusIcon = item.querySelector('.status-icon');
             const statusBadge = item.querySelector('.status-badge');
 
-            if (status === 'completed') {
+            if (progressPercent === 100) {
                 statusIcon.className = 'status-icon fas fa-check-circle text-success';
-                statusBadge.textContent = 'Completed';
+                statusBadge.textContent = 'Complete';
                 statusBadge.className = 'status-badge badge-success';
-            } else if (status === 'not_completed') {
-                statusIcon.className = 'status-icon fas fa-times-circle text-danger';
-                statusBadge.textContent = 'Not Done';
-                statusBadge.className = 'status-badge badge-danger';
-            } else {
-                statusIcon.className = 'status-icon fas fa-clock text-warning';
-                statusBadge.textContent = 'Pending';
+            } else if (progressPercent > 0) {
+                statusIcon.className = 'status-icon fas fa-spinner text-warning';
+                statusBadge.textContent = `${completedTasks}/${TASKS.length}`;
                 statusBadge.className = 'status-badge badge-warning';
+            } else {
+                statusIcon.className = 'status-icon fas fa-circle text-muted';
+                statusBadge.textContent = 'Not Started';
+                statusBadge.className = 'status-badge badge-secondary';
             }
 
             item.querySelector('.nomenclature').textContent = record.Order_Nomenclature || `#${record.id}`;
@@ -256,8 +284,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateStats(stats) {
         document.getElementById('stat-completed').textContent = stats.completed || 0;
-        document.getElementById('stat-not-completed').textContent = stats.not_completed || 0;
-        document.getElementById('stat-pending').textContent = stats.pending || 0;
+        document.getElementById('stat-not-completed').textContent = stats.in_progress || 0;
+        document.getElementById('stat-pending').textContent = stats.not_started || 0;
         document.getElementById('stat-invoice').textContent = stats.ready_to_invoice || 0;
         document.querySelector('.history-count').textContent = stats.total || 0;
     }
@@ -316,14 +344,29 @@ document.addEventListener('DOMContentLoaded', function() {
         const template = document.getElementById('detail-template');
         const detail = template.content.cloneNode(true);
 
-        // Status
-        const status = request.service_status || 'pending';
-        const statusEl = detail.querySelector('.current-status');
-        statusEl.textContent = status === 'completed' ? 'COMPLETED' :
-                               status === 'not_completed' ? 'NOT COMPLETED' : 'PENDING';
-        statusEl.className = `current-status status-${status}`;
-
+        // Nomenclature
         detail.querySelector('.nomenclature-badge').textContent = request.Order_Nomenclature || `#${request.id}`;
+
+        // Parse task tracking
+        const tracking = parseTaskTracking(request.task_tracking);
+        const completedTasks = countCompletedTasks(tracking);
+        const progressPercent = (completedTasks / TASKS.length) * 100;
+
+        // Update progress indicator
+        detail.querySelector('.progress-text').textContent = `${completedTasks}/${TASKS.length} tasks`;
+        detail.querySelector('.progress-fill').style.width = `${progressPercent}%`;
+
+        // Set checkbox states
+        const checkboxes = detail.querySelectorAll('.task-checklist input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            const taskName = checkbox.dataset.task;
+            checkbox.checked = tracking[taskName] || false;
+
+            // Add change event
+            checkbox.addEventListener('change', function() {
+                saveTaskTracking(request.id);
+            });
+        });
 
         // Service info
         detail.querySelector('.service-type').textContent = request.Service_Type || '-';
@@ -336,103 +379,141 @@ document.addEventListener('DOMContentLoaded', function() {
         detail.querySelector('.client-name').textContent = request.client_name || '-';
         detail.querySelector('.email').textContent = request.Email || '-';
         detail.querySelector('.phone').textContent = request.Number_Phone || '-';
-        detail.querySelector('.address').textContent = request.Company_Address || '-';
 
         // Dates
-        detail.querySelector('.document-date').textContent = formatDate(request.Document_Date) || '-';
         detail.querySelector('.work-date').textContent = formatDate(request.Work_Date) || '-';
         detail.querySelector('.created-at').textContent = formatDateTime(request.created_at) || '-';
-        detail.querySelector('.completed-at').textContent = formatDateTime(request.service_completed_at) || '-';
 
-        // Observations
+        // Admin notes
+        const notesInput = detail.querySelector('#adminNotes');
+        notesInput.value = request.admin_notes || '';
+        notesInput.dataset.id = request.id;
+        notesInput.addEventListener('input', debounce(function() {
+            saveAdminNotes(request.id, this.value);
+        }, 500));
+
+        // Observations from seller
         const observations = [];
         if (request.Site_Observation) observations.push(request.Site_Observation);
         if (request.Additional_Comments) observations.push(request.Additional_Comments);
-        detail.querySelector('.observations-content').textContent = observations.join('\n\n') || 'No observations';
-
-        // Action buttons
-        const markCompleteBtn = detail.querySelector('.btn-mark-complete');
-        const markNotCompleteBtn = detail.querySelector('.btn-mark-not-complete');
-        const resetPendingBtn = detail.querySelector('.btn-reset-pending');
-
-        markCompleteBtn.dataset.id = request.id;
-        markNotCompleteBtn.dataset.id = request.id;
-        resetPendingBtn.dataset.id = request.id;
-
-        markCompleteBtn.addEventListener('click', () => updateServiceStatus(request.id, 'completed'));
-        markNotCompleteBtn.addEventListener('click', () => updateServiceStatus(request.id, 'not_completed'));
-        resetPendingBtn.addEventListener('click', () => updateServiceStatus(request.id, 'pending'));
-
-        // Show/hide buttons based on current status
-        if (status === 'completed') {
-            markCompleteBtn.style.display = 'none';
-        } else if (status === 'not_completed') {
-            markNotCompleteBtn.style.display = 'none';
-        } else {
-            resetPendingBtn.style.display = 'none';
-        }
+        detail.querySelector('.observations-content').textContent = observations.join('\n\n') || 'No notes from seller';
 
         detailContent.innerHTML = '';
         detailContent.appendChild(detail);
     }
 
     // ========================================
-    // Update Service Status
+    // Save Task Tracking
     // ========================================
-    function updateServiceStatus(serviceId, newStatus) {
-        const statusLabels = {
-            'completed': 'COMPLETED',
-            'not_completed': 'NOT COMPLETED',
-            'pending': 'PENDING'
-        };
+    function saveTaskTracking(serviceId) {
+        // Collect all checkbox states
+        const checkboxes = document.querySelectorAll('.task-checklist input[type="checkbox"]');
+        const tracking = {};
 
-        if (!confirm(`Are you sure you want to mark this service as ${statusLabels[newStatus]}?`)) {
-            return;
-        }
+        checkboxes.forEach(checkbox => {
+            tracking[checkbox.dataset.task] = checkbox.checked;
+        });
 
-        // Show loading
-        const detailContent = document.getElementById('detail-content');
-        const originalContent = detailContent.innerHTML;
-        detailContent.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Updating...</div>';
+        // Update progress indicator immediately
+        const completedTasks = countCompletedTasks(tracking);
+        const progressPercent = (completedTasks / TASKS.length) * 100;
+        document.querySelector('.progress-text').textContent = `${completedTasks}/${TASKS.length} tasks`;
+        document.querySelector('.progress-fill').style.width = `${progressPercent}%`;
 
-        fetch('controllers/update_service_status.php', {
+        // Show saving indicator
+        showSaveIndicator('saving');
+
+        // Debounce the actual save
+        if (saveTimeout) clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            fetch('controllers/save_task_tracking.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    request_id: serviceId,
+                    task_tracking: tracking
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSaveIndicator('saved');
+                    // Refresh the services list to update progress bars
+                    loadServices();
+                } else {
+                    showSaveIndicator('error');
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving:', error);
+                showSaveIndicator('error');
+            });
+        }, 300);
+    }
+
+    function saveAdminNotes(serviceId, notes) {
+        fetch('controllers/save_admin_notes.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 request_id: serviceId,
-                status: newStatus
+                admin_notes: notes
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showNotification(data.message, 'success');
-
-                // Reload data
-                loadPendingServices();
-                loadHistory();
-
-                // Reload details if still viewing same service
-                if (selectedServiceId === serviceId) {
-                    loadServiceDetails(serviceId);
-                }
-            } else {
-                showNotification(data.message, 'error');
-                detailContent.innerHTML = originalContent;
+                showSaveIndicator('saved');
             }
         })
         .catch(error => {
-            console.error('Error updating status:', error);
-            showNotification('Error updating status', 'error');
-            detailContent.innerHTML = originalContent;
+            console.error('Error saving notes:', error);
         });
+    }
+
+    function showSaveIndicator(state) {
+        const indicator = document.getElementById('saveIndicator');
+        if (!indicator) return;
+
+        indicator.classList.remove('saving', 'saved', 'error');
+
+        if (state === 'saving') {
+            indicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            indicator.classList.add('saving');
+        } else if (state === 'saved') {
+            indicator.innerHTML = '<i class="fas fa-check-circle"></i> Saved';
+            indicator.classList.add('saved');
+            setTimeout(() => indicator.classList.remove('saved'), 2000);
+        } else if (state === 'error') {
+            indicator.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error saving';
+            indicator.classList.add('error');
+        }
     }
 
     // ========================================
     // Utility Functions
     // ========================================
+    function parseTaskTracking(trackingData) {
+        if (!trackingData) return {};
+        if (typeof trackingData === 'string') {
+            try {
+                return JSON.parse(trackingData);
+            } catch (e) {
+                return {};
+            }
+        }
+        return trackingData;
+    }
+
+    function countCompletedTasks(tracking) {
+        return TASKS.filter(task => tracking[task] === true).length;
+    }
+
     function formatDate(dateString) {
         if (!dateString) return '';
         const date = new Date(dateString);
@@ -453,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return function executedFunction(...args) {
             const later = () => {
                 clearTimeout(timeout);
-                func(...args);
+                func.apply(this, args);
             };
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
@@ -461,7 +542,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function showNotification(message, type = 'info') {
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
         notification.innerHTML = `
@@ -470,11 +550,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         document.body.appendChild(notification);
-
-        // Animate in
         setTimeout(() => notification.classList.add('show'), 10);
-
-        // Remove after delay
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => notification.remove(), 300);

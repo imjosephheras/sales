@@ -763,3 +763,301 @@ body {
         flex-direction: column;
     }
 }
+
+/* ========================================
+   Task Tracking - Progress Bars
+   ======================================== */
+.card-progress {
+    padding: 10px 15px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-light);
+}
+
+.progress-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar-mini {
+    flex: 1;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill-mini {
+    height: 100%;
+    background: #90caf9;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-fill-mini.in-progress {
+    background: linear-gradient(90deg, #ffc107, #ffeb3b);
+}
+
+.progress-fill-mini.complete {
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+}
+
+.progress-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    min-width: 35px;
+}
+
+.card-complete {
+    border-color: var(--success-green) !important;
+}
+
+.card-complete .card-header {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+}
+
+/* ========================================
+   Detail Header with Progress
+   ======================================== */
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.progress-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    min-width: 150px;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-blue), #1976d2);
+    border-radius: 5px;
+    transition: width 0.3s ease;
+}
+
+/* ========================================
+   Task Checklist Styles
+   ======================================== */
+.task-tracking-section {
+    background: linear-gradient(135deg, #f8f9fa, #fff);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.task-tracking-section h3 {
+    margin-bottom: 5px;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.section-subtitle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+}
+
+.task-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    user-select: none;
+}
+
+.task-item:hover {
+    border-color: var(--primary-blue);
+    background: rgba(0, 31, 84, 0.02);
+}
+
+.task-item input[type="checkbox"] {
+    display: none;
+}
+
+.task-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    flex-shrink: 0;
+}
+
+.task-checkbox::after {
+    content: '';
+    width: 12px;
+    height: 12px;
+    background: transparent;
+    border-radius: 3px;
+    transition: var(--transition);
+}
+
+.task-item input[type="checkbox"]:checked + .task-checkbox {
+    background: var(--success-green);
+    border-color: var(--success-green);
+}
+
+.task-item input[type="checkbox"]:checked + .task-checkbox::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: white;
+    font-size: 12px;
+    background: transparent;
+}
+
+.task-item input[type="checkbox"]:checked ~ .task-label {
+    color: var(--success-green);
+}
+
+.task-item input[type="checkbox"]:checked ~ .task-label i {
+    color: var(--success-green);
+}
+
+.task-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    color: var(--text-dark);
+    transition: var(--transition);
+}
+
+.task-label i {
+    width: 20px;
+    text-align: center;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+
+/* Save Indicator */
+.save-indicator {
+    margin-top: 15px;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.save-indicator.saving {
+    opacity: 1;
+    background: #fff3cd;
+    color: #856404;
+}
+
+.save-indicator.saved {
+    opacity: 1;
+    background: #d4edda;
+    color: #155724;
+}
+
+.save-indicator.error {
+    opacity: 1;
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* ========================================
+   Admin Notes
+   ======================================== */
+.admin-notes-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    transition: var(--transition);
+}
+
+.admin-notes-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(0, 31, 84, 0.1);
+}
+
+.admin-notes-input::placeholder {
+    color: #aaa;
+}
+
+/* Observations readonly */
+.observations-content.readonly {
+    background: #f8f9fa;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    border: 1px dashed var(--border-color);
+}
+
+/* ========================================
+   Compact Detail Grid
+   ======================================== */
+.detail-grid.compact {
+    gap: 10px;
+}
+
+.detail-grid.compact .detail-item {
+    padding: 8px 12px;
+    background: var(--bg-light);
+    border-radius: 6px;
+}
+
+.detail-grid.compact .detail-item label {
+    font-size: 0.7rem;
+}
+
+.detail-grid.compact .detail-item span {
+    font-size: 0.9rem;
+}
+
+/* ========================================
+   History Badge Styles
+   ======================================== */
+.badge-secondary {
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.text-muted {
+    color: #adb5bd !important;
+}
