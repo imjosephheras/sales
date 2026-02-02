@@ -1327,8 +1327,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (formData.service_status || formData.status) {
       const serviceStatus = formData.service_status || formData.status || 'pending';
       console.log('✅ Loading service status:', serviceStatus);
-      if (typeof updateStatusDisplay === 'function') {
-        updateStatusDisplay(serviceStatus);
+      const statusSelect = document.getElementById('service_status');
+      if (statusSelect) {
+        statusSelect.value = serviceStatus;
       }
     }
 
