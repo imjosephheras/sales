@@ -85,6 +85,8 @@ try {
             order_number,
             status,
             service_status,
+            task_tracking,
+            admin_notes,
             service_completed_at,
             ready_to_invoice,
             final_pdf_path,

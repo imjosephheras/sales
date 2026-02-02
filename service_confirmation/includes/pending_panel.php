@@ -1,6 +1,6 @@
-<!-- Pending Services Panel -->
+<!-- Services Panel - Task Tracking View -->
 <div class="panel-header">
-    <h2><i class="fas fa-clock"></i> Pending Services</h2>
+    <h2><i class="fas fa-clipboard-list"></i> Services</h2>
     <span class="badge pending-count">0</span>
 </div>
 
@@ -8,6 +8,12 @@
     <input type="text" id="search-pending" placeholder="Search..." class="search-input">
     <select id="filter-seller" class="filter-select">
         <option value="">All Sellers</option>
+    </select>
+    <select id="filter-progress" class="filter-select">
+        <option value="">All Progress</option>
+        <option value="not_started">Not Started</option>
+        <option value="in_progress">In Progress</option>
+        <option value="completed">Completed</option>
     </select>
 </div>
 
@@ -34,13 +40,14 @@
             </div>
             <div class="price"></div>
         </div>
-        <div class="card-actions">
-            <button class="btn-action btn-complete" title="Mark as Completed">
-                <i class="fas fa-check"></i> Completed
-            </button>
-            <button class="btn-action btn-not-complete" title="Mark as Not Completed">
-                <i class="fas fa-times"></i> Not Done
-            </button>
+        <!-- Progress indicator instead of action buttons -->
+        <div class="card-progress">
+            <div class="progress-mini">
+                <div class="progress-bar-mini">
+                    <div class="progress-fill-mini" style="width: 0%"></div>
+                </div>
+                <span class="progress-label">0/9</span>
+            </div>
         </div>
     </div>
 </template>
