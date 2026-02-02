@@ -75,6 +75,30 @@ function addServiceConfirmationColumns($pdo) {
             $pdo->exec("ALTER TABLE `requests` ADD COLUMN `final_pdf_path` VARCHAR(500) DEFAULT NULL");
         }
 
+        // Check and add Document_Date column (Section 9)
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'Document_Date'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `Document_Date` DATE DEFAULT NULL COMMENT 'Fecha del documento (Q30)'");
+        }
+
+        // Check and add Work_Date column (Section 9)
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'Work_Date'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `Work_Date` DATE DEFAULT NULL COMMENT 'Fecha del trabajo (Q31)'");
+        }
+
+        // Check and add order_number column (Section 9)
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'order_number'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `order_number` INT DEFAULT NULL COMMENT 'Order number 1000-9999, reusable'");
+        }
+
+        // Check and add Order_Nomenclature column (Section 9)
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'Order_Nomenclature'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `Order_Nomenclature` VARCHAR(50) DEFAULT NULL COMMENT 'Auto-generated nomenclature'");
+        }
+
         // Add indexes if they don't exist
         $stmt = $pdo->query("SHOW INDEX FROM `requests` WHERE Key_name = 'idx_service_status'");
         if ($stmt->rowCount() == 0) {
