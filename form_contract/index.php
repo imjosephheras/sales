@@ -434,8 +434,18 @@ $lang = $_SESSION["lang"] ?? "en";
 }
 
 .form-card-status.pending {
-    background: #dbeafe;
-    color: #1e40af;
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.form-card-status.confirmed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.form-card-status.not-completed {
+    background: #fee2e2;
+    color: #991b1b;
 }
 
 .form-card-actions {
@@ -874,6 +884,15 @@ $lang = $_SESSION["lang"] ?? "en";
       <?php include 'form_part9_dates.php'; ?>
     </div>
 
+    <!-- ✅ SECTION 10 (SERVICE STATUS) -->
+    <div class="section-title collapsible" data-section="10">
+      <?= ($lang=='en') ? "Section 10: Service Status" : "Sección 10: Estado del Servicio"; ?>
+      <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content hidden" data-section-content="10">
+      <?php include 'form_part10_status.php'; ?>
+    </div>
+
     <!-- 📋 Botón principal -->
     <div class="form-actions">
       <button type="button" id="btnSaveDraft" class="btn-draft">
@@ -1097,22 +1116,73 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ===============================
-     LOAD PENDING FORMS
+     SELLER LOCAL STORAGE MANAGEMENT
+     Guarda el vendedor en localStorage para filtrar formularios
+  =============================== */
+  const SELLER_STORAGE_KEY = 'prime_facility_seller';
+
+  function getSavedSeller() {
+    return localStorage.getItem(SELLER_STORAGE_KEY) || '';
+  }
+
+  function saveSeller(seller) {
+    if (seller) {
+      localStorage.setItem(SELLER_STORAGE_KEY, seller);
+    }
+  }
+
+  // Cargar vendedor guardado al iniciar
+  const sellerSelect = document.getElementById('Seller');
+  if (sellerSelect) {
+    const savedSeller = getSavedSeller();
+    if (savedSeller) {
+      sellerSelect.value = savedSeller;
+      // Trigger change event to update related fields
+      sellerSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Guardar vendedor cuando cambie
+    sellerSelect.addEventListener('change', function() {
+      if (this.value) {
+        saveSeller(this.value);
+        // Recargar formularios pendientes con el nuevo vendedor
+        loadPendingForms();
+      }
+    });
+  }
+
+  /* ===============================
+     LOAD PENDING FORMS (FILTERED BY SELLER)
+     Solo muestra formularios del vendedor de esta computadora
   =============================== */
   function loadPendingForms() {
     const loadingIndicator = document.querySelector(".loading-indicator");
     const formsList = document.getElementById("pendingFormsList");
     const noFormsMessage = document.querySelector(".no-forms-message");
-    
+
     if (loadingIndicator) loadingIndicator.style.display = "block";
     if (formsList) formsList.innerHTML = "";
     if (noFormsMessage) noFormsMessage.style.display = "none";
-    
-    fetch("load_drafts.php")
+
+    // Obtener vendedor guardado en localStorage
+    const currentSeller = getSavedSeller();
+
+    // Si no hay vendedor guardado, mostrar mensaje
+    if (!currentSeller) {
+      if (loadingIndicator) loadingIndicator.style.display = "none";
+      if (noFormsMessage) {
+        noFormsMessage.innerHTML = '<p>📋 Seleccione un vendedor para ver sus formularios</p>';
+        noFormsMessage.style.display = "block";
+      }
+      return;
+    }
+
+    // Usar el nuevo endpoint que filtra por vendedor
+    fetch(`load_drafts_by_seller.php?seller=${encodeURIComponent(currentSeller)}`)
       .then(response => response.json())
       .then(data => {
         if (loadingIndicator) loadingIndicator.style.display = "none";
-        
+
         if (data.success && data.forms && data.forms.length > 0) {
           formsList.innerHTML = "";
           data.forms.forEach(form => {
@@ -1120,7 +1190,10 @@ document.addEventListener("DOMContentLoaded", () => {
             formsList.appendChild(card);
           });
         } else {
-          if (noFormsMessage) noFormsMessage.style.display = "block";
+          if (noFormsMessage) {
+            noFormsMessage.innerHTML = `<p>📭 No hay formularios pendientes para ${currentSeller}</p>`;
+            noFormsMessage.style.display = "block";
+          }
         }
       })
       .catch(error => {
@@ -1135,15 +1208,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ===============================
      CREATE FORM CARD
+     Muestra el estado del servicio (Sección 10)
   =============================== */
   function createFormCard(formData) {
     const card = document.createElement("div");
     card.className = "form-card";
     card.dataset.formId = formData.form_id;
-    
+
     const date = new Date(formData.created_at);
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    
+
+    // Determinar el estado del servicio
+    const serviceStatus = formData.service_status || formData.status || 'pending';
+    let statusClass = 'pending';
+    let statusText = 'PENDING';
+    let statusIcon = '⏳';
+
+    if (serviceStatus === 'completed' || serviceStatus === 'confirmed') {
+      statusClass = 'confirmed';
+      statusText = 'CONFIRMED';
+      statusIcon = '✅';
+    } else if (serviceStatus === 'not_completed') {
+      statusClass = 'not-completed';
+      statusText = 'NOT COMPLETED';
+      statusIcon = '❌';
+    }
+
     card.innerHTML = `
       <div class="form-card-header">
         <div class="form-card-id">#${formData.form_id}</div>
@@ -1152,20 +1242,22 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="form-card-client">${formData.client_name || 'No Client'}</div>
       <div class="form-card-service">${formData.requested_service || 'No Service'}</div>
       <div class="form-card-footer">
-        <span class="form-card-status ${formData.status}">${formData.status.toUpperCase()}</span>
+        <span class="form-card-status ${statusClass}" title="Service Status">
+          ${statusIcon} ${statusText}
+        </span>
         <div class="form-card-actions">
           <button class="form-card-btn edit" title="Edit" onclick="loadFormData(${formData.form_id})">✏️</button>
           <button class="form-card-btn delete" title="Delete" onclick="deleteDraft(${formData.form_id})">🗑️</button>
         </div>
       </div>
     `;
-    
+
     card.addEventListener("click", (e) => {
       if (!e.target.closest('.form-card-actions')) {
         loadFormData(formData.form_id);
       }
     });
-    
+
     return card;
   }
 
@@ -1229,6 +1321,15 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log('📸 Loading photos:', additionalData.photos);
       // If you have a specific function to handle photos, call it here
       // populatePhotos(additionalData.photos);
+    }
+
+    // Handle service status (Section 10)
+    if (formData.service_status || formData.status) {
+      const serviceStatus = formData.service_status || formData.status || 'pending';
+      console.log('✅ Loading service status:', serviceStatus);
+      if (typeof updateStatusDisplay === 'function') {
+        updateStatusDisplay(serviceStatus);
+      }
     }
 
     console.log('✅ Form populated successfully');

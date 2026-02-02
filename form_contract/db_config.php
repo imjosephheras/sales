@@ -163,6 +163,8 @@ function addMissingColumnsToForms($pdo) {
         'state'               => 'VARCHAR(100) DEFAULT NULL',
         'submitted_by'        => 'VARCHAR(100) DEFAULT NULL',
         'include_staff'       => 'VARCHAR(10) DEFAULT NULL',
+        'service_status'      => "ENUM('pending', 'completed', 'not_completed') DEFAULT 'pending'",
+        'service_completed_at' => 'TIMESTAMP NULL DEFAULT NULL',
     ];
  
     try {

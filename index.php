@@ -147,7 +147,7 @@
     </a>
 
     <a href="service_confirmation/" class="btn btn-confirmation">
-        <span>✅</span> Service Confirmation
+        <span>⚙️</span> Admin Panel
     </a>
 
 </div>

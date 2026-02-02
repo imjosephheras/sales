@@ -1,10 +1,13 @@
 <?php
 /**
- * SERVICE CONFIRMATION MODULE (Module 10)
+ * ADMIN PANEL (Module 10)
  * 3-column layout:
  * - Left: Pending services (awaiting confirmation)
  * - Center: Service details viewer
  * - Right: Complete history
+ *
+ * This panel shows ALL forms from ALL sellers.
+ * Used to manage and confirm all service requests.
  *
  * Workflow:
  * 1. Services appear in pending after contract is completed
@@ -22,7 +25,7 @@ $current_user = $_SESSION['user_name'] ?? 'Admin';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Service Confirmation - Module 10</title>
+    <title>Admin Panel - Module 10</title>
     <link rel="stylesheet" href="styles/service_confirmation.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -35,8 +38,8 @@ $current_user = $_SESSION['user_name'] ?? 'Admin';
                 <a href="../index.php" class="home-btn" title="Back to Home">
                     <i class="fas fa-home"></i> Home
                 </a>
-                <i class="fas fa-clipboard-check"></i>
-                <h1>Service Confirmation</h1>
+                <i class="fas fa-cogs"></i>
+                <h1>Admin Panel</h1>
             </div>
             <div class="user-section">
                 <i class="fas fa-user-circle"></i>
