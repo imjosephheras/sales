@@ -448,24 +448,24 @@ class EventController {
     
     /**
      * Prepare event data from POST
+     * Title format: "Service - HJ-XXXXXX MMDDYYYY" or directly the Form Contract nomenclature
      */
-    /**
- * Prepare event data from POST - FIXED
- */
 private function prepareEventData($post) {
-    // Generate title from nomenclature if not provided
+    // Get title from form - should be Form Contract nomenclature (HJ-XXXXXX MMDDYYYY)
     $title = !empty($post['title']) ? sanitize($post['title']) : null;
-    
-    // If no title, try to generate from nomenclature
+
+    // If no title provided, use "Service" as fallback
+    // The calendar should NOT generate nomenclature - that's Form Contract's job
     if (empty($title)) {
-        $category = !empty($post['category_id']) ? $post['category_id'] : 'JWO';
-        $client = !empty($post['client']) ? sanitize($post['client']) : 'Unknown';
-        $date = !empty($post['document_date']) ? $post['document_date'] : $post['start_date'];
-        
-        // Generate nomenclature-style title
-        $title = $category . '-' . substr(str_replace(' ', '', $client), 0, 8) . date('dmY', strtotime($date));
+        $title = 'Service';
     }
-    
+
+    // If title is a Form Contract nomenclature (HJ-...), optionally prefix with "Service - "
+    // Check if it already starts with "Service - " to avoid duplicating
+    if (preg_match('/^HJ-\d{6}\d{8}$/i', $title)) {
+        $title = 'Service - ' . $title;
+    }
+
     return [
         'user_id' => $this->userId,
         'category_id' => !empty($post['category_id']) ? intval($post['category_id']) : null,
