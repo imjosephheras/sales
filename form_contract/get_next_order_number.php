@@ -1,7 +1,7 @@
 <?php
 /**
  * get_next_order_number.php
- * Returns the next available order number (1000-9999).
+ * Returns the next available order number (100000-999999).
  * Reuses numbers from deleted/cancelled records.
  */
 
@@ -16,18 +16,18 @@ try {
     $used = $stmt->fetchAll(PDO::FETCH_COLUMN);
     $usedSet = array_flip($used);
 
-    // Find first available number in range 1000-9999
+    // Find first available number in range 100000-999999
     $next = null;
-    for ($i = 1000; $i <= 9999; $i++) {
+    for ($i = 100000; $i <= 999999; $i++) {
         if (!isset($usedSet[$i])) {
             $next = $i;
             break;
         }
     }
 
-    // If all are used, wrap around to 1000 (shouldn't happen with 9000 slots)
+    // If all are used, wrap around to 100000 (shouldn't happen with 900000 slots)
     if ($next === null) {
-        $next = 1000;
+        $next = 100000;
     }
 
     echo json_encode(['next_number' => $next]);

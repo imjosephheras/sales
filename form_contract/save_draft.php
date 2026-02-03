@@ -150,7 +150,7 @@ try {
     $document_date_val = emptyToNull($_POST['Document_Date'] ?? null);
     $work_date_val = emptyToNull($_POST['Work_Date'] ?? null);
 
-    // Generate order number for new drafts
+    // Generate order number for new drafts (range: 100000-999999)
     $order_number_val = null;
     $nomenclature_val = null;
     if (!$form_id) {
@@ -158,13 +158,13 @@ try {
         $stmtNums = $pdo->query("SELECT order_number FROM forms WHERE order_number IS NOT NULL ORDER BY order_number ASC");
         $usedNumbers = $stmtNums->fetchAll(PDO::FETCH_COLUMN);
         $usedSet = array_flip($usedNumbers);
-        for ($i = 1000; $i <= 9999; $i++) {
+        for ($i = 100000; $i <= 999999; $i++) {
             if (!isset($usedSet[(string)$i])) {
                 $order_number_val = $i;
                 break;
             }
         }
-        if ($order_number_val === null) $order_number_val = 1000;
+        if ($order_number_val === null) $order_number_val = 100000;
     } else {
         // Existing form - keep existing order number
         $stmtExisting = $pdo->prepare("SELECT order_number FROM forms WHERE form_id = ?");
@@ -174,25 +174,24 @@ try {
             $stmtNums = $pdo->query("SELECT order_number FROM forms WHERE order_number IS NOT NULL ORDER BY order_number ASC");
             $usedNumbers = $stmtNums->fetchAll(PDO::FETCH_COLUMN);
             $usedSet = array_flip($usedNumbers);
-            for ($i = 1000; $i <= 9999; $i++) {
+            for ($i = 100000; $i <= 999999; $i++) {
                 if (!isset($usedSet[(string)$i])) {
                     $order_number_val = $i;
                     break;
                 }
             }
-            if ($order_number_val === null) $order_number_val = 1000;
+            if ($order_number_val === null) $order_number_val = 100000;
         }
     }
 
-    // Build nomenclature
-    $st_val = $_POST['Service_Type'] ?? '';
-    $rt_val = $_POST['Request_Type'] ?? '';
-    if (!empty($document_date_val) && !empty($st_val) && !empty($rt_val) && $order_number_val) {
-        $st_initial = strtoupper($st_val[0]);
-        $rt_initial = strtoupper($rt_val[0]);
-        $dateParts = explode('-', $document_date_val);
-        $dateFormatted = $dateParts[1] . $dateParts[2] . $dateParts[0];
-        $nomenclature_val = $st_initial . $rt_initial . '-' . $order_number_val . $dateFormatted;
+    // Build nomenclature: HJ-{order_number}{MMDDYYYY}
+    if ($order_number_val) {
+        $dateFormatted = date('mdY'); // Current date in MMDDYYYY format
+        if (!empty($document_date_val)) {
+            $dateParts = explode('-', $document_date_val);
+            $dateFormatted = $dateParts[1] . $dateParts[2] . $dateParts[0]; // MMDDYYYY
+        }
+        $nomenclature_val = 'HJ-' . $order_number_val . $dateFormatted;
     }
 
     $stmt->bindValue(':document_date', $document_date_val);
