@@ -37,7 +37,7 @@ $client_email = $data['Email'] ?? '';
     <title>Vent Hood Service Report - <?php echo htmlspecialchars($client_name); ?></title>
     <style>
         @page {
-            margin: 15mm 12mm;
+            margin: 8mm 10mm;
             size: letter;
         }
 
@@ -50,40 +50,40 @@ $client_email = $data['Email'] ?? '';
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 11px;
-            line-height: 1.3;
+            line-height: 1.2;
             color: #333;
             padding: 0;
         }
 
         .header {
             width: 100%;
-            border-bottom: 3px solid #001f54;
-            padding-bottom: 10px;
-            margin-bottom: 12px;
+            border-bottom: 2px solid #001f54;
+            padding-bottom: 4px;
+            margin-bottom: 4px;
             text-align: center;
         }
 
         .company-logo {
-            max-width: 180px;
-            max-height: 70px;
-            margin-bottom: 8px;
+            max-width: 140px;
+            max-height: 50px;
+            margin-bottom: 2px;
         }
 
         .company-name {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
             color: #001f54;
-            margin-bottom: 4px;
+            margin-bottom: 1px;
         }
 
         .company-info {
-            font-size: 10px;
+            font-size: 9px;
             color: #666;
-            line-height: 1.4;
+            line-height: 1.2;
         }
 
         .report-title {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: bold;
             color: #001f54;
             text-transform: uppercase;
@@ -91,15 +91,15 @@ $client_email = $data['Email'] ?? '';
         }
 
         .report-subtitle {
-            font-size: 11px;
+            font-size: 10px;
             color: #666;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .section {
-            margin-bottom: 10px;
+            margin-bottom: 3px;
             border: 1px solid #ddd;
-            border-radius: 3px;
+            border-radius: 2px;
             overflow: hidden;
             page-break-inside: avoid;
         }
@@ -107,13 +107,13 @@ $client_email = $data['Email'] ?? '';
         .section-header {
             background: #001f54;
             color: #ffffff;
-            padding: 6px 12px;
+            padding: 3px 8px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 10px;
         }
 
         .section-content {
-            padding: 10px 12px;
+            padding: 4px 8px;
             background: #fafafa;
         }
 
@@ -128,8 +128,9 @@ $client_email = $data['Email'] ?? '';
 
         .info-cell {
             display: table-cell;
-            padding: 4px 8px;
+            padding: 2px 4px;
             border-bottom: 1px solid #eee;
+            font-size: 10px;
         }
 
         .info-label {
@@ -151,22 +152,22 @@ $client_email = $data['Email'] ?? '';
             display: table-cell;
             width: 50%;
             vertical-align: top;
-            padding-right: 15px;
+            padding-right: 8px;
         }
 
         .column:last-child {
             padding-right: 0;
-            padding-left: 15px;
+            padding-left: 8px;
         }
 
         .checkbox-group {
-            margin: 3px 0;
+            margin: 1px 0;
         }
 
         .checkbox-item {
             display: block;
-            margin: 4px 0;
-            padding-left: 18px;
+            margin: 1px 0;
+            padding-left: 14px;
             position: relative;
             font-size: 10px;
         }
@@ -175,7 +176,7 @@ $client_email = $data['Email'] ?? '';
             content: "\2610";
             position: absolute;
             left: 0;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .checkbox-item.checked:before {
@@ -192,7 +193,7 @@ $client_email = $data['Email'] ?? '';
         .checklist-table th,
         .checklist-table td {
             border: 1px solid #ddd;
-            padding: 5px 8px;
+            padding: 2px 4px;
             text-align: left;
             font-size: 10px;
         }
@@ -205,7 +206,7 @@ $client_email = $data['Email'] ?? '';
 
         .checklist-table td.center {
             text-align: center;
-            width: 45px;
+            width: 35px;
         }
 
         .frequency-options {
@@ -215,41 +216,41 @@ $client_email = $data['Email'] ?? '';
 
         .freq-option {
             display: table-cell;
-            padding: 4px 10px;
+            padding: 2px 6px;
             text-align: center;
         }
 
         .notes-area {
-            min-height: 40px;
+            min-height: 25px;
             border: 1px solid #ddd;
-            border-radius: 3px;
-            padding: 6px;
+            border-radius: 2px;
+            padding: 3px;
             background: white;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .signature-section {
             display: table;
             width: 100%;
-            margin-top: 10px;
+            margin-top: 4px;
             page-break-inside: avoid;
         }
 
         .signature-box {
             display: table-cell;
             width: 50%;
-            padding: 8px;
+            padding: 4px;
             vertical-align: top;
         }
 
         .signature-line {
             border-bottom: 1px solid #333;
-            height: 25px;
-            margin-bottom: 4px;
+            height: 18px;
+            margin-bottom: 2px;
         }
 
         .signature-label {
-            font-size: 10px;
+            font-size: 9px;
             color: #666;
         }
 
@@ -263,27 +264,27 @@ $client_email = $data['Email'] ?? '';
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 8px;
+            font-size: 7px;
             color: #999;
             border-top: 1px solid #ddd;
-            padding-top: 5px;
+            padding-top: 2px;
         }
 
         .sub-section {
-            margin: 6px 0;
-            padding: 6px;
+            margin: 2px 0;
+            padding: 3px;
             background: white;
             border: 1px solid #eee;
-            border-radius: 3px;
+            border-radius: 2px;
             page-break-inside: avoid;
         }
 
         .sub-section-title {
             font-weight: bold;
             color: #001f54;
-            font-size: 11px;
-            margin-bottom: 4px;
-            padding-bottom: 3px;
+            font-size: 10px;
+            margin-bottom: 2px;
+            padding-bottom: 1px;
             border-bottom: 1px solid #eee;
         }
 
@@ -296,7 +297,7 @@ $client_email = $data['Email'] ?? '';
 
         .inline-checkbox {
             display: inline-block;
-            margin-right: 15px;
+            margin-right: 10px;
             font-size: 10px;
         }
 
@@ -308,7 +309,7 @@ $client_email = $data['Email'] ?? '';
         .photo-item {
             display: table-cell;
             width: 25%;
-            padding: 8px;
+            padding: 4px;
             text-align: center;
         }
 
@@ -329,7 +330,7 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <div style="text-align: center; margin-bottom: 12px;">
+    <div style="text-align: center; margin-bottom: 4px;">
         <div class="report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
     </div>
 
@@ -359,7 +360,7 @@ $client_email = $data['Email'] ?? '';
                     </div>
                 </div>
             </div>
-            <div style="margin-top: 8px;">
+            <div style="margin-top: 3px;">
                 <span style="font-weight: bold; color: #001f54; font-size: 10px;">Frequency:</span>
                 <span class="inline-checkbox">&square; 30 days</span>
                 <span class="inline-checkbox">&square; 60 days</span>
@@ -584,25 +585,25 @@ $client_email = $data['Email'] ?? '';
     <div class="section">
         <div class="section-header">6. TECHNICIAN NOTES & SIGNATURES</div>
         <div class="section-content">
-            <p style="font-weight: bold; color: #001f54; font-size: 10px; margin-bottom: 4px;">Notes / Observations:</p>
+            <p style="font-weight: bold; color: #001f54; font-size: 10px; margin-bottom: 2px;">Notes / Observations:</p>
             <div class="notes-area"></div>
 
             <div class="signature-section">
                 <div class="signature-box">
-                    <p style="font-weight: bold; margin-bottom: 4px; color: #001f54; font-size: 10px;">Responsible Technician:</p>
-                    <p style="font-size: 10px;">Name: _________________ Signature: _________________</p>
-                    <p style="font-size: 10px; margin-top: 4px;">Date: ____/____/______</p>
+                    <p style="font-weight: bold; margin-bottom: 2px; color: #001f54; font-size: 10px;">Responsible Technician:</p>
+                    <p style="font-size: 9px;">Name: _________________ Signature: _________________</p>
+                    <p style="font-size: 9px; margin-top: 2px;">Date: ____/____/______</p>
                 </div>
                 <div class="signature-box">
-                    <p style="font-weight: bold; margin-bottom: 4px; color: #001f54; font-size: 10px;">Client / Manager:</p>
-                    <p style="font-size: 10px;">Name: _________________ Signature: _________________</p>
-                    <p style="font-size: 10px; margin-top: 4px;">Date: ____/____/______</p>
+                    <p style="font-weight: bold; margin-bottom: 2px; color: #001f54; font-size: 10px;">Client / Manager:</p>
+                    <p style="font-size: 9px;">Name: _________________ Signature: _________________</p>
+                    <p style="font-size: 9px; margin-top: 2px;">Date: ____/____/______</p>
                 </div>
             </div>
 
-            <div style="margin-top: 10px; padding: 8px; background: #e8f5e9; border-radius: 3px; border-left: 3px solid #28a745;">
-                <p style="font-weight: bold; color: #1b5e20; font-size: 10px;">ACKNOWLEDGEMENT OF KITCHEN CONDITION & SERVICE COMPLETED</p>
-                <p style="font-size: 9px; color: #333; margin-top: 4px;">By signing above, the customer acknowledges that the service was completed and the kitchen was left clean and in satisfactory condition.</p>
+            <div style="margin-top: 4px; padding: 4px; background: #e8f5e9; border-radius: 2px; border-left: 2px solid #28a745;">
+                <p style="font-weight: bold; color: #1b5e20; font-size: 9px;">ACKNOWLEDGEMENT OF KITCHEN CONDITION & SERVICE COMPLETED</p>
+                <p style="font-size: 8px; color: #333; margin-top: 2px;">By signing above, the customer acknowledges that the service was completed and the kitchen was left clean and in satisfactory condition.</p>
             </div>
         </div>
     </div>
