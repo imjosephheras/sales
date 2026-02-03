@@ -9,6 +9,9 @@ define('DB_NAME', 'form');  // ← CAMBIAR SEGÚN TU BASE DE DATOS
 define('DB_USER', 'root');  // ← CAMBIAR SEGÚN TU USUARIO
 define('DB_PASS', '');      // ← CAMBIAR SEGÚN TU CONTRASEÑA
 
+// Configuración del calendario (para sincronización)
+define('CALENDAR_DB_NAME', 'calendar_system');
+
 /**
  * Initialize the forms table and related tables used by form_contract module
  */
@@ -344,5 +347,202 @@ function getDBConnection() {
         // For regular page loads, show error
         die("Database connection failed. Please check your configuration in db_config.php");
     }
+}
+
+/**
+ * Get connection to calendar database for syncing events
+ */
+function getCalendarDBConnection() {
+    try {
+        $pdo = new PDO(
+            "mysql:host=" . DB_HOST . ";dbname=" . CALENDAR_DB_NAME . ";charset=utf8mb4",
+            DB_USER,
+            DB_PASS,
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false
+            ]
+        );
+
+        // Ensure form_id column exists in events table for linking
+        ensureCalendarFormIdColumn($pdo);
+
+        return $pdo;
+    } catch (PDOException $e) {
+        error_log("Calendar database connection error: " . $e->getMessage());
+        return null;
+    }
+}
+
+/**
+ * Add form_id column to calendar events table if it doesn't exist
+ */
+function ensureCalendarFormIdColumn($pdo) {
+    try {
+        $stmt = $pdo->query("SHOW COLUMNS FROM `events` LIKE 'form_id'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `events` ADD COLUMN `form_id` INT DEFAULT NULL");
+            $pdo->exec("ALTER TABLE `events` ADD INDEX `idx_form_id` (`form_id`)");
+        }
+    } catch (Exception $e) {
+        error_log("Error adding form_id column to calendar events: " . $e->getMessage());
+    }
+}
+
+/**
+ * Create or update calendar event from form data
+ *
+ * @param int $formId - The form_id from forms table
+ * @param array $formData - Form data including Work_Date, Document_Date, Order_Nomenclature, etc.
+ * @return int|false - Returns event_id on success, false on failure
+ */
+function syncFormToCalendar($formId, $formData) {
+    $calendarPdo = getCalendarDBConnection();
+    if (!$calendarPdo) {
+        error_log("Could not connect to calendar database for sync");
+        return false;
+    }
+
+    try {
+        // Check if Work_Date is set - required for calendar sync
+        $workDate = $formData['Work_Date'] ?? null;
+        if (empty($workDate)) {
+            // No work date, nothing to sync
+            return false;
+        }
+
+        // Check if event already exists for this form
+        $stmt = $calendarPdo->prepare("SELECT event_id FROM events WHERE form_id = ? AND is_active = 1");
+        $stmt->execute([$formId]);
+        $existingEvent = $stmt->fetch();
+
+        // Prepare event data
+        $title = $formData['Order_Nomenclature'] ?? ('Service Order #' . $formId);
+        $client = $formData['Company_Name'] ?? '';
+        $documentDate = $formData['Document_Date'] ?? null;
+        $description = buildEventDescription($formData);
+        $location = trim(($formData['Company_Address'] ?? '') . ', ' . ($formData['City'] ?? '') . ', ' . ($formData['State'] ?? ''));
+        $location = trim($location, ', ');
+        $priority = strtolower($formData['Priority'] ?? 'medium');
+
+        // Map form status to calendar status
+        $status = 'pending';
+        if (($formData['status'] ?? '') === 'submitted') {
+            $status = 'confirmed';
+        }
+
+        // Get default category_id (usually 1 for general/services)
+        $categoryId = 1;
+        $stmt = $calendarPdo->query("SELECT category_id FROM event_categories WHERE category_name LIKE '%service%' OR category_name LIKE '%work%' LIMIT 1");
+        $category = $stmt->fetch();
+        if ($category) {
+            $categoryId = $category['category_id'];
+        }
+
+        if ($existingEvent) {
+            // UPDATE existing event
+            $sql = "UPDATE events SET
+                title = :title,
+                description = :description,
+                location = :location,
+                client = :client,
+                start_date = :start_date,
+                end_date = :end_date,
+                document_date = :document_date,
+                status = :status,
+                priority = :priority,
+                updated_at = NOW()
+            WHERE event_id = :event_id";
+
+            $stmt = $calendarPdo->prepare($sql);
+            $stmt->execute([
+                ':title' => $title,
+                ':description' => $description,
+                ':location' => $location,
+                ':client' => $client,
+                ':start_date' => $workDate,
+                ':end_date' => $workDate,
+                ':document_date' => $documentDate,
+                ':status' => $status,
+                ':priority' => $priority,
+                ':event_id' => $existingEvent['event_id']
+            ]);
+
+            return $existingEvent['event_id'];
+        } else {
+            // INSERT new event
+            $sql = "INSERT INTO events (
+                user_id, category_id, title, description, location, client,
+                start_date, end_date, start_time, end_time,
+                is_all_day, is_recurring, status, priority,
+                document_date, original_date, form_id,
+                is_active, created_at
+            ) VALUES (
+                :user_id, :category_id, :title, :description, :location, :client,
+                :start_date, :end_date, :start_time, :end_time,
+                :is_all_day, :is_recurring, :status, :priority,
+                :document_date, :original_date, :form_id,
+                1, NOW()
+            )";
+
+            $stmt = $calendarPdo->prepare($sql);
+            $stmt->execute([
+                ':user_id' => 1, // Default user, adjust as needed
+                ':category_id' => $categoryId,
+                ':title' => $title,
+                ':description' => $description,
+                ':location' => $location,
+                ':client' => $client,
+                ':start_date' => $workDate,
+                ':end_date' => $workDate,
+                ':start_time' => '09:00:00',
+                ':end_time' => '17:00:00',
+                ':is_all_day' => 0,
+                ':is_recurring' => 0,
+                ':status' => $status,
+                ':priority' => $priority,
+                ':document_date' => $documentDate,
+                ':original_date' => $workDate,
+                ':form_id' => $formId
+            ]);
+
+            return $calendarPdo->lastInsertId();
+        }
+    } catch (Exception $e) {
+        error_log("Error syncing form to calendar: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Build event description from form data
+ */
+function buildEventDescription($formData) {
+    $parts = [];
+
+    if (!empty($formData['Order_Nomenclature'])) {
+        $parts[] = "Order: " . $formData['Order_Nomenclature'];
+    }
+    if (!empty($formData['order_number'])) {
+        $parts[] = "Order #: " . $formData['order_number'];
+    }
+    if (!empty($formData['Company_Name'])) {
+        $parts[] = "Client: " . $formData['Company_Name'];
+    }
+    if (!empty($formData['Requested_Service'])) {
+        $parts[] = "Service: " . $formData['Requested_Service'];
+    }
+    if (!empty($formData['Service_Type'])) {
+        $parts[] = "Type: " . $formData['Service_Type'];
+    }
+    if (!empty($formData['Request_Type'])) {
+        $parts[] = "Request: " . $formData['Request_Type'];
+    }
+    if (!empty($formData['Document_Date'])) {
+        $parts[] = "Document Date: " . $formData['Document_Date'];
+    }
+
+    return implode("\n", $parts);
 }
 ?>
