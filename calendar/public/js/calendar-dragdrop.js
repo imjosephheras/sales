@@ -5,10 +5,11 @@
  * ============================================================
  */
 
-var draggedEventId = null;
-let draggedElement = null;
-let dropIndicator = null;
-let monthChangeTimeout = null;
+// Use existing variables if already declared (to avoid conflicts with calendar.js)
+if (typeof draggedEventId === 'undefined') var draggedEventId = null;
+if (typeof draggedElement === 'undefined') var draggedElement = null;
+if (typeof dropIndicator === 'undefined') var dropIndicator = null;
+if (typeof monthChangeTimeout === 'undefined') var monthChangeTimeout = null;
 
 function initializeDragAndDrop() {
     console.log('🎯 Initializing Drag & Drop...');
