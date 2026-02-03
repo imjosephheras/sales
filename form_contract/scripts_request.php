@@ -71,6 +71,18 @@ function normalize(str) {
   return (str || "").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
+// Wrapper functions for inline onchange handlers
+function updateOptions() {
+  updateRequestTypeOptions();
+  updateRequestedServiceOptions();
+  toggleSiteVisitField();
+  evaluateRules();
+}
+
+function updateScopeOfWork() {
+  evaluateRules();
+}
+
 function findSectionEl(num) {
   return (
     document.getElementById(`q${num}`) ||
