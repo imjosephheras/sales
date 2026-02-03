@@ -382,10 +382,39 @@ try {
     // CONFIRMAR TRANSACCIÓN
     // ============================================================
     $pdo->commit();
-    
+
+    // ============================================================
+    // PASO 6: SINCRONIZAR CON CALENDARIO
+    // ============================================================
+    $calendarEventId = null;
+    if (!empty($work_date_val)) {
+        // Prepare form data for calendar sync
+        $calendarFormData = [
+            'Work_Date' => $work_date_val,
+            'Document_Date' => $document_date_val,
+            'Order_Nomenclature' => $nomenclature_val,
+            'order_number' => $order_number_val,
+            'Company_Name' => $_POST['Company_Name'] ?? '',
+            'Company_Address' => $_POST['Company_Address'] ?? '',
+            'City' => $_POST['City'] ?? '',
+            'State' => $_POST['State'] ?? '',
+            'Requested_Service' => $_POST['Requested_Service'] ?? '',
+            'Service_Type' => $_POST['Service_Type'] ?? '',
+            'Request_Type' => $_POST['Request_Type'] ?? '',
+            'Priority' => $_POST['Priority'] ?? 'Medium',
+            'status' => $status
+        ];
+
+        $calendarEventId = syncFormToCalendar($saved_form_id, $calendarFormData);
+        if ($calendarEventId) {
+            error_log("Form #$saved_form_id synced to calendar event #$calendarEventId");
+        }
+    }
+
     echo json_encode([
         'success' => true,
         'form_id' => $saved_form_id,
+        'calendar_event_id' => $calendarEventId,
         'message' => $form_id ? 'Form updated successfully' : 'Form saved successfully'
     ]);
     
