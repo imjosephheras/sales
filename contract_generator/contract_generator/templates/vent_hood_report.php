@@ -64,9 +64,9 @@ $client_email = $data['Email'] ?? '';
         }
 
         .company-logo {
-            max-width: 140px;
-            max-height: 50px;
-            margin-bottom: 2px;
+            max-width: 280px;
+            max-height: 90px;
+            margin-bottom: 6px;
         }
 
         .company-name {
