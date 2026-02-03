@@ -938,8 +938,8 @@ $lang = $_SESSION["lang"] ?? "en";
           
           <!-- ✅ SUBMIT BUTTON -->
           <button
-            type="submit"
-            form="main_form"
+            type="button"
+            id="btnSubmitForm"
             style="
               background: linear-gradient(135deg, #28a745 0%, #218838 100%);
               color:white;
@@ -1921,6 +1921,57 @@ window.loadFormData = function(formId) {
 
   document.getElementById("cancelPreview").addEventListener("click", () => {
     document.getElementById("previewModal").style.display = "none";
+  });
+
+  /* ===============================
+     SUBMIT BUTTON HANDLER
+     Expande secciones con campos inválidos antes de validar
+  =============================== */
+  document.getElementById("btnSubmitForm").addEventListener("click", () => {
+    // Limpia errores previos
+    document.querySelectorAll(".section-title").forEach(t =>
+      t.classList.remove("section-error")
+    );
+
+    // Primero, expandir TODAS las secciones que tengan campos inválidos
+    const invalidFields = form.querySelectorAll(":invalid");
+
+    invalidFields.forEach(field => {
+      const sectionContent = field.closest(".section-content");
+      if (sectionContent && sectionContent.classList.contains("hidden")) {
+        const sectionTitle = sectionContent.previousElementSibling;
+        if (sectionTitle) {
+          sectionTitle.classList.remove("collapsed");
+          sectionContent.classList.remove("hidden");
+          sectionTitle.classList.add("section-error");
+        }
+      }
+    });
+
+    // Ahora validar el formulario
+    if (form.checkValidity()) {
+      // Formulario válido, enviar
+      form.submit();
+    } else {
+      // Mostrar mensaje de error y enfocar el primer campo inválido
+      const firstInvalid = form.querySelector(":invalid");
+      if (firstInvalid) {
+        const sectionContent = firstInvalid.closest(".section-content");
+        if (sectionContent) {
+          const sectionTitle = sectionContent.previousElementSibling;
+          if (sectionTitle) {
+            sectionTitle.scrollIntoView({
+              behavior: "smooth",
+              block: "center"
+            });
+          }
+        }
+        setTimeout(() => {
+          firstInvalid.focus();
+          firstInvalid.reportValidity();
+        }, 300);
+      }
+    }
   });
 
   /* ===============================
