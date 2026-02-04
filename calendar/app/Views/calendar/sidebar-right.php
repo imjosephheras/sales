@@ -49,62 +49,62 @@
         <?php endif; ?>
     </div>
 
-    <!-- Work/Jobs Section -->
+    <!-- Next 7 Days Section -->
     <div class="work-section">
         <div class="section-header">
-            <h2>📋 Work / Jobs</h2>
-            <button class="btn-add" onclick="openWorkModal()">+</button>
-        </div>
-        
-        <!-- JWO Section -->
-        <div class="work-category">
-            <div class="work-category-header">
-                <span class="work-badge jwo">JWO</span>
-                <span class="work-count"><?= count($jwos) ?></span>
-            </div>
-            <div class="work-items">
-                <?php if (empty($jwos)): ?>
-                    <div class="empty-state-micro">No JWOs</div>
-                <?php else: ?>
-                    <?php foreach (array_slice($jwos, 0, 3) as $jwo): ?>
-                        <?php component('work-item', ['item' => $jwo]); ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
+            <h2>📆 Next 7 Days</h2>
+            <span class="work-count"><?= count($next7DaysEvents ?? []) ?></span>
         </div>
 
-        <!-- Contracts Section -->
-        <div class="work-category">
-            <div class="work-category-header">
-                <span class="work-badge contract">Contracts</span>
-                <span class="work-count"><?= count($contracts) ?></span>
-            </div>
-            <div class="work-items">
-                <?php if (empty($contracts)): ?>
-                    <div class="empty-state-micro">No contracts</div>
-                <?php else: ?>
-                    <?php foreach (array_slice($contracts, 0, 3) as $contract): ?>
-                        <?php component('work-item', ['item' => $contract]); ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
-
-        <!-- Proposals Section -->
-        <div class="work-category">
-            <div class="work-category-header">
-                <span class="work-badge proposal">Proposals</span>
-                <span class="work-count"><?= count($proposals) ?></span>
-            </div>
-            <div class="work-items">
-                <?php if (empty($proposals)): ?>
-                    <div class="empty-state-micro">No proposals</div>
-                <?php else: ?>
-                    <?php foreach (array_slice($proposals, 0, 3) as $proposal): ?>
-                        <?php component('work-item', ['item' => $proposal]); ?>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
+        <div class="next-7-days-list">
+            <?php if (empty($next7DaysEvents)): ?>
+                <div class="empty-state-small">
+                    No events scheduled for the next 7 days
+                </div>
+            <?php else: ?>
+                <?php
+                // Group events by date
+                $eventsByDate = [];
+                foreach ($next7DaysEvents as $evt) {
+                    $date = $evt['start_date'];
+                    if (!isset($eventsByDate[$date])) {
+                        $eventsByDate[$date] = [];
+                    }
+                    $eventsByDate[$date][] = $evt;
+                }
+                ?>
+                <?php foreach ($eventsByDate as $date => $dayEvents): ?>
+                    <div class="day-group">
+                        <div class="day-header">
+                            <span class="day-name"><?= date('l', strtotime($date)) ?></span>
+                            <span class="day-date"><?= date('M d', strtotime($date)) ?></span>
+                        </div>
+                        <div class="day-events">
+                            <?php foreach ($dayEvents as $evt): ?>
+                                <div class="upcoming-event" onclick="openEventDetail(<?= $evt['event_id'] ?>)" style="--event-color: <?= e($evt['color_hex'] ?? '#3b82f6') ?>">
+                                    <div class="upcoming-event-info">
+                                        <?php if (!empty($evt['client'])): ?>
+                                            <div class="upcoming-client">👤 <?= e($evt['client']) ?></div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($evt['company'])): ?>
+                                            <div class="upcoming-company">🏢 <?= e($evt['company']) ?></div>
+                                        <?php elseif (!empty($evt['location'])): ?>
+                                            <div class="upcoming-company">📍 <?= e(substr($evt['location'], 0, 30)) ?><?= strlen($evt['location']) > 30 ? '...' : '' ?></div>
+                                        <?php endif; ?>
+                                        <div class="upcoming-title"><?= e($evt['title']) ?></div>
+                                    </div>
+                                    <div class="upcoming-event-status">
+                                        <div class="work-switch switch <?= ($evt['status'] ?? '') === 'completed' ? 'on' : '' ?>"
+                                             onclick="event.stopPropagation(); toggleWorkStatus(<?= $evt['event_id'] ?>, this)">
+                                            <div class="knob"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
 </aside>

@@ -13,6 +13,8 @@
             <input type="hidden" id="eventId" name="event_id">
             <input type="hidden" id="requestId" name="request_id">
             <input type="hidden" id="requestNumber" name="request_number">
+            <!-- Default to JWO category (90% of events are work orders) -->
+            <input type="hidden" id="eventCategory" name="category_id" value="<?= $defaultCategoryId ?? '' ?>">
 
             <div class="modal-body">
                 <!-- Title / Nomenclature (from Request Form) -->
@@ -25,20 +27,6 @@
                            required
                            readonly>
                     <small class="help-text">Identificador único del evento (viene del Request Form)</small>
-                </div>
-
-                <!-- Category / Work Type (informativo) -->
-                <div class="form-group">
-                    <label for="eventCategory">Work Type / Category</label>
-                    <select id="eventCategory" name="category_id">
-                        <option value="">Select work type...</option>
-                        <?php foreach ($categories as $cat): ?>
-                            <option value="<?= $cat['category_id'] ?>">
-                                <?= e($cat['icon']) ?> <?= e($cat['category_name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <small class="help-text">Solo informativo, no afecta el Title</small>
                 </div>
 
                 <!-- Company Name (auto desde Request Form) -->
