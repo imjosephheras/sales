@@ -199,9 +199,14 @@
     function createTaskItem(task) {
         const div = document.createElement('div');
         div.className = 'task-item';
+        if (task.is_draft) {
+            div.classList.add('draft-item');
+        }
         div.dataset.id = task.task_id;
         div.dataset.type = task.type || 'task';
         div.dataset.eventId = task.event_id || '';
+        div.dataset.formId = task.form_id || '';
+        div.dataset.calendarEventId = task.calendar_event_id || '';
 
         // Classes for badges
         const priorityClass = (task.priority || task.Priority || 'normal').toLowerCase();
@@ -210,6 +215,14 @@
         // Mark as active if selected
         if (selectedTaskId == task.task_id) {
             div.classList.add('active');
+        }
+
+        // Build status badge for drafts
+        let statusBadge = '';
+        if (task.type === 'request' && task.status_label) {
+            statusBadge = `<span class="task-status-badge" style="background-color: ${task.status_color || '#ffc107'}">
+                ${task.status_icon || '📝'} ${task.status_label}
+            </span>`;
         }
 
         // Build category badge
@@ -228,34 +241,188 @@
             </span>`;
         }
 
-        // Get date formatted
-        const dateFormatted = task.due_date_formatted || task.created_at_formatted || 'No date';
+        // Get date formatted - prefer work date for requests
+        let dateFormatted = task.due_date_formatted || task.created_at_formatted || 'No date';
+        let dateIcon = 'far fa-calendar';
+        let dateLabel = '';
+        if (task.type === 'request') {
+            if (task.work_date_formatted) {
+                dateFormatted = task.work_date_formatted;
+                dateIcon = 'fas fa-calendar-check';
+                dateLabel = 'Work: ';
+            } else if (task.start_date_formatted) {
+                dateFormatted = task.start_date_formatted;
+                dateIcon = 'fas fa-calendar-alt';
+                dateLabel = 'Start: ';
+            }
+        }
+
+        // Build completion progress bar for drafts
+        let completionBar = '';
+        if (task.is_draft && task.completion_info) {
+            const percentage = task.completion_info.percentage || 0;
+            const missingItems = task.completion_info.missing || [];
+            const missingText = missingItems.length > 0 ? `Missing: ${missingItems.join(', ')}` : '';
+            completionBar = `
+                <div class="completion-info">
+                    <div class="completion-bar">
+                        <div class="completion-fill" style="width: ${percentage}%"></div>
+                    </div>
+                    <span class="completion-text">${percentage}% complete</span>
+                    ${missingText ? `<span class="missing-items" title="${escapeHtml(missingText)}">${escapeHtml(missingText)}</span>` : ''}
+                </div>
+            `;
+        }
+
+        // Build order nomenclature display
+        let orderInfo = '';
+        if (task.Order_Nomenclature) {
+            orderInfo = `<p class="order-nomenclature"><i class="fas fa-hashtag"></i> ${escapeHtml(task.Order_Nomenclature)}</p>`;
+        }
+
+        // Build calendar link
+        let calendarLink = '';
+        if (task.has_calendar_event && task.calendar_event_id) {
+            calendarLink = `<span class="calendar-link" data-event-id="${task.calendar_event_id}" title="View in Calendar">
+                <i class="fas fa-calendar-alt"></i>
+            </span>`;
+        }
+
+        // Build report buttons
+        let reportButtons = '';
+        if (task.available_reports && task.available_reports.length > 0) {
+            const buttons = task.available_reports.map(report => {
+                let icon = '📄';
+                let label = report;
+                if (report === 'hood_vent') { icon = '🔥'; label = 'Hood Vent'; }
+                else if (report === 'kitchen') { icon = '🍳'; label = 'Kitchen'; }
+                else if (report === 'janitorial') { icon = '🧹'; label = 'Janitorial'; }
+                else if (report === 'staff') { icon = '👥'; label = 'Staff'; }
+                return `<button class="report-btn" data-report="${report}" data-request-id="${task.id}" title="Print ${label} Report">
+                    ${icon}
+                </button>`;
+            }).join('');
+            reportButtons = `<div class="report-buttons">${buttons}</div>`;
+        }
+
+        // Build pricing info
+        let pricingInfo = '';
+        if (task.type === 'request') {
+            const totalCost = task.total_cost || task.PriceInput || '';
+            const grand18 = task.grand18 || '';
+            const grand19 = task.grand19 || '';
+            if (totalCost || grand18 || grand19) {
+                let priceDisplay = totalCost ? `$${formatNumber(totalCost)}` : '';
+                if (grand18) priceDisplay += (priceDisplay ? ' + ' : '') + `J:$${formatNumber(grand18)}`;
+                if (grand19) priceDisplay += (priceDisplay ? ' + ' : '') + `K:$${formatNumber(grand19)}`;
+                pricingInfo = `<span class="pricing-info"><i class="fas fa-dollar-sign"></i> ${priceDisplay}</span>`;
+            }
+        }
 
         div.innerHTML = `
             <div class="task-header">
+                ${statusBadge}
                 <span class="task-priority-badge ${priorityClass}">${formatPriority(task.priority || task.Priority)}</span>
                 ${categoryBadge}
+                ${calendarLink}
             </div>
             <div class="task-body">
                 <h3 class="task-title">${escapeHtml(task.title)}</h3>
+                ${orderInfo}
                 <p class="task-description">${escapeHtml(task.description)}</p>
+                ${completionBar}
                 ${task.event_title ? `<p class="event-ref"><i class="fas fa-link"></i> ${escapeHtml(task.event_title)}</p>` : ''}
                 ${(task.client || task.client_name) ? `<p class="client-name"><i class="fas fa-user"></i> ${escapeHtml(task.client || task.client_name)}</p>` : ''}
+                ${task.Seller ? `<p class="seller-name"><i class="fas fa-user-tie"></i> ${escapeHtml(task.Seller)}</p>` : ''}
                 <div class="task-meta">
                     <span class="due-date">
-                        <i class="far fa-calendar"></i>
-                        <span class="date-text">${dateFormatted}</span>
+                        <i class="${dateIcon}"></i>
+                        <span class="date-text">${dateLabel}${dateFormatted}</span>
                     </span>
+                    ${pricingInfo}
                 </div>
+                ${reportButtons}
             </div>
         `;
 
         // Event listener to select and open form
-        div.addEventListener('click', function() {
+        div.addEventListener('click', function(e) {
+            // Don't select if clicking on report buttons or calendar link
+            if (e.target.closest('.report-btn') || e.target.closest('.calendar-link')) {
+                return;
+            }
             selectTask(task);
         });
 
+        // Add event listeners for report buttons
+        div.querySelectorAll('.report-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const reportType = this.dataset.report;
+                const requestId = this.dataset.requestId;
+                generateReport(reportType, requestId);
+            });
+        });
+
+        // Add event listener for calendar link
+        const calLink = div.querySelector('.calendar-link');
+        if (calLink) {
+            calLink.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const eventId = this.dataset.eventId;
+                openCalendarPreview(eventId, task);
+            });
+        }
+
         return div;
+    }
+
+    // ========================================
+    // GENERATE REPORT
+    // ========================================
+
+    function generateReport(reportType, requestId) {
+        console.log(`📄 Generating ${reportType} report for request #${requestId}`);
+
+        // Open report in new window
+        const reportUrl = `controllers/generate_report.php?type=${reportType}&id=${requestId}`;
+        window.open(reportUrl, '_blank', 'width=800,height=600');
+    }
+
+    // ========================================
+    // OPEN CALENDAR PREVIEW
+    // ========================================
+
+    function openCalendarPreview(eventId, task) {
+        console.log(`📅 Opening calendar preview for event #${eventId}`);
+
+        // Dispatch event for calendar preview
+        const event = new CustomEvent('openCalendarPreview', {
+            detail: {
+                eventId: eventId,
+                task: task
+            }
+        });
+        document.dispatchEvent(event);
+
+        // If calendar module exists, use it
+        if (window.CalendarModule && window.CalendarModule.openEventPreview) {
+            window.CalendarModule.openEventPreview(eventId);
+        } else {
+            // Fallback: open calendar in new tab with event selected
+            const calendarUrl = `../../calendar/?event=${eventId}`;
+            window.open(calendarUrl, '_blank');
+        }
+    }
+
+    // ========================================
+    // FORMAT NUMBER
+    // ========================================
+
+    function formatNumber(num) {
+        if (!num) return '0';
+        const n = parseFloat(num.toString().replace(/[^0-9.-]/g, ''));
+        return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
     }
 
     // ========================================

@@ -305,6 +305,37 @@ function addMissingColumnsFormContract($pdo) {
         if ($stmt->rowCount() == 0) {
             $pdo->exec("ALTER TABLE `requests` ADD COLUMN `completed_at` TIMESTAMP NULL DEFAULT NULL");
         }
+
+        // Check and add form_id column for linking with forms table
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'form_id'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `form_id` INT DEFAULT NULL");
+            $pdo->exec("ALTER TABLE `requests` ADD INDEX `idx_form_id` (`form_id`)");
+        }
+
+        // Check and add Work_Date column
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'Work_Date'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `Work_Date` DATE DEFAULT NULL");
+        }
+
+        // Check and add Document_Date column
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'Document_Date'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `Document_Date` DATE DEFAULT NULL");
+        }
+
+        // Check and add City column
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'City'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `City` VARCHAR(100) DEFAULT NULL");
+        }
+
+        // Check and add State column
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'State'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `State` VARCHAR(100) DEFAULT NULL");
+        }
     } catch (Exception $e) {
         error_log("Error adding missing columns: " . $e->getMessage());
     }
@@ -557,11 +588,19 @@ function buildEventDescription($formData) {
  */
 function syncFormToRequests($pdo, $formId, $formData) {
     try {
-        // Check if request already exists for this form (using docnum or form_id match)
+        // Check if request already exists for this form (using form_id or docnum)
         $docnum = $formData['Order_Nomenclature'] ?? null;
         $existingRequest = null;
 
-        if ($docnum) {
+        // First try to find by form_id (more reliable)
+        if ($formId) {
+            $stmt = $pdo->prepare("SELECT id FROM requests WHERE form_id = ?");
+            $stmt->execute([$formId]);
+            $existingRequest = $stmt->fetch();
+        }
+
+        // If not found by form_id, try by docnum
+        if (!$existingRequest && $docnum) {
             $stmt = $pdo->prepare("SELECT id FROM requests WHERE docnum = ?");
             $stmt->execute([$docnum]);
             $existingRequest = $stmt->fetch();
@@ -609,6 +648,8 @@ function syncFormToRequests($pdo, $formId, $formData) {
                 Number_Phone = :number_phone,
                 Company_Name = :company_name,
                 Company_Address = :company_address,
+                City = :city,
+                State = :state,
                 Is_New_Client = :is_new_client,
                 Site_Visit_Conducted = :site_visit_conducted,
                 frequency_period = :frequency_period,
@@ -636,17 +677,23 @@ function syncFormToRequests($pdo, $formId, $formData) {
                 Site_Observation = :site_observation,
                 Additional_Comments = :additional_comments,
                 Scope_Of_Work = :scope_of_work,
+                Work_Date = :work_date,
+                Document_Date = :document_date,
+                docnum = :docnum,
+                form_id = :form_id,
                 status = :status,
                 updated_at = NOW()
             WHERE id = :id";
 
             $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':id', $existingRequest['id']);
+            $stmt->bindValue(':docnum', $docnum);
+            $stmt->bindValue(':form_id', $formId);
         } else {
             // INSERT new request
             $sql = "INSERT INTO requests (
                 Service_Type, Request_Type, Priority, Requested_Service,
-                client_name, Client_Title, Email, Number_Phone, Company_Name, Company_Address, Is_New_Client,
+                client_name, Client_Title, Email, Number_Phone, Company_Name, Company_Address, City, State, Is_New_Client,
                 Site_Visit_Conducted, frequency_period, week_days, one_time, Invoice_Frequency, Contract_Duration,
                 Seller, PriceInput, Prime_Quoted_Price,
                 includeJanitorial, type18, write18, time18, freq18, desc18, subtotal18, total18, taxes18, grand18,
@@ -654,10 +701,11 @@ function syncFormToRequests($pdo, $formId, $formData) {
                 includeStaff, base_staff, increase_staff, bill_staff,
                 inflationAdjustment, totalArea, buildingsIncluded, startDateServices,
                 Site_Observation, Additional_Comments, Scope_Of_Work,
-                status, docnum, created_at
+                Work_Date, Document_Date,
+                status, docnum, form_id, created_at
             ) VALUES (
                 :service_type, :request_type, :priority, :requested_service,
-                :client_name, :client_title, :email, :number_phone, :company_name, :company_address, :is_new_client,
+                :client_name, :client_title, :email, :number_phone, :company_name, :company_address, :city, :state, :is_new_client,
                 :site_visit_conducted, :frequency_period, :week_days, :one_time, :invoice_frequency, :contract_duration,
                 :seller, :price_input, :prime_quoted_price,
                 :include_janitorial, :type18, :write18, :time18, :freq18, :desc18, :subtotal18, :total18, :taxes18, :grand18,
@@ -665,11 +713,13 @@ function syncFormToRequests($pdo, $formId, $formData) {
                 :include_staff, :base_staff, :increase_staff, :bill_staff,
                 :inflation_adjustment, :total_area, :buildings_included, :start_date_services,
                 :site_observation, :additional_comments, :scope_of_work,
-                :status, :docnum, NOW()
+                :work_date, :document_date,
+                :status, :docnum, :form_id, NOW()
             )";
 
             $stmt = $pdo->prepare($sql);
             $stmt->bindValue(':docnum', $docnum);
+            $stmt->bindValue(':form_id', $formId);
         }
 
         // Bind common parameters
@@ -683,6 +733,8 @@ function syncFormToRequests($pdo, $formId, $formData) {
         $stmt->bindValue(':number_phone', $formData['Number_Phone'] ?? null);
         $stmt->bindValue(':company_name', $formData['Company_Name'] ?? null);
         $stmt->bindValue(':company_address', $formData['Company_Address'] ?? null);
+        $stmt->bindValue(':city', $formData['City'] ?? null);
+        $stmt->bindValue(':state', $formData['State'] ?? null);
         $stmt->bindValue(':is_new_client', $formData['Is_New_Client'] ?? null);
         $stmt->bindValue(':site_visit_conducted', $formData['Site_Visit_Conducted'] ?? null);
         $stmt->bindValue(':frequency_period', $formData['frequency_period'] ?? null);
@@ -723,6 +775,8 @@ function syncFormToRequests($pdo, $formId, $formData) {
         $stmt->bindValue(':site_observation', $formData['Site_Observation'] ?? null);
         $stmt->bindValue(':additional_comments', $formData['Additional_Comments'] ?? null);
         $stmt->bindValue(':scope_of_work', $scopeOfWork);
+        $stmt->bindValue(':work_date', !empty($formData['Work_Date']) ? $formData['Work_Date'] : null);
+        $stmt->bindValue(':document_date', !empty($formData['Document_Date']) ? $formData['Document_Date'] : null);
         $stmt->bindValue(':status', $formData['status'] ?? 'pending');
 
         $stmt->execute();
