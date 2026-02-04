@@ -411,9 +411,28 @@ try {
         }
     }
 
+    // ============================================================
+    // PASO 7: SINCRONIZAR CON TABLA REQUESTS (Contract Generator)
+    // ============================================================
+    $requestId = null;
+    // Prepare complete form data for requests sync
+    $requestFormData = array_merge($_POST, [
+        'Order_Nomenclature' => $nomenclature_val,
+        'order_number' => $order_number_val,
+        'Document_Date' => $document_date_val,
+        'Work_Date' => $work_date_val,
+        'status' => $status
+    ]);
+
+    $requestId = syncFormToRequests($pdo, $saved_form_id, $requestFormData);
+    if ($requestId) {
+        error_log("Form #$saved_form_id synced to requests table as request #$requestId");
+    }
+
     echo json_encode([
         'success' => true,
         'form_id' => $saved_form_id,
+        'request_id' => $requestId,
         'calendar_event_id' => $calendarEventId,
         'message' => $form_id ? 'Form updated successfully' : 'Form saved successfully'
     ]);

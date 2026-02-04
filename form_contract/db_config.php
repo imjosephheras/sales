@@ -545,4 +545,197 @@ function buildEventDescription($formData) {
 
     return implode("\n", $parts);
 }
+
+/**
+ * Sync form data to requests table (for Contract Generator)
+ * Maps fields from forms table format to requests table format
+ *
+ * @param PDO $pdo - Database connection
+ * @param int $formId - The form_id from forms table
+ * @param array $formData - Form data from POST
+ * @return int|false - Returns request_id on success, false on failure
+ */
+function syncFormToRequests($pdo, $formId, $formData) {
+    try {
+        // Check if request already exists for this form (using docnum or form_id match)
+        $docnum = $formData['Order_Nomenclature'] ?? null;
+        $existingRequest = null;
+
+        if ($docnum) {
+            $stmt = $pdo->prepare("SELECT id FROM requests WHERE docnum = ?");
+            $stmt->execute([$docnum]);
+            $existingRequest = $stmt->fetch();
+        }
+
+        // Prepare scope of work as JSON
+        $scopeOfWork = null;
+        if (isset($formData['Scope_Of_Work']) && is_array($formData['Scope_Of_Work'])) {
+            $scopeOfWork = json_encode($formData['Scope_Of_Work']);
+        }
+
+        // Prepare janitorial arrays as JSON
+        $type18 = isset($formData['type18']) && is_array($formData['type18']) ? json_encode($formData['type18']) : null;
+        $write18 = isset($formData['write18']) && is_array($formData['write18']) ? json_encode($formData['write18']) : null;
+        $time18 = isset($formData['time18']) && is_array($formData['time18']) ? json_encode($formData['time18']) : null;
+        $freq18 = isset($formData['freq18']) && is_array($formData['freq18']) ? json_encode($formData['freq18']) : null;
+        $desc18 = isset($formData['desc18']) && is_array($formData['desc18']) ? json_encode($formData['desc18']) : null;
+        $subtotal18 = isset($formData['subtotal18']) && is_array($formData['subtotal18']) ? json_encode($formData['subtotal18']) : null;
+
+        // Prepare kitchen/hoodvent arrays as JSON
+        $type19 = isset($formData['type19']) && is_array($formData['type19']) ? json_encode($formData['type19']) : null;
+        $time19 = isset($formData['time19']) && is_array($formData['time19']) ? json_encode($formData['time19']) : null;
+        $freq19 = isset($formData['freq19']) && is_array($formData['freq19']) ? json_encode($formData['freq19']) : null;
+        $desc19 = isset($formData['desc19']) && is_array($formData['desc19']) ? json_encode($formData['desc19']) : null;
+        $subtotal19 = isset($formData['subtotal19']) && is_array($formData['subtotal19']) ? json_encode($formData['subtotal19']) : null;
+
+        // Prepare staff arrays as JSON
+        $baseStaff = isset($formData['base_staff']) && is_array($formData['base_staff']) ? json_encode($formData['base_staff']) : null;
+        $increaseStaff = isset($formData['increase_staff']) && is_array($formData['increase_staff']) ? json_encode($formData['increase_staff']) : null;
+        $billStaff = isset($formData['bill_staff']) && is_array($formData['bill_staff']) ? json_encode($formData['bill_staff']) : null;
+
+        // Prepare week_days as JSON if it's an array
+        $weekDays = isset($formData['week_days']) && is_array($formData['week_days']) ? json_encode($formData['week_days']) : ($formData['week_days'] ?? null);
+
+        if ($existingRequest) {
+            // UPDATE existing request
+            $sql = "UPDATE requests SET
+                Service_Type = :service_type,
+                Request_Type = :request_type,
+                Priority = :priority,
+                Requested_Service = :requested_service,
+                client_name = :client_name,
+                Client_Title = :client_title,
+                Email = :email,
+                Number_Phone = :number_phone,
+                Company_Name = :company_name,
+                Company_Address = :company_address,
+                Is_New_Client = :is_new_client,
+                Site_Visit_Conducted = :site_visit_conducted,
+                frequency_period = :frequency_period,
+                week_days = :week_days,
+                one_time = :one_time,
+                Invoice_Frequency = :invoice_frequency,
+                Contract_Duration = :contract_duration,
+                Seller = :seller,
+                PriceInput = :price_input,
+                Prime_Quoted_Price = :prime_quoted_price,
+                includeJanitorial = :include_janitorial,
+                type18 = :type18, write18 = :write18, time18 = :time18,
+                freq18 = :freq18, desc18 = :desc18, subtotal18 = :subtotal18,
+                total18 = :total18, taxes18 = :taxes18, grand18 = :grand18,
+                includeKitchen = :include_kitchen,
+                type19 = :type19, time19 = :time19,
+                freq19 = :freq19, desc19 = :desc19, subtotal19 = :subtotal19,
+                total19 = :total19, taxes19 = :taxes19, grand19 = :grand19,
+                includeStaff = :include_staff,
+                base_staff = :base_staff, increase_staff = :increase_staff, bill_staff = :bill_staff,
+                inflationAdjustment = :inflation_adjustment,
+                totalArea = :total_area,
+                buildingsIncluded = :buildings_included,
+                startDateServices = :start_date_services,
+                Site_Observation = :site_observation,
+                Additional_Comments = :additional_comments,
+                Scope_Of_Work = :scope_of_work,
+                status = :status,
+                updated_at = NOW()
+            WHERE id = :id";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':id', $existingRequest['id']);
+        } else {
+            // INSERT new request
+            $sql = "INSERT INTO requests (
+                Service_Type, Request_Type, Priority, Requested_Service,
+                client_name, Client_Title, Email, Number_Phone, Company_Name, Company_Address, Is_New_Client,
+                Site_Visit_Conducted, frequency_period, week_days, one_time, Invoice_Frequency, Contract_Duration,
+                Seller, PriceInput, Prime_Quoted_Price,
+                includeJanitorial, type18, write18, time18, freq18, desc18, subtotal18, total18, taxes18, grand18,
+                includeKitchen, type19, time19, freq19, desc19, subtotal19, total19, taxes19, grand19,
+                includeStaff, base_staff, increase_staff, bill_staff,
+                inflationAdjustment, totalArea, buildingsIncluded, startDateServices,
+                Site_Observation, Additional_Comments, Scope_Of_Work,
+                status, docnum, created_at
+            ) VALUES (
+                :service_type, :request_type, :priority, :requested_service,
+                :client_name, :client_title, :email, :number_phone, :company_name, :company_address, :is_new_client,
+                :site_visit_conducted, :frequency_period, :week_days, :one_time, :invoice_frequency, :contract_duration,
+                :seller, :price_input, :prime_quoted_price,
+                :include_janitorial, :type18, :write18, :time18, :freq18, :desc18, :subtotal18, :total18, :taxes18, :grand18,
+                :include_kitchen, :type19, :time19, :freq19, :desc19, :subtotal19, :total19, :taxes19, :grand19,
+                :include_staff, :base_staff, :increase_staff, :bill_staff,
+                :inflation_adjustment, :total_area, :buildings_included, :start_date_services,
+                :site_observation, :additional_comments, :scope_of_work,
+                :status, :docnum, NOW()
+            )";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':docnum', $docnum);
+        }
+
+        // Bind common parameters
+        $stmt->bindValue(':service_type', $formData['Service_Type'] ?? null);
+        $stmt->bindValue(':request_type', $formData['Request_Type'] ?? null);
+        $stmt->bindValue(':priority', $formData['Priority'] ?? 'Normal');
+        $stmt->bindValue(':requested_service', $formData['Requested_Service'] ?? null);
+        $stmt->bindValue(':client_name', $formData['Client_Name'] ?? null);
+        $stmt->bindValue(':client_title', $formData['Client_Title'] ?? null);
+        $stmt->bindValue(':email', $formData['Email'] ?? null);
+        $stmt->bindValue(':number_phone', $formData['Number_Phone'] ?? null);
+        $stmt->bindValue(':company_name', $formData['Company_Name'] ?? null);
+        $stmt->bindValue(':company_address', $formData['Company_Address'] ?? null);
+        $stmt->bindValue(':is_new_client', $formData['Is_New_Client'] ?? null);
+        $stmt->bindValue(':site_visit_conducted', $formData['Site_Visit_Conducted'] ?? null);
+        $stmt->bindValue(':frequency_period', $formData['frequency_period'] ?? null);
+        $stmt->bindValue(':week_days', $weekDays);
+        $stmt->bindValue(':one_time', $formData['one_time'] ?? null);
+        $stmt->bindValue(':invoice_frequency', $formData['Invoice_Frequency'] ?? null);
+        $stmt->bindValue(':contract_duration', $formData['Contract_Duration'] ?? null);
+        $stmt->bindValue(':seller', $formData['Seller'] ?? null);
+        $stmt->bindValue(':price_input', $formData['PriceInput'] ?? null);
+        $stmt->bindValue(':prime_quoted_price', $formData['Prime_Quoted_Price'] ?? null);
+        $stmt->bindValue(':include_janitorial', $formData['includeJanitorial'] ?? null);
+        $stmt->bindValue(':type18', $type18);
+        $stmt->bindValue(':write18', $write18);
+        $stmt->bindValue(':time18', $time18);
+        $stmt->bindValue(':freq18', $freq18);
+        $stmt->bindValue(':desc18', $desc18);
+        $stmt->bindValue(':subtotal18', $subtotal18);
+        $stmt->bindValue(':total18', $formData['total18'] ?? null);
+        $stmt->bindValue(':taxes18', $formData['taxes18'] ?? null);
+        $stmt->bindValue(':grand18', $formData['grand18'] ?? null);
+        $stmt->bindValue(':include_kitchen', $formData['includeKitchen'] ?? null);
+        $stmt->bindValue(':type19', $type19);
+        $stmt->bindValue(':time19', $time19);
+        $stmt->bindValue(':freq19', $freq19);
+        $stmt->bindValue(':desc19', $desc19);
+        $stmt->bindValue(':subtotal19', $subtotal19);
+        $stmt->bindValue(':total19', $formData['total19'] ?? null);
+        $stmt->bindValue(':taxes19', $formData['taxes19'] ?? null);
+        $stmt->bindValue(':grand19', $formData['grand19'] ?? null);
+        $stmt->bindValue(':include_staff', $formData['includeStaff'] ?? null);
+        $stmt->bindValue(':base_staff', $baseStaff);
+        $stmt->bindValue(':increase_staff', $increaseStaff);
+        $stmt->bindValue(':bill_staff', $billStaff);
+        $stmt->bindValue(':inflation_adjustment', $formData['inflationAdjustment'] ?? null);
+        $stmt->bindValue(':total_area', $formData['totalArea'] ?? null);
+        $stmt->bindValue(':buildings_included', $formData['buildingsIncluded'] ?? null);
+        $stmt->bindValue(':start_date_services', !empty($formData['startDateServices']) ? $formData['startDateServices'] : null);
+        $stmt->bindValue(':site_observation', $formData['Site_Observation'] ?? null);
+        $stmt->bindValue(':additional_comments', $formData['Additional_Comments'] ?? null);
+        $stmt->bindValue(':scope_of_work', $scopeOfWork);
+        $stmt->bindValue(':status', $formData['status'] ?? 'pending');
+
+        $stmt->execute();
+
+        if ($existingRequest) {
+            return $existingRequest['id'];
+        } else {
+            return $pdo->lastInsertId();
+        }
+
+    } catch (Exception $e) {
+        error_log("Error syncing form to requests: " . $e->getMessage());
+        return false;
+    }
+}
 ?>
