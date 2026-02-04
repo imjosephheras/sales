@@ -463,17 +463,50 @@ function syncFormToCalendar($formId, $formData) {
             $status = 'confirmed';
         }
 
-        // Get default category_id (usually 1 for general/services)
-        $categoryId = 1;
-        $stmt = $calendarPdo->query("SELECT category_id FROM event_categories WHERE category_name LIKE '%service%' OR category_name LIKE '%work%' LIMIT 1");
+        // Determine category based on Request_Type
+        $requestType = strtoupper($formData['Request_Type'] ?? 'JWO');
+
+        // Map request types to category names
+        $categoryMap = [
+            'JWO' => ['name' => 'JWO', 'color' => '#3b82f6', 'icon' => '📋'],
+            'CONTRACT' => ['name' => 'Contract', 'color' => '#10b981', 'icon' => '📄'],
+            'PROPOSAL' => ['name' => 'Proposal', 'color' => '#f59e0b', 'icon' => '📊'],
+            'HOODVENT' => ['name' => 'Hoodvent', 'color' => '#ef4444', 'icon' => '🔥'],
+            'JANITORIAL' => ['name' => 'Janitorial', 'color' => '#8b5cf6', 'icon' => '🧹'],
+        ];
+
+        // Default to JWO if request type not found
+        $categoryInfo = $categoryMap[$requestType] ?? $categoryMap['JWO'];
+        $categoryName = $categoryInfo['name'];
+
+        // Try to find existing category by name (case-insensitive)
+        $stmt = $calendarPdo->prepare("SELECT category_id FROM event_categories WHERE UPPER(category_name) = :name LIMIT 1");
+        $stmt->execute([':name' => strtoupper($categoryName)]);
         $category = $stmt->fetch();
+
         if ($category) {
             $categoryId = $category['category_id'];
+        } else {
+            // Category doesn't exist - create it
+            $insertStmt = $calendarPdo->prepare(
+                "INSERT INTO event_categories (user_id, category_name, color_hex, icon, is_default)
+                 VALUES (:user_id, :name, :color, :icon, :is_default)"
+            );
+            $insertStmt->execute([
+                ':user_id' => 1, // Default user
+                ':name' => $categoryName,
+                ':color' => $categoryInfo['color'],
+                ':icon' => $categoryInfo['icon'],
+                ':is_default' => ($categoryName === 'JWO') ? 1 : 0
+            ]);
+            $categoryId = $calendarPdo->lastInsertId();
+            error_log("Created new calendar category '$categoryName' with ID $categoryId");
         }
 
         if ($existingEvent) {
             // UPDATE existing event
             $sql = "UPDATE events SET
+                category_id = :category_id,
                 title = :title,
                 description = :description,
                 location = :location,
@@ -488,6 +521,7 @@ function syncFormToCalendar($formId, $formData) {
 
             $stmt = $calendarPdo->prepare($sql);
             $stmt->execute([
+                ':category_id' => $categoryId,
                 ':title' => $title,
                 ':description' => $description,
                 ':location' => $location,
