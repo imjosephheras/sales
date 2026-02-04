@@ -101,6 +101,12 @@ try {
         'Site_Observation' => $form['site_observation'],
         'Additional_Comments' => $form['additional_comments'],
         'Email_Information_Sent' => $form['email_information_sent'],
+
+        // Section 9: Document & Work Dates
+        'Document_Date' => $form['Document_Date'],
+        'Work_Date' => $form['Work_Date'],
+        'Order_Nomenclature' => $form['Order_Nomenclature'],
+        'order_number' => $form['order_number'],
     ];
     
     echo json_encode([
