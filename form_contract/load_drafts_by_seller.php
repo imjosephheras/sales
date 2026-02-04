@@ -12,21 +12,7 @@ require_once 'db_config.php';
 try {
     $pdo = getDBConnection();
 
-    // Obtener el vendedor del parámetro GET
-    $seller = isset($_GET['seller']) ? trim($_GET['seller']) : '';
-
-    if (empty($seller)) {
-        // Si no hay vendedor, devolver lista vacía
-        echo json_encode([
-            'success' => true,
-            'forms' => [],
-            'count' => 0,
-            'message' => 'No seller specified'
-        ]);
-        exit;
-    }
-
-    // Cargar formularios del vendedor específico con status 'draft' o 'pending'
+    // Cargar TODOS los formularios con status 'draft' o 'pending' (sin filtro de vendedor)
     $sql = "SELECT
                 form_id,
                 service_type,
@@ -41,12 +27,10 @@ try {
                 updated_at
             FROM forms
             WHERE status IN ('draft', 'pending')
-            AND seller = :seller
             ORDER BY updated_at DESC, created_at DESC
             LIMIT 50";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':seller', $seller);
     $stmt->execute();
     $forms = $stmt->fetchAll();
 
