@@ -1152,8 +1152,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ===============================
-     LOAD PENDING FORMS (FILTERED BY SELLER)
-     Solo muestra formularios del vendedor de esta computadora
+     LOAD PENDING FORMS (ALL FORMS)
+     Muestra todos los formularios pendientes sin filtro de vendedor
   =============================== */
   function loadPendingForms() {
     const loadingIndicator = document.querySelector(".loading-indicator");
@@ -1164,21 +1164,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (formsList) formsList.innerHTML = "";
     if (noFormsMessage) noFormsMessage.style.display = "none";
 
-    // Obtener vendedor guardado en localStorage
-    const currentSeller = getSavedSeller();
-
-    // Si no hay vendedor guardado, mostrar mensaje
-    if (!currentSeller) {
-      if (loadingIndicator) loadingIndicator.style.display = "none";
-      if (noFormsMessage) {
-        noFormsMessage.innerHTML = '<p>📋 Seleccione un vendedor para ver sus formularios</p>';
-        noFormsMessage.style.display = "block";
-      }
-      return;
-    }
-
-    // Usar el nuevo endpoint que filtra por vendedor
-    fetch(`load_drafts_by_seller.php?seller=${encodeURIComponent(currentSeller)}`)
+    // Cargar todos los formularios pendientes (sin filtro de vendedor)
+    fetch('load_drafts_by_seller.php')
       .then(response => response.json())
       .then(data => {
         if (loadingIndicator) loadingIndicator.style.display = "none";
@@ -1191,7 +1178,7 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         } else {
           if (noFormsMessage) {
-            noFormsMessage.innerHTML = `<p>📭 No hay formularios pendientes para ${currentSeller}</p>`;
+            noFormsMessage.innerHTML = '<p>📭 No hay formularios pendientes</p>';
             noFormsMessage.style.display = "block";
           }
         }
