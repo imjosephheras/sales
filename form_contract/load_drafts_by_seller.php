@@ -37,8 +37,7 @@ try {
     echo json_encode([
         'success' => true,
         'forms' => $forms,
-        'count' => count($forms),
-        'seller' => $seller
+        'count' => count($forms)
     ]);
 
 } catch (PDOException $e) {

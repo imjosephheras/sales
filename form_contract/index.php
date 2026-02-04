@@ -1145,8 +1145,6 @@ document.addEventListener("DOMContentLoaded", () => {
     sellerSelect.addEventListener('change', function() {
       if (this.value) {
         saveSeller(this.value);
-        // Recargar formularios pendientes con el nuevo vendedor
-        loadPendingForms();
       }
     });
   }
