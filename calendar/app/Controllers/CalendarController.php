@@ -64,45 +64,42 @@ class CalendarController {
         try {
             // Load events for the month
             $events = $this->eventModel->getByMonth($this->userId, $year, $month);
-            
+
             // Load categories
             $categories = $this->categoryModel->getAllByUser($this->userId);
-            
+
             // Load today's events
             $todayEvents = $this->eventModel->getToday($this->userId);
-            
-            // Filter work items (JWO, Contract, Proposal, etc.)
-            $workItems = array_filter($events, function($evt) {
-                $categoryName = strtoupper($evt['category_name'] ?? '');
-                return in_array($categoryName, ['JWO', 'CONTRACT', 'PROPOSAL', 'HOODVENT', 'JANITORIAL']);
-            });
-            
-            // Group work items by type
-            $jwos = array_filter($workItems, fn($item) => stripos($item['category_name'], 'JWO') !== false);
-            $contracts = array_filter($workItems, fn($item) => stripos($item['category_name'], 'CONTRACT') !== false);
-            $proposals = array_filter($workItems, fn($item) => stripos($item['category_name'], 'PROPOSAL') !== false);
-            
+
+            // Load next 7 days events
+            $next7DaysEvents = $this->eventModel->getNext7Days($this->userId);
+
+            // Get default category ID (JWO - for automatic assignment)
+            $defaultCategoryId = null;
+            foreach ($categories as $cat) {
+                if (stripos($cat['category_name'], 'JWO') !== false) {
+                    $defaultCategoryId = $cat['category_id'];
+                    break;
+                }
+            }
+
             return [
                 'events' => $events,
                 'categories' => $categories,
                 'todayEvents' => $todayEvents,
-                'workItems' => $workItems,
-                'jwos' => $jwos,
-                'contracts' => $contracts,
-                'proposals' => $proposals
+                'next7DaysEvents' => $next7DaysEvents,
+                'defaultCategoryId' => $defaultCategoryId
             ];
-            
+
         } catch (Exception $e) {
             error_log("Error loading calendar data: " . $e->getMessage());
-            
+
             return [
                 'events' => [],
                 'categories' => [],
                 'todayEvents' => [],
-                'workItems' => [],
-                'jwos' => [],
-                'contracts' => [],
-                'proposals' => []
+                'next7DaysEvents' => [],
+                'defaultCategoryId' => null
             ];
         }
     }

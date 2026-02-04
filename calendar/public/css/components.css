@@ -694,17 +694,138 @@
         left: 10px;
         min-width: auto;
     }
-    
+
     .modal-content {
         width: 95%;
         margin: 1rem;
     }
-    
+
     .work-item {
         padding: 0.5rem;
     }
-    
+
     .work-code {
         font-size: 0.7rem;
     }
+}
+
+/* ============================================================
+   NEXT 7 DAYS SECTION
+   ============================================================ */
+.next-7-days-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.day-group {
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.day-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.day-date {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.day-events {
+    display: flex;
+    flex-direction: column;
+}
+
+.upcoming-event {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.625rem 0.75rem;
+    background: var(--color-surface);
+    border-left: 3px solid var(--event-color, #3b82f6);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upcoming-event:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.upcoming-event:hover {
+    background: var(--color-bg);
+}
+
+.upcoming-event-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.upcoming-client {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.upcoming-company {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.upcoming-title {
+    font-size: 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--color-accent, #3b82f6);
+    font-weight: 500;
+}
+
+.upcoming-event-status {
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+}
+
+/* Dark theme */
+[data-theme="dark"] .day-header {
+    background: #1f2937;
+}
+
+[data-theme="dark"] .day-group {
+    border-color: #374151;
+}
+
+[data-theme="dark"] .upcoming-event {
+    background: #1f2937;
+}
+
+[data-theme="dark"] .upcoming-event:hover {
+    background: #374151;
+}
+
+[data-theme="dark"] .upcoming-event:not(:last-child) {
+    border-bottom-color: #374151;
 }

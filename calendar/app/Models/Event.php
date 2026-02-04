@@ -498,8 +498,8 @@ class Event {
      */
     public function getToday($userId) {
         $today = date('Y-m-d');
-        
-        $query = "SELECT 
+
+        $query = "SELECT
             e.*,
             ec.category_name,
             ec.color_hex,
@@ -510,12 +510,41 @@ class Event {
         AND e.start_date = :today
         AND e.is_active = TRUE
         ORDER BY e.start_time ASC";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
         $stmt->bindParam(':today', $today);
         $stmt->execute();
-        
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Get events for the next 7 days (including today)
+     */
+    public function getNext7Days($userId) {
+        $today = date('Y-m-d');
+        $endDate = date('Y-m-d', strtotime('+7 days'));
+
+        $query = "SELECT
+            e.*,
+            ec.category_name,
+            ec.color_hex,
+            ec.icon
+        FROM {$this->table} e
+        LEFT JOIN event_categories ec ON e.category_id = ec.category_id
+        WHERE e.user_id = :user_id
+        AND e.start_date >= :today
+        AND e.start_date <= :end_date
+        AND e.is_active = TRUE
+        ORDER BY e.start_date ASC, e.start_time ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':today', $today);
+        $stmt->bindParam(':end_date', $endDate);
+        $stmt->execute();
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
