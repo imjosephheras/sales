@@ -340,6 +340,77 @@ try {
 
     $request_id = $pdo->lastInsertId();
 
+    // ============================================================
+    // SINCRONIZAR CON CALENDARIO (Calendar System)
+    // ============================================================
+    $calendarEventId = null;
+    if (!empty($work_date) && $request_id) {
+        $calendarFormData = [
+            'Work_Date' => $work_date,
+            'Document_Date' => $document_date,
+            'Order_Nomenclature' => $nomenclature,
+            'order_number' => $order_number,
+            'Company_Name' => $company_name,
+            'Company_Address' => $company_address,
+            'City' => $_POST['City'] ?? '',
+            'State' => $_POST['State'] ?? '',
+            'Requested_Service' => $requested_service,
+            'Service_Type' => $service_type,
+            'Request_Type' => $request_type,
+            'Priority' => $priority ?: 'Medium',
+            'status' => 'pending'
+        ];
+
+        $calendarEventId = syncFormToCalendar($request_id, $calendarFormData);
+        if ($calendarEventId) {
+            error_log("Form #$request_id synced to calendar event #$calendarEventId");
+        }
+    }
+
+    // ============================================================
+    // SINCRONIZAR CON TABLA REQUESTS (Contract Generator)
+    // ============================================================
+    $syncedRequestId = null;
+    if ($request_id) {
+        $requestFormData = [
+            'Service_Type' => $service_type,
+            'Request_Type' => $request_type,
+            'Priority' => $priority,
+            'Requested_Service' => $requested_service,
+            'client_name' => $client_name,
+            'Client_Title' => $client_title,
+            'Email' => $email,
+            'Number_Phone' => $number_phone,
+            'Company_Name' => $company_name,
+            'Company_Address' => $company_address,
+            'City' => $_POST['City'] ?? '',
+            'State' => $_POST['State'] ?? '',
+            'Is_New_Client' => $is_new_client,
+            'Site_Visit_Conducted' => $site_visit_conducted,
+            'Invoice_Frequency' => $invoice_frequency,
+            'Contract_Duration' => $contract_duration,
+            'Seller' => $Seller,
+            'PriceInput' => $PriceInput,
+            'Prime_Quoted_Price' => $prime_quoted_price,
+            'inflationAdjustment' => $inflation_adjustment,
+            'totalArea' => $total_area,
+            'buildingsIncluded' => $buildings_included,
+            'startDateServices' => $start_date_services,
+            'Site_Observation' => $site_observation,
+            'Additional_Comments' => $additional_comments,
+            'Order_Nomenclature' => $nomenclature,
+            'order_number' => $order_number,
+            'Document_Date' => $document_date,
+            'Work_Date' => $work_date,
+            'status' => 'pending'
+        ];
+
+        $syncedRequestId = syncFormToRequests($pdo, $request_id, $requestFormData);
+        if ($syncedRequestId) {
+            error_log("Form #$request_id synced to requests table as request #$syncedRequestId");
+        }
+    }
+
 } catch (Exception $e) {
     // Log error with full details
     error_log("Database save error: " . $e->getMessage());
