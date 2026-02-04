@@ -395,12 +395,13 @@ function showNotification(message, type = 'info') {
 
 // ============================================================
 // DRAG & DROP FUNCTIONALITY
+// Note: Using var for variables shared with calendar-dragdrop.js
 // ============================================================
 
 var draggedEventId = null;
-let draggedElement = null;
-let dropIndicator = null;
-let monthChangeTimeout = null;
+var draggedElement = null;
+var dropIndicator = null;
+var monthChangeTimeout = null;
 
 function initializeDragAndDrop() {
     createDropIndicator();
