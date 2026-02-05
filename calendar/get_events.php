@@ -15,8 +15,11 @@ try {
     $year  = isset($_GET['year'])  ? (int)$_GET['year']  : (int)date('Y');
 
     // Fetch forms that have a Work_Date in the requested month/year
+    // Include request form fields for schedule display
     $stmt = $pdo->prepare("
-        SELECT form_id, client_name, company_name, Work_Date, status
+        SELECT form_id, client_name, company_name, Work_Date, status,
+               service_type, request_type, priority, requested_service,
+               Order_Nomenclature, seller, Document_Date
         FROM forms
         WHERE Work_Date IS NOT NULL
           AND MONTH(Work_Date) = :month

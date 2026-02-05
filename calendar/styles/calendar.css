@@ -13,6 +13,12 @@
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
     --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
     --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+
+    /* Request type colors */
+    --color-contract: #1a73e8;
+    --color-proposal: #e67e22;
+    --color-jwo: #8e44ad;
+    --color-quote: #27ae60;
 }
 
 * {
@@ -182,7 +188,7 @@ body {
     gap: 4px;
 }
 
-/* Day Cell - Updated for events */
+/* Day Cell */
 .day-cell {
     min-height: 90px;
     display: flex;
@@ -226,8 +232,13 @@ body {
 }
 
 .day-cell.today .event-client,
-.day-cell.today .event-company {
+.day-cell.today .event-service {
     color: rgba(255,255,255,0.95);
+}
+
+.day-cell.today .chip-type-badge {
+    background: rgba(255,255,255,0.3);
+    color: white;
 }
 
 .day-cell.today:hover {
@@ -272,10 +283,68 @@ body {
     gap: 0;
     overflow: hidden;
     transition: background 0.15s;
+    position: relative;
+}
+
+/* Request type color coding for chips */
+.event-chip.chip-contract {
+    background: #e3f0ff;
+    border-left-color: var(--color-contract);
+}
+.event-chip.chip-proposal {
+    background: #fef3e2;
+    border-left-color: var(--color-proposal);
+}
+.event-chip.chip-jwo {
+    background: #f3e8fa;
+    border-left-color: var(--color-jwo);
+}
+.event-chip.chip-quote {
+    background: #e8f8ef;
+    border-left-color: var(--color-quote);
 }
 
 .event-chip:hover {
-    background: #d4e4fc;
+    filter: brightness(0.95);
+}
+
+/* Rush priority indicator */
+.event-chip.priority-rush {
+    animation: rushPulse 2s ease-in-out infinite;
+}
+
+@keyframes rushPulse {
+    0%, 100% { box-shadow: none; }
+    50% { box-shadow: 0 0 0 1px var(--accent-color); }
+}
+
+/* Type badge inside chip */
+.chip-type-badge {
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 0px 3px;
+    border-radius: 2px;
+    align-self: flex-start;
+    line-height: 1.4;
+    margin-bottom: 1px;
+}
+
+.chip-contract .chip-type-badge {
+    background: var(--color-contract);
+    color: white;
+}
+.chip-proposal .chip-type-badge {
+    background: var(--color-proposal);
+    color: white;
+}
+.chip-jwo .chip-type-badge {
+    background: var(--color-jwo);
+    color: white;
+}
+.chip-quote .chip-type-badge {
+    background: var(--color-quote);
+    color: white;
 }
 
 .event-client {
@@ -288,7 +357,7 @@ body {
     line-height: 1.3;
 }
 
-.event-company {
+.event-service {
     font-size: 0.6rem;
     font-weight: 400;
     color: var(--text-muted);
@@ -374,6 +443,88 @@ body {
     gap: 6px;
 }
 
+/* Request type colored borders for detail items */
+.detail-item.chip-contract-border {
+    border-left-color: var(--color-contract);
+}
+.detail-item.chip-proposal-border {
+    border-left-color: var(--color-proposal);
+}
+.detail-item.chip-jwo-border {
+    border-left-color: var(--color-jwo);
+}
+.detail-item.chip-quote-border {
+    border-left-color: var(--color-quote);
+}
+
+/* Detail item header row */
+.detail-item-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.detail-nomenclature {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+.detail-priority-rush {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: white;
+    background: var(--accent-color);
+    padding: 1px 7px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.detail-priority-rush i {
+    font-size: 0.6rem;
+}
+
+/* Badges row */
+.detail-badges {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.detail-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 8px;
+    letter-spacing: 0.3px;
+}
+
+.detail-badge.chip-contract {
+    background: #dbeafe;
+    color: var(--color-contract);
+}
+.detail-badge.chip-proposal {
+    background: #fef3e2;
+    color: var(--color-proposal);
+}
+.detail-badge.chip-jwo {
+    background: #f3e8fa;
+    color: var(--color-jwo);
+}
+.detail-badge.chip-quote {
+    background: #e8f8ef;
+    color: var(--color-quote);
+}
+.detail-badge.badge-service {
+    background: #f0f0f0;
+    color: var(--text-muted);
+}
+
 .detail-client {
     font-size: 0.88rem;
     font-weight: 600;
@@ -401,6 +552,33 @@ body {
     font-size: 0.75rem;
 }
 
+.detail-service {
+    font-size: 0.8rem;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.detail-service i {
+    color: var(--color-proposal);
+    font-size: 0.75rem;
+}
+
+.detail-seller {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-seller i {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
 .detail-status {
     align-self: flex-start;
     font-size: 0.7rem;
@@ -409,6 +587,7 @@ body {
     border-radius: 10px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    margin-left: auto;
 }
 
 .status-pending {
@@ -490,7 +669,11 @@ body {
         font-size: 0.55rem;
     }
 
-    .event-company {
+    .event-service {
         display: none;
+    }
+
+    .chip-type-badge {
+        font-size: 0.45rem;
     }
 }
