@@ -1,17 +1,11 @@
 <?php
 /**
- * ============================================================
- * RESCHEDULE EVENT ACTION
- * Reschedule event via drag & drop
- * ============================================================
+ * Reschedule Event Action - BASIC
+ * Delegates to EventController->reschedule()
  */
 
 require_once '../../config.php';
-require_once '../../app/Controllers/EventController.php';
+require_once APP_PATH . '/Controllers/EventController.php';
 
-// Require authentication
-requireAuth();
-
-// Initialize controller and reschedule
 $controller = new EventController();
 $controller->reschedule();
