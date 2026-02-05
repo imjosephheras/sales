@@ -1,17 +1,11 @@
 <?php
 /**
- * ============================================================
- * SAVE EVENT ACTION
- * Create or update event
- * ============================================================
+ * Save Event Action - BASIC
+ * Delegates to EventController->save()
  */
 
 require_once '../../config.php';
-require_once '../../app/Controllers/EventController.php';
+require_once APP_PATH . '/Controllers/EventController.php';
 
-// Require authentication
-requireAuth();
-
-// Initialize controller and save
 $controller = new EventController();
 $controller->save();

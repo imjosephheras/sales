@@ -1,81 +1,86 @@
 <?php
 /**
- * ============================================================
- * CALENDAR VIEW - MAIN INDEX
- * Clean separation of concerns
- * ============================================================
+ * Calendar View - BASIC
+ * Single column layout. No sidebars. Just the calendar grid.
  */
-
-// Set page-specific variables
-$pageTitle = e($monthName) . ' ' . $year . ' | Work Calendar';
-$showPrintHeader = true;
-$showPrintFooter = true;
-
-// Include header
-include VIEWS_PATH . '/layouts/header.php';
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= $pageTitle ?? 'Calendar' ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="public/css/calendar.css">
+</head>
+<body>
 
-<!-- Main Calendar Layout (3 columns) -->
-<div class="calendar-layout">
-    
-    <!-- Left Sidebar: Client Filters (Excel-style) -->
-    <?php include VIEWS_PATH . '/calendar/sidebar-left.php'; ?>
-    
-    <!-- Calendar Main Section (Center) -->
-    <main class="calendar-main">
-        
-        <!-- Calendar Header -->
-        <div class="calendar-header">
-            <div class="month-navigation">
-                <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="nav-arrow">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M12 4L6 10L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </a>
-                
-                <h1 class="month-title">
-                    <span class="month"><?= $monthName ?></span>
-                    <span class="year"><?= $year ?></span>
-                </h1>
-                
-                <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="nav-arrow">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M8 4L14 10L8 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </a>
-            </div>
-            
-            <div class="calendar-actions">
-                <a href="?month=<?= date('n') ?>&year=<?= date('Y') ?>" class="btn-today">Today</a>
-                
-                <!-- Print Button -->
-                <button class="btn-print" onclick="printCalendar()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 9V2h12v7"/>
-                        <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
-                        <rect x="6" y="14" width="12" height="8"/>
-                    </svg>
-                    Print
-                </button>
-                
-                <button class="btn-primary" onclick="openEventModal()">+ New Event</button>
-            </div>
+<!-- Header -->
+<header class="main-header">
+    <div class="header-left">
+        <a href="../index.php" class="home-btn">Home</a>
+        <span class="logo-text">Calendar</span>
+    </div>
+    <div class="header-right">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+            <span class="theme-icon-light">&#9728;</span>
+            <span class="theme-icon-dark">&#9790;</span>
+        </button>
+    </div>
+</header>
+
+<!-- Flash Messages -->
+<?php if (isset($flash) && $flash): ?>
+    <div class="flash-message flash-<?= e($flash['type']) ?>" id="flashMessage">
+        <?= e($flash['message']) ?>
+    </div>
+<?php endif; ?>
+
+<!-- Calendar -->
+<main class="calendar-main">
+
+    <!-- Calendar Header -->
+    <div class="calendar-header">
+        <div class="month-navigation">
+            <a href="?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="nav-arrow">&larr;</a>
+            <h1 class="month-title">
+                <span class="month"><?= $monthName ?></span>
+                <span class="year"><?= $year ?></span>
+            </h1>
+            <a href="?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="nav-arrow">&rarr;</a>
         </div>
+        <div class="calendar-actions">
+            <a href="?month=<?= date('n') ?>&year=<?= date('Y') ?>" class="btn-today">Today</a>
+            <button class="btn-primary" onclick="openEventModal()">+ New Event</button>
+        </div>
+    </div>
 
-        <!-- Calendar Grid -->
-        <?php include VIEWS_PATH . '/calendar/grid.php'; ?>
-        
-    </main>
+    <!-- Calendar Grid -->
+    <?php include VIEWS_PATH . '/calendar/grid.php'; ?>
 
-    <!-- Right Sidebar: Today + Work/Jobs -->
-    <?php include VIEWS_PATH . '/calendar/sidebar-right.php'; ?>
-    
-</div>
+</main>
 
-<!-- Modals -->
+<!-- Event Modal -->
 <?php include VIEWS_PATH . '/calendar/modals.php'; ?>
 
-<?php
-// Include footer
-include VIEWS_PATH . '/layouts/footer.php';
-?>
+<!-- Single JS file -->
+<script src="public/js/calendar.js"></script>
+
+<script>
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+
+// Auto-hide flash messages
+const flashEl = document.getElementById('flashMessage');
+if (flashEl) {
+    setTimeout(() => {
+        flashEl.style.opacity = '0';
+        setTimeout(() => flashEl.remove(), 300);
+    }, 4000);
+}
+</script>
+</body>
+</html>

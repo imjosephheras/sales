@@ -1,12 +1,13 @@
-<!-- Calendar Grid -->
+<!-- Calendar Grid - BASIC -->
+<!-- Events are placed by start_date. Nothing else. -->
 <div class="calendar-grid">
-    
+
     <!-- Day Headers -->
     <?php
     $dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    foreach ($dayNames as $dayName):
+    foreach ($dayNames as $dn):
     ?>
-        <div class="day-header"><?= $dayName ?></div>
+        <div class="grid-day-header"><?= $dn ?></div>
     <?php endforeach; ?>
 
     <!-- Empty cells before first day -->
@@ -20,28 +21,25 @@
     for ($day = 1; $day <= $daysInMonth; $day++):
         $date = sprintf('%04d-%02d-%02d', $year, $month, $day);
         $isToday = ($date === $today);
-        $dayEvents = array_filter($events, fn($e) => ($e['effective_date'] ?? $e['start_date'] ?? $e['execution_date'] ?? $e['document_date']) === $date);
+
+        // Filter events for this day using start_date only
+        $dayEvents = array_filter($events, function($e) use ($date) {
+            return $e['start_date'] === $date;
+        });
     ?>
-        <div class="calendar-day <?= $isToday ? 'today' : '' ?>" 
+        <div class="calendar-day <?= $isToday ? 'today' : '' ?>"
              data-date="<?= $date ?>"
-             onclick="console.log('Day clicked: <?= $date ?>')">
-            
+             ondragover="event.preventDefault(); this.classList.add('drag-over')"
+             ondragleave="this.classList.remove('drag-over')"
+             ondrop="handleDrop(event, this)">
+
             <div class="day-number"><?= $day ?></div>
-            
-            <!-- Screen display events -->
+
             <div class="day-events">
                 <?php foreach ($dayEvents as $evt): ?>
-                    <?php 
-                    component('event-dot', [
-                        'event' => $evt,
-                        'date' => $date
-                    ]); 
-                    ?>
+                    <?php component('event-dot', ['event' => $evt]); ?>
                 <?php endforeach; ?>
             </div>
-            
-            <!-- Print-only events (populated by JavaScript) -->
-            <div class="print-events"></div>
         </div>
     <?php endfor; ?>
 </div>
