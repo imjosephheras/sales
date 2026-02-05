@@ -115,15 +115,6 @@
         // Use Company_Address or fallback (matching PDF template)
         const companyAddress = data.Company_Address || 'N/A';
 
-        // Get total price with fallback chain (same as PDF)
-        const rawPrice = parseFloat(data.Total_Price || data.Prime_Quoted_Price || data.PriceInput || 0);
-        const subtotal = formatPrice(rawPrice);
-
-        // Calculate taxes and grand total (same as PDF: 8.25%)
-        const taxRate = 0.0825;
-        const taxes = rawPrice * taxRate;
-        const grandTotal = rawPrice + taxes;
-
         // Payment terms mapping (same as PDF)
         const termsMap = {
             '15': 'Net 15',
@@ -143,42 +134,159 @@
         const department = data.Service_Type || 'N/A';
         const woNumber = data.docnum || 'DRAFT';
         const workDate = new Date().toLocaleDateString('en-US');
-
-        // Service details
         const requestedService = data.Requested_Service || 'Service';
-        const serviceTime = data.Service_Time || 'One Day';
-        const serviceFrequency = data.Service_Frequency || 'One Time';
 
-        // Build service description (same logic as PDF)
-        let serviceDescription = '';
-        if (data.Site_Observation) {
-            serviceDescription = escapeHtml(data.Site_Observation);
-        } else if (data.scope_of_work) {
-            serviceDescription = escapeHtml(data.scope_of_work.replace(/<[^>]*>/g, ''));
-        } else {
-            serviceDescription = 'Professional service as per client requirements. All work performed to industry standards with quality assurance.';
+        // ========================================
+        // BUILD SERVICE ROWS from DB detail tables
+        // ========================================
+        let serviceRows = [];
+        let runningTotal = 0;
+        let hasDetailServices = false;
+
+        // --- Janitorial Services (from detail table or JSON arrays) ---
+        if (data.janitorial_services && Array.isArray(data.janitorial_services) && data.janitorial_services.length > 0) {
+            hasDetailServices = true;
+            data.janitorial_services.forEach(function(svc) {
+                const svcSub = parseFloat(svc.subtotal || 0);
+                runningTotal += svcSub;
+                serviceRows.push({
+                    type: svc.service_type || 'Janitorial',
+                    time: svc.service_time || '',
+                    freq: svc.frequency || '',
+                    desc: svc.description || '',
+                    subtotal: svcSub
+                });
+            });
+        } else if (data.includeJanitorial === 'Yes' && data.type18 && Array.isArray(data.type18)) {
+            hasDetailServices = true;
+            data.type18.forEach(function(type, i) {
+                if (!type) return;
+                const svcSub = parseFloat((data.subtotal18 && data.subtotal18[i]) || 0);
+                runningTotal += svcSub;
+                serviceRows.push({
+                    type: type,
+                    time: (data.time18 && data.time18[i]) || '',
+                    freq: (data.freq18 && data.freq18[i]) || '',
+                    desc: (data.desc18 && data.desc18[i]) || '',
+                    subtotal: svcSub
+                });
+            });
         }
 
-        // Build scope of work for bottom section
+        // --- Kitchen Cleaning Services ---
+        if (data.kitchen_services && Array.isArray(data.kitchen_services) && data.kitchen_services.length > 0) {
+            hasDetailServices = true;
+            data.kitchen_services.forEach(function(svc) {
+                const svcSub = parseFloat(svc.subtotal || 0);
+                runningTotal += svcSub;
+                serviceRows.push({
+                    type: svc.service_type || 'Kitchen Cleaning',
+                    time: svc.service_time || '',
+                    freq: svc.frequency || '',
+                    desc: svc.description || '',
+                    subtotal: svcSub
+                });
+            });
+        } else if (data.includeKitchen === 'Yes' && data.type19 && Array.isArray(data.type19)) {
+            hasDetailServices = true;
+            data.type19.forEach(function(type, i) {
+                if (!type) return;
+                const svcSub = parseFloat((data.subtotal19 && data.subtotal19[i]) || 0);
+                runningTotal += svcSub;
+                serviceRows.push({
+                    type: type,
+                    time: (data.time19 && data.time19[i]) || '',
+                    freq: (data.freq19 && data.freq19[i]) || '',
+                    desc: (data.desc19 && data.desc19[i]) || '',
+                    subtotal: svcSub
+                });
+            });
+        }
+
+        // --- Hood Vent Services ---
+        if (data.hood_vent_services && Array.isArray(data.hood_vent_services) && data.hood_vent_services.length > 0) {
+            hasDetailServices = true;
+            data.hood_vent_services.forEach(function(svc) {
+                const svcSub = parseFloat(svc.subtotal || 0);
+                runningTotal += svcSub;
+                serviceRows.push({
+                    type: svc.service_type || 'Hood Vent',
+                    time: svc.service_time || '',
+                    freq: svc.frequency || '',
+                    desc: svc.description || '',
+                    subtotal: svcSub
+                });
+            });
+        }
+
+        // Calculate totals
+        let totalAmount;
+        if (hasDetailServices && runningTotal > 0) {
+            totalAmount = runningTotal;
+        } else {
+            totalAmount = parseFloat(data.Total_Price || data.Prime_Quoted_Price || data.PriceInput || 0);
+        }
+
+        // If no detail service rows, create a single generic row
+        if (serviceRows.length === 0) {
+            let serviceDescription = '';
+            if (data.Site_Observation) {
+                serviceDescription = escapeHtml(data.Site_Observation);
+            } else {
+                serviceDescription = 'Professional service as per client requirements.';
+            }
+            serviceRows.push({
+                type: requestedService,
+                time: data.Service_Time || 'One Day',
+                freq: data.Service_Frequency || 'One Time',
+                desc: serviceDescription,
+                subtotal: totalAmount
+            });
+        }
+
+        const taxRate = 0.0825;
+        const taxes = totalAmount * taxRate;
+        const grandTotal = totalAmount + taxes;
+
+        // Build service rows HTML
+        let serviceRowsHtml = '';
+        serviceRows.forEach(function(row) {
+            serviceRowsHtml += `
+                <tr>
+                    <td class="service-desc">${escapeHtml(row.type)}</td>
+                    <td>${escapeHtml(row.time)}</td>
+                    <td>${escapeHtml(row.freq)}</td>
+                    <td class="service-desc">${escapeHtml(row.desc)}</td>
+                    <td class="amount">$${formatPrice(row.subtotal)}</td>
+                </tr>
+            `;
+        });
+
+        // ========================================
+        // BUILD SCOPE OF WORK
+        // ========================================
         let scopeWorkHtml = '';
-        if (data.scope_of_work) {
-            scopeWorkHtml = data.scope_of_work;
+        if (data.scope_of_work_tasks && Array.isArray(data.scope_of_work_tasks) && data.scope_of_work_tasks.length > 0) {
+            scopeWorkHtml = '<ul>' + data.scope_of_work_tasks.map(function(task) {
+                return '<li>' + escapeHtml(task) + '</li>';
+            }).join('') + '</ul>';
+        } else if (data.Scope_Of_Work && Array.isArray(data.Scope_Of_Work) && data.Scope_Of_Work.length > 0) {
+            scopeWorkHtml = '<ul>' + data.Scope_Of_Work.map(function(task) {
+                return '<li>' + escapeHtml(task) + '</li>';
+            }).join('') + '</ul>';
         } else {
             scopeWorkHtml = `
                 <ul>
-                    <li>Pre-cleaning and preparation of all exterior glass panels listed above</li>
-                    <li>Removal of fingerprints, dust, and any residues to ensure proper film adhesion</li>
-                    <li>Installation of window tint on doors, side panels, and upper transom window</li>
-                    <li>Removal of bubbles and inspection of adhesion during installation</li>
-                    <li>Cleaning of the work area to maintain a professional finish</li>
-                    <li>Final inspection to ensure an even and uniform appearance across the entire storefront</li>
+                    <li>Professional service as per client requirements</li>
+                    <li>All work performed to industry standards with quality assurance</li>
+                    <li>Final inspection to ensure satisfactory completion</li>
                 </ul>
             `;
         }
 
         // Determine logo based on Service_Type (same as PDF)
-        const dept = (data.Service_Type || '').toLowerCase();
-        const logoSrc = dept.includes('hospitality') ? '/sales/Images/phospitality.png' : '/sales/Images/pfacility.png';
+        const deptLower = (data.Service_Type || '').toLowerCase();
+        const logoSrc = deptLower.includes('hospitality') ? '/sales/Images/phospitality.png' : '/sales/Images/pfacility.png';
 
         return `
             <div class="document-preview jwo-preview-exact">
@@ -396,8 +504,8 @@
                     </tr>
                 </table>
 
-                <!-- SERVICES TABLE - Exact match to PDF -->
-                <table class="jwo-services-exact">  
+                <!-- SERVICES TABLE - All services from DB -->
+                <table class="jwo-services-exact">
                     <thead>
                         <tr>
                             <th style="width: 25%;">TYPE OF SERVICES</th>
@@ -408,13 +516,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="service-desc">${escapeHtml(requestedService)}</td>
-                            <td>${escapeHtml(serviceTime)}</td>
-                            <td>${escapeHtml(serviceFrequency)}</td>
-                            <td class="service-desc">${serviceDescription}</td>
-                            <td class="amount">$${subtotal}</td>
-                        </tr>
+                        ${serviceRowsHtml}
                     </tbody>
                 </table>
 
@@ -422,7 +524,7 @@
                 <table class="jwo-totals-exact">
                     <tr>
                         <td class="label-cell">TOTAL</td>
-                        <td class="value-cell">$${subtotal}</td>
+                        <td class="value-cell">$${formatPrice(totalAmount)}</td>
                     </tr>
                     <tr>
                         <td class="label-cell">TAXES (8.25%)</td>
@@ -461,7 +563,7 @@
     function escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
-        div.textContent = text;
+        div.textContent = String(text);
         return div.innerHTML;
     }
 

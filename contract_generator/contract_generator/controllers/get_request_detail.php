@@ -20,6 +20,7 @@ try {
     $stmt = $pdo->prepare("
         SELECT
             id, status, docnum, created_at, updated_at, completed_at,
+            form_id,
 
             -- Section 1: Request Information
             Service_Type, Request_Type, Priority, Requested_Service,
@@ -92,6 +93,48 @@ try {
                 $request[$field] = $decoded;
             }
         }
+    }
+
+    // Query service detail tables from form database if form_id exists
+    $formId = $request['form_id'] ?? null;
+
+    // Also try to find form_id by docnum if not directly set
+    if (!$formId && !empty($request['docnum'])) {
+        $stmtForm = $pdo->prepare("SELECT form_id FROM forms WHERE Order_Nomenclature = ? LIMIT 1");
+        $stmtForm->execute([$request['docnum']]);
+        $formRow = $stmtForm->fetch(PDO::FETCH_ASSOC);
+        if ($formRow) {
+            $formId = $formRow['form_id'];
+        }
+    }
+
+    $request['janitorial_services'] = [];
+    $request['kitchen_services'] = [];
+    $request['hood_vent_services'] = [];
+    $request['scope_of_work_tasks'] = [];
+
+    if ($formId) {
+        $request['form_id'] = $formId;
+
+        // Get janitorial services from detail table
+        $stmtJ = $pdo->prepare("SELECT * FROM janitorial_services_costs WHERE form_id = ? ORDER BY service_number");
+        $stmtJ->execute([$formId]);
+        $request['janitorial_services'] = $stmtJ->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get kitchen cleaning services from detail table
+        $stmtK = $pdo->prepare("SELECT * FROM kitchen_cleaning_costs WHERE form_id = ? ORDER BY service_number");
+        $stmtK->execute([$formId]);
+        $request['kitchen_services'] = $stmtK->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get hood vent services from detail table
+        $stmtH = $pdo->prepare("SELECT * FROM hood_vent_costs WHERE form_id = ? ORDER BY service_number");
+        $stmtH->execute([$formId]);
+        $request['hood_vent_services'] = $stmtH->fetchAll(PDO::FETCH_ASSOC);
+
+        // Get scope of work tasks from detail table
+        $stmtS = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
+        $stmtS->execute([$formId]);
+        $request['scope_of_work_tasks'] = $stmtS->fetchAll(PDO::FETCH_COLUMN);
     }
 
     // Formatear fechas

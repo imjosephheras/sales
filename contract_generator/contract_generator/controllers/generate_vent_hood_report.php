@@ -37,6 +37,37 @@ try {
     }
 
     // ========================================
+    // QUERY SERVICE DETAIL TABLES FROM form DB
+    // ========================================
+
+    $formId = $data['form_id'] ?? null;
+
+    // Try to find form_id by docnum if not directly set
+    if (!$formId && !empty($data['docnum'])) {
+        $stmtForm = $pdo->prepare("SELECT form_id FROM forms WHERE Order_Nomenclature = ? LIMIT 1");
+        $stmtForm->execute([$data['docnum']]);
+        $formRow = $stmtForm->fetch(PDO::FETCH_ASSOC);
+        if ($formRow) {
+            $formId = $formRow['form_id'];
+        }
+    }
+
+    $hoodVentServices = [];
+    $kitchenServices = [];
+
+    if ($formId) {
+        // Hood vent services from detail table
+        $stmtH = $pdo->prepare("SELECT * FROM hood_vent_costs WHERE form_id = ? ORDER BY service_number");
+        $stmtH->execute([$formId]);
+        $hoodVentServices = $stmtH->fetchAll(PDO::FETCH_ASSOC);
+
+        // Kitchen cleaning services from detail table
+        $stmtK = $pdo->prepare("SELECT * FROM kitchen_cleaning_costs WHERE form_id = ? ORDER BY service_number");
+        $stmtK->execute([$formId]);
+        $kitchenServices = $stmtK->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // ========================================
     // USE VENT HOOD REPORT TEMPLATE
     // ========================================
 

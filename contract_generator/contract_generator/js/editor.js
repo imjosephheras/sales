@@ -540,9 +540,38 @@
     // ========================================
 
     function updatePreview() {
-        // Esta función se implementará en preview.js
         if (window.PreviewModule) {
-            window.PreviewModule.render(getFormData());
+            // Merge form field values with service detail arrays from loaded request data
+            const formData = getFormData();
+
+            // Carry over service detail arrays from the loaded request (not in form fields)
+            if (currentRequestData) {
+                if (currentRequestData.janitorial_services) {
+                    formData.janitorial_services = currentRequestData.janitorial_services;
+                }
+                if (currentRequestData.kitchen_services) {
+                    formData.kitchen_services = currentRequestData.kitchen_services;
+                }
+                if (currentRequestData.hood_vent_services) {
+                    formData.hood_vent_services = currentRequestData.hood_vent_services;
+                }
+                if (currentRequestData.scope_of_work_tasks) {
+                    formData.scope_of_work_tasks = currentRequestData.scope_of_work_tasks;
+                }
+                if (currentRequestData.Scope_Of_Work) {
+                    formData.Scope_Of_Work = currentRequestData.Scope_Of_Work;
+                }
+                // Carry over JSON array fields for fallback
+                ['type18','write18','time18','freq18','desc18','subtotal18',
+                 'type19','time19','freq19','desc19','subtotal19',
+                 'base_staff','increase_staff','bill_staff'].forEach(function(field) {
+                    if (currentRequestData[field] && Array.isArray(currentRequestData[field])) {
+                        formData[field] = currentRequestData[field];
+                    }
+                });
+            }
+
+            window.PreviewModule.render(formData);
         }
     }
 

@@ -20,17 +20,18 @@ if (!in_array($reportType, ['hood_vent', 'kitchen', 'janitorial', 'staff', 'summ
 }
 
 try {
-    // Get request data
+    // Get request data - join with forms via form_id or docnum
     $stmt = $pdo->prepare("
         SELECT r.*,
-               f.form_id,
-               f.Work_Date,
-               f.Document_Date,
-               f.Order_Nomenclature,
-               f.order_number,
-               f.total_cost
+               COALESCE(f1.form_id, f2.form_id) AS form_id,
+               COALESCE(f1.Work_Date, f2.Work_Date) AS Work_Date,
+               COALESCE(f1.Document_Date, f2.Document_Date) AS Document_Date,
+               COALESCE(f1.Order_Nomenclature, f2.Order_Nomenclature) AS Order_Nomenclature,
+               COALESCE(f1.order_number, f2.order_number) AS order_number,
+               COALESCE(f1.total_cost, f2.total_cost) AS total_cost
         FROM requests r
-        LEFT JOIN forms f ON r.docnum = f.Order_Nomenclature
+        LEFT JOIN forms f1 ON r.form_id = f1.form_id
+        LEFT JOIN forms f2 ON r.docnum = f2.Order_Nomenclature AND f1.form_id IS NULL
         WHERE r.id = :id
     ");
     $stmt->execute([':id' => $requestId]);

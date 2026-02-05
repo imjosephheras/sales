@@ -336,20 +336,24 @@
 <body>
 
     <!-- HEADER -->
+    <?php
+    // Encode logo as base64 for DOMPDF compatibility
+    $dept = strtolower(trim($data['Service_Type'] ?? ''));
+    if (strpos($dept, 'hospitality') !== false) {
+        $logo_file = __DIR__ . '/../../../Images/Hospitality.png';
+    } else {
+        $logo_file = __DIR__ . '/../../../Images/Facility.png';
+    }
+    $logo_base64 = '';
+    if (file_exists($logo_file)) {
+        $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_file));
+    }
+    ?>
     <div class="header">
         <div class="header-left">
-            <img
-                class="header-logo"
-                src="<?php
-                    $dept = strtolower(trim($data['Service_Type'] ?? ''));
-                    if (strpos($dept, 'hospitality') !== false) {
-                        echo '/sales/Images/phospitality.png';
-                    } else {
-                        echo '/sales/Images/pfacility.png';
-                    }
-                ?>"
-                alt="Prime Facility Services Group"
-            >
+            <?php if ($logo_base64): ?>
+            <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Facility Services Group">
+            <?php endif; ?>
         </div>
         <div class="header-right">
             <div class="doc-title">JOB WORK ORDER</div>
@@ -424,25 +428,118 @@
 
     <!-- SERVICES TABLE -->
     <?php
+    // Build service rows from DB detail tables (passed by generate_pdf.php)
+    // Fallback to JSON arrays from requests table if detail tables are empty
+    $hasDetailServices = false;
+    $allServiceRows = [];
+    $runningTotal = 0.0;
+
+    // --- Janitorial Services ---
+    if (!empty($janitorialServices)) {
+        $hasDetailServices = true;
+        foreach ($janitorialServices as $svc) {
+            $svcSubtotal = floatval($svc['subtotal'] ?? 0);
+            $runningTotal += $svcSubtotal;
+            $allServiceRows[] = [
+                'type' => $svc['service_type'] ?? 'Janitorial',
+                'time' => $svc['service_time'] ?? '',
+                'freq' => $svc['frequency'] ?? '',
+                'desc' => $svc['description'] ?? '',
+                'subtotal' => $svcSubtotal,
+            ];
+        }
+    } elseif (($data['includeJanitorial'] ?? '') === 'Yes' && !empty($data['type18']) && is_array($data['type18'])) {
+        $hasDetailServices = true;
+        foreach ($data['type18'] as $i => $type) {
+            if (!$type) continue;
+            $svcSubtotal = floatval($data['subtotal18'][$i] ?? 0);
+            $runningTotal += $svcSubtotal;
+            $allServiceRows[] = [
+                'type' => $type,
+                'time' => $data['time18'][$i] ?? '',
+                'freq' => $data['freq18'][$i] ?? '',
+                'desc' => $data['desc18'][$i] ?? '',
+                'subtotal' => $svcSubtotal,
+            ];
+        }
+    }
+
+    // --- Kitchen Cleaning Services ---
+    if (!empty($kitchenServices)) {
+        $hasDetailServices = true;
+        foreach ($kitchenServices as $svc) {
+            $svcSubtotal = floatval($svc['subtotal'] ?? 0);
+            $runningTotal += $svcSubtotal;
+            $allServiceRows[] = [
+                'type' => $svc['service_type'] ?? 'Kitchen Cleaning',
+                'time' => $svc['service_time'] ?? '',
+                'freq' => $svc['frequency'] ?? '',
+                'desc' => $svc['description'] ?? '',
+                'subtotal' => $svcSubtotal,
+            ];
+        }
+    } elseif (($data['includeKitchen'] ?? '') === 'Yes' && !empty($data['type19']) && is_array($data['type19'])) {
+        $hasDetailServices = true;
+        foreach ($data['type19'] as $i => $type) {
+            if (!$type) continue;
+            $svcSubtotal = floatval($data['subtotal19'][$i] ?? 0);
+            $runningTotal += $svcSubtotal;
+            $allServiceRows[] = [
+                'type' => $type,
+                'time' => $data['time19'][$i] ?? '',
+                'freq' => $data['freq19'][$i] ?? '',
+                'desc' => $data['desc19'][$i] ?? '',
+                'subtotal' => $svcSubtotal,
+            ];
+        }
+    }
+
+    // --- Hood Vent Services ---
+    if (!empty($hoodVentServices)) {
+        $hasDetailServices = true;
+        foreach ($hoodVentServices as $svc) {
+            $svcSubtotal = floatval($svc['subtotal'] ?? 0);
+            $runningTotal += $svcSubtotal;
+            $allServiceRows[] = [
+                'type' => $svc['service_type'] ?? 'Hood Vent',
+                'time' => $svc['service_time'] ?? '',
+                'freq' => $svc['frequency'] ?? '',
+                'desc' => $svc['description'] ?? '',
+                'subtotal' => $svcSubtotal,
+            ];
+        }
+    }
+
     // Calculate totals
-    $subtotal = (float)($data['Total_Price'] ?? $data['Prime_Quoted_Price'] ?? $data['PriceInput'] ?? 0);
+    if ($hasDetailServices && $runningTotal > 0) {
+        $subtotal = $runningTotal;
+    } else {
+        $subtotal = (float)($data['Total_Price'] ?? $data['Prime_Quoted_Price'] ?? $data['PriceInput'] ?? 0);
+    }
+
     $tax_rate = 0.0825;
     $taxes = $subtotal * $tax_rate;
     $grand_total = $subtotal + $taxes;
 
-    // Build service description
-    $service_description = '';
-    if (!empty($data['Site_Observation'])) {
-        $service_description = htmlspecialchars($data['Site_Observation']);
-    } elseif (!empty($data['scope_of_work'])) {
-        $service_description = strip_tags($data['scope_of_work']);
-    } else {
-        $service_description = 'Professional service as per client requirements. All work performed to industry standards with quality assurance.';
-    }
+    // If no detail service rows, create a single generic row
+    if (empty($allServiceRows)) {
+        $service_description = '';
+        if (!empty($data['Site_Observation'])) {
+            $service_description = htmlspecialchars($data['Site_Observation']);
+        } elseif (!empty($data['scope_of_work'])) {
+            $service_description = strip_tags($data['scope_of_work']);
+        } else {
+            $service_description = 'Professional service as per client requirements. All work performed to industry standards with quality assurance.';
+        }
 
-    // Service time and frequency
-    $service_time = htmlspecialchars($data['Service_Time'] ?? 'One Day');
-    $frequency = htmlspecialchars($data['Service_Frequency'] ?? 'One Time');
+        $allServiceRows[] = [
+            'type' => $data['Requested_Service'] ?? 'Service',
+            'time' => $data['Service_Time'] ?? 'One Day',
+            'freq' => $data['Service_Frequency'] ?? 'One Time',
+            'desc' => $service_description,
+            'subtotal' => $subtotal,
+        ];
+    }
     ?>
     <table class="services-table">
         <thead>
@@ -455,13 +552,15 @@
             </tr>
         </thead>
         <tbody>
+            <?php foreach ($allServiceRows as $row): ?>
             <tr>
-                <td class="service-desc"><?php echo htmlspecialchars($data['Requested_Service'] ?? 'Service'); ?></td>
-                <td><?php echo $service_time; ?></td>
-                <td><?php echo $frequency; ?></td>
-                <td class="service-desc"><?php echo $service_description; ?></td>
-                <td class="amount">$<?php echo number_format($subtotal, 2); ?></td>
+                <td class="service-desc"><?php echo htmlspecialchars($row['type']); ?></td>
+                <td><?php echo htmlspecialchars($row['time']); ?></td>
+                <td><?php echo htmlspecialchars($row['freq']); ?></td>
+                <td class="service-desc"><?php echo htmlspecialchars($row['desc']); ?></td>
+                <td class="amount">$<?php echo number_format($row['subtotal'], 2); ?></td>
             </tr>
+            <?php endforeach; ?>
         </tbody>
     </table>
 
@@ -486,16 +585,25 @@
         <div class="scope-header">SCOPE OF WORK - <?php echo strtoupper(htmlspecialchars($data['Requested_Service'] ?? 'SERVICE DESCRIPTION')); ?></div>
         <div class="scope-content">
             <h4>WORK TO BE PERFORMED:</h4>
-            <?php if (!empty($data['scope_of_work'])): ?>
+            <?php if (!empty($scopeOfWorkTasks)): ?>
+                <ul>
+                <?php foreach ($scopeOfWorkTasks as $task): ?>
+                    <li><?php echo htmlspecialchars($task); ?></li>
+                <?php endforeach; ?>
+                </ul>
+            <?php elseif (!empty($data['Scope_Of_Work']) && is_array($data['Scope_Of_Work'])): ?>
+                <ul>
+                <?php foreach ($data['Scope_Of_Work'] as $task): ?>
+                    <li><?php echo htmlspecialchars($task); ?></li>
+                <?php endforeach; ?>
+                </ul>
+            <?php elseif (!empty($data['scope_of_work'])): ?>
                 <?php echo $data['scope_of_work']; ?>
             <?php else: ?>
                 <ul>
-                    <li>Pre-cleaning and preparation of all exterior glass panels listed above</li>
-                    <li>Removal of fingerprints, dust, and any residues to ensure proper film adhesion</li>
-                    <li>Installation of window tint on doors, side panels, and upper transom window</li>
-                    <li>Removal of bubbles and inspection of adhesion during installation</li>
-                    <li>Cleaning of the work area to maintain a professional finish</li>
-                    <li>Final inspection to ensure an even and uniform appearance across the entire storefront</li>
+                    <li>Professional service as per client requirements</li>
+                    <li>All work performed to industry standards with quality assurance</li>
+                    <li>Final inspection to ensure satisfactory completion</li>
                 </ul>
             <?php endif; ?>
 
