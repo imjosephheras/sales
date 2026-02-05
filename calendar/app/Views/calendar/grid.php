@@ -20,7 +20,7 @@
     for ($day = 1; $day <= $daysInMonth; $day++):
         $date = sprintf('%04d-%02d-%02d', $year, $month, $day);
         $isToday = ($date === $today);
-        $dayEvents = array_filter($events, fn($e) => $e['start_date'] === $date);
+        $dayEvents = array_filter($events, fn($e) => ($e['effective_date'] ?? $e['start_date'] ?? $e['execution_date'] ?? $e['document_date']) === $date);
     ?>
         <div class="calendar-day <?= $isToday ? 'today' : '' ?>" 
              data-date="<?= $date ?>"

@@ -248,30 +248,31 @@ class Event {
         $hasSchedulingColumns = $this->checkSchedulingColumns();
         
         if ($hasSchedulingColumns) {
-            $query = "SELECT 
+            $query = "SELECT
                 e.*,
                 ec.category_name,
                 ec.color_hex,
                 ec.icon,
+                COALESCE(e.start_date, e.execution_date, e.document_date) as effective_date,
                 DATEDIFF(e.next_service_date, CURDATE()) as days_until_next_service,
                 CASE
-                    WHEN e.execution_date IS NOT NULL AND e.execution_date != e.original_date 
+                    WHEN e.execution_date IS NOT NULL AND e.execution_date != e.original_date
                     THEN TRUE
                     ELSE FALSE
                 END as was_rescheduled
             FROM {$this->table} e
             LEFT JOIN event_categories ec ON e.category_id = ec.category_id
-            WHERE e.event_id = :event_id AND e.is_active = TRUE
+            WHERE e.event_id = :event_id AND COALESCE(e.is_active, TRUE) = TRUE
             LIMIT 1";
         } else {
-            $query = "SELECT 
+            $query = "SELECT
                 e.*,
                 ec.category_name,
                 ec.color_hex,
                 ec.icon
             FROM {$this->table} e
             LEFT JOIN event_categories ec ON e.category_id = ec.category_id
-            WHERE e.event_id = :event_id AND e.is_active = TRUE
+            WHERE e.event_id = :event_id AND COALESCE(e.is_active, TRUE) = TRUE
             LIMIT 1";
         }
         
@@ -289,55 +290,61 @@ class Event {
     public function getByMonth($userId, $year, $month) {
     $viewExists = $this->checkViewExists('v_scheduled_events');
     $hasSchedulingColumns = $this->checkSchedulingColumns();
-    
+
     if ($viewExists) {
         // Use view if exists (after migration)
-        $query = "SELECT 
+        $query = "SELECT
             e.*,
             ec.category_name,
             ec.color_hex,
             ec.icon,
             e.next_service_date,
             e.frequency_months,
-            e.was_rescheduled
+            e.was_rescheduled,
+            COALESCE(e.start_date, e.execution_date, e.document_date) as effective_date
         FROM v_scheduled_events e
         WHERE e.user_id = ?
         AND (
             (YEAR(e.start_date) = ? AND MONTH(e.start_date) = ?)
             OR (YEAR(e.end_date) = ? AND MONTH(e.end_date) = ?)
             OR (YEAR(e.next_service_date) = ? AND MONTH(e.next_service_date) = ?)
+            OR (YEAR(e.execution_date) = ? AND MONTH(e.execution_date) = ?)
+            OR (YEAR(e.document_date) = ? AND MONTH(e.document_date) = ?)
         )
-        ORDER BY e.start_date ASC, e.start_time ASC";
-        
+        ORDER BY COALESCE(e.start_date, e.execution_date, e.document_date) ASC, e.start_time ASC";
+
         $stmt = $this->conn->prepare($query);
-        $stmt->execute([$userId, $year, $month, $year, $month, $year, $month]);
-        
+        $stmt->execute([$userId, $year, $month, $year, $month, $year, $month, $year, $month, $year, $month]);
+
     } else if ($hasSchedulingColumns) {
         // Has columns but no view
-        $query = "SELECT 
+        $query = "SELECT
             e.*,
             ec.category_name,
             ec.color_hex,
             ec.icon,
             e.next_service_date,
-            e.frequency_months
+            e.frequency_months,
+            COALESCE(e.start_date, e.execution_date, e.document_date) as effective_date
         FROM {$this->table} e
         LEFT JOIN event_categories ec ON e.category_id = ec.category_id
         WHERE e.user_id = ?
-        AND e.is_active = ?
+        AND COALESCE(e.is_active, TRUE) = TRUE
         AND (
             (YEAR(e.start_date) = ? AND MONTH(e.start_date) = ?)
             OR (YEAR(e.end_date) = ? AND MONTH(e.end_date) = ?)
             OR (YEAR(e.next_service_date) = ? AND MONTH(e.next_service_date) = ?)
+            OR (YEAR(e.execution_date) = ? AND MONTH(e.execution_date) = ?)
+            OR (YEAR(e.document_date) = ? AND MONTH(e.document_date) = ?)
         )
-        ORDER BY e.start_date ASC, e.start_time ASC";
-        
+        ORDER BY COALESCE(e.start_date, e.execution_date, e.document_date) ASC, e.start_time ASC";
+
         $stmt = $this->conn->prepare($query);
-        $stmt->execute([$userId, 1, $year, $month, $year, $month, $year, $month]);
-        
+        $stmt->execute([$userId, $year, $month, $year, $month, $year, $month, $year, $month, $year, $month]);
+
     } else {
         // No scheduling columns (before migration)
-        $query = "SELECT 
+        $query = "SELECT
             e.*,
             ec.category_name,
             ec.color_hex,
@@ -345,17 +352,17 @@ class Event {
         FROM {$this->table} e
         LEFT JOIN event_categories ec ON e.category_id = ec.category_id
         WHERE e.user_id = ?
-        AND e.is_active = ?
+        AND COALESCE(e.is_active, TRUE) = TRUE
         AND (
             (YEAR(e.start_date) = ? AND MONTH(e.start_date) = ?)
             OR (YEAR(e.end_date) = ? AND MONTH(e.end_date) = ?)
         )
         ORDER BY e.start_date ASC, e.start_time ASC";
-        
+
         $stmt = $this->conn->prepare($query);
-        $stmt->execute([$userId, 1, $year, $month, $year, $month]);
+        $stmt->execute([$userId, $year, $month, $year, $month]);
     }
-    
+
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
     
@@ -498,18 +505,34 @@ class Event {
      */
     public function getToday($userId) {
         $today = date('Y-m-d');
+        $hasSchedulingColumns = $this->checkSchedulingColumns();
 
-        $query = "SELECT
-            e.*,
-            ec.category_name,
-            ec.color_hex,
-            ec.icon
-        FROM {$this->table} e
-        LEFT JOIN event_categories ec ON e.category_id = ec.category_id
-        WHERE e.user_id = :user_id
-        AND e.start_date = :today
-        AND e.is_active = TRUE
-        ORDER BY e.start_time ASC";
+        if ($hasSchedulingColumns) {
+            $query = "SELECT
+                e.*,
+                ec.category_name,
+                ec.color_hex,
+                ec.icon,
+                COALESCE(e.start_date, e.execution_date, e.document_date) as effective_date
+            FROM {$this->table} e
+            LEFT JOIN event_categories ec ON e.category_id = ec.category_id
+            WHERE e.user_id = :user_id
+            AND COALESCE(e.start_date, e.execution_date, e.document_date) = :today
+            AND COALESCE(e.is_active, TRUE) = TRUE
+            ORDER BY e.start_time ASC";
+        } else {
+            $query = "SELECT
+                e.*,
+                ec.category_name,
+                ec.color_hex,
+                ec.icon
+            FROM {$this->table} e
+            LEFT JOIN event_categories ec ON e.category_id = ec.category_id
+            WHERE e.user_id = :user_id
+            AND e.start_date = :today
+            AND COALESCE(e.is_active, TRUE) = TRUE
+            ORDER BY e.start_time ASC";
+        }
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
@@ -525,19 +548,36 @@ class Event {
     public function getNext7Days($userId) {
         $today = date('Y-m-d');
         $endDate = date('Y-m-d', strtotime('+7 days'));
+        $hasSchedulingColumns = $this->checkSchedulingColumns();
 
-        $query = "SELECT
-            e.*,
-            ec.category_name,
-            ec.color_hex,
-            ec.icon
-        FROM {$this->table} e
-        LEFT JOIN event_categories ec ON e.category_id = ec.category_id
-        WHERE e.user_id = :user_id
-        AND e.start_date >= :today
-        AND e.start_date <= :end_date
-        AND e.is_active = TRUE
-        ORDER BY e.start_date ASC, e.start_time ASC";
+        if ($hasSchedulingColumns) {
+            $query = "SELECT
+                e.*,
+                ec.category_name,
+                ec.color_hex,
+                ec.icon,
+                COALESCE(e.start_date, e.execution_date, e.document_date) as effective_date
+            FROM {$this->table} e
+            LEFT JOIN event_categories ec ON e.category_id = ec.category_id
+            WHERE e.user_id = :user_id
+            AND COALESCE(e.start_date, e.execution_date, e.document_date) >= :today
+            AND COALESCE(e.start_date, e.execution_date, e.document_date) <= :end_date
+            AND COALESCE(e.is_active, TRUE) = TRUE
+            ORDER BY COALESCE(e.start_date, e.execution_date, e.document_date) ASC, e.start_time ASC";
+        } else {
+            $query = "SELECT
+                e.*,
+                ec.category_name,
+                ec.color_hex,
+                ec.icon
+            FROM {$this->table} e
+            LEFT JOIN event_categories ec ON e.category_id = ec.category_id
+            WHERE e.user_id = :user_id
+            AND e.start_date >= :today
+            AND e.start_date <= :end_date
+            AND COALESCE(e.is_active, TRUE) = TRUE
+            ORDER BY e.start_date ASC, e.start_time ASC";
+        }
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);

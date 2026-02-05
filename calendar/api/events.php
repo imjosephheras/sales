@@ -46,7 +46,7 @@ try {
               LEFT JOIN event_categories c ON e.category_id = c.category_id
               WHERE e.event_id = :event_id
               AND e.user_id = :user_id
-              AND e.is_active = TRUE";
+              AND COALESCE(e.is_active, TRUE) = TRUE";
     
     $stmt = $db->prepare($query);
     $stmt->bindParam(':event_id', $eventId, PDO::PARAM_INT);

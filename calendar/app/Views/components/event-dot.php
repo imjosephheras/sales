@@ -11,7 +11,7 @@ $eventId = $event['event_id'];
 $title = e($event['title']);
 $color = e($event['color_hex'] ?? '#2563eb');
 $isReschedulable = $event['is_reschedulable'] ?? 1;
-$eventDate = $date ?? $event['start_date'];
+$eventDate = $date ?? $event['effective_date'] ?? $event['start_date'] ?? $event['execution_date'] ?? $event['document_date'];
 $location = e($event['location'] ?? '');
 $client = e($event['client'] ?? '');
 
