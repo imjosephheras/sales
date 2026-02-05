@@ -429,19 +429,23 @@ function ensureCalendarFormIdColumn($pdo) {
  * @return int|false - Returns event_id on success, false on failure
  */
 function syncFormToCalendar($formId, $formData) {
+    error_log("syncFormToCalendar: Starting sync for form_id=$formId");
+
     $calendarPdo = getCalendarDBConnection();
     if (!$calendarPdo) {
-        error_log("Could not connect to calendar database for sync");
+        error_log("syncFormToCalendar: FAILED - Could not connect to calendar database");
         return false;
     }
+    error_log("syncFormToCalendar: Connected to calendar_system database");
 
     try {
         // Check if Work_Date is set - required for calendar sync
         $workDate = $formData['Work_Date'] ?? null;
         if (empty($workDate)) {
-            // No work date, nothing to sync
+            error_log("syncFormToCalendar: SKIPPED - Work_Date is empty for form_id=$formId");
             return false;
         }
+        error_log("syncFormToCalendar: Work_Date=$workDate for form_id=$formId");
 
         // Check if event already exists for this form
         $stmt = $calendarPdo->prepare("SELECT event_id FROM events WHERE form_id = ? AND is_active = 1");
@@ -534,6 +538,7 @@ function syncFormToCalendar($formId, $formData) {
                 ':event_id' => $existingEvent['event_id']
             ]);
 
+            error_log("syncFormToCalendar: SUCCESS - Updated event_id={$existingEvent['event_id']} for form_id=$formId");
             return $existingEvent['event_id'];
         } else {
             // INSERT new event
@@ -572,10 +577,13 @@ function syncFormToCalendar($formId, $formData) {
                 ':form_id' => $formId
             ]);
 
-            return $calendarPdo->lastInsertId();
+            $newEventId = $calendarPdo->lastInsertId();
+            error_log("syncFormToCalendar: SUCCESS - Created event_id=$newEventId for form_id=$formId");
+            return $newEventId;
         }
     } catch (Exception $e) {
-        error_log("Error syncing form to calendar: " . $e->getMessage());
+        error_log("syncFormToCalendar: ERROR for form_id=$formId - " . $e->getMessage());
+        error_log("syncFormToCalendar: SQL State: " . implode(", ", $e->errorInfo ?? []));
         return false;
     }
 }
