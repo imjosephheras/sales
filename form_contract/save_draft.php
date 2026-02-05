@@ -407,8 +407,12 @@ try {
 
         $calendarEventId = syncFormToCalendar($saved_form_id, $calendarFormData);
         if ($calendarEventId) {
-            error_log("Form #$saved_form_id synced to calendar event #$calendarEventId");
+            error_log("save_draft.php: Form #$saved_form_id synced to calendar event #$calendarEventId");
+        } else {
+            error_log("save_draft.php: Calendar sync FAILED for form #$saved_form_id (Work_Date: $work_date_val)");
         }
+    } else {
+        error_log("save_draft.php: Calendar sync SKIPPED - No Work_Date for form #$saved_form_id");
     }
 
     // ============================================================
