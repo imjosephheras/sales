@@ -110,6 +110,22 @@ class Database {
                 INDEX idx_form_id (form_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ");
+
+        // Ensure 'description' column exists (may be missing if table was created before it was added)
+        $this->addColumnIfNotExists('events', 'description', 'TEXT DEFAULT NULL AFTER `title`');
+    }
+
+    /**
+     * Add a column to a table if it doesn't already exist
+     */
+    private function addColumnIfNotExists($table, $column, $definition) {
+        $stmt = $this->connection->prepare(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = :db AND TABLE_NAME = :table AND COLUMN_NAME = :column"
+        );
+        $stmt->execute([':db' => $this->dbname, ':table' => $table, ':column' => $column]);
+        if ($stmt->fetchColumn() == 0) {
+            $this->connection->exec("ALTER TABLE `{$table}` ADD COLUMN `{$column}` {$definition}");
+        }
     }
 
     /**
