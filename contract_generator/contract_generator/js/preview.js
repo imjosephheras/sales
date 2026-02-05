@@ -305,7 +305,7 @@
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        border-bottom: 3px solid #8B1A1A;
+                        border-bottom: 3px solid #AC1E34;
                         padding-bottom: 10px;
                         margin-bottom: 10px;
                     }
@@ -318,7 +318,7 @@
                         padding-left: 15px;
                     }
                     .jwo-header-exact .doc-title {
-                        color: #8B1A1A;
+                        color: #AC1E34;
                         font-size: 22pt;
                         font-weight: bold;
                         margin-bottom: 5px;
@@ -361,7 +361,7 @@
                         margin-bottom: 10px;
                     }
                     .jwo-services-exact th {
-                        background-color: #8B1A1A;
+                        background-color: #AC1E34;
                         color: white;
                         font-weight: bold;
                         padding: 8px 6px;
@@ -411,7 +411,7 @@
                     }
                     .jwo-totals-exact tr:last-child .label-cell,
                     .jwo-totals-exact tr:last-child .value-cell {
-                        background-color: #8B1A1A;
+                        background-color: #AC1E34;
                         color: white;
                     }
 
@@ -420,7 +420,7 @@
                         margin-bottom: 15px;
                     }
                     .jwo-scope-header-exact {
-                        background-color: #8B1A1A;
+                        background-color: #AC1E34;
                         color: white;
                         font-weight: bold;
                         padding: 6px 10px;

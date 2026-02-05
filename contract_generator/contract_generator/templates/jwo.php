@@ -6,7 +6,7 @@
     <title>Job Work Order</title>
     <style>
         @page {
-            margin: 1.5cm 1.5cm 1.5cm 1.5cm;
+            margin: 1.5cm 1.5cm 2.8cm 1.5cm;
         }
 
         * {
@@ -27,7 +27,7 @@
             display: table;
             width: 100%;
             margin-bottom: 10px;
-            border-bottom: 3px solid #8B1A1A;
+            border-bottom: 3px solid #AC1E34;
         }
 
         .header-left {
@@ -51,7 +51,7 @@
         }
 
         .doc-title {
-            color: #8B1A1A;
+            color: #AC1E34;
             font-size: 22pt;
             font-weight: bold;
             margin-bottom: 5px;
@@ -99,7 +99,7 @@
         }
 
         .services-table th {
-            background-color: #8B1A1A;
+            background-color: #AC1E34;
             color: white;
             font-weight: bold;
             padding: 8px 6px;
@@ -155,12 +155,12 @@
         }
 
         .totals-table tr:last-child .label-cell {
-            background-color: #8B1A1A;
+            background-color: #AC1E34;
             color: white;
         }
 
         .totals-table tr:last-child .value-cell {
-            background-color: #8B1A1A;
+            background-color: #AC1E34;
             color: white;
         }
 
@@ -170,7 +170,7 @@
         }
 
         .scope-header {
-            background-color: #8B1A1A;
+            background-color: #AC1E34;
             color: white;
             font-weight: bold;
             padding: 6px 10px;
@@ -215,7 +215,7 @@
         }
 
         .terms-main-title {
-            background-color: #8B1A1A;
+            background-color: #AC1E34;
             color: white;
             font-weight: bold;
             padding: 8px 10px;
@@ -314,20 +314,31 @@
             font-size: 8pt;
         }
 
-        /* Footer */
-        .footer {
+        /* Footer - Two-tone split design */
+        .footer-wrapper {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background-color: #8B1A1A;
+        }
+
+        .footer-top {
+            background-color: #8F1B2C;
+            color: white;
+            text-align: center;
+            padding: 3px 10px;
+            font-size: 7pt;
+        }
+
+        .footer-bottom {
+            background-color: #AC1E34;
             color: white;
             text-align: center;
             padding: 8px 10px;
             font-size: 8pt;
         }
 
-        .footer a {
+        .footer-bottom a {
             color: white;
             text-decoration: none;
         }
@@ -736,9 +747,14 @@
     </div>
 
     <!-- FOOTER -->
-    <div class="footer">
-        <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
-        <a href="http://www.primefacilityservicesgroup.com">www.primefacilityservicesgroup.com</a>
+    <div class="footer-wrapper">
+        <div class="footer-top">
+            PRIME FACILITY SERVICES GROUP, INC.
+        </div>
+        <div class="footer-bottom">
+            <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
+            <a href="http://www.primefacilityservicesgroup.com">www.primefacilityservicesgroup.com</a>
+        </div>
     </div>
 
 </body>
