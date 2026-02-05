@@ -27,6 +27,9 @@ session_start();
                 <i class="fas fa-calendar-alt"></i>
                 <h1>Calendar</h1>
             </div>
+            <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode">
+                <i class="fas fa-moon"></i>
+            </button>
         </div>
     </header>
 

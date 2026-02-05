@@ -6,7 +6,37 @@
 document.addEventListener('DOMContentLoaded', () => {
     const calendar = new Calendar();
     calendar.init();
+    initThemeToggle();
 });
+
+/**
+ * Theme toggle - switches between light and dark mode
+ * Persists preference in localStorage
+ */
+function initThemeToggle() {
+    const toggleBtn = document.getElementById('theme-toggle');
+    const icon = toggleBtn.querySelector('i');
+    const saved = localStorage.getItem('calendar-theme');
+
+    if (saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        icon.classList.replace('fa-moon', 'fa-sun');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            icon.classList.replace('fa-sun', 'fa-moon');
+            localStorage.setItem('calendar-theme', 'light');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            icon.classList.replace('fa-moon', 'fa-sun');
+            localStorage.setItem('calendar-theme', 'dark');
+        }
+    });
+}
 
 class Calendar {
     constructor() {
