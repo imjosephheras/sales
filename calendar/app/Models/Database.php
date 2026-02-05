@@ -111,8 +111,20 @@ class Database {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ");
 
-        // Ensure 'description' column exists (may be missing if table was created before it was added)
+        // Ensure columns exist (may be missing if table was created before they were added)
         $this->addColumnIfNotExists('events', 'description', 'TEXT DEFAULT NULL AFTER `title`');
+        $this->addColumnIfNotExists('events', 'client', "VARCHAR(255) DEFAULT NULL AFTER `location`");
+        $this->addColumnIfNotExists('events', 'location', "VARCHAR(255) DEFAULT NULL AFTER `client`");
+        $this->addColumnIfNotExists('events', 'start_date', 'DATE DEFAULT NULL AFTER `location`');
+        $this->addColumnIfNotExists('events', 'end_date', 'DATE DEFAULT NULL AFTER `start_date`');
+        $this->addColumnIfNotExists('events', 'start_time', 'TIME DEFAULT NULL AFTER `end_date`');
+        $this->addColumnIfNotExists('events', 'end_time', 'TIME DEFAULT NULL AFTER `start_time`');
+        $this->addColumnIfNotExists('events', 'is_all_day', 'TINYINT(1) DEFAULT 1 AFTER `end_time`');
+        $this->addColumnIfNotExists('events', 'status', "VARCHAR(50) DEFAULT 'pending' AFTER `is_all_day`");
+        $this->addColumnIfNotExists('events', 'priority', "VARCHAR(50) DEFAULT 'normal' AFTER `status`");
+        $this->addColumnIfNotExists('events', 'document_date', 'DATE DEFAULT NULL AFTER `priority`');
+        $this->addColumnIfNotExists('events', 'original_date', 'DATE DEFAULT NULL AFTER `document_date`');
+        $this->addColumnIfNotExists('events', 'form_id', 'INT DEFAULT NULL AFTER `original_date`');
     }
 
     /**
