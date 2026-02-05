@@ -51,25 +51,10 @@
                 });
         };
 
-        // Fetch both tasks and requests in parallel - handle failures independently
-        Promise.all([
-            safeFetch('controllers/get_pending_tasks.php'),
-            safeFetch('controllers/get_pending_requests.php')
-        ])
-        .then(([tasksData, requestsData]) => {
+        // Fetch pending requests
+        safeFetch('controllers/get_pending_requests.php')
+        .then(requestsData => {
             let allItems = [];
-
-            // Add tasks if successful
-            if (tasksData.success && tasksData.data) {
-                tasksData.data.forEach(task => {
-                    allItems.push({
-                        ...task,
-                        type: 'task',
-                        item_id: task.task_id,
-                        sort_date: task.due_date || task.created_at
-                    });
-                });
-            }
 
             // Add requests if successful
             if (requestsData.success && requestsData.data) {
@@ -206,7 +191,6 @@
         div.dataset.type = task.type || 'task';
         div.dataset.eventId = task.event_id || '';
         div.dataset.formId = task.form_id || '';
-        div.dataset.calendarEventId = task.calendar_event_id || '';
 
         // Classes for badges
         const priorityClass = (task.priority || task.Priority || 'normal').toLowerCase();
@@ -234,7 +218,6 @@
                 ${categoryIcon} ${task.Service_Type || 'Request'}
             </span>`;
         } else if (task.category_name) {
-            // For tasks from calendar
             const categoryIcon = task.category_icon || '📋';
             categoryBadge = `<span class="task-category-badge ${categoryClass}" style="background-color: ${task.category_color || '#999'}">
                 ${categoryIcon} ${task.category_name}
@@ -280,14 +263,6 @@
             orderInfo = `<p class="order-nomenclature"><i class="fas fa-hashtag"></i> ${escapeHtml(task.Order_Nomenclature)}</p>`;
         }
 
-        // Build calendar link
-        let calendarLink = '';
-        if (task.has_calendar_event && task.calendar_event_id) {
-            calendarLink = `<span class="calendar-link" data-event-id="${task.calendar_event_id}" title="View in Calendar">
-                <i class="fas fa-calendar-alt"></i>
-            </span>`;
-        }
-
         // Build report buttons
         let reportButtons = '';
         if (task.available_reports && task.available_reports.length > 0) {
@@ -324,7 +299,6 @@
                 ${statusBadge}
                 <span class="task-priority-badge ${priorityClass}">${formatPriority(task.priority || task.Priority)}</span>
                 ${categoryBadge}
-                ${calendarLink}
             </div>
             <div class="task-body">
                 <h3 class="task-title">${escapeHtml(task.title)}</h3>
@@ -347,8 +321,8 @@
 
         // Event listener to select and open form
         div.addEventListener('click', function(e) {
-            // Don't select if clicking on report buttons or calendar link
-            if (e.target.closest('.report-btn') || e.target.closest('.calendar-link')) {
+            // Don't select if clicking on report buttons
+            if (e.target.closest('.report-btn')) {
                 return;
             }
             selectTask(task);
@@ -364,16 +338,6 @@
             });
         });
 
-        // Add event listener for calendar link
-        const calLink = div.querySelector('.calendar-link');
-        if (calLink) {
-            calLink.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const eventId = this.dataset.eventId;
-                openCalendarPreview(eventId, task);
-            });
-        }
-
         return div;
     }
 
@@ -387,32 +351,6 @@
         // Open report in new window
         const reportUrl = `controllers/generate_report.php?type=${reportType}&id=${requestId}`;
         window.open(reportUrl, '_blank', 'width=800,height=600');
-    }
-
-    // ========================================
-    // OPEN CALENDAR PREVIEW
-    // ========================================
-
-    function openCalendarPreview(eventId, task) {
-        console.log(`📅 Opening calendar preview for event #${eventId}`);
-
-        // Dispatch event for calendar preview
-        const event = new CustomEvent('openCalendarPreview', {
-            detail: {
-                eventId: eventId,
-                task: task
-            }
-        });
-        document.dispatchEvent(event);
-
-        // If calendar module exists, use it
-        if (window.CalendarModule && window.CalendarModule.openEventPreview) {
-            window.CalendarModule.openEventPreview(eventId);
-        } else {
-            // Fallback: open calendar in new tab with event selected
-            const calendarUrl = `../../calendar/?event=${eventId}`;
-            window.open(calendarUrl, '_blank');
-        }
     }
 
     // ========================================
@@ -558,29 +496,8 @@
             return;
         }
 
-        // For calendar tasks, try to find existing request linked to this task/event
-        if (task.event_id) {
-            // Check if a request exists for this event
-            fetch(`controllers/find_request_by_event.php?event_id=${task.event_id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.request) {
-                        // Load existing request
-                        loadExistingRequest(data.request.id);
-                    } else {
-                        // Create new request from task
-                        createNewRequestFromTask(task);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error checking for existing request:', error);
-                    // Fallback to creating new
-                    createNewRequestFromTask(task);
-                });
-        } else {
-            // No event, create new request
-            createNewRequestFromTask(task);
-        }
+        // No matching request, create new
+        createNewRequestFromTask(task);
     }
 
     // ========================================

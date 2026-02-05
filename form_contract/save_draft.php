@@ -384,47 +384,7 @@ try {
     $pdo->commit();
 
     // ============================================================
-    // PASO 6: SINCRONIZAR CON CALENDARIO (calendar_system.events)
-    // ============================================================
-    // Mapeo de campos:
-    // - form_id: $saved_form_id (lastInsertId)
-    // - requested_service: Requested_Service
-    // - client_name: Client_Name
-    // - company_name: Company_Name
-    // - location: address OR city/state
-    // - Document_Date: Document_Date
-    // - Work_Date: Work_Date
-    // - frequency_months: NULL
-    // - frequency_years: 1
-    // - status: 'pending'
-    // - is_active: 1
-    // ============================================================
-    $calendarEventId = null;
-    if (!empty($work_date_val)) {
-        // Prepare form data for calendar sync
-        $calendarFormData = [
-            'Work_Date' => $work_date_val,
-            'Document_Date' => $document_date_val,
-            'Requested_Service' => $_POST['Requested_Service'] ?? null,
-            'Client_Name' => $_POST['Client_Name'] ?? null,
-            'Company_Name' => $_POST['Company_Name'] ?? null,
-            'Company_Address' => $_POST['Company_Address'] ?? '',
-            'City' => $_POST['City'] ?? '',
-            'State' => $_POST['State'] ?? ''
-        ];
-
-        $calendarEventId = syncFormToCalendar($saved_form_id, $calendarFormData);
-        if ($calendarEventId) {
-            error_log("save_draft.php: Form #$saved_form_id synced to calendar event #$calendarEventId");
-        } else {
-            error_log("save_draft.php: Calendar sync FAILED for form #$saved_form_id (Work_Date: $work_date_val)");
-        }
-    } else {
-        error_log("save_draft.php: Calendar sync SKIPPED - No Work_Date for form #$saved_form_id");
-    }
-
-    // ============================================================
-    // PASO 7: SINCRONIZAR CON TABLA REQUESTS (Contract Generator)
+    // PASO 6: SINCRONIZAR CON TABLA REQUESTS (Contract Generator)
     // ============================================================
     $requestId = null;
     // Prepare complete form data for requests sync
@@ -445,7 +405,6 @@ try {
         'success' => true,
         'form_id' => $saved_form_id,
         'request_id' => $requestId,
-        'calendar_event_id' => $calendarEventId,
         'message' => $form_id ? 'Form updated successfully' : 'Form saved successfully'
     ]);
     
