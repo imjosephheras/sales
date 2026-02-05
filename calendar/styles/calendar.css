@@ -4,12 +4,14 @@
 
 :root {
     --primary-color: #001f54;
+    --primary-light: #003080;
     --accent-color: #c70734;
     --success-color: #28a745;
     --text-dark: #333;
     --text-muted: #666;
     --border-color: #e0e0e0;
     --bg-light: #f5f7fa;
+    --bg-card: #ffffff;
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
     --shadow-md: 0 4px 16px rgba(0,0,0,0.12);
     --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
@@ -19,6 +21,62 @@
     --color-proposal: #e67e22;
     --color-jwo: #8e44ad;
     --color-quote: #27ae60;
+
+    /* Event chip backgrounds */
+    --chip-contract-bg: #e3f0ff;
+    --chip-proposal-bg: #fef3e2;
+    --chip-jwo-bg: #f3e8fa;
+    --chip-quote-bg: #e8f8ef;
+    --chip-default-bg: #e8f0fe;
+
+    /* Detail badge backgrounds */
+    --badge-contract-bg: #dbeafe;
+    --badge-service-bg: #f0f0f0;
+
+    /* Status colors */
+    --status-pending-bg: #fff3cd;
+    --status-pending-color: #856404;
+    --status-draft-bg: #e2e3e5;
+    --status-draft-color: #495057;
+    --status-submitted-bg: #d4edda;
+    --status-submitted-color: #155724;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --primary-color: #1a3a6b;
+    --primary-light: #244e8a;
+    --accent-color: #e0445a;
+    --success-color: #34d058;
+    --text-dark: #e1e4e8;
+    --text-muted: #9ea7b3;
+    --border-color: #2d3748;
+    --bg-light: #0d1117;
+    --bg-card: #161b22;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+
+    --color-contract: #4a9eff;
+    --color-proposal: #f0a050;
+    --color-jwo: #b07cc8;
+    --color-quote: #3dd68c;
+
+    --chip-contract-bg: rgba(74, 158, 255, 0.15);
+    --chip-proposal-bg: rgba(240, 160, 80, 0.15);
+    --chip-jwo-bg: rgba(176, 124, 200, 0.15);
+    --chip-quote-bg: rgba(61, 214, 140, 0.15);
+    --chip-default-bg: rgba(74, 158, 255, 0.1);
+
+    --badge-contract-bg: rgba(74, 158, 255, 0.2);
+    --badge-service-bg: rgba(255,255,255,0.08);
+
+    --status-pending-bg: rgba(255, 193, 7, 0.15);
+    --status-pending-color: #ffc107;
+    --status-draft-bg: rgba(255,255,255,0.08);
+    --status-draft-color: #9ea7b3;
+    --status-submitted-bg: rgba(52, 208, 88, 0.15);
+    --status-submitted-color: #34d058;
 }
 
 * {
@@ -36,7 +94,7 @@ body {
 
 /* Header */
 .main-header {
-    background: linear-gradient(135deg, var(--primary-color), #003080);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
     padding: 0 24px;
     height: 60px;
@@ -100,7 +158,7 @@ body {
 
 /* Calendar Card */
 .calendar-card {
-    background: white;
+    background: var(--bg-card);
     border-radius: 16px;
     box-shadow: var(--shadow-md);
     overflow: hidden;
@@ -112,7 +170,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 24px 32px;
-    background: linear-gradient(135deg, var(--primary-color), #003080);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
 }
 
@@ -274,7 +332,7 @@ body {
 }
 
 .event-chip {
-    background: #e8f0fe;
+    background: var(--chip-default-bg);
     border-left: 3px solid var(--primary-color);
     border-radius: 4px;
     padding: 2px 5px;
@@ -288,19 +346,19 @@ body {
 
 /* Request type color coding for chips */
 .event-chip.chip-contract {
-    background: #e3f0ff;
+    background: var(--chip-contract-bg);
     border-left-color: var(--color-contract);
 }
 .event-chip.chip-proposal {
-    background: #fef3e2;
+    background: var(--chip-proposal-bg);
     border-left-color: var(--color-proposal);
 }
 .event-chip.chip-jwo {
-    background: #f3e8fa;
+    background: var(--chip-jwo-bg);
     border-left-color: var(--color-jwo);
 }
 .event-chip.chip-quote {
-    background: #e8f8ef;
+    background: var(--chip-quote-bg);
     border-left-color: var(--color-quote);
 }
 
@@ -381,7 +439,7 @@ body {
     top: 0;
     right: -340px;
     width: 320px;
-    background: white;
+    background: var(--bg-card);
     border-radius: 16px;
     box-shadow: var(--shadow-lg);
     padding: 0;
@@ -401,7 +459,7 @@ body {
 }
 
 .detail-header {
-    background: linear-gradient(135deg, var(--primary-color), #003080);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
     color: white;
     padding: 20px;
     border-radius: 16px 16px 0 0;
@@ -505,23 +563,23 @@ body {
 }
 
 .detail-badge.chip-contract {
-    background: #dbeafe;
+    background: var(--badge-contract-bg);
     color: var(--color-contract);
 }
 .detail-badge.chip-proposal {
-    background: #fef3e2;
+    background: var(--chip-proposal-bg);
     color: var(--color-proposal);
 }
 .detail-badge.chip-jwo {
-    background: #f3e8fa;
+    background: var(--chip-jwo-bg);
     color: var(--color-jwo);
 }
 .detail-badge.chip-quote {
-    background: #e8f8ef;
+    background: var(--chip-quote-bg);
     color: var(--color-quote);
 }
 .detail-badge.badge-service {
-    background: #f0f0f0;
+    background: var(--badge-service-bg);
     color: var(--text-muted);
 }
 
@@ -591,18 +649,53 @@ body {
 }
 
 .status-pending {
-    background: #fff3cd;
-    color: #856404;
+    background: var(--status-pending-bg);
+    color: var(--status-pending-color);
 }
 
 .status-draft {
-    background: #e2e3e5;
-    color: #495057;
+    background: var(--status-draft-bg);
+    color: var(--status-draft-color);
 }
 
 .status-submitted {
-    background: #d4edda;
-    color: #155724;
+    background: var(--status-submitted-bg);
+    color: var(--status-submitted-color);
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+}
+
+/* Dark theme day cell overrides */
+[data-theme="dark"] .day-cell.today {
+    background: #2563eb;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
+[data-theme="dark"] .day-cell.today:hover {
+    background: #3b82f6;
+}
+
+[data-theme="dark"] .day-cell.other-month {
+    color: #4a5568;
 }
 
 /* Responsive */
