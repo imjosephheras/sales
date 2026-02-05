@@ -66,7 +66,8 @@
                 // Group events by date
                 $eventsByDate = [];
                 foreach ($next7DaysEvents as $evt) {
-                    $date = $evt['start_date'];
+                    $date = $evt['effective_date'] ?? $evt['start_date'] ?? $evt['execution_date'] ?? $evt['document_date'];
+                    if (!$date) continue;
                     if (!isset($eventsByDate[$date])) {
                         $eventsByDate[$date] = [];
                     }
