@@ -37,6 +37,64 @@ try {
     }
 
     // ========================================
+    // QUERY SERVICE DETAIL TABLES FROM form DB
+    // ========================================
+
+    $formId = $data['form_id'] ?? null;
+
+    // Try to find form_id by docnum if not directly set
+    if (!$formId && !empty($data['docnum'])) {
+        $stmtForm = $pdo->prepare("SELECT form_id FROM forms WHERE Order_Nomenclature = ? LIMIT 1");
+        $stmtForm->execute([$data['docnum']]);
+        $formRow = $stmtForm->fetch(PDO::FETCH_ASSOC);
+        if ($formRow) {
+            $formId = $formRow['form_id'];
+        }
+    }
+
+    $janitorialServices = [];
+    $kitchenServices = [];
+    $hoodVentServices = [];
+    $scopeOfWorkTasks = [];
+
+    if ($formId) {
+        // Janitorial services from detail table
+        $stmtJ = $pdo->prepare("SELECT * FROM janitorial_services_costs WHERE form_id = ? ORDER BY service_number");
+        $stmtJ->execute([$formId]);
+        $janitorialServices = $stmtJ->fetchAll(PDO::FETCH_ASSOC);
+
+        // Kitchen cleaning services from detail table
+        $stmtK = $pdo->prepare("SELECT * FROM kitchen_cleaning_costs WHERE form_id = ? ORDER BY service_number");
+        $stmtK->execute([$formId]);
+        $kitchenServices = $stmtK->fetchAll(PDO::FETCH_ASSOC);
+
+        // Hood vent services from detail table
+        $stmtH = $pdo->prepare("SELECT * FROM hood_vent_costs WHERE form_id = ? ORDER BY service_number");
+        $stmtH->execute([$formId]);
+        $hoodVentServices = $stmtH->fetchAll(PDO::FETCH_ASSOC);
+
+        // Scope of work tasks from detail table
+        $stmtS = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
+        $stmtS->execute([$formId]);
+        $scopeOfWorkTasks = $stmtS->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    // Decode JSON fields in data for fallback
+    $jsonFields = [
+        'type18', 'write18', 'time18', 'freq18', 'desc18', 'subtotal18',
+        'type19', 'time19', 'freq19', 'desc19', 'subtotal19',
+        'base_staff', 'increase_staff', 'bill_staff', 'Scope_Of_Work'
+    ];
+    foreach ($jsonFields as $field) {
+        if (!empty($data[$field])) {
+            $decoded = json_decode($data[$field], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $data[$field] = $decoded;
+            }
+        }
+    }
+
+    // ========================================
     // DETERMINAR QUÉ TEMPLATE USAR
     // ========================================
 
