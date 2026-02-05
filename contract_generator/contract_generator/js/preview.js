@@ -286,7 +286,7 @@
 
         // Determine logo based on Service_Type (same as PDF)
         const deptLower = (data.Service_Type || '').toLowerCase();
-        const logoSrc = deptLower.includes('hospitality') ? '/sales/Images/phospitality.png' : '/sales/Images/pfacility.png';
+        const logoSrc = deptLower.includes('hospitality') ? '/sales/Images/Hospitality.png' : '/sales/Images/Facility.png';
 
         return `
             <div class="document-preview jwo-preview-exact">
