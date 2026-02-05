@@ -1,6 +1,6 @@
 /**
  * CALENDAR MODULE - Main JavaScript
- * Month-by-month calendar with scheduled form events
+ * Month-by-month calendar with scheduled request form events
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -89,13 +89,44 @@ class Calendar {
                         id: ev.form_id,
                         client: ev.client_name || 'N/A',
                         company: ev.company_name || 'N/A',
-                        status: ev.status || 'pending'
+                        status: ev.status || 'pending',
+                        serviceType: ev.service_type || '',
+                        requestType: ev.request_type || '',
+                        priority: ev.priority || '',
+                        requestedService: ev.requested_service || '',
+                        nomenclature: ev.Order_Nomenclature || '',
+                        seller: ev.seller || '',
+                        documentDate: ev.Document_Date || ''
                     });
                 });
             }
         } catch (err) {
             console.error('Error fetching calendar events:', err);
         }
+    }
+
+    /**
+     * Get CSS class for request type color coding
+     */
+    getRequestTypeClass(requestType) {
+        const type = (requestType || '').toLowerCase();
+        if (type === 'contract') return 'chip-contract';
+        if (type === 'proposal') return 'chip-proposal';
+        if (type === 'jwo') return 'chip-jwo';
+        if (type === 'quote') return 'chip-quote';
+        return 'chip-default';
+    }
+
+    /**
+     * Get short label for request type
+     */
+    getRequestTypeShort(requestType) {
+        const type = (requestType || '').toLowerCase();
+        if (type === 'contract') return 'CTR';
+        if (type === 'proposal') return 'PRP';
+        if (type === 'jwo') return 'JWO';
+        if (type === 'quote') return 'QTE';
+        return '';
     }
 
     render() {
@@ -133,9 +164,16 @@ class Calendar {
 
                 html += '<div class="day-events">';
                 eventsForDay.slice(0, maxVisible).forEach(ev => {
-                    html += `<div class="event-chip" title="${ev.client} - ${ev.company}">`;
+                    const typeClass = this.getRequestTypeClass(ev.requestType);
+                    const typeShort = this.getRequestTypeShort(ev.requestType);
+                    const priorityClass = ev.priority === 'Rush' ? 'priority-rush' : '';
+
+                    html += `<div class="event-chip ${typeClass} ${priorityClass}" title="${ev.client} - ${ev.company} | ${ev.requestType} | ${ev.requestedService}">`;
+                    if (typeShort) {
+                        html += `<span class="chip-type-badge">${typeShort}</span>`;
+                    }
                     html += `<span class="event-client">${ev.client}</span>`;
-                    html += `<span class="event-company">${ev.company}</span>`;
+                    html += `<span class="event-service">${ev.requestedService || ev.company}</span>`;
                     html += `</div>`;
                 });
 
@@ -174,17 +212,53 @@ class Calendar {
 
         let html = `<div class="detail-header">`;
         html += `<h3><i class="fas fa-calendar-day"></i> ${dateStr}</h3>`;
-        html += `<span class="detail-count">${eventsForDay.length} form${eventsForDay.length !== 1 ? 's' : ''}</span>`;
+        html += `<span class="detail-count">${eventsForDay.length} schedule${eventsForDay.length !== 1 ? 's' : ''}</span>`;
         html += `</div>`;
         html += `<div class="detail-list">`;
 
         eventsForDay.forEach(ev => {
             const statusClass = ev.status === 'submitted' ? 'status-submitted' :
                                 ev.status === 'draft' ? 'status-draft' : 'status-pending';
-            html += `<div class="detail-item">`;
+            const typeClass = this.getRequestTypeClass(ev.requestType);
+            const isPriorityRush = ev.priority === 'Rush';
+
+            html += `<div class="detail-item ${typeClass}-border">`;
+
+            // Header row: nomenclature + priority + status
+            html += `<div class="detail-item-header">`;
+            if (ev.nomenclature) {
+                html += `<span class="detail-nomenclature">${ev.nomenclature}</span>`;
+            }
+            if (isPriorityRush) {
+                html += `<span class="detail-priority-rush"><i class="fas fa-bolt"></i> Rush</span>`;
+            }
+            html += `<span class="detail-status ${statusClass}">${ev.status}</span>`;
+            html += `</div>`;
+
+            // Request type + Service type badges
+            html += `<div class="detail-badges">`;
+            if (ev.requestType) {
+                html += `<span class="detail-badge ${typeClass}">${ev.requestType}</span>`;
+            }
+            if (ev.serviceType) {
+                html += `<span class="detail-badge badge-service">${ev.serviceType}</span>`;
+            }
+            html += `</div>`;
+
+            // Client & Company
             html += `<div class="detail-client"><i class="fas fa-user"></i> ${ev.client}</div>`;
             html += `<div class="detail-company"><i class="fas fa-building"></i> ${ev.company}</div>`;
-            html += `<span class="detail-status ${statusClass}">${ev.status}</span>`;
+
+            // Requested service
+            if (ev.requestedService) {
+                html += `<div class="detail-service"><i class="fas fa-concierge-bell"></i> ${ev.requestedService}</div>`;
+            }
+
+            // Seller
+            if (ev.seller) {
+                html += `<div class="detail-seller"><i class="fas fa-user-tie"></i> ${ev.seller}</div>`;
+            }
+
             html += `</div>`;
         });
 
