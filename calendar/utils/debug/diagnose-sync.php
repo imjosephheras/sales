@@ -60,7 +60,7 @@ try {
     echo "<p>Total de requests: <strong>$requestCount</strong></p>";
 
     // Formularios con Work_Date
-    $stmt = $pdoForm->query("SELECT COUNT(*) FROM forms WHERE Work_Date IS NOT NULL AND Work_Date != ''");
+    $stmt = $pdoForm->query("SELECT COUNT(*) FROM forms WHERE Work_Date IS NOT NULL AND Work_Date != '0000-00-00'");
     $formsWithWorkDate = $stmt->fetchColumn();
     echo "<p>Formularios con Work_Date: <strong>$formsWithWorkDate</strong></p>";
 
@@ -232,7 +232,7 @@ if (isset($pdoForm) && isset($pdoCal)) {
     $stmt = $pdoForm->query("
         SELECT form_id, company_name, Order_Nomenclature, Document_Date, Work_Date, status, created_at
         FROM forms
-        WHERE Work_Date IS NOT NULL AND Work_Date != ''
+        WHERE Work_Date IS NOT NULL AND Work_Date != '0000-00-00'
         ORDER BY created_at DESC
         LIMIT 20
     ");
