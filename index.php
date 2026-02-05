@@ -134,10 +134,6 @@
         <span>🧹</span> Employee Work Report
     </a>
 
-    <a href="calendar/" class="btn btn-sales">
-        <span>📅</span> Calendar
-    </a>
-
     <a href="reports/" class="btn btn-reports">
         <span>📋</span> Reports
     </a>

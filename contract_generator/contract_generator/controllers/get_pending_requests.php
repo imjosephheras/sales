@@ -10,7 +10,6 @@ require_once '../config/db_config.php';
 
 try {
     // Get pending requests including drafts, ordered by priority and date
-    // Also fetch additional fields for preview, reports, and calendar linking
     $sql = "SELECT
                 r.id,
                 r.Service_Type,
@@ -45,12 +44,9 @@ try {
                 f.Document_Date,
                 f.Order_Nomenclature,
                 f.order_number,
-                f.total_cost,
-                e.event_id AS calendar_event_id,
-                e.start_date AS calendar_date
+                f.total_cost
             FROM requests r
             LEFT JOIN forms f ON r.form_id = f.form_id OR (r.form_id IS NULL AND r.docnum = f.Order_Nomenclature)
-            LEFT JOIN calendar_system.events e ON f.form_id = e.form_id AND e.is_active = 1
             WHERE r.status IN ('pending', 'in_progress', 'draft')
             ORDER BY
                 FIELD(r.status, 'draft', 'pending', 'in_progress'),
@@ -142,9 +138,6 @@ try {
             $request['status_icon'] = '📥';
             $request['status_label'] = 'Pending';
         }
-
-        // Add calendar link info if available
-        $request['has_calendar_event'] = !empty($request['calendar_event_id']);
 
         // Determine available report types
         $request['available_reports'] = [];
