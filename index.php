@@ -87,6 +87,11 @@
             box-shadow: 0 4px 15px rgba(23,162,184,0.35);
         }
 
+        .btn-calendar {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            box-shadow: 0 4px 15px rgba(230,126,34,0.35);
+        }
+
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.35);
@@ -144,6 +149,10 @@
 
     <a href="service_confirmation/" class="btn btn-confirmation">
         <span>⚙️</span> Admin Panel
+    </a>
+
+    <a href="calendar/" class="btn btn-calendar">
+        <span>📅</span> Calendar
     </a>
 
 </div>
