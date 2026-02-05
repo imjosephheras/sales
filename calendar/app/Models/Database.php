@@ -111,8 +111,30 @@ class Database {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         ");
 
-        // Ensure 'description' column exists (may be missing if table was created before it was added)
-        $this->addColumnIfNotExists('events', 'description', 'TEXT DEFAULT NULL AFTER `title`');
+        // Ensure all required columns exist (table may have been created with an older schema)
+        $columns = [
+            ['events', 'user_id',       'INT NOT NULL DEFAULT 1 AFTER `event_id`'],
+            ['events', 'category_id',   'INT DEFAULT NULL AFTER `user_id`'],
+            ['events', 'title',         'VARCHAR(255) NOT NULL DEFAULT "" AFTER `category_id`'],
+            ['events', 'description',   'TEXT DEFAULT NULL AFTER `title`'],
+            ['events', 'client',        'VARCHAR(255) DEFAULT NULL AFTER `description`'],
+            ['events', 'location',      'VARCHAR(255) DEFAULT NULL AFTER `client`'],
+            ['events', 'start_date',    'DATE DEFAULT NULL AFTER `location`'],
+            ['events', 'end_date',      'DATE DEFAULT NULL AFTER `start_date`'],
+            ['events', 'start_time',    'TIME DEFAULT NULL AFTER `end_date`'],
+            ['events', 'end_time',      'TIME DEFAULT NULL AFTER `start_time`'],
+            ['events', 'is_all_day',    'TINYINT(1) DEFAULT 1 AFTER `end_time`'],
+            ['events', 'is_recurring',  'TINYINT(1) DEFAULT 0 AFTER `is_all_day`'],
+            ['events', 'status',        "VARCHAR(50) DEFAULT 'pending' AFTER `is_recurring`"],
+            ['events', 'priority',      "VARCHAR(50) DEFAULT 'normal' AFTER `status`"],
+            ['events', 'document_date', 'DATE DEFAULT NULL AFTER `priority`'],
+            ['events', 'original_date', 'DATE DEFAULT NULL AFTER `document_date`'],
+            ['events', 'form_id',       'INT DEFAULT NULL AFTER `original_date`'],
+            ['events', 'is_active',     'TINYINT(1) DEFAULT 1 AFTER `form_id`'],
+        ];
+        foreach ($columns as [$table, $column, $definition]) {
+            $this->addColumnIfNotExists($table, $column, $definition);
+        }
     }
 
     /**
