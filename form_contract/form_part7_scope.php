@@ -139,14 +139,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (scopeOfWorkOptions[selectedService]) {
       scopeContainer.style.display = "grid";
       scopeContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(250px, 1fr))";
-      scopeContainer.style.gap = "12px";
+      scopeContainer.style.gap = "6px";
 
       scopeOfWorkOptions[selectedService].forEach(item => {
         const label = document.createElement("label");
         label.style.display = "flex";
         label.style.alignItems = "center";
-        label.style.gap = "10px";
-        label.style.padding = "12px 14px";
+        label.style.gap = "8px";
+        label.style.padding = "8px 10px";
         label.style.background = "#f4f7fc";
         label.style.border = "2px solid #e1e8ed";
         label.style.borderRadius = "8px";

@@ -192,6 +192,23 @@
       display: none;
     }
 
+    /* ======= COMPACT: Sections 5 (Terms) & 7 (Scope) ======= */
+    .section-title[data-section="5"],
+    .section-title[data-section="7"] {
+      margin-top: 10px;
+      padding: 12px 20px;
+    }
+
+    .section-content[data-section-content="5"],
+    .section-content[data-section-content="7"] {
+      padding: 12px 20px;
+    }
+
+    .section-content[data-section-content="5"] .question-block,
+    .section-content[data-section-content="7"] .question-block {
+      margin-bottom: 10px;
+    }
+
     /* ======= BLOQUES DE PREGUNTAS ======= */
     .question-block {
       margin-bottom: 25px;
@@ -264,9 +281,9 @@
     .checkbox-group {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-top: 15px;
-      padding: 20px;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 10px;
       background: white;
       border-radius: 10px;
       border: 2px solid var(--border-color);
@@ -278,7 +295,7 @@
       font-weight: 400;
       color: var(--text-primary);
       cursor: pointer;
-      padding: 12px 14px;
+      padding: 8px 10px;
       border-radius: 8px;
       transition: all 0.2s ease;
       background: var(--light-bg);
