@@ -9,12 +9,12 @@
            PAGE SETUP - Per-page control for dompdf
            ============================================= */
         @page {
-            margin: 4.5cm 2cm 3.5cm 2cm;
+            margin: 2cm 2cm 0.5cm 2cm;
         }
 
         @media print {
             @page {
-                margin: 4.5cm 2cm 3.5cm 2cm;
+                margin: 2cm 2cm 0.5cm 2cm;
             }
             body {
                 padding: 0;
@@ -48,20 +48,28 @@
             page-break-before: always;
         }
 
-        .page-3 {
-            page-break-before: always;
-        }
-
-        /* Page 3: Anchor signatures to the bottom via table layout.
-           Height = A4 (29.7cm) - top margin (4.5cm) - bottom margin (3.5cm) = 21.7cm */
-        .page-3-anchor {
+        /* Page table wrappers: anchor footers to bottom via table layout.
+           Height = A4 (29.7cm) - top margin (2cm) - bottom margin (0.5cm) = 27.2cm */
+        .page-table {
             width: 100%;
-            height: 21.7cm;
+            height: 27.2cm;
+            border-collapse: collapse;
         }
 
-        .page-3-anchor td.page-3-content {
+        .page-table td.page-content {
+            vertical-align: top;
+            padding: 0;
+        }
+
+        .page-table td.page-footer-cell {
             vertical-align: bottom;
             padding: 0;
+        }
+
+        /* Page 1 top spacer: replicate original 4.5cm from page edge
+           (2cm @page margin + 2.5cm spacer = 4.5cm) */
+        .page-1-spacer {
+            height: 2.5cm;
         }
 
         /* =============================================
@@ -397,16 +405,13 @@
         }
 
         /* =============================================
-           FOOTER - Two-tone split design (fixed on all pages)
+           FOOTER A - Two-tone split design (Page 1)
            ============================================= */
-        .footer-wrapper {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+        .footer-a {
+            width: 100%;
         }
 
-        .footer-top {
+        .footer-a-top {
             background-color: #A30000;
             color: white;
             text-align: center;
@@ -414,7 +419,7 @@
             font-size: 7pt;
         }
 
-        .footer-bottom {
+        .footer-a-bottom {
             background-color: #CC0000;
             color: white;
             text-align: center;
@@ -422,9 +427,32 @@
             font-size: 8pt;
         }
 
-        .footer-bottom a {
+        .footer-a-bottom a {
             color: white;
             text-decoration: none;
+        }
+
+        /* =============================================
+           FOOTER B - Single-line professional (Page 2)
+           ============================================= */
+        .footer-b {
+            width: 100%;
+            border-top: 2px solid #CC0000;
+            margin-top: 10px;
+            padding-top: 6px;
+            text-align: center;
+            font-size: 7pt;
+            color: #555;
+        }
+
+        .footer-b-company {
+            font-weight: bold;
+            color: #CC0000;
+        }
+
+        .footer-b-url {
+            font-weight: bold;
+            color: #CC0000;
         }
     </style>
 </head>
@@ -550,30 +578,14 @@
     ?>
 
     <!-- =============================================
-         PAGE 1: Header, Client Info, Services, Scope
+         PAGE 1: Header, Client Info, Services, Totals, Scope + Footer A
          ============================================= -->
-    <?php include __DIR__ . '/jwo/page1.php'; ?>
+    <?php include __DIR__ . '/JWO/page-1.blade.php'; ?>
 
     <!-- =============================================
-         PAGE 2: Terms and Conditions
+         PAGE 2: Terms and Conditions + Acceptance/Signatures + Footer B
          ============================================= -->
-    <?php include __DIR__ . '/jwo/page2.php'; ?>
-
-    <!-- =============================================
-         PAGE 3: Acceptance / Signatures
-         ============================================= -->
-    <?php include __DIR__ . '/jwo/page3.php'; ?>
-
-    <!-- FOOTER (fixed on all pages) -->
-    <div class="footer-wrapper">
-        <div class="footer-top">
-            PRIME FACILITY SERVICES GROUP, INC.
-        </div>
-        <div class="footer-bottom">
-            <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
-            <a href="http://www.primefacilityservicesgroup.com">www.primefacilityservicesgroup.com</a>
-        </div>
-    </div>
+    <?php include __DIR__ . '/JWO/page-2.blade.php'; ?>
 
 </body>
 </html>
