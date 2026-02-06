@@ -317,12 +317,15 @@
                 </div>
                 ${reportButtons}
             </div>
+            <button class="delete-btn" data-id="${task.id}" title="Delete this task">
+                <i class="fas fa-trash-alt"></i>
+            </button>
         `;
 
         // Event listener to select and open form
         div.addEventListener('click', function(e) {
-            // Don't select if clicking on report buttons
-            if (e.target.closest('.report-btn')) {
+            // Don't select if clicking on report buttons or delete button
+            if (e.target.closest('.report-btn') || e.target.closest('.delete-btn')) {
                 return;
             }
             selectTask(task);
@@ -336,6 +339,14 @@
                 const requestId = this.dataset.requestId;
                 generateReport(reportType, requestId);
             });
+        });
+
+        // Add event listener for delete button
+        div.querySelector('.delete-btn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const requestId = this.dataset.id;
+            const taskTitle = task.title || task.Company_Name || 'this task';
+            deleteRequest(requestId, taskTitle);
         });
 
         return div;
@@ -414,11 +425,25 @@
                     </span>
                 </div>
             </div>
+            <button class="delete-btn" data-id="${task.id}" title="Delete this contract">
+                <i class="fas fa-trash-alt"></i>
+            </button>
         `;
 
         // Event listener to select and view completed contract
-        div.addEventListener('click', function() {
+        div.addEventListener('click', function(e) {
+            if (e.target.closest('.delete-btn')) {
+                return;
+            }
             selectCompletedTask(task);
+        });
+
+        // Add event listener for delete button
+        div.querySelector('.delete-btn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const requestId = this.dataset.id;
+            const taskTitle = companyName || 'this contract';
+            deleteRequest(requestId, taskTitle);
         });
 
         return div;
@@ -587,6 +612,41 @@
             'low': 'Low'
         };
         return priorityMap[priority] || priority || 'Normal';
+    }
+
+    // ========================================
+    // DELETE REQUEST
+    // ========================================
+
+    function deleteRequest(requestId, title) {
+        if (!confirm(`Are you sure you want to delete "${title}"?\n\nThis action cannot be undone.`)) {
+            return;
+        }
+
+        fetch('controllers/delete_request.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: parseInt(requestId) })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // If the deleted item was selected, clear the editor
+                if (selectedTaskId == 'req_' + requestId || selectedTaskId == 'completed_' + requestId) {
+                    selectedTaskId = null;
+                    // Dispatch event to clear editor
+                    document.dispatchEvent(new CustomEvent('requestDeleted', { detail: { id: requestId } }));
+                }
+                // Refresh both lists
+                refreshAll();
+            } else {
+                alert('Error deleting: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting request:', error);
+            alert('Connection error. Please try again.');
+        });
     }
 
     // ========================================
