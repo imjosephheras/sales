@@ -46,7 +46,6 @@
 
         .page-2 {
             page-break-before: always;
-            padding-top: 1.2cm;
         }
 
         .page-3 {
@@ -312,7 +311,6 @@
         .final-section {
             display: table;
             width: 100%;
-            margin-top: 20px;
             page-break-inside: avoid;
         }
 
