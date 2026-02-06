@@ -146,15 +146,14 @@
         .totals-table td {
             padding: 6px 12px;
             font-size: 9pt;
-            border: 1px solid #000;
         }
 
         .totals-table .label-cell {
-            text-align: left;
+            text-align: right;
             font-weight: bold;
-            background-color: #f5f5f5;
             text-transform: uppercase;
             width: 120px;
+            border: none;
         }
 
         .totals-table .value-cell {
@@ -162,11 +161,11 @@
             width: 130px;
             background-color: #fff;
             font-weight: bold;
+            border: 1px solid #000;
         }
 
         .totals-table tr:last-child .label-cell {
-            background-color: #CC0000;
-            color: white;
+            color: #CC0000;
         }
 
         .totals-table tr:last-child .value-cell {
@@ -190,7 +189,7 @@
         }
 
         .scope-content {
-            border: 1px solid #000;
+            border: none;
             padding: 10px;
             background-color: #fff;
         }
