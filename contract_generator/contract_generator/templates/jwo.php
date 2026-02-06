@@ -6,12 +6,12 @@
     <title>Job Work Order</title>
     <style>
         @page {
-            margin: 2.5cm 2cm 2.8cm 2cm;
+            margin: 2.5cm 2cm 3.5cm 2cm;
         }
 
         @media print {
             @page {
-                margin: 2.5cm 2cm 2.8cm 2cm;
+                margin: 2.5cm 2cm 3.5cm 2cm;
             }
             body {
                 padding: 0;
@@ -177,11 +177,11 @@
         /* Scope Section */
         .scope-section {
             margin-bottom: 15px;
+            page-break-inside: avoid;
         }
 
         .scope-header {
-            background-color: #CC0000;
-            color: white;
+            color: #CC0000;
             font-weight: bold;
             padding: 6px 10px;
             margin-bottom: 8px;
@@ -221,11 +221,11 @@
         /* Terms Section */
         .terms-section {
             margin-top: 20px;
+            page-break-before: auto;
         }
 
         .terms-main-title {
-            background-color: #CC0000;
-            color: white;
+            color: #CC0000;
             font-weight: bold;
             padding: 8px 10px;
             font-size: 10pt;
@@ -236,6 +236,7 @@
         .term-box {
             margin-bottom: 12px;
             padding-left: 5px;
+            page-break-inside: avoid;
         }
 
         .term-title {
