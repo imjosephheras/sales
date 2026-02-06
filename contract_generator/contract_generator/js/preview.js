@@ -453,15 +453,115 @@
                         font-size: 9pt;
                     }
 
-                    /* Preview note */
-                    .jwo-preview-note {
-                        margin-top: 20px;
+                    /* Page separator */
+                    .jwo-page-separator {
+                        border: none;
+                        border-top: 2px dashed #ccc;
+                        margin: 25px 0;
+                    }
+
+                    /* Terms Section */
+                    .jwo-terms-section {
+                        margin-top: 10px;
+                    }
+                    .jwo-terms-main-title {
+                        background-color: #AC1E34;
+                        color: white;
+                        font-weight: bold;
+                        padding: 8px 10px;
+                        font-size: 10pt;
+                        margin-bottom: 15px;
+                        text-transform: uppercase;
+                    }
+                    .jwo-term-box {
+                        margin-bottom: 12px;
+                        padding-left: 5px;
+                    }
+                    .jwo-term-title {
+                        font-weight: bold;
+                        font-size: 9pt;
+                        margin-bottom: 5px;
+                        text-transform: uppercase;
+                        color: #AC1E34;
+                    }
+                    .jwo-term-box ul {
+                        margin-left: 20px;
+                    }
+                    .jwo-term-box li {
+                        margin-bottom: 3px;
+                        font-size: 9pt;
+                        color: #000;
+                    }
+                    .jwo-term-box p {
+                        margin-left: 15px;
+                        font-size: 9pt;
+                        margin-bottom: 5px;
+                        color: #000;
+                    }
+
+                    /* Final Section - Signatures */
+                    .jwo-final-section {
+                        display: flex;
+                        width: 100%;
+                        margin-top: 30px;
+                        gap: 20px;
+                    }
+                    .jwo-contact-column {
+                        width: 48%;
+                    }
+                    .jwo-signature-column {
+                        width: 48%;
+                    }
+                    .jwo-contact-title {
+                        font-weight: bold;
+                        font-size: 9pt;
+                        margin-bottom: 8px;
+                        text-decoration: underline;
+                        text-transform: uppercase;
+                    }
+                    .jwo-contact-info {
+                        font-size: 9pt;
+                        line-height: 1.5;
+                    }
+                    .jwo-signature-box {
+                        border: 1px solid #000;
                         padding: 10px;
-                        background: #f0f0f0;
-                        border: 1px dashed #999;
-                        text-align: center;
+                        margin-bottom: 10px;
+                        height: 70px;
+                    }
+                    .jwo-sig-label {
+                        font-weight: bold;
+                        font-size: 9pt;
+                        text-transform: uppercase;
+                    }
+                    .jwo-sig-line {
+                        border-top: 1px solid #000;
+                        margin-top: 35px;
+                        padding-top: 3px;
                         font-size: 8pt;
-                        color: #666;
+                    }
+
+                    /* Footer */
+                    .jwo-footer-wrapper {
+                        margin-top: 30px;
+                    }
+                    .jwo-footer-top {
+                        background-color: #8B0000;
+                        color: white;
+                        text-align: center;
+                        padding: 3px 10px;
+                        font-size: 7pt;
+                    }
+                    .jwo-footer-bottom {
+                        background-color: #AC1E34;
+                        color: white;
+                        text-align: center;
+                        padding: 8px 10px;
+                        font-size: 8pt;
+                    }
+                    .jwo-footer-bottom a {
+                        color: white;
+                        text-decoration: none;
                     }
                 </style>
 
@@ -552,9 +652,132 @@
                     </div>
                 </div>
 
-                <!-- Preview Note -->
-                <div class="jwo-preview-note">
-                    <strong>PREVIEW</strong> - The PDF includes Terms & Conditions (page 2) and signature sections.
+                <!-- PAGE SEPARATOR -->
+                <hr class="jwo-page-separator">
+
+                <!-- PAGE 2: TERMS AND CONDITIONS -->
+                <div class="jwo-terms-section">
+                    <div class="jwo-terms-main-title">TERMS AND CONDITIONS</div>
+
+                    <div class="jwo-term-box">
+                        <div class="jwo-term-title">1. SERVICE LIMITATIONS</div>
+                        <ul>
+                            <li>Work will be performed during approved service windows.</li>
+                            <li>Additional charges may apply for emergency service requests.</li>
+                            <li>Separate scheduling is required for areas containing wood-burning equipment.</li>
+                        </ul>
+                    </div>
+
+                    ${isKitchenService(requestedService) ? `
+                    <div class="jwo-term-box">
+                        <div class="jwo-term-title">2. AREA PREPARATION</div>
+                        <ul>
+                            <li>All cooking equipment must be turned off at least two (2) hours before service.</li>
+                        </ul>
+                    </div>
+
+                    <div class="jwo-term-box">
+                        <div class="jwo-term-title">3. KITCHEN PREPARATION</div>
+                        <p>The Client must ensure that the kitchen is ready for service, including:</p>
+                        <ul>
+                            <li>Turning off all kitchen equipment and allowing it to cool completely</li>
+                            <li>Removing food, utensils, and personal items from work surfaces</li>
+                            <li>Keeping access areas clear for the cleaning crew</li>
+                        </ul>
+                        <p>Additional time caused by lack of preparation may be billed at <strong>$30.00 USD per hour</strong>.</p>
+                    </div>
+                    ` : ''}
+
+                    <div class="jwo-term-box">
+                        <div class="jwo-term-title">${isKitchenService(requestedService) ? '4' : '2'}. PROPOSAL VALIDITY PERIOD</div>
+                        <p>The proposal issued for this Work Order will be valid for fourteen (14) days from the date of issuance. Prime Facility Services Group may revise pricing, scope, or terms if approval is not received within this period.</p>
+                        <p>If actual site conditions differ from those observed during the initial inspection, a revised proposal may be issued.</p>
+                    </div>
+
+                    <div class="jwo-term-box">
+                        <div class="jwo-term-title">${isKitchenService(requestedService) ? '5' : '3'}. CANCELLATIONS</div>
+                        <p>Cancellations made with less than twenty-four (24) hours' notice will incur a charge equal to one hundred percent (100%) of the minimum scheduled labor.</p>
+                        <p>Cancellations made with more than twenty-four (24) hours' notice will not incur charges unless otherwise specified in the applicable price list.</p>
+                    </div>
+
+                    <div class="jwo-term-box">
+                        <div class="jwo-term-title">${isKitchenService(requestedService) ? '6' : '4'}. RESCHEDULING</div>
+                        <p>Rescheduling requests must be submitted at least twenty-four (24) hours in advance. Requests made within 24 hours may incur a fee of up to the total scheduled labor and are subject to personnel and equipment availability.</p>
+                        <p>Availability for rescheduled dates or times is not guaranteed.</p>
+                    </div>
+
+                    <div class="jwo-term-box">
+                        <div class="jwo-term-title">${isKitchenService(requestedService) ? '7' : '5'}. LACK OF ACCESS</div>
+                        <p>If personnel arrive on site and are unable to begin work due to lack of access, incomplete area preparation, or delays caused by the Client, the situation will be treated as a same-day cancellation and the corresponding charges will apply.</p>
+                    </div>
+
+                    <div class="jwo-term-box">
+                        <div class="jwo-term-title">${isKitchenService(requestedService) ? '8' : '6'}. WEATHER OR SAFETY DELAYS</div>
+                        <p>If work cannot be safely performed due to weather conditions, hazardous environments, or other safety-related circumstances beyond the company's control, the service will be rescheduled to the next available date.</p>
+                        <p>No penalties will apply; however, labor or material costs may be adjusted if conditions change significantly.</p>
+                    </div>
+
+                    <div class="jwo-term-box">
+                        <div class="jwo-term-title">${isKitchenService(requestedService) ? '9' : '7'}. POST-SERVICE REQUIREMENTS</div>
+                        <ul>
+                            <li>Kitchen management must verify completion.</li>
+                            <li>Any concerns must be reported within twenty-four (24) hours.</li>
+                            <li>Recommended maintenance schedules must be followed.</li>
+                        </ul>
+                    </div>
+
+                    <div class="jwo-term-box">
+                        <div class="jwo-term-title">${isKitchenService(requestedService) ? '10' : '8'}. SITE ACCESS AND SECURITY COORDINATION</div>
+                        <ul>
+                            <li>The Client must notify on-site security personnel or building management in advance that services will be performed.</li>
+                            <li>If the service requires access to rooftops, ceilings, ventilation systems, or other restricted areas, the Client must ensure safe and full access.</li>
+                            <li>The Client must provide clear instructions and prior authorization to security or access-control personnel to allow entry for the service team.</li>
+                        </ul>
+                    </div>
+
+                    <!-- ACCEPTANCE / SIGNATURES SECTION -->
+                    <div class="jwo-terms-main-title" style="margin-top: 20px;">ACCEPTANCE / SIGNATURES</div>
+
+                    <div class="jwo-final-section">
+                        <div class="jwo-contact-column">
+                            <div class="jwo-contact-title">PLEASE SEND TWO COPIES OF YOUR WORK ORDER:</div>
+                            <div class="jwo-contact-info">
+                                Enter this order in accordance with the prices, terms, and<br>
+                                specifications listed above.
+                            </div>
+                            <br>
+                            <div class="jwo-contact-title">SEND ALL CORRESPONDENCES TO:</div>
+                            <div class="jwo-contact-info">
+                                <strong>Prime Facility Services Group, Inc.</strong><br>
+                                8303 Westglen Drive<br>
+                                Houston, TX 77063<br><br>
+                                customerservice@primefacilityservicesgroup.com<br>
+                                (713) 338-2553 Phone<br>
+                                (713) 574-3065 Fax
+                            </div>
+                        </div>
+                        <div class="jwo-signature-column">
+                            <div class="jwo-signature-box">
+                                <div class="jwo-sig-label">AUTHORIZED BY:</div>
+                                <div class="jwo-sig-line">Signature & Date</div>
+                            </div>
+                            <div class="jwo-signature-box">
+                                <div class="jwo-sig-label">PRINT NAME:</div>
+                                <div class="jwo-sig-line">Name & Title</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="jwo-footer-wrapper">
+                    <div class="jwo-footer-top">
+                        PRIME FACILITY SERVICES GROUP, INC.
+                    </div>
+                    <div class="jwo-footer-bottom">
+                        <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
+                        www.primefacilityservicesgroup.com
+                    </div>
                 </div>
             </div>
         `;
@@ -640,6 +863,11 @@
     // ========================================
     // UTILIDADES
     // ========================================
+
+    function isKitchenService(requestedService) {
+        const svc = (requestedService || '').toLowerCase();
+        return svc.indexOf('kitchen') !== -1 || svc.indexOf('hood') !== -1;
+    }
 
     function formatPrice(price) {
         if (!price) return '0.00';
