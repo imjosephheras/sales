@@ -305,7 +305,7 @@
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
-                        border-bottom: 3px solid #AC1E34;
+                        border-bottom: 3px solid #CC0000;
                         padding-bottom: 10px;
                         margin-bottom: 10px;
                     }
@@ -318,7 +318,7 @@
                         padding-left: 15px;
                     }
                     .jwo-header-exact .doc-title {
-                        color: #AC1E34;
+                        color: #CC0000;
                         font-size: 22pt;
                         font-weight: bold;
                         margin-bottom: 5px;
@@ -361,7 +361,7 @@
                         margin-bottom: 10px;
                     }
                     .jwo-services-exact th {
-                        background-color: #AC1E34;
+                        background-color: #CC0000;
                         color: white;
                         font-weight: bold;
                         padding: 8px 6px;
@@ -411,7 +411,7 @@
                     }
                     .jwo-totals-exact tr:last-child .label-cell,
                     .jwo-totals-exact tr:last-child .value-cell {
-                        background-color: #AC1E34;
+                        background-color: #CC0000;
                         color: white;
                     }
 
@@ -420,7 +420,7 @@
                         margin-bottom: 15px;
                     }
                     .jwo-scope-header-exact {
-                        background-color: #AC1E34;
+                        background-color: #CC0000;
                         color: white;
                         font-weight: bold;
                         padding: 6px 10px;
@@ -465,7 +465,7 @@
                         margin-top: 10px;
                     }
                     .jwo-terms-main-title {
-                        background-color: #AC1E34;
+                        background-color: #CC0000;
                         color: white;
                         font-weight: bold;
                         padding: 8px 10px;
@@ -482,7 +482,7 @@
                         font-size: 9pt;
                         margin-bottom: 5px;
                         text-transform: uppercase;
-                        color: #AC1E34;
+                        color: #CC0000;
                     }
                     .jwo-term-box ul {
                         margin-left: 20px;
@@ -546,14 +546,14 @@
                         margin-top: 30px;
                     }
                     .jwo-footer-top {
-                        background-color: #8B0000;
+                        background-color: #A30000;
                         color: white;
                         text-align: center;
                         padding: 3px 10px;
                         font-size: 7pt;
                     }
                     .jwo-footer-bottom {
-                        background-color: #AC1E34;
+                        background-color: #CC0000;
                         color: white;
                         text-align: center;
                         padding: 8px 10px;
