@@ -394,22 +394,24 @@
                     .jwo-totals-exact td {
                         padding: 6px 12px;
                         font-size: 9pt;
-                        border: 1px solid #000;
                     }
                     .jwo-totals-exact .label-cell {
-                        text-align: left;
+                        text-align: right;
                         font-weight: bold;
-                        background-color: #f5f5f5;
                         text-transform: uppercase;
                         width: 120px;
+                        border: none;
                     }
                     .jwo-totals-exact .value-cell {
                         text-align: right;
                         width: 130px;
                         background-color: #fff;
                         font-weight: bold;
+                        border: 1px solid #000;
                     }
-                    .jwo-totals-exact tr:last-child .label-cell,
+                    .jwo-totals-exact tr:last-child .label-cell {
+                        color: #CC0000;
+                    }
                     .jwo-totals-exact tr:last-child .value-cell {
                         background-color: #CC0000;
                         color: white;
@@ -429,7 +431,7 @@
                         text-transform: uppercase;
                     }
                     .jwo-scope-content-exact {
-                        border: 1px solid #000;
+                        border: none;
                         padding: 10px;
                         background-color: #fff;
                     }
