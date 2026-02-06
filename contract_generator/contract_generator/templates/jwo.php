@@ -228,6 +228,7 @@
         /* Terms Section */
         .terms-section {
             margin-top: 20px;
+            padding-left: 15px;
             page-break-before: auto;
         }
 
@@ -242,7 +243,7 @@
 
         .term-box {
             margin-bottom: 12px;
-            padding-left: 5px;
+            padding-left: 15px;
             page-break-inside: avoid;
         }
 
