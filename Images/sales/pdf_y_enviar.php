@@ -29,7 +29,7 @@ $net_utility           = $_POST['Net_Utility'] ?? '';
 $commission_percentage = $_POST['Commission_Percentage'] ?? '';
 $commission_amount     = $_POST['Commission_Amount'] ?? '';
 
-$image_path = __DIR__ . '/Images/Facility.png';
+$image_path = __DIR__ . '/../pfacility.png';
 if (file_exists($image_path)) {
     $image_data = base64_encode(file_get_contents($image_path));
     $image_src = 'data:image/png;base64,' . $image_data;

@@ -12,7 +12,7 @@ $company_fax = "713-574-3065";
 $company_website = "www.primefacilityservicesgroup.com";
 
 // Logo path (base64 encode for PDF)
-$logo_path = __DIR__ . '/../../../Images/Facility.png';
+$logo_path = __DIR__ . '/../../../Images/pfacility.png';
 $logo_base64 = '';
 if (file_exists($logo_path)) {
     $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_path));
