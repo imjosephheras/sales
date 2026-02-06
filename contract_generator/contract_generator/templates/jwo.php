@@ -137,31 +137,28 @@
 
         /* Totals Table - Right aligned, 3 rows only */
         .totals-table {
-            width: 250px;
+            width: 280px;
             border-collapse: collapse;
             margin-left: auto;
             margin-bottom: 15px;
         }
 
         .totals-table td {
-            padding: 6px 12px;
+            padding: 6px 8px;
             font-size: 9pt;
-        }
-
-        .totals-table .label-cell {
-            text-align: right;
-            font-weight: bold;
-            text-transform: uppercase;
-            width: 120px;
             border: none;
+            background: none;
         }
 
         .totals-table .value-cell {
             text-align: right;
-            width: 130px;
-            background-color: #fff;
             font-weight: bold;
-            border: 1px solid #000;
+        }
+
+        .totals-table .label-cell {
+            text-align: left;
+            font-weight: bold;
+            text-transform: uppercase;
         }
 
         .totals-table tr:last-child .label-cell {
@@ -169,14 +166,14 @@
         }
 
         .totals-table tr:last-child .value-cell {
-            background-color: #CC0000;
-            color: white;
+            color: #CC0000;
         }
 
         /* Scope Section */
         .scope-section {
             margin-bottom: 15px;
             page-break-inside: avoid;
+            border: none;
         }
 
         .scope-header {
@@ -190,8 +187,8 @@
 
         .scope-content {
             border: none;
-            padding: 10px;
-            background-color: #fff;
+            padding: 10px 0;
+            background-color: transparent;
         }
 
         .scope-content h4 {
@@ -594,16 +591,16 @@
     <!-- TOTALS TABLE -->
     <table class="totals-table">
         <tr>
-            <td class="label-cell">TOTAL</td>
             <td class="value-cell">$<?php echo number_format($subtotal, 2); ?></td>
+            <td class="label-cell">TOTAL</td>
         </tr>
         <tr>
-            <td class="label-cell">TAXES (8.25%)</td>
             <td class="value-cell">$<?php echo number_format($taxes, 2); ?></td>
+            <td class="label-cell">TAXES (8.25%)</td>
         </tr>
         <tr>
-            <td class="label-cell">GRAND TOTAL</td>
             <td class="value-cell">$<?php echo number_format($grand_total, 2); ?></td>
+            <td class="label-cell">GRAND TOTAL</td>
         </tr>
     </table>
 
