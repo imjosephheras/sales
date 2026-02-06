@@ -6,9 +6,14 @@
 // ===============================
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
 // ===============================
-// LOGO BASE64 PARA PDF
+// LOGO BASE64 PARA PDF (dynamic based on Service_Type)
 // ===============================
-$logo_path = __DIR__ . '/Images/Facility.png';
+$service_type_raw = strtolower(trim($_POST['Service_Type'] ?? ''));
+if (strpos($service_type_raw, 'hospitality') !== false) {
+    $logo_path = __DIR__ . '/Images/Hospitality.png';
+} else {
+    $logo_path = __DIR__ . '/Images/Facility.png';
+}
 $image_src = '';
 
 if (file_exists($logo_path)) {

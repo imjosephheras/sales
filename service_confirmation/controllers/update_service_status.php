@@ -135,8 +135,13 @@ function generateFinalPDF($request, $pdo) {
 
     $dompdf = new Dompdf($options);
 
-    // Get logo
-    $logo_path = dirname(__DIR__, 2) . '/form_contract/Images/Facility.png';
+    // Get logo (dynamic based on Service_Type)
+    $dept = strtolower(trim($request['Service_Type'] ?? ''));
+    if (strpos($dept, 'hospitality') !== false) {
+        $logo_path = dirname(__DIR__, 2) . '/form_contract/Images/Hospitality.png';
+    } else {
+        $logo_path = dirname(__DIR__, 2) . '/form_contract/Images/Facility.png';
+    }
     $image_src = '';
     if (file_exists($logo_path)) {
         $image_data = base64_encode(file_get_contents($logo_path));
