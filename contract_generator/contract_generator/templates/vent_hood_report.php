@@ -37,8 +37,14 @@ $client_email = $data['Email'] ?? '';
     <title>Vent Hood Service Report - <?php echo htmlspecialchars($client_name); ?></title>
     <style>
         @page {
-            margin: 8mm 10mm;
+            margin: 20mm 18mm 22mm 18mm;
             size: letter;
+        }
+
+        @media print {
+            @page {
+                margin: 20mm 18mm 22mm 18mm;
+            }
         }
 
         * {
