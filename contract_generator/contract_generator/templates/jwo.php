@@ -15,6 +15,8 @@
             }
             body {
                 padding: 0;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
         }
 
@@ -153,6 +155,7 @@
         .totals-table .value-cell {
             text-align: right;
             font-weight: bold;
+            border: 1px solid #000;
         }
 
         .totals-table .label-cell {
@@ -166,7 +169,9 @@
         }
 
         .totals-table tr:last-child .value-cell {
-            color: #CC0000;
+            background-color: #CC0000;
+            color: white;
+            border: 1px solid #CC0000;
         }
 
         /* Scope Section */
