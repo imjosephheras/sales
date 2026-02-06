@@ -27,7 +27,7 @@
             display: table;
             width: 100%;
             margin-bottom: 10px;
-            border-bottom: 3px solid #AC1E34;
+            border-bottom: 3px solid #CC0000;
         }
 
         .header-left {
@@ -51,7 +51,7 @@
         }
 
         .doc-title {
-            color: #AC1E34;
+            color: #CC0000;
             font-size: 22pt;
             font-weight: bold;
             margin-bottom: 5px;
@@ -99,7 +99,7 @@
         }
 
         .services-table th {
-            background-color: #AC1E34;
+            background-color: #CC0000;
             color: white;
             font-weight: bold;
             padding: 8px 6px;
@@ -155,12 +155,12 @@
         }
 
         .totals-table tr:last-child .label-cell {
-            background-color: #AC1E34;
+            background-color: #CC0000;
             color: white;
         }
 
         .totals-table tr:last-child .value-cell {
-            background-color: #AC1E34;
+            background-color: #CC0000;
             color: white;
         }
 
@@ -170,7 +170,7 @@
         }
 
         .scope-header {
-            background-color: #AC1E34;
+            background-color: #CC0000;
             color: white;
             font-weight: bold;
             padding: 6px 10px;
@@ -215,7 +215,7 @@
         }
 
         .terms-main-title {
-            background-color: #AC1E34;
+            background-color: #CC0000;
             color: white;
             font-weight: bold;
             padding: 8px 10px;
@@ -234,6 +234,7 @@
             font-size: 9pt;
             margin-bottom: 5px;
             text-transform: uppercase;
+            color: #CC0000;
         }
 
         .term-box ul {
@@ -243,12 +244,14 @@
         .term-box li {
             margin-bottom: 3px;
             font-size: 9pt;
+            color: #000;
         }
 
         .term-box p {
             margin-left: 15px;
             font-size: 9pt;
             margin-bottom: 5px;
+            color: #000;
         }
 
         /* Final Section */
@@ -323,7 +326,7 @@
         }
 
         .footer-top {
-            background-color: #8F1B2C;
+            background-color: #A30000;
             color: white;
             text-align: center;
             padding: 3px 10px;
@@ -331,7 +334,7 @@
         }
 
         .footer-bottom {
-            background-color: #AC1E34;
+            background-color: #CC0000;
             color: white;
             text-align: center;
             padding: 8px 10px;
