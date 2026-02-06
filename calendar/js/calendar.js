@@ -391,7 +391,7 @@ class Calendar {
 
             if (hasEvents) {
                 const eventsForDay = this.events[day];
-                const maxVisible = 2;
+                const maxVisible = 3;
 
                 html += '<div class="day-events">';
                 eventsForDay.slice(0, maxVisible).forEach(ev => {
