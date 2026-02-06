@@ -221,7 +221,6 @@
         /* Terms Section */
         .terms-section {
             margin-top: 20px;
-            page-break-before: always;
         }
 
         .terms-main-title {
