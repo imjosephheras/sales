@@ -9,16 +9,9 @@
             margin: 4.5cm 2cm 3.5cm 2cm;
         }
 
-        @page :first {
-            margin: 2.5cm 2cm 3.5cm 2cm;
-        }
-
         @media print {
             @page {
                 margin: 4.5cm 2cm 3.5cm 2cm;
-            }
-            @page :first {
-                margin: 2.5cm 2cm 3.5cm 2cm;
             }
             body {
                 padding: 0;
