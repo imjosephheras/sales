@@ -85,6 +85,9 @@ session_start();
                     <div style="display:flex; align-items:center; gap:16px;">
                         <h2 id="calendar-title"></h2>
                         <button class="today-btn" id="today-btn">Today</button>
+                        <button class="print-btn" id="print-btn" title="Print calendar">
+                            <i class="fas fa-print"></i> Print
+                        </button>
                     </div>
 
                     <button class="nav-btn" id="next-month" title="Next month">

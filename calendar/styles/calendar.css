@@ -525,6 +525,27 @@ body {
     background: rgba(255,255,255,0.35);
 }
 
+/* Print Button */
+.print-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.print-btn:hover {
+    background: rgba(255,255,255,0.35);
+}
+
 /* Calendar Grid */
 .calendar-grid {
     padding: 16px 24px 24px;
@@ -1003,6 +1024,105 @@ body {
 
 [data-theme="dark"] .day-cell.other-month {
     color: #4a5568;
+}
+
+/* ===== Print Styles ===== */
+@media print {
+    /* Hide non-essential elements */
+    .main-header,
+    .filter-sidebar,
+    .sidebar-expand-btn,
+    .nav-btn,
+    .today-btn,
+    .print-btn,
+    .theme-toggle,
+    .event-detail-panel {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+        color: #000;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .calendar-layout {
+        margin: 0;
+        padding: 0;
+        display: block;
+    }
+
+    .calendar-wrapper {
+        width: 100%;
+    }
+
+    .calendar-card {
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    .calendar-nav {
+        background: none !important;
+        color: #000;
+        padding: 16px 0;
+        justify-content: center;
+    }
+
+    .calendar-nav h2 {
+        color: #000;
+        font-size: 1.6rem;
+    }
+
+    .calendar-grid {
+        padding: 0;
+    }
+
+    .weekday-header span {
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .day-cell {
+        border: 1px solid #ddd;
+        border-radius: 0;
+        min-height: 80px;
+    }
+
+    .day-cell.today {
+        background: #eef3ff !important;
+        color: #000;
+        box-shadow: none;
+    }
+
+    .day-cell.today .day-number {
+        color: #001f54;
+        font-weight: 800;
+    }
+
+    .day-cell.today .event-client,
+    .day-cell.today .event-service {
+        color: inherit;
+    }
+
+    .day-cell.today .chip-type-badge {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .event-chip {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .chip-type-badge {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .event-chip.priority-rush {
+        animation: none;
+    }
 }
 
 /* Responsive */

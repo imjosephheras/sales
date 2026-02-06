@@ -62,9 +62,12 @@ class Calendar {
         this.nextBtn = document.getElementById('next-month');
         this.todayBtn = document.getElementById('today-btn');
 
+        this.printBtn = document.getElementById('print-btn');
+
         this.prevBtn.addEventListener('click', () => this.changeMonth(-1));
         this.nextBtn.addEventListener('click', () => this.changeMonth(1));
         this.todayBtn.addEventListener('click', () => this.goToToday());
+        this.printBtn.addEventListener('click', () => window.print());
 
         // Close detail panel when clicking outside
         document.addEventListener('click', (e) => {
