@@ -10,9 +10,9 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
 // ===============================
 $service_type_raw = strtolower(trim($_POST['Service_Type'] ?? ''));
 if (strpos($service_type_raw, 'hospitality') !== false) {
-    $logo_path = __DIR__ . '/Images/Hospitality.png';
+    $logo_path = __DIR__ . '/../Images/phospitality.png';
 } else {
-    $logo_path = __DIR__ . '/Images/Facility.png';
+    $logo_path = __DIR__ . '/../Images/pfacility.png';
 }
 $image_src = '';
 

@@ -3,7 +3,7 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
 // ===============================
 // LOGO BASE64 PARA PDF
 // ===============================
-$logo_path = __DIR__ . '/Images/Facility.png';
+$logo_path = __DIR__ . '/../Images/pfacility.png';
 $image_src = '';
 
 if (file_exists($logo_path)) {

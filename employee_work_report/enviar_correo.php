@@ -128,7 +128,7 @@ $action = $_POST['action'] ?? 'send';
 // =====================================
 //  LOGO BASE64 PARA PDF
 // =====================================
-$logo_path = __DIR__ . '/Images/Facility.png';
+$logo_path = __DIR__ . '/../Images/pfacility.png';
 $logo_base64 = '';
 if (file_exists($logo_path)) {
     $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_path));
