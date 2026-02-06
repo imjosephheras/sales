@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Work Order</title>
     <style>
+        /* =============================================
+           PAGE SETUP - Per-page control for dompdf
+           ============================================= */
         @page {
             margin: 4.5cm 2cm 3.5cm 2cm;
         }
@@ -34,7 +37,37 @@
             padding: 0 0.5cm;
         }
 
-        /* Header */
+        /* =============================================
+           PAGE STRUCTURE - Explicit page wrappers
+           ============================================= */
+        .page {
+            /* Base page wrapper */
+        }
+
+        .page-2 {
+            page-break-before: always;
+            padding-top: 1.2cm;
+        }
+
+        .page-3 {
+            page-break-before: always;
+        }
+
+        /* Page 3: Anchor signatures to the bottom via table layout.
+           Height = A4 (29.7cm) - top margin (4.5cm) - bottom margin (3.5cm) = 21.7cm */
+        .page-3-anchor {
+            width: 100%;
+            height: 21.7cm;
+        }
+
+        .page-3-anchor td.page-3-content {
+            vertical-align: bottom;
+            padding: 0;
+        }
+
+        /* =============================================
+           HEADER
+           ============================================= */
         .header {
             display: table;
             width: 100%;
@@ -75,7 +108,9 @@
             font-style: italic;
         }
 
-        /* 7 Column Info Table - Invisible borders */
+        /* =============================================
+           CLIENT INFO TABLE - 7 columns, invisible borders
+           ============================================= */
         .info-columns {
             width: 100%;
             border-collapse: collapse;
@@ -103,7 +138,9 @@
             text-align: center;
         }
 
-        /* Services Table */
+        /* =============================================
+           SERVICES TABLE
+           ============================================= */
         .services-table {
             width: 100%;
             border-collapse: collapse;
@@ -137,7 +174,9 @@
             font-weight: bold;
         }
 
-        /* Totals Table - Right aligned, 3 rows only */
+        /* =============================================
+           TOTALS TABLE - Right aligned, 3 rows
+           ============================================= */
         .totals-table {
             width: 280px;
             border-collapse: collapse;
@@ -174,7 +213,9 @@
             border: 1px solid #CC0000;
         }
 
-        /* Scope Section */
+        /* =============================================
+           SCOPE OF WORK
+           ============================================= */
         .scope-section {
             margin-bottom: 15px;
             page-break-inside: avoid;
@@ -218,11 +259,11 @@
             font-size: 9pt;
         }
 
-        /* Terms Section */
+        /* =============================================
+           TERMS AND CONDITIONS
+           ============================================= */
         .terms-section {
-            margin-top: 20px;
             padding-left: 15px;
-            page-break-before: auto;
         }
 
         .terms-main-title {
@@ -265,7 +306,9 @@
             color: #000;
         }
 
-        /* Final Section */
+        /* =============================================
+           ACCEPTANCE / SIGNATURES
+           ============================================= */
         .final-section {
             display: table;
             width: 100%;
@@ -355,7 +398,9 @@
             color: #555;
         }
 
-        /* Footer - Two-tone split design */
+        /* =============================================
+           FOOTER - Two-tone split design (fixed on all pages)
+           ============================================= */
         .footer-wrapper {
             position: fixed;
             bottom: 0;
@@ -387,106 +432,18 @@
 </head>
 <body>
 
-    <!-- HEADER -->
     <?php
-    // Encode logo as base64 for DOMPDF compatibility
-    $dept = strtolower(trim($data['Service_Type'] ?? ''));
-    if (strpos($dept, 'hospitality') !== false) {
-        $logo_file = __DIR__ . '/../../../Images/phospitality.png';
-    } else {
-        $logo_file = __DIR__ . '/../../../Images/pfacility.png';
-    }
-    $logo_base64 = '';
-    if (file_exists($logo_file)) {
-        $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_file));
-    }
-    ?>
-    <div class="header">
-        <div class="header-left">
-            <?php if ($logo_base64): ?>
-            <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Facility Services Group">
-            <?php endif; ?>
-        </div>
-        <div class="header-right">
-            <div class="doc-title">JOB WORK ORDER</div>
-            <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
-        </div>
-    </div>
+    /* =============================================
+       DATA PREPARATION
+       Compute all variables needed by page templates
+       ============================================= */
 
-    <!-- CLIENT & WORK INFO - 7 COLUMNS INVISIBLE -->
-    <?php
-    // Prepare data - using correct database field names
-    $client_name = htmlspecialchars($data['client_name'] ?? $data['Client_Name'] ?? 'N/A');
-    $client_title = htmlspecialchars($data['Client_Title'] ?? '');
-    $client_email = htmlspecialchars($data['Email'] ?? 'N/A');
-    $client_phone = htmlspecialchars($data['Number_Phone'] ?? 'N/A');
-
-    $company_name = htmlspecialchars($data['Company_Name'] ?? 'N/A');
-    $company_address = htmlspecialchars($data['Company_Address'] ?? 'N/A');
-
-    $seller = htmlspecialchars($data['Seller'] ?? 'N/A');
-    $work_date = date('m/d/Y');
-    $department = htmlspecialchars($data['Service_Type'] ?? 'N/A');
-
-    // Payment terms mapping
-    $freq_map = [
-        '15' => 'Net 15',
-        '30' => 'Net 30',
-        '50_deposit' => '50% Deposit',
-        'completion' => 'Upon Completion'
-    ];
-    $payment_terms = $freq_map[$data['Invoice_Frequency'] ?? ''] ?? 'Upon Completion';
-
-    $wo_number = htmlspecialchars($data['docnum'] ?? '');
-    ?>
-    <table class="info-columns">
-        <tr>
-            <td class="col-header">BILL TO</td>
-            <td class="col-header">WORK SITE</td>
-            <td class="col-header">SALES PERSON</td>
-            <td class="col-header">WORK DATE</td>
-            <td class="col-header">DEPARTMENT</td>
-            <td class="col-header">PAYMENT TERMS</td>
-            <td class="col-header">W.O. NO.</td>
-        </tr>
-        <tr>
-            <td class="col-content">
-                <?php echo $client_name; ?><br>
-                <?php if ($client_title): ?><?php echo $client_title; ?><br><?php endif; ?>
-                <?php echo $client_email; ?><br>
-                <?php echo $client_phone; ?>
-            </td>
-            <td class="col-content">
-                <?php echo $company_name; ?><br>
-                <?php echo $company_address; ?>
-            </td>
-            <td class="col-content">
-                <?php echo $seller; ?>
-            </td>
-            <td class="col-content">
-                <?php echo $work_date; ?>
-            </td>
-            <td class="col-content">
-                <?php echo $department; ?>
-            </td>
-            <td class="col-content">
-                <?php echo $payment_terms; ?>
-            </td>
-            <td class="col-content">
-                <?php echo $wo_number ?: '-'; ?>
-            </td>
-        </tr>
-    </table>
-
-    <!-- SERVICES TABLE -->
-    <?php
-    // Build service rows from DB detail tables (passed by generate_pdf.php)
-    // Fallback to JSON arrays from requests table if detail tables are empty
+    // --- Build service rows from DB detail tables ---
     $hasDetailServices = false;
     $allServiceRows = [];
     $runningTotal = 0.0;
 
-    // --- Janitorial Services ---
+    // Janitorial Services
     if (!empty($janitorialServices)) {
         $hasDetailServices = true;
         foreach ($janitorialServices as $svc) {
@@ -516,7 +473,7 @@
         }
     }
 
-    // --- Kitchen Cleaning Services ---
+    // Kitchen Cleaning Services
     if (!empty($kitchenServices)) {
         $hasDetailServices = true;
         foreach ($kitchenServices as $svc) {
@@ -531,10 +488,6 @@
             ];
         }
     } elseif (($data['includeKitchen'] ?? '') === 'Yes' && !empty($data['type19']) && is_array($data['type19']) && empty($hoodVentServices)) {
-        // Fallback to JSON arrays ONLY when detail tables are not populated (legacy data).
-        // When $hoodVentServices has data, detail tables were used during save, so this
-        // fallback must be skipped to avoid duplicating hood vent services that already
-        // appear via $hoodVentServices below.
         $hasDetailServices = true;
         foreach ($data['type19'] as $i => $type) {
             if (!$type) continue;
@@ -550,7 +503,7 @@
         }
     }
 
-    // --- Hood Vent Services ---
+    // Hood Vent Services
     if (!empty($hoodVentServices)) {
         $hasDetailServices = true;
         foreach ($hoodVentServices as $svc) {
@@ -597,201 +550,23 @@
         ];
     }
     ?>
-    <table class="services-table">
-        <thead>
-            <tr>
-                <th style="width: 25%;">TYPE OF SERVICES</th>
-                <th style="width: 12%;">SERVICE TIME</th>
-                <th style="width: 12%;">FREQUENCY</th>
-                <th style="width: 36%;">SERVICE DESCRIPTION</th>
-                <th style="width: 15%;">SUBTOTAL</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($allServiceRows as $row): ?>
-            <tr>
-                <td class="service-desc"><?php echo htmlspecialchars($row['type']); ?></td>
-                <td><?php echo htmlspecialchars($row['time']); ?></td>
-                <td><?php echo htmlspecialchars($row['freq']); ?></td>
-                <td class="service-desc"><?php echo htmlspecialchars($row['desc']); ?></td>
-                <td class="amount" style="text-align: right;">$<?php echo number_format($row['subtotal'], 2); ?></td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
 
-    <!-- TOTALS TABLE -->
-    <table class="totals-table">
-        <tr>
-            <td class="label-cell">TOTAL</td>
-            <td class="value-cell">$<?php echo number_format($subtotal, 2); ?></td>
-        </tr>
-        <tr>
-            <td class="label-cell">TAXES (8.25%)</td>
-            <td class="value-cell">$<?php echo number_format($taxes, 2); ?></td>
-        </tr>
-        <tr>
-            <td class="label-cell">GRAND TOTAL</td>
-            <td class="value-cell">$<?php echo number_format($grand_total, 2); ?></td>
-        </tr>
-    </table>
+    <!-- =============================================
+         PAGE 1: Header, Client Info, Services, Scope
+         ============================================= -->
+    <?php include __DIR__ . '/jwo/page1.php'; ?>
 
-    <!-- SCOPE OF WORK -->
-    <div class="scope-section">
-        <div class="scope-header">SCOPE OF WORK - <?php echo strtoupper(htmlspecialchars($data['Requested_Service'] ?? 'SERVICE DESCRIPTION')); ?></div>
-        <div class="scope-content">
-            <h4>WORK TO BE PERFORMED:</h4>
-            <?php if (!empty($scopeOfWorkTasks)): ?>
-                <ul>
-                <?php foreach ($scopeOfWorkTasks as $task): ?>
-                    <li><?php echo htmlspecialchars($task); ?></li>
-                <?php endforeach; ?>
-                </ul>
-            <?php elseif (!empty($data['Scope_Of_Work']) && is_array($data['Scope_Of_Work'])): ?>
-                <ul>
-                <?php foreach ($data['Scope_Of_Work'] as $task): ?>
-                    <li><?php echo htmlspecialchars($task); ?></li>
-                <?php endforeach; ?>
-                </ul>
-            <?php elseif (!empty($data['scope_of_work'])): ?>
-                <?php echo $data['scope_of_work']; ?>
-            <?php else: ?>
-                <ul>
-                    <li>Professional service as per client requirements</li>
-                    <li>All work performed to industry standards with quality assurance</li>
-                    <li>Final inspection to ensure satisfactory completion</li>
-                </ul>
-            <?php endif; ?>
+    <!-- =============================================
+         PAGE 2: Terms and Conditions
+         ============================================= -->
+    <?php include __DIR__ . '/jwo/page2.php'; ?>
 
-            <?php if (!empty($data['Additional_Comments'])): ?>
-                <h4>ADDITIONAL NOTES:</h4>
-                <p><?php echo nl2br(htmlspecialchars($data['Additional_Comments'])); ?></p>
-            <?php endif; ?>
-        </div>
-    </div>
+    <!-- =============================================
+         PAGE 3: Acceptance / Signatures
+         ============================================= -->
+    <?php include __DIR__ . '/jwo/page3.php'; ?>
 
-    <!-- PAGE 2: TERMS AND CONDITIONS -->
-    <div class="terms-section">
-
-        <div class="terms-main-title">TERMS AND CONDITIONS</div>
-
-        <div class="term-box">
-            <div class="term-title">1. SERVICE LIMITATIONS</div>
-            <ul>
-                <li>Work will be performed during approved service windows.</li>
-                <li>Additional charges may apply for emergency service requests.</li>
-                <li>Separate scheduling is required for areas containing wood-burning equipment.</li>
-            </ul>
-        </div>
-
-        <?php
-        $requested_service = strtolower($data['Requested_Service'] ?? '');
-        $is_kitchen_service = (strpos($requested_service, 'kitchen') !== false || strpos($requested_service, 'hood') !== false);
-
-        if ($is_kitchen_service):
-        ?>
-        <div class="term-box">
-            <div class="term-title">2. AREA PREPARATION</div>
-            <ul>
-                <li>All cooking equipment must be turned off at least two (2) hours before service.</li>
-            </ul>
-        </div>
-
-        <div class="term-box">
-            <div class="term-title">3. KITCHEN PREPARATION</div>
-            <p>The Client must ensure that the kitchen is ready for service, including:</p>
-            <ul>
-                <li>Turning off all kitchen equipment and allowing it to cool completely</li>
-                <li>Removing food, utensils, and personal items from work surfaces</li>
-                <li>Keeping access areas clear for the cleaning crew</li>
-            </ul>
-            <p>Additional time caused by lack of preparation may be billed at <strong>$30.00 USD per hour</strong>.</p>
-        </div>
-        <?php endif; ?>
-
-        <div class="term-box">
-            <div class="term-title"><?php echo $is_kitchen_service ? '4' : '2'; ?>. PROPOSAL VALIDITY PERIOD</div>
-            <p>The proposal issued for this Work Order will be valid for fourteen (14) days from the date of issuance. Prime Facility Services Group may revise pricing, scope, or terms if approval is not received within this period.</p>
-            <p>If actual site conditions differ from those observed during the initial inspection, a revised proposal may be issued.</p>
-        </div>
-
-        <div class="term-box">
-            <div class="term-title"><?php echo $is_kitchen_service ? '5' : '3'; ?>. CANCELLATIONS</div>
-            <p>Cancellations made with less than twenty-four (24) hours' notice will incur a charge equal to one hundred percent (100%) of the minimum scheduled labor.</p>
-            <p>Cancellations made with more than twenty-four (24) hours' notice will not incur charges unless otherwise specified in the applicable price list.</p>
-        </div>
-
-        <div class="term-box">
-            <div class="term-title"><?php echo $is_kitchen_service ? '6' : '4'; ?>. RESCHEDULING</div>
-            <p>Rescheduling requests must be submitted at least twenty-four (24) hours in advance. Requests made within 24 hours may incur a fee of up to the total scheduled labor and are subject to personnel and equipment availability.</p>
-            <p>Availability for rescheduled dates or times is not guaranteed.</p>
-        </div>
-
-        <div class="term-box">
-            <div class="term-title"><?php echo $is_kitchen_service ? '7' : '5'; ?>. LACK OF ACCESS</div>
-            <p>If personnel arrive on site and are unable to begin work due to lack of access, incomplete area preparation, or delays caused by the Client, the situation will be treated as a same-day cancellation and the corresponding charges will apply.</p>
-        </div>
-
-        <div class="term-box">
-            <div class="term-title"><?php echo $is_kitchen_service ? '8' : '6'; ?>. WEATHER OR SAFETY DELAYS</div>
-            <p>If work cannot be safely performed due to weather conditions, hazardous environments, or other safety-related circumstances beyond the company's control, the service will be rescheduled to the next available date.</p>
-            <p>No penalties will apply; however, labor or material costs may be adjusted if conditions change significantly.</p>
-        </div>
-
-        <div class="term-box">
-            <div class="term-title"><?php echo $is_kitchen_service ? '9' : '7'; ?>. POST-SERVICE REQUIREMENTS</div>
-            <ul>
-                <li>Kitchen management must verify completion.</li>
-                <li>Any concerns must be reported within twenty-four (24) hours.</li>
-                <li>Recommended maintenance schedules must be followed.</li>
-            </ul>
-        </div>
-
-        <div class="term-box">
-            <div class="term-title"><?php echo $is_kitchen_service ? '10' : '8'; ?>. SITE ACCESS AND SECURITY COORDINATION</div>
-            <ul>
-                <li>The Client must notify on-site security personnel or building management in advance that services will be performed.</li>
-                <li>If the service requires access to rooftops, ceilings, ventilation systems, or other restricted areas, the Client must ensure safe and full access.</li>
-                <li>The Client must provide clear instructions and prior authorization to security or access-control personnel to allow entry for the service team.</li>
-            </ul>
-        </div>
-
-        <!-- ACCEPTANCE / SIGNATURES SECTION -->
-        <div class="acceptance-header">ACCEPTANCE / SIGNATURES</div>
-
-        <div class="final-section">
-            <div class="contact-column">
-                <div class="contact-title">PLEASE SEND TWO COPIES OF YOUR WORK ORDER:</div>
-                <div class="contact-info" style="margin-top: 5px;">
-                    Enter this order in accordance with the prices, terms, and<br>
-                    specifications listed above.
-                </div>
-                <br>
-                <div class="contact-subtitle">&#9993; &nbsp;SEND ALL CORRESPONDENCE TO:</div>
-                <div class="contact-info" style="margin-top: 5px;">
-                    <strong>Prime Facility Services Group, Inc.</strong><br>
-                    8303 Westglen Drive<br>
-                    Houston, TX 77063<br><br>
-                    customerservice@primefacilityservicesgroup.com<br>
-                    <span class="contact-icon">&#9742;</span> (713) 338-2553 Phone<br>
-                    <span class="contact-icon">&#9742;</span> (713) 574-3065 Fax
-                </div>
-            </div>
-            <div class="signature-column">
-                <div class="signature-box">
-                    <div class="sig-label">AUTHORIZED BY:</div>
-                    <div class="sig-line">Signature &amp; Date</div>
-                </div>
-                <div class="signature-box">
-                    <div class="sig-label">PRINT NAME:</div>
-                    <div class="sig-line">Name &amp; Title</div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- FOOTER -->
+    <!-- FOOTER (fixed on all pages) -->
     <div class="footer-wrapper">
         <div class="footer-top">
             PRIME FACILITY SERVICES GROUP, INC.
