@@ -587,7 +587,7 @@
                 <td><?php echo htmlspecialchars($row['time']); ?></td>
                 <td><?php echo htmlspecialchars($row['freq']); ?></td>
                 <td class="service-desc"><?php echo htmlspecialchars($row['desc']); ?></td>
-                <td class="amount">$<?php echo number_format($row['subtotal'], 2); ?></td>
+                <td class="amount" style="text-align: right;">$<?php echo number_format($row['subtotal'], 2); ?></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
@@ -596,15 +596,15 @@
     <!-- TOTALS TABLE -->
     <table class="totals-table">
         <tr>
-            <td class="value-cell">$<?php echo number_format($subtotal, 2); ?></td>
+            <td class="value-cell" style="text-align: right;">$<?php echo number_format($subtotal, 2); ?></td>
             <td class="label-cell">TOTAL</td>
         </tr>
         <tr>
-            <td class="value-cell">$<?php echo number_format($taxes, 2); ?></td>
+            <td class="value-cell" style="text-align: right;">$<?php echo number_format($taxes, 2); ?></td>
             <td class="label-cell">TAXES (8.25%)</td>
         </tr>
         <tr>
-            <td class="value-cell">$<?php echo number_format($grand_total, 2); ?></td>
+            <td class="value-cell" style="text-align: right;">$<?php echo number_format($grand_total, 2); ?></td>
             <td class="label-cell">GRAND TOTAL</td>
         </tr>
     </table>
