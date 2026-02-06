@@ -6,15 +6,16 @@
     <title>Job Work Order</title>
     <style>
         /* =============================================
-           PAGE SETUP - Per-page control for dompdf
+           PAGE SETUP - Minimal @page margins for full
+           per-page structural control via internal spacing.
            ============================================= */
         @page {
-            margin: 2cm 2cm 0.5cm 2cm;
+            margin: 0.3cm 2cm 0.3cm 2cm;
         }
 
         @media print {
             @page {
-                margin: 2cm 2cm 0.5cm 2cm;
+                margin: 0.3cm 2cm 0.3cm 2cm;
             }
             body {
                 padding: 0;
@@ -34,25 +35,21 @@
             font-size: 10pt;
             color: #000;
             line-height: 1.3;
-            padding: 0 0.5cm;
+            padding: 0;
         }
 
         /* =============================================
-           PAGE STRUCTURE - Explicit page wrappers
+           PAGE STRUCTURE - Each page is a self-contained
+           fixed-height table. No content flows between them.
+           Height = A4 (29.7cm) - top (0.3cm) - bottom (0.3cm) = 29.1cm
            ============================================= */
-        .page {
-            /* Base page wrapper */
-        }
-
         .page-2 {
             page-break-before: always;
         }
 
-        /* Page table wrappers: anchor footers to bottom via table layout.
-           Height = A4 (29.7cm) - top margin (2cm) - bottom margin (0.5cm) = 27.2cm */
         .page-table {
             width: 100%;
-            height: 27.2cm;
+            height: 29.1cm;
             border-collapse: collapse;
         }
 
@@ -66,10 +63,11 @@
             padding: 0;
         }
 
-        /* Page 1 top spacer: replicate original 4.5cm from page edge
-           (2cm @page margin + 2.5cm spacer = 4.5cm) */
+        /* Page 1 internal top spacer:
+           Original design = 4.5cm from page edge.
+           @page top = 0.3cm, so spacer = 4.2cm */
         .page-1-spacer {
-            height: 2.5cm;
+            height: 4.2cm;
         }
 
         /* =============================================
@@ -270,21 +268,21 @@
            TERMS AND CONDITIONS
            ============================================= */
         .terms-section {
-            padding-left: 15px;
+            padding: 0;
         }
 
         .terms-main-title {
             color: #CC0000;
             font-weight: bold;
-            padding: 8px 10px;
+            padding: 0 0 6px 0;
+            margin: 0;
             font-size: 10pt;
-            margin-bottom: 15px;
             text-transform: uppercase;
         }
 
         .term-box {
-            margin-bottom: 12px;
-            padding-left: 15px;
+            margin-bottom: 6px;
+            padding-left: 10px;
             page-break-inside: avoid;
         }
 
@@ -301,15 +299,15 @@
         }
 
         .term-box li {
-            margin-bottom: 3px;
-            font-size: 9pt;
+            margin-bottom: 2px;
+            font-size: 8pt;
             color: #000;
         }
 
         .term-box p {
-            margin-left: 15px;
-            font-size: 9pt;
-            margin-bottom: 5px;
+            margin-left: 10px;
+            font-size: 8pt;
+            margin-bottom: 3px;
             color: #000;
         }
 
@@ -438,8 +436,8 @@
         .footer-b {
             width: 100%;
             border-top: 2px solid #CC0000;
-            margin-top: 10px;
-            padding-top: 6px;
+            margin-top: 0;
+            padding-top: 4px;
             text-align: center;
             font-size: 7pt;
             color: #555;

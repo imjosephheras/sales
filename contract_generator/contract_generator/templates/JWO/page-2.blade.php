@@ -1,12 +1,14 @@
 <!-- ============================================
-     PAGE 2: Terms and Conditions + Acceptance/Signatures + Footer B
+     PAGE 2 - STRUCTURALLY INDEPENDENT
+     Terms & Conditions (top) + Signatures anchored to bottom + Footer B
+     Self-contained table: 29.1cm height (A4 minus 0.3cm top/bottom @page margins)
      ============================================ -->
 <div class="page page-2">
     <table class="page-table">
+        <!-- ROW 1: Terms and Conditions — fills from top, no padding/margin -->
         <tr>
             <td class="page-content">
 
-                <!-- TERMS AND CONDITIONS -->
                 <div class="terms-section">
 
                     <div class="terms-main-title">TERMS AND CONDITIONS</div>
@@ -96,22 +98,23 @@
 
             </td>
         </tr>
+        <!-- ROW 2: Signatures + Footer B — anchored to page bottom via vertical-align:bottom -->
         <tr>
             <td class="page-footer-cell">
 
-                <!-- ACCEPTANCE / SIGNATURES (anchored to bottom) -->
+                <!-- ACCEPTANCE / SIGNATURES -->
                 <div class="acceptance-header">ACCEPTANCE / SIGNATURES</div>
 
                 <div class="final-section">
                     <div class="contact-column">
                         <div class="contact-title">PLEASE SEND TWO COPIES OF YOUR WORK ORDER:</div>
-                        <div class="contact-info" style="margin-top: 5px;">
+                        <div class="contact-info" style="margin-top: 3px;">
                             Enter this order in accordance with the prices, terms, and<br>
                             specifications listed above.
                         </div>
                         <br>
                         <div class="contact-subtitle">&#9993; &nbsp;SEND ALL CORRESPONDENCE TO:</div>
-                        <div class="contact-info" style="margin-top: 5px;">
+                        <div class="contact-info" style="margin-top: 3px;">
                             <strong>Prime Facility Services Group, Inc.</strong><br>
                             8303 Westglen Drive<br>
                             Houston, TX 77063<br><br>
