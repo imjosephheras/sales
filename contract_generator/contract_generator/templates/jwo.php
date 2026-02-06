@@ -502,7 +502,11 @@
                 'subtotal' => $svcSubtotal,
             ];
         }
-    } elseif (($data['includeKitchen'] ?? '') === 'Yes' && !empty($data['type19']) && is_array($data['type19'])) {
+    } elseif (($data['includeKitchen'] ?? '') === 'Yes' && !empty($data['type19']) && is_array($data['type19']) && empty($hoodVentServices)) {
+        // Fallback to JSON arrays ONLY when detail tables are not populated (legacy data).
+        // When $hoodVentServices has data, detail tables were used during save, so this
+        // fallback must be skipped to avoid duplicating hood vent services that already
+        // appear via $hoodVentServices below.
         $hasDetailServices = true;
         foreach ($data['type19'] as $i => $type) {
             if (!$type) continue;
