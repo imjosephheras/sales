@@ -1215,6 +1215,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   height: 100%;
+  min-height: 0;
 }
 
 /* Scrollbar for preview panel */
@@ -1241,6 +1242,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
 }
 
 /* Empty state */
@@ -1275,6 +1277,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
 }
 
 .preview-header {

@@ -21,7 +21,7 @@ $current_user = $_SESSION['user_name'] ?? 'Admin';
     <title>Contract Generator</title>
     
     <!-- Styles -->
-    <link rel="stylesheet" href="styles/generator.css">
+    <link rel="stylesheet" href="styles/generator.css?v=<?php echo time(); ?>">
     
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -75,9 +75,9 @@ $current_user = $_SESSION['user_name'] ?? 'Admin';
     </div>
 
     <!-- Scripts -->
-    <script src="js/inbox.js"></script>
-    <script src="js/editor.js"></script>
-    <script src="js/preview.js"></script>
+    <script src="js/inbox.js?v=<?php echo time(); ?>"></script>
+    <script src="js/editor.js?v=<?php echo time(); ?>"></script>
+    <script src="js/preview.js?v=<?php echo time(); ?>"></script>
 
     <!-- Auto-load request if request_id is in URL -->
     <script>
