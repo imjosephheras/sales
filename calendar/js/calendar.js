@@ -1,6 +1,7 @@
 /**
  * CALENDAR MODULE - Main JavaScript
  * Month-by-month calendar with scheduled request form events
+ * Includes client filter sidebar
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -43,7 +44,10 @@ class Calendar {
         this.currentDate = new Date();
         this.currentMonth = this.currentDate.getMonth();
         this.currentYear = this.currentDate.getFullYear();
-        this.events = {}; // keyed by day number
+        this.allEvents = {};   // all events keyed by day (unfiltered)
+        this.events = {};      // filtered events keyed by day
+        this.selectedClients = new Set();
+        this.allClients = [];  // sorted unique client names for current month
 
         this.monthNames = [
             'January', 'February', 'March', 'April', 'May', 'June',
@@ -70,7 +74,61 @@ class Calendar {
             }
         });
 
+        // Sidebar controls
+        this.initSidebar();
+
         this.loadAndRender();
+    }
+
+    /**
+     * Initialize sidebar elements and event listeners
+     */
+    initSidebar() {
+        this.sidebarEl = document.getElementById('filter-sidebar');
+        this.clientListEl = document.getElementById('client-list');
+        this.clientSearchEl = document.getElementById('client-search');
+        this.selectAllBtn = document.getElementById('select-all-btn');
+        this.deselectAllBtn = document.getElementById('deselect-all-btn');
+        this.filterCountEl = document.getElementById('filter-count');
+        this.collapseBtn = document.getElementById('sidebar-collapse-btn');
+        this.expandBtn = document.getElementById('sidebar-expand-btn');
+
+        // Search clients
+        this.clientSearchEl.addEventListener('input', () => {
+            this.renderClientList();
+        });
+
+        // Select / Deselect all
+        this.selectAllBtn.addEventListener('click', () => {
+            this.allClients.forEach(c => this.selectedClients.add(c));
+            this.renderClientList();
+            this.applyFilter();
+        });
+
+        this.deselectAllBtn.addEventListener('click', () => {
+            this.selectedClients.clear();
+            this.renderClientList();
+            this.applyFilter();
+        });
+
+        // Collapse / Expand sidebar
+        const savedSidebar = localStorage.getItem('calendar-sidebar');
+        if (savedSidebar === 'collapsed') {
+            this.sidebarEl.classList.add('collapsed');
+            this.expandBtn.classList.add('visible');
+        }
+
+        this.collapseBtn.addEventListener('click', () => {
+            this.sidebarEl.classList.add('collapsed');
+            this.expandBtn.classList.add('visible');
+            localStorage.setItem('calendar-sidebar', 'collapsed');
+        });
+
+        this.expandBtn.addEventListener('click', () => {
+            this.sidebarEl.classList.remove('collapsed');
+            this.expandBtn.classList.remove('visible');
+            localStorage.setItem('calendar-sidebar', 'expanded');
+        });
     }
 
     changeMonth(delta) {
@@ -96,11 +154,12 @@ class Calendar {
 
     async loadAndRender() {
         await this.fetchEvents();
-        this.render();
+        this.extractClients();
+        this.applyFilter();
     }
 
     async fetchEvents() {
-        this.events = {};
+        this.allEvents = {};
         try {
             // PHP month is 1-indexed
             const month = this.currentMonth + 1;
@@ -112,10 +171,10 @@ class Calendar {
                 data.events.forEach(ev => {
                     // Extract day from Work_Date (YYYY-MM-DD)
                     const day = parseInt(ev.Work_Date.split('-')[2], 10);
-                    if (!this.events[day]) {
-                        this.events[day] = [];
+                    if (!this.allEvents[day]) {
+                        this.allEvents[day] = [];
                     }
-                    this.events[day].push({
+                    this.allEvents[day].push({
                         id: ev.form_id,
                         client: ev.client_name || 'N/A',
                         company: ev.company_name || 'N/A',
@@ -133,6 +192,136 @@ class Calendar {
         } catch (err) {
             console.error('Error fetching calendar events:', err);
         }
+    }
+
+    /**
+     * Extract unique client names from allEvents and populate sidebar
+     */
+    extractClients() {
+        const clientSet = new Set();
+        Object.values(this.allEvents).forEach(dayEvents => {
+            dayEvents.forEach(ev => {
+                clientSet.add(ev.client);
+            });
+        });
+
+        this.allClients = Array.from(clientSet).sort((a, b) =>
+            a.localeCompare(b, undefined, { sensitivity: 'base' })
+        );
+
+        // By default select all clients
+        this.selectedClients = new Set(this.allClients);
+
+        this.clientSearchEl.value = '';
+        this.renderClientList();
+    }
+
+    /**
+     * Render the client checkbox list in the sidebar
+     */
+    renderClientList() {
+        const searchTerm = this.clientSearchEl.value.toLowerCase().trim();
+        const filtered = searchTerm
+            ? this.allClients.filter(c => c.toLowerCase().includes(searchTerm))
+            : this.allClients;
+
+        if (this.allClients.length === 0) {
+            this.clientListEl.innerHTML = `
+                <div class="client-list-empty">
+                    <i class="fas fa-calendar-xmark"></i>
+                    <span>No clients this month</span>
+                </div>`;
+            this.updateFilterCount();
+            return;
+        }
+
+        if (filtered.length === 0) {
+            this.clientListEl.innerHTML = `
+                <div class="client-list-empty">
+                    <i class="fas fa-search"></i>
+                    <span>No matching clients</span>
+                </div>`;
+            return;
+        }
+
+        // Count events per client
+        const eventCounts = {};
+        Object.values(this.allEvents).forEach(dayEvents => {
+            dayEvents.forEach(ev => {
+                eventCounts[ev.client] = (eventCounts[ev.client] || 0) + 1;
+            });
+        });
+
+        let html = '';
+        filtered.forEach(client => {
+            const isChecked = this.selectedClients.has(client);
+            const count = eventCounts[client] || 0;
+            html += `
+                <label class="client-item ${isChecked ? 'active' : ''}">
+                    <input type="checkbox" value="${this.escapeHtml(client)}" ${isChecked ? 'checked' : ''}>
+                    <span class="client-checkbox-custom">
+                        <i class="fas fa-check"></i>
+                    </span>
+                    <span class="client-name">${this.escapeHtml(client)}</span>
+                    <span class="client-count">${count}</span>
+                </label>`;
+        });
+
+        this.clientListEl.innerHTML = html;
+
+        // Attach change listeners
+        this.clientListEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', (e) => {
+                const clientName = e.target.value;
+                if (e.target.checked) {
+                    this.selectedClients.add(clientName);
+                } else {
+                    this.selectedClients.delete(clientName);
+                }
+                // Update active class on label
+                e.target.closest('.client-item').classList.toggle('active', e.target.checked);
+                this.applyFilter();
+            });
+        });
+
+        this.updateFilterCount();
+    }
+
+    /**
+     * Update the filter count text in the sidebar footer
+     */
+    updateFilterCount() {
+        const total = this.allClients.length;
+        const selected = this.selectedClients.size;
+
+        if (selected === total) {
+            this.filterCountEl.textContent = `Showing all (${total})`;
+        } else {
+            this.filterCountEl.textContent = `${selected} of ${total} selected`;
+        }
+    }
+
+    /**
+     * Apply the client filter and re-render calendar
+     */
+    applyFilter() {
+        this.events = {};
+
+        if (this.selectedClients.size === this.allClients.length) {
+            // No filter active - show all
+            this.events = { ...this.allEvents };
+        } else {
+            // Filter events to only selected clients
+            Object.entries(this.allEvents).forEach(([day, dayEvents]) => {
+                const filtered = dayEvents.filter(ev => this.selectedClients.has(ev.client));
+                if (filtered.length > 0) {
+                    this.events[day] = filtered;
+                }
+            });
+        }
+
+        this.updateFilterCount();
+        this.render();
     }
 
     /**
@@ -157,6 +346,15 @@ class Calendar {
         if (type === 'jwo') return 'JWO';
         if (type === 'quote') return 'QTE';
         return '';
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
 
     render() {
@@ -198,12 +396,12 @@ class Calendar {
                     const typeShort = this.getRequestTypeShort(ev.requestType);
                     const priorityClass = ev.priority === 'Rush' ? 'priority-rush' : '';
 
-                    html += `<div class="event-chip ${typeClass} ${priorityClass}" title="${ev.client} - ${ev.company} | ${ev.requestType} | ${ev.requestedService}">`;
+                    html += `<div class="event-chip ${typeClass} ${priorityClass}" title="${this.escapeHtml(ev.client)} - ${this.escapeHtml(ev.company)} | ${ev.requestType} | ${ev.requestedService}">`;
                     if (typeShort) {
                         html += `<span class="chip-type-badge">${typeShort}</span>`;
                     }
-                    html += `<span class="event-client">${ev.client}</span>`;
-                    html += `<span class="event-service">${ev.requestedService || ev.company}</span>`;
+                    html += `<span class="event-client">${this.escapeHtml(ev.client)}</span>`;
+                    html += `<span class="event-service">${this.escapeHtml(ev.requestedService || ev.company)}</span>`;
                     html += `</div>`;
                 });
 
@@ -257,7 +455,7 @@ class Calendar {
             // Header row: nomenclature + priority + status
             html += `<div class="detail-item-header">`;
             if (ev.nomenclature) {
-                html += `<span class="detail-nomenclature">${ev.nomenclature}</span>`;
+                html += `<span class="detail-nomenclature">${this.escapeHtml(ev.nomenclature)}</span>`;
             }
             if (isPriorityRush) {
                 html += `<span class="detail-priority-rush"><i class="fas fa-bolt"></i> Rush</span>`;
@@ -276,17 +474,17 @@ class Calendar {
             html += `</div>`;
 
             // Client & Company
-            html += `<div class="detail-client"><i class="fas fa-user"></i> ${ev.client}</div>`;
-            html += `<div class="detail-company"><i class="fas fa-building"></i> ${ev.company}</div>`;
+            html += `<div class="detail-client"><i class="fas fa-user"></i> ${this.escapeHtml(ev.client)}</div>`;
+            html += `<div class="detail-company"><i class="fas fa-building"></i> ${this.escapeHtml(ev.company)}</div>`;
 
             // Requested service
             if (ev.requestedService) {
-                html += `<div class="detail-service"><i class="fas fa-concierge-bell"></i> ${ev.requestedService}</div>`;
+                html += `<div class="detail-service"><i class="fas fa-concierge-bell"></i> ${this.escapeHtml(ev.requestedService)}</div>`;
             }
 
             // Seller
             if (ev.seller) {
-                html += `<div class="detail-seller"><i class="fas fa-user-tie"></i> ${ev.seller}</div>`;
+                html += `<div class="detail-seller"><i class="fas fa-user-tie"></i> ${this.escapeHtml(ev.seller)}</div>`;
             }
 
             html += `</div>`;
