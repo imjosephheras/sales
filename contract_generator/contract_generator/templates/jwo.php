@@ -200,7 +200,6 @@
             font-size: 9pt;
             font-weight: bold;
             margin: 8px 0 4px 0;
-            text-decoration: underline;
             text-transform: uppercase;
         }
 
@@ -596,16 +595,16 @@
     <!-- TOTALS TABLE -->
     <table class="totals-table">
         <tr>
-            <td class="value-cell" style="text-align: right;">$<?php echo number_format($subtotal, 2); ?></td>
             <td class="label-cell">TOTAL</td>
+            <td class="value-cell">$<?php echo number_format($subtotal, 2); ?></td>
         </tr>
         <tr>
-            <td class="value-cell" style="text-align: right;">$<?php echo number_format($taxes, 2); ?></td>
             <td class="label-cell">TAXES (8.25%)</td>
+            <td class="value-cell">$<?php echo number_format($taxes, 2); ?></td>
         </tr>
         <tr>
-            <td class="value-cell" style="text-align: right;">$<?php echo number_format($grand_total, 2); ?></td>
             <td class="label-cell">GRAND TOTAL</td>
+            <td class="value-cell">$<?php echo number_format($grand_total, 2); ?></td>
         </tr>
     </table>
 
