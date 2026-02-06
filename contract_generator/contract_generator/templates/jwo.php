@@ -6,7 +6,16 @@
     <title>Job Work Order</title>
     <style>
         @page {
-            margin: 1.5cm 1.5cm 2.8cm 1.5cm;
+            margin: 2.5cm 2cm 2.8cm 2cm;
+        }
+
+        @media print {
+            @page {
+                margin: 2.5cm 2cm 2.8cm 2cm;
+            }
+            body {
+                padding: 0;
+            }
         }
 
         * {
@@ -20,6 +29,7 @@
             font-size: 10pt;
             color: #000;
             line-height: 1.3;
+            padding: 0 0.5cm;
         }
 
         /* Header */
