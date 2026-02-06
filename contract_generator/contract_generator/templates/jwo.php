@@ -269,7 +269,7 @@
         .final-section {
             display: table;
             width: 100%;
-            margin-top: 30px;
+            margin-top: 20px;
             page-break-inside: avoid;
         }
 
@@ -286,12 +286,36 @@
             vertical-align: top;
         }
 
+        .acceptance-header {
+            color: #CC0000;
+            font-weight: bold;
+            font-size: 10pt;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #CC0000;
+        }
+
         .contact-title {
             font-weight: bold;
             font-size: 9pt;
             margin-bottom: 8px;
-            text-decoration: underline;
             text-transform: uppercase;
+            text-decoration: none;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #CC0000;
+            display: inline-block;
+        }
+
+        .contact-subtitle {
+            font-weight: bold;
+            font-size: 9pt;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            text-decoration: none;
+            border-bottom: 1px solid #999;
+            display: inline-block;
+            padding-bottom: 4px;
         }
 
         .contact-info {
@@ -299,33 +323,36 @@
             line-height: 1.5;
         }
 
-        .signature-title {
-            font-weight: bold;
+        .contact-icon {
+            color: #CC0000;
             font-size: 9pt;
-            margin-bottom: 10px;
-            text-decoration: underline;
-            text-transform: uppercase;
+            margin-right: 4px;
         }
 
         .signature-box {
-            border: 1px solid #000;
+            border: 2px solid #CC0000;
             padding: 10px;
             margin-bottom: 10px;
-            height: 70px;
+            height: 80px;
         }
 
         .sig-label {
             font-weight: bold;
             font-size: 9pt;
-            margin-bottom: 5px;
             text-transform: uppercase;
+            color: #fff;
+            background-color: #CC0000;
+            display: inline-block;
+            padding: 3px 10px;
+            margin: -10px 0 5px -10px;
         }
 
         .sig-line {
-            border-top: 1px solid #000;
-            margin-top: 35px;
+            border-top: 1px solid #333;
+            margin-top: 30px;
             padding-top: 3px;
             font-size: 8pt;
+            color: #555;
         }
 
         /* Footer - Two-tone split design */
@@ -730,34 +757,34 @@
         </div>
 
         <!-- ACCEPTANCE / SIGNATURES SECTION -->
-        <div class="terms-main-title" style="margin-top: 20px;">ACCEPTANCE / SIGNATURES</div>
+        <div class="acceptance-header">ACCEPTANCE / SIGNATURES</div>
 
         <div class="final-section">
             <div class="contact-column">
                 <div class="contact-title">PLEASE SEND TWO COPIES OF YOUR WORK ORDER:</div>
-                <div class="contact-info">
+                <div class="contact-info" style="margin-top: 5px;">
                     Enter this order in accordance with the prices, terms, and<br>
                     specifications listed above.
                 </div>
                 <br>
-                <div class="contact-title">SEND ALL CORRESPONDENCES TO:</div>
-                <div class="contact-info">
+                <div class="contact-subtitle">&#9993; &nbsp;SEND ALL CORRESPONDENCE TO:</div>
+                <div class="contact-info" style="margin-top: 5px;">
                     <strong>Prime Facility Services Group, Inc.</strong><br>
                     8303 Westglen Drive<br>
                     Houston, TX 77063<br><br>
                     customerservice@primefacilityservicesgroup.com<br>
-                    (713) 338-2553 Phone<br>
-                    (713) 574-3065 Fax
+                    <span class="contact-icon">&#9742;</span> (713) 338-2553 Phone<br>
+                    <span class="contact-icon">&#9742;</span> (713) 574-3065 Fax
                 </div>
             </div>
             <div class="signature-column">
                 <div class="signature-box">
                     <div class="sig-label">AUTHORIZED BY:</div>
-                    <div class="sig-line">Signature & Date</div>
+                    <div class="sig-line">Signature &amp; Date</div>
                 </div>
                 <div class="signature-box">
                     <div class="sig-label">PRINT NAME:</div>
-                    <div class="sig-line">Name & Title</div>
+                    <div class="sig-line">Name &amp; Title</div>
                 </div>
             </div>
         </div>
