@@ -404,7 +404,7 @@ class Calendar {
                         html += `<span class="chip-type-badge">${typeShort}</span>`;
                     }
                     html += `<span class="event-client">${this.escapeHtml(ev.client)}</span>`;
-                    html += `<span class="event-service">${this.escapeHtml(ev.requestedService || ev.company)}</span>`;
+                    html += `<span class="event-company-name">${this.escapeHtml(ev.company)}</span>`;
                     html += `</div>`;
                 });
 
