@@ -531,8 +531,8 @@
             return;
         }
 
-        // Abrir en nueva ventana
-        window.open(`controllers/generate_vent_hood_report.php?id=${requestId}`, '_blank');
+        // Open the interactive vent hood report editor/previewer
+        window.open(`vent_hood_editor.php?id=${requestId}`, '_blank');
     }
 
     // ========================================
