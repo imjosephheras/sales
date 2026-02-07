@@ -401,10 +401,32 @@ try {
         error_log("Form #$saved_form_id synced to requests table as request #$requestId");
     }
 
+    // ============================================================
+    // PASO 7: SYNC CALENDAR EVENT (if Work_Date is set)
+    // ============================================================
+    $calendarEventId = null;
+    if (!empty($work_date_val)) {
+        // Get existing calendar event frequency settings (preserve them on form save)
+        $existingFreqMonths = 0;
+        $existingFreqYears = 0;
+        $existingDesc = null;
+        $stmtCal = $pdo->prepare("SELECT frequency_months, frequency_years, description FROM calendar_events WHERE form_id = :fid AND is_base_event = 1 LIMIT 1");
+        $stmtCal->execute([':fid' => $saved_form_id]);
+        $existingCalEvent = $stmtCal->fetch();
+        if ($existingCalEvent) {
+            $existingFreqMonths = (int)$existingCalEvent['frequency_months'];
+            $existingFreqYears = (int)$existingCalEvent['frequency_years'];
+            $existingDesc = $existingCalEvent['description'];
+        }
+
+        $calendarEventId = syncCalendarEvent($pdo, $saved_form_id, $work_date_val, $existingFreqMonths, $existingFreqYears, $existingDesc);
+    }
+
     echo json_encode([
         'success' => true,
         'form_id' => $saved_form_id,
         'request_id' => $requestId,
+        'calendar_event_id' => $calendarEventId,
         'message' => $form_id ? 'Form updated successfully' : 'Form saved successfully'
     ]);
     

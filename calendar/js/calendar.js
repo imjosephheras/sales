@@ -1,7 +1,7 @@
 /**
  * CALENDAR MODULE - Main JavaScript
- * Month-by-month calendar with scheduled request form events
- * Includes client filter sidebar
+ * Month-by-month calendar with scheduled agendas (base + recurring events)
+ * Features: Client filter sidebar, Mini form, Drag & Drop, Recurrence
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /**
  * Theme toggle - switches between light and dark mode
- * Persists preference in localStorage
  */
 function initThemeToggle() {
     const toggleBtn = document.getElementById('theme-toggle');
@@ -44,10 +43,15 @@ class Calendar {
         this.currentDate = new Date();
         this.currentMonth = this.currentDate.getMonth();
         this.currentYear = this.currentDate.getFullYear();
-        this.allEvents = {};   // all events keyed by day (unfiltered)
-        this.events = {};      // filtered events keyed by day
+        this.allEvents = {};       // all events keyed by day (unfiltered)
+        this.events = {};          // filtered events keyed by day
+        this.rawEvents = [];       // flat array of all events for the month
         this.selectedClients = new Set();
-        this.allClients = [];  // sorted unique client names for current month
+        this.allClients = [];
+
+        // Drag state
+        this.draggedEvent = null;
+        this.draggedElement = null;
 
         this.monthNames = [
             'January', 'February', 'March', 'April', 'May', 'June',
@@ -61,8 +65,9 @@ class Calendar {
         this.prevBtn = document.getElementById('prev-month');
         this.nextBtn = document.getElementById('next-month');
         this.todayBtn = document.getElementById('today-btn');
-
         this.printBtn = document.getElementById('print-btn');
+        this.miniFormOverlay = document.getElementById('mini-form-overlay');
+        this.miniFormPanel = document.getElementById('mini-form-panel');
 
         this.prevBtn.addEventListener('click', () => this.changeMonth(-1));
         this.nextBtn.addEventListener('click', () => this.changeMonth(1));
@@ -76,6 +81,21 @@ class Calendar {
                 panel.classList.remove('visible');
             }
         });
+
+        // Mini form close
+        if (this.miniFormOverlay) {
+            this.miniFormOverlay.addEventListener('click', () => this.closeMiniForm());
+        }
+        const miniFormClose = document.getElementById('mini-form-close');
+        if (miniFormClose) {
+            miniFormClose.addEventListener('click', () => this.closeMiniForm());
+        }
+
+        // Mini form save
+        const miniFormSave = document.getElementById('mini-form-save');
+        if (miniFormSave) {
+            miniFormSave.addEventListener('click', () => this.saveMiniForm());
+        }
 
         // Sidebar controls
         this.initSidebar();
@@ -96,12 +116,8 @@ class Calendar {
         this.collapseBtn = document.getElementById('sidebar-collapse-btn');
         this.expandBtn = document.getElementById('sidebar-expand-btn');
 
-        // Search clients
-        this.clientSearchEl.addEventListener('input', () => {
-            this.renderClientList();
-        });
+        this.clientSearchEl.addEventListener('input', () => this.renderClientList());
 
-        // Select / Deselect all
         this.selectAllBtn.addEventListener('click', () => {
             this.allClients.forEach(c => this.selectedClients.add(c));
             this.renderClientList();
@@ -114,7 +130,6 @@ class Calendar {
             this.applyFilter();
         });
 
-        // Collapse / Expand sidebar
         const savedSidebar = localStorage.getItem('calendar-sidebar');
         if (savedSidebar === 'collapsed') {
             this.sidebarEl.classList.add('collapsed');
@@ -136,7 +151,6 @@ class Calendar {
 
     changeMonth(delta) {
         this.currentMonth += delta;
-
         if (this.currentMonth > 11) {
             this.currentMonth = 0;
             this.currentYear++;
@@ -144,7 +158,6 @@ class Calendar {
             this.currentMonth = 11;
             this.currentYear--;
         }
-
         this.loadAndRender();
     }
 
@@ -163,24 +176,32 @@ class Calendar {
 
     async fetchEvents() {
         this.allEvents = {};
+        this.rawEvents = [];
         try {
-            // PHP month is 1-indexed
             const month = this.currentMonth + 1;
             const year = this.currentYear;
             const resp = await fetch(`get_events.php?month=${month}&year=${year}`);
             const data = await resp.json();
 
             if (data.success && data.events) {
+                this.rawEvents = data.events;
                 data.events.forEach(ev => {
-                    // Extract day from Work_Date (YYYY-MM-DD)
-                    const day = parseInt(ev.Work_Date.split('-')[2], 10);
+                    const day = parseInt(ev.event_date.split('-')[2], 10);
                     if (!this.allEvents[day]) {
                         this.allEvents[day] = [];
                     }
                     this.allEvents[day].push({
-                        id: ev.form_id,
+                        eventId: parseInt(ev.event_id, 10),
+                        formId: parseInt(ev.form_id, 10),
+                        parentEventId: ev.parent_event_id ? parseInt(ev.parent_event_id, 10) : null,
+                        isBaseEvent: parseInt(ev.is_base_event, 10) === 1,
+                        eventDate: ev.event_date,
+                        description: ev.description || '',
+                        frequencyMonths: parseInt(ev.frequency_months, 10) || 0,
+                        frequencyYears: parseInt(ev.frequency_years, 10) || 0,
                         client: ev.client_name || 'N/A',
                         company: ev.company_name || 'N/A',
+                        workDate: ev.Work_Date || '',
                         status: ev.status || 'pending',
                         serviceType: ev.service_type || '',
                         requestType: ev.request_type || '',
@@ -197,31 +218,21 @@ class Calendar {
         }
     }
 
-    /**
-     * Extract unique client names from allEvents and populate sidebar
-     */
     extractClients() {
         const clientSet = new Set();
         Object.values(this.allEvents).forEach(dayEvents => {
-            dayEvents.forEach(ev => {
-                clientSet.add(ev.client);
-            });
+            dayEvents.forEach(ev => clientSet.add(ev.client));
         });
 
         this.allClients = Array.from(clientSet).sort((a, b) =>
             a.localeCompare(b, undefined, { sensitivity: 'base' })
         );
 
-        // By default select all clients
         this.selectedClients = new Set(this.allClients);
-
         this.clientSearchEl.value = '';
         this.renderClientList();
     }
 
-    /**
-     * Render the client checkbox list in the sidebar
-     */
     renderClientList() {
         const searchTerm = this.clientSearchEl.value.toLowerCase().trim();
         const filtered = searchTerm
@@ -247,7 +258,6 @@ class Calendar {
             return;
         }
 
-        // Count events per client
         const eventCounts = {};
         Object.values(this.allEvents).forEach(dayEvents => {
             dayEvents.forEach(ev => {
@@ -272,7 +282,6 @@ class Calendar {
 
         this.clientListEl.innerHTML = html;
 
-        // Attach change listeners
         this.clientListEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
             cb.addEventListener('change', (e) => {
                 const clientName = e.target.value;
@@ -281,7 +290,6 @@ class Calendar {
                 } else {
                     this.selectedClients.delete(clientName);
                 }
-                // Update active class on label
                 e.target.closest('.client-item').classList.toggle('active', e.target.checked);
                 this.applyFilter();
             });
@@ -290,13 +298,9 @@ class Calendar {
         this.updateFilterCount();
     }
 
-    /**
-     * Update the filter count text in the sidebar footer
-     */
     updateFilterCount() {
         const total = this.allClients.length;
         const selected = this.selectedClients.size;
-
         if (selected === total) {
             this.filterCountEl.textContent = `Showing all (${total})`;
         } else {
@@ -304,17 +308,12 @@ class Calendar {
         }
     }
 
-    /**
-     * Apply the client filter and re-render calendar
-     */
     applyFilter() {
         this.events = {};
 
         if (this.selectedClients.size === this.allClients.length) {
-            // No filter active - show all
             this.events = { ...this.allEvents };
         } else {
-            // Filter events to only selected clients
             Object.entries(this.allEvents).forEach(([day, dayEvents]) => {
                 const filtered = dayEvents.filter(ev => this.selectedClients.has(ev.client));
                 if (filtered.length > 0) {
@@ -327,9 +326,6 @@ class Calendar {
         this.render();
     }
 
-    /**
-     * Get CSS class for request type color coding
-     */
     getRequestTypeClass(requestType) {
         const type = (requestType || '').toLowerCase();
         if (type === 'contract') return 'chip-contract';
@@ -339,9 +335,6 @@ class Calendar {
         return 'chip-default';
     }
 
-    /**
-     * Get short label for request type
-     */
     getRequestTypeShort(requestType) {
         const type = (requestType || '').toLowerCase();
         if (type === 'contract') return 'CTR';
@@ -351,9 +344,6 @@ class Calendar {
         return '';
     }
 
-    /**
-     * Escape HTML to prevent XSS
-     */
     escapeHtml(str) {
         const div = document.createElement('div');
         div.textContent = str;
@@ -374,7 +364,7 @@ class Calendar {
 
         // Empty cells before the 1st
         for (let i = 0; i < firstDay; i++) {
-            html += '<div class="day-cell empty"></div>';
+            html += '<div class="day-cell empty" data-drop-target="true"></div>';
         }
 
         // Day cells
@@ -386,7 +376,12 @@ class Calendar {
             if (isToday) classes.push('today');
             if (hasEvents) classes.push('has-events');
 
-            html += `<div class="${classes.join(' ')}" data-day="${day}">`;
+            // Build full date string for drop target
+            const monthStr = String(this.currentMonth + 1).padStart(2, '0');
+            const dayStr = String(day).padStart(2, '0');
+            const fullDate = `${this.currentYear}-${monthStr}-${dayStr}`;
+
+            html += `<div class="${classes.join(' ')}" data-day="${day}" data-date="${fullDate}" data-drop-target="true">`;
             html += `<span class="day-number">${day}</span>`;
 
             if (hasEvents) {
@@ -398,10 +393,17 @@ class Calendar {
                     const typeClass = this.getRequestTypeClass(ev.requestType);
                     const typeShort = this.getRequestTypeShort(ev.requestType);
                     const priorityClass = ev.priority === 'Rush' ? 'priority-rush' : '';
+                    const baseClass = ev.isBaseEvent ? 'event-base' : 'event-recurring';
 
-                    html += `<div class="event-chip ${typeClass} ${priorityClass}" title="${this.escapeHtml(ev.client)} - ${this.escapeHtml(ev.company)} | ${ev.requestType} | ${ev.requestedService}">`;
+                    html += `<div class="event-chip ${typeClass} ${priorityClass} ${baseClass}"
+                                  draggable="true"
+                                  data-event-id="${ev.eventId}"
+                                  title="${this.escapeHtml(ev.client)} - ${this.escapeHtml(ev.company)} | ${ev.requestType} | ${ev.requestedService}${ev.isBaseEvent ? ' [BASE]' : ' [Recurring]'}">`;
                     if (typeShort) {
                         html += `<span class="chip-type-badge">${typeShort}</span>`;
+                    }
+                    if (!ev.isBaseEvent) {
+                        html += `<span class="chip-recurring-badge"><i class="fas fa-sync-alt"></i></span>`;
                     }
                     html += `<span class="event-client">${this.escapeHtml(ev.client)}</span>`;
                     html += `<span class="event-company-name">${this.escapeHtml(ev.company)}</span>`;
@@ -422,12 +424,249 @@ class Calendar {
         // Attach click listeners for days with events
         this.gridEl.querySelectorAll('.day-cell.has-events').forEach(cell => {
             cell.addEventListener('click', (e) => {
+                // Don't open detail if we clicked on a chip (that opens mini form)
+                if (e.target.closest('.event-chip')) return;
                 e.stopPropagation();
                 const day = parseInt(cell.dataset.day, 10);
                 this.showDayDetail(day, cell);
             });
         });
+
+        // Attach click listeners on event chips to open mini form
+        this.gridEl.querySelectorAll('.event-chip').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const eventId = parseInt(chip.dataset.eventId, 10);
+                this.openMiniForm(eventId);
+            });
+        });
+
+        // Drag & Drop setup
+        this.setupDragAndDrop();
     }
+
+    // ===== DRAG & DROP =====
+
+    setupDragAndDrop() {
+        // Drag start on event chips
+        this.gridEl.querySelectorAll('.event-chip[draggable="true"]').forEach(chip => {
+            chip.addEventListener('dragstart', (e) => {
+                const eventId = parseInt(chip.dataset.eventId, 10);
+                this.draggedEvent = this.findEventById(eventId);
+                this.draggedElement = chip;
+                chip.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', eventId.toString());
+            });
+
+            chip.addEventListener('dragend', () => {
+                chip.classList.remove('dragging');
+                this.draggedEvent = null;
+                this.draggedElement = null;
+                // Remove all drop-over highlights
+                this.gridEl.querySelectorAll('.day-cell.drop-over').forEach(cell => {
+                    cell.classList.remove('drop-over');
+                });
+            });
+        });
+
+        // Drop targets (all day cells)
+        this.gridEl.querySelectorAll('.day-cell[data-drop-target="true"]').forEach(cell => {
+            cell.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                cell.classList.add('drop-over');
+            });
+
+            cell.addEventListener('dragleave', () => {
+                cell.classList.remove('drop-over');
+            });
+
+            cell.addEventListener('drop', (e) => {
+                e.preventDefault();
+                cell.classList.remove('drop-over');
+
+                const newDate = cell.dataset.date;
+                if (!newDate || !this.draggedEvent) return;
+
+                // Don't drop on empty cells without a date
+                if (cell.classList.contains('empty') && !newDate) return;
+
+                this.handleDrop(this.draggedEvent, newDate);
+            });
+        });
+    }
+
+    findEventById(eventId) {
+        for (const dayEvents of Object.values(this.allEvents)) {
+            const found = dayEvents.find(ev => ev.eventId === eventId);
+            if (found) return found;
+        }
+        return null;
+    }
+
+    async handleDrop(event, newDate) {
+        if (!event || !newDate) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('event_id', event.eventId);
+            formData.append('new_date', newDate);
+
+            const resp = await fetch('update_work_date.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                // Reload calendar
+                await this.loadAndRender();
+            } else {
+                console.error('Drop failed:', data.message);
+            }
+        } catch (err) {
+            console.error('Error updating work date:', err);
+        }
+    }
+
+    // ===== MINI FORM =====
+
+    async openMiniForm(eventId) {
+        const event = this.findEventById(eventId);
+        if (!event) return;
+
+        // Find the base event for this form to get frequency settings
+        let baseEvent = event;
+        if (!event.isBaseEvent) {
+            // First try to find in current month's raw data
+            const base = this.rawEvents.find(e =>
+                parseInt(e.form_id, 10) === event.formId && parseInt(e.is_base_event, 10) === 1
+            );
+            if (base) {
+                baseEvent = {
+                    eventId: parseInt(base.event_id, 10),
+                    formId: parseInt(base.form_id, 10),
+                    isBaseEvent: true,
+                    eventDate: base.event_date,
+                    description: base.description || '',
+                    frequencyMonths: parseInt(base.frequency_months, 10) || 0,
+                    frequencyYears: parseInt(base.frequency_years, 10) || 0,
+                    workDate: base.Work_Date || '',
+                    client: base.client_name || 'N/A',
+                    company: base.company_name || 'N/A'
+                };
+            } else {
+                // Base event not in current month - fetch from server
+                try {
+                    const resp = await fetch(`get_base_event.php?form_id=${event.formId}`);
+                    const data = await resp.json();
+                    if (data.success && data.base_event) {
+                        const b = data.base_event;
+                        baseEvent = {
+                            eventId: parseInt(b.event_id, 10),
+                            formId: parseInt(b.form_id, 10),
+                            isBaseEvent: true,
+                            eventDate: b.event_date,
+                            description: b.description || '',
+                            frequencyMonths: parseInt(b.frequency_months, 10) || 0,
+                            frequencyYears: parseInt(b.frequency_years, 10) || 0,
+                            workDate: b.Work_Date || '',
+                            client: b.client_name || 'N/A',
+                            company: b.company_name || 'N/A'
+                        };
+                    }
+                } catch (err) {
+                    console.error('Error fetching base event:', err);
+                }
+            }
+        }
+
+        // Populate mini form fields
+        document.getElementById('mini-form-event-id').value = event.eventId;
+        document.getElementById('mini-form-form-id').value = event.formId;
+
+        // Work Date = form.Work_Date (the base event's date)
+        document.getElementById('mini-form-work-date').value = baseEvent.workDate || baseEvent.eventDate;
+
+        // Notes = this specific event's description
+        document.getElementById('mini-form-notes').value = event.description || '';
+
+        // Frequency from base event
+        document.getElementById('mini-form-freq-months').value = baseEvent.frequencyMonths;
+        document.getElementById('mini-form-freq-years').value = baseEvent.frequencyYears;
+
+        // Display info
+        document.getElementById('mini-form-client-name').textContent = event.client;
+        document.getElementById('mini-form-company-name').textContent = event.company;
+        document.getElementById('mini-form-event-type').textContent = event.isBaseEvent ? 'Base Event' : 'Recurring Agenda';
+        document.getElementById('mini-form-event-type').className = 'mini-form-badge ' + (event.isBaseEvent ? 'badge-base' : 'badge-recurring');
+
+        // Show
+        this.miniFormOverlay.classList.add('visible');
+        this.miniFormPanel.classList.add('visible');
+    }
+
+    closeMiniForm() {
+        if (this.miniFormOverlay) this.miniFormOverlay.classList.remove('visible');
+        if (this.miniFormPanel) this.miniFormPanel.classList.remove('visible');
+    }
+
+    async saveMiniForm() {
+        const eventId = document.getElementById('mini-form-event-id').value;
+        const workDate = document.getElementById('mini-form-work-date').value;
+        const description = document.getElementById('mini-form-notes').value;
+        const freqMonths = document.getElementById('mini-form-freq-months').value;
+        const freqYears = document.getElementById('mini-form-freq-years').value;
+
+        if (!eventId) return;
+
+        // Validate frequency values
+        const fm = parseInt(freqMonths, 10);
+        const fy = parseInt(freqYears, 10);
+        if (fm < 0 || fm > 6) {
+            alert('Frequency Months must be between 0 and 6');
+            return;
+        }
+        if (fy < 0 || fy > 5) {
+            alert('Frequency Years must be between 0 and 5');
+            return;
+        }
+
+        const saveBtn = document.getElementById('mini-form-save');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        try {
+            const formData = new FormData();
+            formData.append('event_id', eventId);
+            formData.append('work_date', workDate);
+            formData.append('description', description);
+            formData.append('frequency_months', fm);
+            formData.append('frequency_years', fy);
+
+            const resp = await fetch('update_event.php', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                this.closeMiniForm();
+                await this.loadAndRender();
+            } else {
+                alert('Error: ' + (data.message || 'Failed to save'));
+            }
+        } catch (err) {
+            console.error('Error saving mini form:', err);
+            alert('Error saving changes');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+        }
+    }
+
+    // ===== DAY DETAIL PANEL =====
 
     showDayDetail(day, cell) {
         let panel = document.getElementById('event-detail-panel');
@@ -453,20 +692,24 @@ class Calendar {
             const typeClass = this.getRequestTypeClass(ev.requestType);
             const isPriorityRush = ev.priority === 'Rush';
 
-            html += `<div class="detail-item ${typeClass}-border">`;
+            html += `<div class="detail-item ${typeClass}-border" data-event-id="${ev.eventId}" style="cursor:pointer;">`;
 
-            // Header row: nomenclature + priority + status
+            // Header row
             html += `<div class="detail-item-header">`;
             if (ev.nomenclature) {
                 html += `<span class="detail-nomenclature">${this.escapeHtml(ev.nomenclature)}</span>`;
             }
+            // Base/Recurring badge
+            html += ev.isBaseEvent
+                ? `<span class="detail-badge-type badge-base-sm">BASE</span>`
+                : `<span class="detail-badge-type badge-recurring-sm"><i class="fas fa-sync-alt"></i> Recurring</span>`;
             if (isPriorityRush) {
                 html += `<span class="detail-priority-rush"><i class="fas fa-bolt"></i> Rush</span>`;
             }
             html += `<span class="detail-status ${statusClass}">${ev.status}</span>`;
             html += `</div>`;
 
-            // Request type + Service type badges
+            // Badges
             html += `<div class="detail-badges">`;
             if (ev.requestType) {
                 html += `<span class="detail-badge ${typeClass}">${ev.requestType}</span>`;
@@ -480,14 +723,17 @@ class Calendar {
             html += `<div class="detail-client"><i class="fas fa-user"></i> ${this.escapeHtml(ev.client)}</div>`;
             html += `<div class="detail-company"><i class="fas fa-building"></i> ${this.escapeHtml(ev.company)}</div>`;
 
-            // Requested service
             if (ev.requestedService) {
                 html += `<div class="detail-service"><i class="fas fa-concierge-bell"></i> ${this.escapeHtml(ev.requestedService)}</div>`;
             }
 
-            // Seller
             if (ev.seller) {
                 html += `<div class="detail-seller"><i class="fas fa-user-tie"></i> ${this.escapeHtml(ev.seller)}</div>`;
+            }
+
+            // Notes preview
+            if (ev.description) {
+                html += `<div class="detail-notes"><i class="fas fa-sticky-note"></i> ${this.escapeHtml(ev.description.substring(0, 80))}${ev.description.length > 80 ? '...' : ''}</div>`;
             }
 
             html += `</div>`;
@@ -496,5 +742,15 @@ class Calendar {
         html += `</div>`;
         panel.innerHTML = html;
         panel.classList.add('visible');
+
+        // Click on detail item opens mini form
+        panel.querySelectorAll('.detail-item[data-event-id]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const eid = parseInt(item.dataset.eventId, 10);
+                panel.classList.remove('visible');
+                this.openMiniForm(eid);
+            });
+        });
     }
 }
