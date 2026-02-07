@@ -466,7 +466,7 @@ body {
 }
 
 .calendar-logo img {
-    max-height: 55px;
+    max-height: 90px;
     width: auto;
     object-fit: contain;
 }
@@ -1082,7 +1082,7 @@ body {
     }
 
     .calendar-logo img {
-        max-height: 45px;
+        max-height: 70px;
     }
 
     * {
