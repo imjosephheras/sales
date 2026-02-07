@@ -84,6 +84,13 @@ $t = $translations[$lang];
     </p>
 </div>
 
+<!-- VENHOOD REPORT BUTTON -->
+<div class="venhood-action-bar">
+    <button type="button" id="btnVentHoodReport" class="btn-venhood-report" title="<?= $t['wr_venhood_desc'] ?? 'Fill, print or download the Vent Hood Service Report' ?>">
+        <i class="fas fa-file-pdf"></i> <?= $t['wr_venhood_btn'] ?? 'Vent Hood Report' ?>
+    </button>
+</div>
+
 <div class="form-content">
 <form id="main_form" action="enviar_correo.php" method="POST" enctype="multipart/form-data">
 
@@ -299,6 +306,42 @@ $t = $translations[$lang];
     font-size: 12px;
     color: #666;
 }
+
+/* VENHOOD REPORT ACTION BAR */
+.venhood-action-bar {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f0f4ff;
+    border-radius: 10px;
+    border: 2px solid #d0d9f0;
+}
+.btn-venhood-report {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #001f54 0%, #003080 100%);
+    color: white;
+    padding: 14px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,31,84,0.3);
+}
+.btn-venhood-report:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,31,84,0.4);
+    background: linear-gradient(135deg, #002a6e 0%, #0040a0 100%);
+}
+.btn-venhood-report:active {
+    transform: translateY(0);
+}
+.btn-venhood-report i {
+    font-size: 18px;
+}
 </style>
 
 <!-- ===================== -->
@@ -337,6 +380,14 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    // Venhood Report button - open editor in new tab
+    const ventHoodBtn = document.getElementById("btnVentHoodReport");
+    if (ventHoodBtn) {
+        ventHoodBtn.addEventListener("click", () => {
+            window.open("../contract_generator/contract_generator/vent_hood_editor.php", "_blank");
+        });
+    }
 
     document.querySelectorAll(".section-title").forEach(section => {
         const content = section.nextElementSibling;

@@ -110,6 +110,10 @@ $translations = [
 
         "wr_sec3_p3" =>
             "This document serves as a visual record for internal review, client reporting, and quality assurance purposes.",
+
+        // Venhood Report Button
+        "wr_venhood_btn" => "Vent Hood Report",
+        "wr_venhood_desc" => "Fill, print or download the Vent Hood Service Report",
     ],
 
 
@@ -222,6 +226,10 @@ $translations = [
 
         "wr_sec3_p3" =>
             "Este documento sirve como registro visual para revisión interna, reportes al cliente y fines de control de calidad.",
+
+        // Venhood Report Button
+        "wr_venhood_btn" => "Reporte Vent Hood",
+        "wr_venhood_desc" => "Llenar, imprimir o descargar el Reporte de Servicio Vent Hood",
     ]
 ];
 ?>
