@@ -24,8 +24,13 @@ $client_contact = $data['Client_Name'] ?? '';
 $client_email = $data['Email'] ?? '';
 $work_order = $data['docnum'] ?? '';
 
-// Logo - use the normal Prime Facility Services Group logo (NOT the contract one)
-$logo_path = __DIR__ . '/../../Images/pfacility.png';
+// Logo - dynamic based on Service_Type (Facility.png / Hospitality.png)
+$dept = strtolower(trim($data['Service_Type'] ?? ''));
+if (strpos($dept, 'hospitality') !== false) {
+    $logo_path = __DIR__ . '/../../Images/Hospitality.png';
+} else {
+    $logo_path = __DIR__ . '/../../Images/Facility.png';
+}
 $logo_base64 = '';
 if (file_exists($logo_path)) {
     $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_path));
