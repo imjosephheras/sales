@@ -388,6 +388,31 @@ if (file_exists($logo_path)) {
             width: 35px;
         }
 
+        .checklist-table td.comment-cell {
+            padding: 1px 2px;
+        }
+
+        .checklist-table .comment-input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            background: transparent;
+            font-family: inherit;
+            font-size: 9px;
+            color: #333;
+            padding: 1px 3px;
+            outline: none;
+        }
+
+        .checklist-table .comment-input:hover {
+            background: #fffde7;
+        }
+
+        .checklist-table .comment-input:focus {
+            border-bottom: 1px solid #001f54;
+            background: #e8f0fe;
+        }
+
         .table-subheader {
             background: #d0e4f7 !important;
             font-weight: bold;
@@ -568,7 +593,8 @@ if (file_exists($logo_path)) {
                 display: none;
             }
 
-            .editable-field {
+            .editable-field,
+            .checklist-table .comment-input {
                 border-bottom: none !important;
                 background: transparent !important;
             }
@@ -685,37 +711,17 @@ if (file_exists($logo_path)) {
         <div class="section">
             <div class="section-header">1. CLIENT INFORMATION</div>
             <div class="section-content">
-                <div class="two-columns">
-                    <div class="column">
-                        <div class="info-grid">
-                            <div class="info-row">
-                                <div class="info-cell info-label">Client / Restaurant:</div>
-                                <div class="info-cell info-value">
-                                    <input type="text" class="editable-field wide" id="client_name" value="<?php echo htmlspecialchars($client_name); ?>" placeholder="Enter client name">
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-cell info-label">Address:</div>
-                                <div class="info-cell info-value">
-                                    <input type="text" class="editable-field wide" id="client_address" value="<?php echo htmlspecialchars($client_address); ?>" placeholder="Enter address">
-                                </div>
-                            </div>
+                <div class="info-grid">
+                    <div class="info-row">
+                        <div class="info-cell info-label">Client / Restaurant:</div>
+                        <div class="info-cell info-value">
+                            <input type="text" class="editable-field wide" id="client_name" value="<?php echo htmlspecialchars($client_name); ?>" placeholder="Enter client name">
                         </div>
                     </div>
-                    <div class="column">
-                        <div class="info-grid">
-                            <div class="info-row">
-                                <div class="info-cell info-label">Contact:</div>
-                                <div class="info-cell info-value">
-                                    <input type="text" class="editable-field wide" id="client_contact" value="<?php echo htmlspecialchars($client_contact); ?>" placeholder="Contact name">
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-cell info-label">Email:</div>
-                                <div class="info-cell info-value">
-                                    <input type="text" class="editable-field wide" id="client_email" value="<?php echo htmlspecialchars($client_email); ?>" placeholder="Email">
-                                </div>
-                            </div>
+                    <div class="info-row">
+                        <div class="info-cell info-label">Address:</div>
+                        <div class="info-cell info-value">
+                            <input type="text" class="editable-field wide" id="client_address" value="<?php echo htmlspecialchars($client_address); ?>" placeholder="Enter address">
                         </div>
                     </div>
                 </div>
@@ -752,104 +758,120 @@ if (file_exists($logo_path)) {
                             <th class="center">Yes</th>
                             <th class="center">No</th>
                             <th class="center">N/A</th>
+                            <th>Comment</th>
                         </tr>
                     </thead>
                     <tbody>
                         <!-- BEFORE CLEANING -->
-                        <tr><td colspan="4" class="table-subheader">BEFORE CLEANING</td></tr>
+                        <tr><td colspan="5" class="table-subheader">BEFORE CLEANING</td></tr>
                         <tr>
                             <td>Fans working correctly?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc1')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc1')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc1')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_bc1" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Filters with grease accumulation?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc2')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc2')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc2')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_bc2" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Hood lights working?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc3')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc3')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc3')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_bc3" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Visible grease in ducts?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc4')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc4')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc4')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_bc4" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Grease container present?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc5')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc5')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc5')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_bc5" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Visible damage in system?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc6')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc6')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'bc6')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_bc6" placeholder=""></td>
                         </tr>
                         <!-- AFTER CLEANING -->
-                        <tr><td colspan="4" class="table-subheader">AFTER CLEANING</td></tr>
+                        <tr><td colspan="5" class="table-subheader">AFTER CLEANING</td></tr>
                         <tr>
                             <td>System clean and operative</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac1')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac1')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac1')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_ac1" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Fan working at completion</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac2')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac2')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac2')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_ac2" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Work area delivered clean</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac3')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac3')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac3')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_ac3" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Client informed of final status</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac4')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac4')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ac4')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_ac4" placeholder=""></td>
                         </tr>
                         <!-- ROOF INSPECTION -->
-                        <tr><td colspan="4" class="table-subheader">ROOF INSPECTION</td></tr>
+                        <tr><td colspan="5" class="table-subheader">ROOF INSPECTION</td></tr>
                         <tr>
                             <td>Grease accumulation on roof?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri1')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri1')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri1')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_ri1" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Is it a severe problem?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri2')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri2')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri2')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_ri2" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Absorption unit installation recommended?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri3')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri3')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri3')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_ri3" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Roof damage from grease?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri4')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri4')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri4')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_ri4" placeholder=""></td>
                         </tr>
                         <tr>
                             <td>Is there proper drainage?</td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri5')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri5')"></span></td>
                             <td class="center"><span class="cb" onclick="toggleRadio(this, 'ri5')"></span></td>
+                            <td class="comment-cell"><input type="text" class="comment-input" id="comment_ri5" placeholder=""></td>
                         </tr>
                     </tbody>
                 </table>
@@ -1126,7 +1148,7 @@ if (file_exists($logo_path)) {
         if (!confirm('Are you sure you want to clear all fields? This cannot be undone.')) return;
 
         // Clear all input fields
-        document.querySelectorAll('.editable-field').forEach(function(field) {
+        document.querySelectorAll('.editable-field, .comment-input').forEach(function(field) {
             field.value = '';
         });
 

@@ -220,6 +220,11 @@ $client_email = $data['Email'] ?? '';
             width: 35px;
         }
 
+        .checklist-table td.comment-cell {
+            font-size: 9px;
+            color: #555;
+        }
+
         .frequency-options {
             display: table;
             width: 100%;
@@ -433,104 +438,120 @@ $client_email = $data['Email'] ?? '';
                         <th class="center">Yes</th>
                         <th class="center">No</th>
                         <th class="center">N/A</th>
+                        <th>Comment</th>
                     </tr>
                 </thead>
                 <tbody>
                     <!-- BEFORE CLEANING -->
-                    <tr><td colspan="4" class="table-subheader">BEFORE CLEANING</td></tr>
+                    <tr><td colspan="5" class="table-subheader">BEFORE CLEANING</td></tr>
                     <tr>
                         <td>Fans working correctly?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Filters with grease accumulation?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Hood lights working?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Visible grease in ducts?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Grease container present?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Visible damage in system?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <!-- AFTER CLEANING -->
-                    <tr><td colspan="4" class="table-subheader">AFTER CLEANING</td></tr>
+                    <tr><td colspan="5" class="table-subheader">AFTER CLEANING</td></tr>
                     <tr>
                         <td>System clean and operative</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Fan working at completion</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Work area delivered clean</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Client informed of final status</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <!-- ROOF INSPECTION -->
-                    <tr><td colspan="4" class="table-subheader">ROOF INSPECTION</td></tr>
+                    <tr><td colspan="5" class="table-subheader">ROOF INSPECTION</td></tr>
                     <tr>
                         <td>Grease accumulation on roof?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Is it a severe problem?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Absorption unit installation recommended?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Roof damage from grease?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                     <tr>
                         <td>Is there proper drainage?</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
                         <td class="center">&square;</td>
+                        <td class="comment-cell"></td>
                     </tr>
                 </tbody>
             </table>
