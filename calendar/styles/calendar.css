@@ -459,14 +459,14 @@ body {
 /* Calendar Logo */
 .calendar-logo {
     background: #ffffff;
-    padding: 12px 32px;
+    padding: 16px 32px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .calendar-logo img {
-    max-height: 40px;
+    max-height: 55px;
     width: auto;
     object-fit: contain;
 }
@@ -1082,7 +1082,7 @@ body {
     }
 
     .calendar-logo img {
-        max-height: 35px;
+        max-height: 45px;
     }
 
     * {
