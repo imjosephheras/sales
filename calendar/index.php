@@ -76,6 +76,11 @@ session_start();
         <div class="calendar-wrapper">
             <div class="calendar-card">
 
+                <!-- Logo -->
+                <div class="calendar-logo">
+                    <img src="../form_contract/Images/Facility.png" alt="Prime Facility Services Group">
+                </div>
+
                 <!-- Navigation -->
                 <div class="calendar-nav">
                     <button class="nav-btn" id="prev-month" title="Previous month">
