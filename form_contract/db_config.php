@@ -132,6 +132,29 @@ function initializeFormsTable($pdo) {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
+    // Calendar events (agendas)
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `calendar_events` (
+      `event_id` INT AUTO_INCREMENT PRIMARY KEY,
+      `form_id` INT NOT NULL,
+      `parent_event_id` INT DEFAULT NULL,
+      `is_base_event` TINYINT(1) DEFAULT 0,
+      `event_date` DATE NOT NULL,
+      `description` TEXT DEFAULT NULL,
+      `frequency_months` TINYINT UNSIGNED DEFAULT 0,
+      `frequency_years` TINYINT UNSIGNED DEFAULT 0,
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX `idx_form_id` (`form_id`),
+      INDEX `idx_parent_event` (`parent_event_id`),
+      INDEX `idx_event_date` (`event_date`),
+      INDEX `idx_base_event` (`is_base_event`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // Migrate existing forms with Work_Date to calendar_events
+    migrateExistingFormsToCalendarEvents($pdo);
+
     // Form photos (Section 8)
     $pdo->exec("
     CREATE TABLE IF NOT EXISTS `form_photos` (
@@ -374,6 +397,146 @@ function getDBConnection() {
 
         // For regular page loads, show error
         die("Database connection failed. Please check your configuration in db_config.php");
+    }
+}
+
+/**
+ * Migrate existing forms with Work_Date to calendar_events (runs once)
+ */
+function migrateExistingFormsToCalendarEvents($pdo) {
+    try {
+        // Check if there are any calendar events already
+        $count = $pdo->query("SELECT COUNT(*) FROM calendar_events")->fetchColumn();
+        if ($count > 0) return; // Already migrated
+
+        // Find all forms with Work_Date that don't have calendar events
+        $stmt = $pdo->query("
+            SELECT form_id, Work_Date FROM forms
+            WHERE Work_Date IS NOT NULL
+        ");
+        $forms = $stmt->fetchAll();
+
+        if (empty($forms)) return;
+
+        $insertStmt = $pdo->prepare("
+            INSERT INTO calendar_events (form_id, parent_event_id, is_base_event, event_date, frequency_months, frequency_years)
+            VALUES (:form_id, NULL, 1, :event_date, 0, 0)
+        ");
+
+        foreach ($forms as $form) {
+            $insertStmt->execute([
+                ':form_id' => $form['form_id'],
+                ':event_date' => $form['Work_Date']
+            ]);
+        }
+    } catch (Exception $e) {
+        error_log("Calendar events migration: " . $e->getMessage());
+    }
+}
+
+/**
+ * Create or update base calendar event for a form, and generate recurring agendas
+ *
+ * @param PDO $pdo
+ * @param int $formId
+ * @param string $workDate - The form's Work_Date (YYYY-MM-DD)
+ * @param int $frequencyMonths - 0-6
+ * @param int $frequencyYears - 0-5
+ * @param string|null $description - Notes
+ * @return int|false - base event_id on success
+ */
+function syncCalendarEvent($pdo, $formId, $workDate, $frequencyMonths = 0, $frequencyYears = 0, $description = null) {
+    if (empty($workDate)) return false;
+
+    // Clamp values
+    $frequencyMonths = max(0, min(6, (int)$frequencyMonths));
+    $frequencyYears = max(0, min(5, (int)$frequencyYears));
+
+    try {
+        // Check if base event exists for this form
+        $stmt = $pdo->prepare("SELECT event_id, description FROM calendar_events WHERE form_id = :fid AND is_base_event = 1 LIMIT 1");
+        $stmt->execute([':fid' => $formId]);
+        $baseEvent = $stmt->fetch();
+
+        if ($baseEvent) {
+            // Update existing base event
+            $pdo->prepare("
+                UPDATE calendar_events SET
+                    event_date = :event_date,
+                    frequency_months = :fm,
+                    frequency_years = :fy,
+                    description = :desc
+                WHERE event_id = :eid
+            ")->execute([
+                ':event_date' => $workDate,
+                ':fm' => $frequencyMonths,
+                ':fy' => $frequencyYears,
+                ':desc' => $description !== null ? $description : $baseEvent['description'],
+                ':eid' => $baseEvent['event_id']
+            ]);
+            $baseEventId = $baseEvent['event_id'];
+        } else {
+            // Create new base event
+            $pdo->prepare("
+                INSERT INTO calendar_events (form_id, parent_event_id, is_base_event, event_date, description, frequency_months, frequency_years)
+                VALUES (:fid, NULL, 1, :event_date, :desc, :fm, :fy)
+            ")->execute([
+                ':fid' => $formId,
+                ':event_date' => $workDate,
+                ':desc' => $description,
+                ':fm' => $frequencyMonths,
+                ':fy' => $frequencyYears
+            ]);
+            $baseEventId = $pdo->lastInsertId();
+        }
+
+        // Delete all existing recurring agendas for this base event
+        $pdo->prepare("DELETE FROM calendar_events WHERE parent_event_id = :pid")->execute([':pid' => $baseEventId]);
+
+        // Generate recurring agendas if frequency > 0
+        if ($frequencyMonths > 0 && $frequencyYears > 0) {
+            generateRecurringAgendas($pdo, $baseEventId, $formId, $workDate, $frequencyMonths, $frequencyYears);
+        }
+
+        return $baseEventId;
+
+    } catch (Exception $e) {
+        error_log("syncCalendarEvent error: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Generate recurring agendas from a base event
+ */
+function generateRecurringAgendas($pdo, $baseEventId, $formId, $baseDate, $frequencyMonths, $frequencyYears) {
+    // Total range in months = frequency_years * 12
+    // Number of agendas = (totalMonths / frequencyMonths)
+    // Example: freq_months=1, freq_years=1 => 12 months total, 12/1 = 12 agendas (1 base + 11 recurring)
+    $totalMonths = $frequencyYears * 12;
+    $step = $frequencyMonths;
+
+    if ($step <= 0 || $totalMonths <= 0) return;
+
+    $insertStmt = $pdo->prepare("
+        INSERT INTO calendar_events (form_id, parent_event_id, is_base_event, event_date, frequency_months, frequency_years)
+        VALUES (:fid, :pid, 0, :event_date, :fm, :fy)
+    ");
+
+    $baseDateObj = new DateTime($baseDate);
+
+    // Start from step (skip 0 since that's the base event)
+    for ($m = $step; $m < $totalMonths; $m += $step) {
+        $nextDate = clone $baseDateObj;
+        $nextDate->modify("+{$m} months");
+
+        $insertStmt->execute([
+            ':fid' => $formId,
+            ':pid' => $baseEventId,
+            ':event_date' => $nextDate->format('Y-m-d'),
+            ':fm' => $frequencyMonths,
+            ':fy' => $frequencyYears
+        ]);
     }
 }
 

@@ -1056,6 +1056,333 @@ body {
     color: #4a5568;
 }
 
+/* ===== Recurring Badge on Chips ===== */
+.chip-recurring-badge {
+    position: absolute;
+    top: 1px;
+    right: 2px;
+    font-size: 0.4rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.chip-recurring-badge i {
+    font-size: 0.4rem;
+}
+
+/* Base vs Recurring event visual cues */
+.event-chip.event-recurring {
+    border-left-style: dashed;
+    opacity: 0.85;
+}
+
+.event-chip.event-base {
+    border-left-style: solid;
+}
+
+/* Detail panel badges for base/recurring */
+.detail-badge-type {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.badge-base-sm {
+    background: var(--primary-color);
+    color: white;
+}
+
+.badge-recurring-sm {
+    background: var(--chip-proposal-bg);
+    color: var(--color-proposal);
+}
+
+.badge-recurring-sm i {
+    font-size: 0.5rem;
+}
+
+/* Detail notes preview */
+.detail-notes {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-style: italic;
+}
+
+.detail-notes i {
+    color: var(--color-quote);
+    font-size: 0.75rem;
+    margin-top: 2px;
+}
+
+/* ===== Drag & Drop ===== */
+.event-chip[draggable="true"] {
+    cursor: grab;
+}
+
+.event-chip[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.event-chip.dragging {
+    opacity: 0.4;
+    transform: scale(0.95);
+}
+
+.day-cell.drop-over {
+    background: rgba(0, 31, 84, 0.08) !important;
+    border: 2px dashed var(--primary-color) !important;
+    border-radius: 10px;
+}
+
+[data-theme="dark"] .day-cell.drop-over {
+    background: rgba(74, 158, 255, 0.1) !important;
+    border-color: var(--color-contract) !important;
+}
+
+/* ===== Mini Form Overlay ===== */
+.mini-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.mini-form-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ===== Mini Form Panel ===== */
+.mini-form-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 420px;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: var(--bg-card);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    z-index: 510;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.mini-form-panel.visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Mini form header */
+.mini-form-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.mini-form-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mini-form-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mini-form-header-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.mini-form-client-display {
+    font-size: 0.82rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.mini-form-company-display {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.mini-form-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mini-form-badge.badge-base {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+}
+
+.mini-form-badge.badge-recurring {
+    background: rgba(230, 126, 34, 0.3);
+    color: #ffd9a0;
+}
+
+.mini-form-close-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mini-form-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Mini form body */
+.mini-form-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+}
+
+.mini-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mini-form-field label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mini-form-field input,
+.mini-form-field textarea,
+.mini-form-field select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-light);
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mini-form-field input:focus,
+.mini-form-field textarea:focus,
+.mini-form-field select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 31, 84, 0.1);
+}
+
+.mini-form-field textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+/* Frequency fields row */
+.mini-form-freq-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.mini-form-field .field-hint {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+/* Mini form footer */
+.mini-form-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.mini-form-btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+}
+
+.mini-form-btn-cancel {
+    background: var(--bg-light);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+}
+
+.mini-form-btn-cancel:hover {
+    background: var(--border-color);
+}
+
+.mini-form-btn-save {
+    background: var(--primary-color);
+    color: white;
+}
+
+.mini-form-btn-save:hover {
+    background: var(--primary-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.mini-form-btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* ===== Print Styles ===== */
 @page {
     size: landscape;
@@ -1071,7 +1398,9 @@ body {
     .today-btn,
     .print-btn,
     .theme-toggle,
-    .event-detail-panel {
+    .event-detail-panel,
+    .mini-form-overlay,
+    .mini-form-panel {
         display: none !important;
     }
 
@@ -1358,5 +1687,13 @@ body {
 
     .chip-type-badge {
         font-size: 0.45rem;
+    }
+
+    .mini-form-panel {
+        width: 95vw;
+    }
+
+    .mini-form-freq-row {
+        grid-template-columns: 1fr;
     }
 }

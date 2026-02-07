@@ -1,8 +1,12 @@
 <?php
 /**
  * GET EVENTS API
- * Returns forms with Work_Date for calendar display
- * Only returns client_name, company_name, and Work_Date
+ * Returns calendar events (agendas) joined with form data for calendar display.
+ * Fetches from calendar_events table + forms table.
+ *
+ * GET params:
+ *   month (int) - 1-12
+ *   year  (int)
  */
 header('Content-Type: application/json');
 
@@ -14,17 +18,33 @@ try {
     $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('n');
     $year  = isset($_GET['year'])  ? (int)$_GET['year']  : (int)date('Y');
 
-    // Fetch forms that have a Work_Date in the requested month/year
-    // Include request form fields for schedule display
+    // Fetch calendar events joined with form data
     $stmt = $pdo->prepare("
-        SELECT form_id, client_name, company_name, Work_Date, status,
-               service_type, request_type, priority, requested_service,
-               Order_Nomenclature, seller, Document_Date
-        FROM forms
-        WHERE Work_Date IS NOT NULL
-          AND MONTH(Work_Date) = :month
-          AND YEAR(Work_Date) = :year
-        ORDER BY Work_Date ASC
+        SELECT
+            ce.event_id,
+            ce.form_id,
+            ce.parent_event_id,
+            ce.is_base_event,
+            ce.event_date,
+            ce.description,
+            ce.frequency_months,
+            ce.frequency_years,
+            f.client_name,
+            f.company_name,
+            f.Work_Date,
+            f.status,
+            f.service_type,
+            f.request_type,
+            f.priority,
+            f.requested_service,
+            f.Order_Nomenclature,
+            f.seller,
+            f.Document_Date
+        FROM calendar_events ce
+        JOIN forms f ON ce.form_id = f.form_id
+        WHERE MONTH(ce.event_date) = :month
+          AND YEAR(ce.event_date) = :year
+        ORDER BY ce.event_date ASC, ce.is_base_event DESC
     ");
     $stmt->execute([
         ':month' => $month,

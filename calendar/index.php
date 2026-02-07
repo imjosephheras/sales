@@ -1,7 +1,7 @@
 <?php
 /**
  * CALENDAR MODULE
- * Basic month-by-month calendar view
+ * Month-by-month calendar with agendas, mini form, drag & drop, recurrence
  */
 session_start();
 ?>
@@ -117,6 +117,96 @@ session_start();
             </div>
         </div>
 
+    </div>
+
+    <!-- Mini Form Overlay -->
+    <div class="mini-form-overlay" id="mini-form-overlay"></div>
+
+    <!-- Mini Form Panel -->
+    <div class="mini-form-panel" id="mini-form-panel">
+        <input type="hidden" id="mini-form-event-id">
+        <input type="hidden" id="mini-form-form-id">
+
+        <!-- Header -->
+        <div class="mini-form-header">
+            <div class="mini-form-header-left">
+                <h3><i class="fas fa-edit"></i> Agenda Details</h3>
+                <div class="mini-form-header-info">
+                    <span class="mini-form-client-display" id="mini-form-client-name"></span>
+                    <span class="mini-form-company-display" id="mini-form-company-name"></span>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span class="mini-form-badge badge-base" id="mini-form-event-type">Base Event</span>
+                <button class="mini-form-close-btn" id="mini-form-close" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Body: Only 4 fields allowed -->
+        <div class="mini-form-body">
+
+            <!-- 1. Work Date -->
+            <div class="mini-form-field">
+                <label for="mini-form-work-date">
+                    <i class="fas fa-calendar-day"></i> Work Date
+                </label>
+                <input type="date" id="mini-form-work-date">
+            </div>
+
+            <!-- 2. Notes -->
+            <div class="mini-form-field">
+                <label for="mini-form-notes">
+                    <i class="fas fa-sticky-note"></i> Notes
+                </label>
+                <textarea id="mini-form-notes" placeholder="Add notes for this agenda..." rows="3"></textarea>
+            </div>
+
+            <!-- 3 & 4. Frequency: Months and Years -->
+            <div class="mini-form-freq-row">
+                <div class="mini-form-field">
+                    <label for="mini-form-freq-months">
+                        <i class="fas fa-calendar-alt"></i> Month (Frequency)
+                    </label>
+                    <select id="mini-form-freq-months">
+                        <option value="0">0 - No recurrence</option>
+                        <option value="1">1 - Every 1 month</option>
+                        <option value="2">2 - Every 2 months</option>
+                        <option value="3">3 - Every 3 months</option>
+                        <option value="4">4 - Every 4 months</option>
+                        <option value="5">5 - Every 5 months</option>
+                        <option value="6">6 - Every 6 months</option>
+                    </select>
+                    <span class="field-hint">Interval between agendas</span>
+                </div>
+                <div class="mini-form-field">
+                    <label for="mini-form-freq-years">
+                        <i class="fas fa-history"></i> Year (Frequency)
+                    </label>
+                    <select id="mini-form-freq-years">
+                        <option value="0">0 - No recurrence</option>
+                        <option value="1">1 - Span 1 year</option>
+                        <option value="2">2 - Span 2 years</option>
+                        <option value="3">3 - Span 3 years</option>
+                        <option value="4">4 - Span 4 years</option>
+                        <option value="5">5 - Span 5 years</option>
+                    </select>
+                    <span class="field-hint">Total range for agendas</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="mini-form-footer">
+            <button class="mini-form-btn mini-form-btn-cancel" id="mini-form-cancel-btn" onclick="document.getElementById('mini-form-overlay').classList.remove('visible'); document.getElementById('mini-form-panel').classList.remove('visible');">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button class="mini-form-btn mini-form-btn-save" id="mini-form-save">
+                <i class="fas fa-save"></i> Save
+            </button>
+        </div>
     </div>
 
     <script src="js/calendar.js"></script>
