@@ -6,12 +6,12 @@
     <title>Job Work Order</title>
     <style>
         @page {
-            margin: 4.5cm 2cm 3.5cm 2cm;
+            margin: 6cm 2cm 5cm 2cm;
         }
 
         @media print {
             @page {
-                margin: 4.5cm 2cm 3.5cm 2cm;
+                margin: 6cm 2cm 5cm 2cm;
             }
             body {
                 padding: 0;

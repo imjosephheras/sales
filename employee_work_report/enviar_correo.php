@@ -144,7 +144,7 @@ $common_styles = "
 body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
 
 @page {
-    margin: 15mm 15mm 15mm 15mm;
+    margin: 30mm 15mm 30mm 15mm;
 }
 
 .logo-container {
