@@ -277,9 +277,10 @@ $client_email = $data['Email'] ?? '';
         /* Footer - Two-tone split design */
         .footer-wrapper {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            bottom: -40mm;
+            left: -18mm;
+            right: -18mm;
+            padding: 0 18mm 5mm;
         }
 
         .footer-top {
