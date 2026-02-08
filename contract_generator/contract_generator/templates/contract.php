@@ -34,11 +34,18 @@
             padding: 0.5cm 1.5cm;
         }
 
-        /* Header */
+        /* Header - fixed position to repeat on every page */
+        .header-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+        }
+
         .header {
             display: table;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 0;
             border-bottom: 3px solid #CC0000;
         }
 
@@ -285,15 +292,18 @@
     $start_date = htmlspecialchars($data['startDateServices'] ?? '');
     ?>
 
-    <div class="header">
-        <div class="header-left">
-            <?php if ($logo_base64): ?>
-            <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Hospitality Services">
-            <?php endif; ?>
-        </div>
-        <div class="header-right">
-            <div class="doc-title">Temporary Staff</div>
-            <div class="doc-subtitle">SERVICES AGREEMENT</div>
+    <!-- HEADER - fixed position, repeats on every page -->
+    <div class="header-wrapper">
+        <div class="header">
+            <div class="header-left">
+                <?php if ($logo_base64): ?>
+                <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Hospitality Services">
+                <?php endif; ?>
+            </div>
+            <div class="header-right">
+                <div class="doc-title">Temporary Staff</div>
+                <div class="doc-subtitle">SERVICES AGREEMENT</div>
+            </div>
         </div>
     </div>
 
@@ -605,17 +615,6 @@
     <!-- PAGE 9 - APPENDIX A - Service Prices -->
     <!-- ============================================ -->
     <div class="page-break"></div>
-    <div class="header">
-        <div class="header-left">
-            <?php if ($logo_base64): ?>
-            <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Hospitality Services">
-            <?php endif; ?>
-        </div>
-        <div class="header-right">
-            <div class="doc-title">Temporary Staff</div>
-            <div class="doc-subtitle">SERVICES AGREEMENT</div>
-        </div>
-    </div>
 
     <div class="appendix-title">APPENDIX (A)</div>
     <div class="appendix-subtitle">Service Prices</div>
@@ -678,17 +677,6 @@
     <!-- PAGE 10 - APPENDIX B - Benefits Waiver -->
     <!-- ============================================ -->
     <div class="page-break"></div>
-    <div class="header">
-        <div class="header-left">
-            <?php if ($logo_base64): ?>
-            <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Hospitality Services">
-            <?php endif; ?>
-        </div>
-        <div class="header-right">
-            <div class="doc-title">Temporary Staff</div>
-            <div class="doc-subtitle">SERVICES AGREEMENT</div>
-        </div>
-    </div>
 
     <div class="appendix-title">APPENDIX (B)</div>
     <div class="appendix-subtitle">Exemption from Benefits for Principal Associates</div>
@@ -743,17 +731,6 @@
     <!-- PAGE 11 - APPENDIX C - Confidentiality Agreement -->
     <!-- ============================================ -->
     <div class="page-break"></div>
-    <div class="header">
-        <div class="header-left">
-            <?php if ($logo_base64): ?>
-            <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Hospitality Services">
-            <?php endif; ?>
-        </div>
-        <div class="header-right">
-            <div class="doc-title">Temporary Staff</div>
-            <div class="doc-subtitle">SERVICES AGREEMENT</div>
-        </div>
-    </div>
 
     <div class="appendix-title">APPENDIX (C)</div>
     <div class="appendix-subtitle">Confidentiality and Non-Disclosure Agreement for Key Associates</div>
