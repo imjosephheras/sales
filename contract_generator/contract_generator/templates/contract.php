@@ -6,12 +6,12 @@
     <title>Temporary Staff Services Agreement</title>
     <style>
         @page {
-            margin: 3.5cm 2cm 4cm 2cm;
+            margin: 5cm 2cm 5.5cm 2cm;
         }
 
         @media print {
             @page {
-                margin: 3.5cm 2cm 4cm 2cm;
+                margin: 5cm 2cm 5.5cm 2cm;
             }
             body {
                 padding: 0;
