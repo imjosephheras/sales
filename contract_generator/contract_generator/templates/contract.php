@@ -31,7 +31,7 @@
             font-size: 9.5pt;
             color: #000;
             line-height: 1.4;
-            padding: 0 1cm;
+            padding: 0.5cm 1.5cm;
         }
 
         /* Header */

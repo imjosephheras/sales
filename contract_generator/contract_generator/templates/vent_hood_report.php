@@ -42,13 +42,13 @@ $client_email = $data['Email'] ?? '';
     <title>Vent Hood Service Report - <?php echo htmlspecialchars($client_name); ?></title>
     <style>
         @page {
-            margin: 20mm 18mm 22mm 18mm;
+            margin: 20mm 18mm 28mm 18mm;
             size: letter;
         }
 
         @media print {
             @page {
-                margin: 20mm 18mm 22mm 18mm;
+                margin: 20mm 18mm 28mm 18mm;
             }
         }
 
@@ -63,7 +63,7 @@ $client_email = $data['Email'] ?? '';
             font-size: 11px;
             line-height: 1.2;
             color: #333;
-            padding: 0;
+            padding: 0.5cm 1cm;
         }
 
         .header {
@@ -274,16 +274,33 @@ $client_email = $data['Email'] ?? '';
             page-break-before: always;
         }
 
-        .footer {
+        /* Footer - Two-tone split design */
+        .footer-wrapper {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
+        }
+
+        .footer-top {
+            background-color: #A30000;
+            color: white;
             text-align: center;
-            font-size: 7px;
-            color: #999;
-            border-top: 1px solid #ddd;
-            padding-top: 2px;
+            padding: 3px 10px;
+            font-size: 7pt;
+        }
+
+        .footer-bottom {
+            background-color: #CC0000;
+            color: white;
+            text-align: center;
+            padding: 8px 10px;
+            font-size: 8pt;
+        }
+
+        .footer-bottom a {
+            color: white;
+            text-decoration: none;
         }
 
         .sub-section {
@@ -641,9 +658,14 @@ $client_email = $data['Email'] ?? '';
     </div>
 
     <!-- FOOTER -->
-    <div class="footer">
-        <p><?php echo htmlspecialchars($company_name); ?> | <?php echo htmlspecialchars($company_address); ?> | <?php echo htmlspecialchars($company_phone); ?></p>
-        <p>This document is confidential and intended solely for the addressee. &copy; <?php echo date('Y'); ?></p>
+    <div class="footer-wrapper">
+        <div class="footer-top">
+            PRIME FACILITY SERVICES GROUP, INC.
+        </div>
+        <div class="footer-bottom">
+            <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
+            <a href="http://www.primefacilityservicesgroup.com">www.primefacilityservicesgroup.com</a>
+        </div>
     </div>
 
 </body>
