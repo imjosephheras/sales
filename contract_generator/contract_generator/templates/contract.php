@@ -328,6 +328,9 @@
         </ol>
     </div>
 
+    <!-- PAGE 2 -->
+    <div class="page-break"></div>
+
     <!-- SECTION 3 -->
     <div class="section-number">3. Payment Terms, Rates and Charges</div>
     <div class="subsection">
@@ -364,6 +367,9 @@
             <li>Any changes in state tax rates or regulations will be applied accordingly.</li>
         </ol>
     </div>
+
+    <!-- PAGE 3 -->
+    <div class="page-break"></div>
 
     <!-- SECTION 4 -->
     <div class="section-number">4. Confidential Information</div>
@@ -403,7 +409,8 @@
         <p><span class="subsection-label">V.</span> The provisions of this Agreement constitute the entire agreement between the parties with respect to indemnification, and each party waives the right to assert any claim for indemnification or common law contribution against the other party.</p>
     </div>
 
-    <!-- SECTION 9 - NOTICES (own page) -->
+    <!-- PAGE 4 -->
+    <!-- SECTION 9 - NOTICES -->
     <div class="page-break"></div>
     <div class="section-number">9. NOTICES</div>
     <div class="subsection">
@@ -434,6 +441,9 @@
         </div>
     </div>
 
+    <!-- PAGE 5 -->
+    <div class="page-break"></div>
+
     <!-- SECTION 10 -->
     <div class="section-number">10. MISCELLANEOUS</div>
     <div class="subsection">
@@ -457,6 +467,9 @@
 
         <p><span class="subsection-label">X.</span> Neither party shall be liable for failure or delay in performing this Agreement if such failure or delay is due to labor disputes, strikes, fire, riots, war, terrorism, acts of God, or any other cause beyond the control of the defaulting party.</p>
     </div>
+
+    <!-- PAGE 6 -->
+    <div class="page-break"></div>
 
     <!-- SECTION 11 -->
     <div class="section-number">11. TERMS OF THE AGREEMENT</div>
@@ -516,6 +529,9 @@
         </table>
     </div>
 
+    <!-- PAGE 7 -->
+    <div class="page-break"></div>
+
     <!-- SECTION 12 -->
     <div class="section-number">12. Emergency provision</div>
     <div class="subsection">
@@ -547,6 +563,9 @@
 
         <p><span class="subsection-label">IV.</span> As necessary, by negotiation or at the CLIENT's request, PRIME will provide the CLIENT with certificates of this insurance coverage or, with the insurer's consent, make the CLIENT an additional insured for PRIME's services.</p>
     </div>
+
+    <!-- PAGE 8 -->
+    <div class="page-break"></div>
 
     <!-- SECTION 15 -->
     <div class="section-number">15. PENALTY FOR LATE PAYMENT</div>
@@ -583,7 +602,7 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- APPENDIX A - Service Prices (own page) -->
+    <!-- PAGE 9 - APPENDIX A - Service Prices -->
     <!-- ============================================ -->
     <div class="page-break"></div>
     <div class="header">
@@ -656,7 +675,7 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- APPENDIX B - Benefits Waiver (own page) -->
+    <!-- PAGE 10 - APPENDIX B - Benefits Waiver -->
     <!-- ============================================ -->
     <div class="page-break"></div>
     <div class="header">
@@ -721,7 +740,7 @@
     </div>
 
     <!-- ============================================ -->
-    <!-- APPENDIX C - Confidentiality Agreement (own page) -->
+    <!-- PAGE 11 - APPENDIX C - Confidentiality Agreement -->
     <!-- ============================================ -->
     <div class="page-break"></div>
     <div class="header">
