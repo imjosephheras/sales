@@ -1,4 +1,6 @@
 <!-- PAGE 7 - SECTIONS 12-14: EMERGENCY, PRICE INCREASE, INSURANCE -->
+<?php include __DIR__ . '/_header.php'; ?>
+<?php include __DIR__ . '/_footer.php'; ?>
 <div class="page-break"></div>
 
 <!-- SECTION 12 -->

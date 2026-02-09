@@ -255,7 +255,7 @@
 </head>
 <body>
 
-    <!-- HEADER -->
+    <!-- DATA PREPARATION -->
     <?php
     // Encode logo as base64 for DOMPDF compatibility
     $dept = strtolower(trim($data['Service_Type'] ?? ''));
@@ -292,21 +292,6 @@
     $start_date = htmlspecialchars($data['startDateServices'] ?? '');
     ?>
 
-    <!-- HEADER - position:fixed makes DOMPDF repeat this on every page -->
-    <div class="header-wrapper">
-        <div class="header">
-            <div class="header-left">
-                <?php if ($logo_base64): ?>
-                <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Hospitality Services">
-                <?php endif; ?>
-            </div>
-            <div class="header-right">
-                <div class="doc-title">Temporary Staff</div>
-                <div class="doc-subtitle">SERVICES AGREEMENT</div>
-            </div>
-        </div>
-    </div>
-
     <!-- ============================================ -->
     <!-- CONTRACT PAGES                               -->
     <!-- Each page is in its own file for easy editing -->
@@ -323,17 +308,6 @@
     <?php include __DIR__ . '/contract/page9_appendix_a_services.php'; ?>
     <?php include __DIR__ . '/contract/page10_appendix_b_benefits_waiver.php'; ?>
     <?php include __DIR__ . '/contract/page11_appendix_c_confidentiality.php'; ?>
-
-    <!-- FOOTER - position:fixed makes DOMPDF repeat this on every page -->
-    <div class="footer-wrapper">
-        <div class="footer-top">
-            PRIME HOSPITALITY SERVICES OF TEXAS
-        </div>
-        <div class="footer-bottom">
-            <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
-            <a href="http://www.primefacilityservicesgroup.com">www.primefacilityservicesgroup.com</a>
-        </div>
-    </div>
 
 </body>
 </html>

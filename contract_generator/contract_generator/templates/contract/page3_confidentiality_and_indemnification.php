@@ -1,4 +1,6 @@
 <!-- PAGE 3 - SECTIONS 4-8: CONFIDENTIALITY, FULL AGREEMENT, RESIGNATION, COOPERATION, INDEMNIFICATION -->
+<?php include __DIR__ . '/_header.php'; ?>
+<?php include __DIR__ . '/_footer.php'; ?>
 <div class="page-break"></div>
 
 <!-- SECTION 4 -->
