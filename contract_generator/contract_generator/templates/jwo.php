@@ -31,7 +31,11 @@
             font-size: 10pt;
             color: #000;
             line-height: 1.3;
+<<<<<<< HEAD
             padding: 0.5cm 2cm;
+=======
+            padding: 0 0.5cm;
+>>>>>>> parent of 102c161 (Increase horizontal padding on JWO template body)
         }
 
         /* Header */
