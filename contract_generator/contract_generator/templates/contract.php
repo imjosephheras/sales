@@ -37,10 +37,9 @@
         /* Header - fixed position to repeat on every page */
         .header-wrapper {
             position: fixed;
-            top: -5cm;
-            left: -2cm;
-            right: -2cm;
-            padding: 0.5cm 2cm 0;
+            top: 0;
+            left: 0;
+            right: 0;
         }
 
         .header {
@@ -227,10 +226,9 @@
         /* Footer */
         .footer-wrapper {
             position: fixed;
-            bottom: -5.5cm;
-            left: -2cm;
-            right: -2cm;
-            padding: 0 2cm 0.5cm;
+            bottom: 0;
+            left: 0;
+            right: 0;
         }
 
         .footer-top {
