@@ -6,12 +6,12 @@
     <title>Temporary Staff Services Agreement</title>
     <style>
         @page {
-            margin: 5cm 2cm 5.5cm 2cm;
+            margin: 2cm;
         }
 
         @media print {
             @page {
-                margin: 5cm 2cm 5.5cm 2cm;
+                margin: 2cm;
             }
             body {
                 padding: 0;
@@ -34,12 +34,9 @@
             padding: 0.5cm 1.5cm;
         }
 
-        /* Header - fixed position to repeat on every page */
+        /* Header - static, part of normal document flow */
         .header-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
+            margin-bottom: 0.5cm;
         }
 
         .header {
@@ -223,12 +220,9 @@
             margin-bottom: 2px;
         }
 
-        /* Footer */
+        /* Footer - static, part of normal document flow */
         .footer-wrapper {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            margin-top: 0.5cm;
         }
 
         .footer-top {
