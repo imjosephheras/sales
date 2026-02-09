@@ -1,6 +1,4 @@
 <!-- PAGE 11 - APPENDIX C: CONFIDENTIALITY AGREEMENT -->
-<?php include __DIR__ . '/_header.php'; ?>
-<?php include __DIR__ . '/_footer.php'; ?>
 <div class="page-break"></div>
 
 <div class="appendix-title">APPENDIX (C)</div>

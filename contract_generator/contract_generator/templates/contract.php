@@ -38,8 +38,9 @@
         .header-wrapper {
             position: fixed;
             top: -3cm;
-            left: 0;
-            right: 0;
+            left: -2cm;
+            right: -2cm;
+            height: 2.5cm;
         }
 
         .header {
@@ -227,8 +228,9 @@
         .footer-wrapper {
             position: fixed;
             bottom: -2.7cm;
-            left: 0;
-            right: 0;
+            left: -2cm;
+            right: -2cm;
+            height: 2.2cm;
         }
 
         .footer-top {
@@ -291,6 +293,32 @@
     $inflation_adj = htmlspecialchars($data['inflationAdjustment'] ?? '3.1');
     $start_date = htmlspecialchars($data['startDateServices'] ?? '');
     ?>
+
+    <!-- HEADER - position:fixed makes DOMPDF repeat this on every page -->
+    <div class="header-wrapper">
+        <div class="header">
+            <div class="header-left">
+                <?php if (!empty($logo_base64)): ?>
+                <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Hospitality Services">
+                <?php endif; ?>
+            </div>
+            <div class="header-right">
+                <div class="doc-title">Temporary Staff</div>
+                <div class="doc-subtitle">SERVICES AGREEMENT</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER - position:fixed makes DOMPDF repeat this on every page -->
+    <div class="footer-wrapper">
+        <div class="footer-top">
+            PRIME HOSPITALITY SERVICES OF TEXAS
+        </div>
+        <div class="footer-bottom">
+            <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
+            <a href="http://www.primefacilityservicesgroup.com">www.primefacilityservicesgroup.com</a>
+        </div>
+    </div>
 
     <!-- ============================================ -->
     <!-- CONTRACT PAGES                               -->

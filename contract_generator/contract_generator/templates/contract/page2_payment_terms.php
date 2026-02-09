@@ -1,6 +1,4 @@
 <!-- PAGE 2 - SECTION 3: PAYMENT TERMS -->
-<?php include __DIR__ . '/_header.php'; ?>
-<?php include __DIR__ . '/_footer.php'; ?>
 <div class="page-break"></div>
 
 <!-- SECTION 3 -->
