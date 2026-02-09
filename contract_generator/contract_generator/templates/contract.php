@@ -6,12 +6,12 @@
     <title>Temporary Staff Services Agreement</title>
     <style>
         @page {
-            margin: 2cm;
+            margin: 3.5cm 2cm 3.2cm 2cm;
         }
 
         @media print {
             @page {
-                margin: 2cm;
+                margin: 3.5cm 2cm 3.2cm 2cm;
             }
             body {
                 padding: 0;
@@ -31,12 +31,15 @@
             font-size: 9.5pt;
             color: #000;
             line-height: 1.4;
-            padding: 0.5cm 1.5cm;
+            padding: 0;
         }
 
-        /* Header - static, part of normal document flow */
+        /* Header - fixed position, repeats on every page */
         .header-wrapper {
-            margin-bottom: 0.5cm;
+            position: fixed;
+            top: -3cm;
+            left: 0;
+            right: 0;
         }
 
         .header {
@@ -220,9 +223,12 @@
             margin-bottom: 2px;
         }
 
-        /* Footer - static, part of normal document flow */
+        /* Footer - fixed position, repeats on every page */
         .footer-wrapper {
-            margin-top: 0.5cm;
+            position: fixed;
+            bottom: -2.7cm;
+            left: 0;
+            right: 0;
         }
 
         .footer-top {
@@ -286,7 +292,7 @@
     $start_date = htmlspecialchars($data['startDateServices'] ?? '');
     ?>
 
-    <!-- HEADER - fixed position, repeats on every page -->
+    <!-- HEADER - position:fixed makes DOMPDF repeat this on every page -->
     <div class="header-wrapper">
         <div class="header">
             <div class="header-left">
@@ -318,7 +324,7 @@
     <?php include __DIR__ . '/contract/page10_appendix_b_benefits_waiver.php'; ?>
     <?php include __DIR__ . '/contract/page11_appendix_c_confidentiality.php'; ?>
 
-    <!-- FOOTER -->
+    <!-- FOOTER - position:fixed makes DOMPDF repeat this on every page -->
     <div class="footer-wrapper">
         <div class="footer-top">
             PRIME HOSPITALITY SERVICES OF TEXAS
