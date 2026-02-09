@@ -9,28 +9,12 @@
             margin: 3.5cm 2cm 3.2cm 2cm;
         }
 
-        @media print {
-            @page {
-                margin: 3.5cm 2cm 3.2cm 2cm;
-            }
-            body {
-                padding: 0;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: Arial, Helvetica, sans-serif;
             font-size: 9.5pt;
             color: #000;
             line-height: 1.4;
+            margin: 0;
             padding: 0;
         }
 
@@ -38,31 +22,20 @@
         .header-wrapper {
             position: fixed;
             top: -3cm;
-            left: -2cm;
-            right: -2cm;
+            left: 0;
+            right: 0;
             height: 2.5cm;
+            overflow: visible;
         }
 
-        .header {
-            display: table;
+        .header-table {
             width: 100%;
-            margin-bottom: 0;
+            border-collapse: collapse;
             border-bottom: 3px solid #CC0000;
         }
 
-        .header-left {
-            display: table-cell;
-            width: 40%;
+        .header-table td {
             vertical-align: middle;
-            padding: 10px 0;
-        }
-
-        .header-right {
-            display: table-cell;
-            width: 60%;
-            vertical-align: middle;
-            text-align: left;
-            padding: 10px 0 10px 15px;
         }
 
         .header-logo {
@@ -228,9 +201,10 @@
         .footer-wrapper {
             position: fixed;
             bottom: -2.7cm;
-            left: -2cm;
-            right: -2cm;
+            left: 0;
+            right: 0;
             height: 2.2cm;
+            overflow: visible;
         }
 
         .footer-top {
@@ -296,17 +270,19 @@
 
     <!-- HEADER - position:fixed makes DOMPDF repeat this on every page -->
     <div class="header-wrapper">
-        <div class="header">
-            <div class="header-left">
-                <?php if (!empty($logo_base64)): ?>
-                <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Hospitality Services">
-                <?php endif; ?>
-            </div>
-            <div class="header-right">
-                <div class="doc-title">Temporary Staff</div>
-                <div class="doc-subtitle">SERVICES AGREEMENT</div>
-            </div>
-        </div>
+        <table class="header-table">
+            <tr>
+                <td style="width: 40%; padding: 10px 0;">
+                    <?php if (!empty($logo_base64)): ?>
+                    <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Hospitality Services">
+                    <?php endif; ?>
+                </td>
+                <td style="width: 60%; padding: 10px 0 10px 15px; text-align: left;">
+                    <div class="doc-title">Temporary Staff</div>
+                    <div class="doc-subtitle">SERVICES AGREEMENT</div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <!-- FOOTER - position:fixed makes DOMPDF repeat this on every page -->
