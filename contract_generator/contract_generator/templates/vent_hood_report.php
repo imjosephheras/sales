@@ -42,13 +42,13 @@ $client_email = $data['Email'] ?? '';
     <title>Vent Hood Service Report - <?php echo htmlspecialchars($client_name); ?></title>
     <style>
         @page {
-            margin: 35mm 18mm 40mm 18mm;
+            margin: 18mm;
             size: letter;
         }
 
         @media print {
             @page {
-                margin: 35mm 18mm 40mm 18mm;
+                margin: 18mm;
             }
         }
 
@@ -274,12 +274,9 @@ $client_email = $data['Email'] ?? '';
             page-break-before: always;
         }
 
-        /* Footer - Two-tone split design */
+        /* Footer - static, part of normal document flow */
         .footer-wrapper {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            margin-top: 4px;
         }
 
         .footer-top {

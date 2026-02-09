@@ -6,12 +6,12 @@
     <title>Job Work Order</title>
     <style>
         @page {
-            margin: 6cm 2cm 5cm 2cm;
+            margin: 2cm;
         }
 
         @media print {
             @page {
-                margin: 6cm 2cm 5cm 2cm;
+                margin: 2cm;
             }
             body {
                 padding: 0;
@@ -31,11 +31,7 @@
             font-size: 10pt;
             color: #000;
             line-height: 1.3;
-<<<<<<< HEAD
-            padding: 0.5cm 2cm;
-=======
-            padding: 0 0.5cm;
->>>>>>> parent of 102c161 (Increase horizontal padding on JWO template body)
+            padding: 0.5cm 0.5cm;
         }
 
         /* Header */
@@ -332,12 +328,9 @@
             font-size: 8pt;
         }
 
-        /* Footer - Two-tone split design */
+        /* Footer - static, part of normal document flow */
         .footer-wrapper {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            margin-top: 0.5cm;
         }
 
         .footer-top {
