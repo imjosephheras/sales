@@ -194,52 +194,6 @@
                         </div>
                     </div>
 
-                    <!-- 🔹 SECTION: Economic Details -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-dollar-sign"></i> Economic Details</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Price Input</label>
-                                <input type="text" name="PriceInput" id="PriceInput">
-                            </div>
-                            <div class="form-group">
-                                <label>Prime Quoted Price</label>
-                                <input type="text" name="Prime_Quoted_Price" id="Prime_Quoted_Price">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Total Price</label>
-                                <input type="number" step="0.01" name="Total_Price" id="Total_Price">
-                            </div>
-                            <div class="form-group">
-                                <label>Currency</label>
-                                <select name="Currency" id="Currency">
-                                    <option value="USD">USD</option>
-                                    <option value="MXN">MXN</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Include Janitorial Services</label>
-                                <select name="includeJanitorial" id="includeJanitorial">
-                                    <option value="">-- Select --</option>
-                                    <option value="No">No</option>
-                                    <option value="Yes">Yes</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Include Kitchen & Hood Services</label>
-                                <select name="includeKitchen" id="includeKitchen">
-                                    <option value="">-- Select --</option>
-                                    <option value="No">No</option>
-                                    <option value="Yes">Yes</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- 🔹 SECTION: Janitorial Services (if applicable) -->
                     <div class="form-section" id="janitorial-section" style="display: none;">
                         <h3><i class="fas fa-broom"></i> Janitorial Services</h3>
@@ -325,14 +279,6 @@
                                 <label>Additional Comments</label>
                                 <textarea name="Additional_Comments" id="Additional_Comments" rows="3"></textarea>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- 🔹 SECTION: Scope of Work -->
-                    <div class="form-section">
-                        <h3><i class="fas fa-tasks"></i> Scope of Work</h3>
-                        <div id="scope-display" class="scope-display">
-                            <!-- Se carga dinámicamente -->
                         </div>
                     </div>
 
