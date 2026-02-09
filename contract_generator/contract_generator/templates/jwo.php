@@ -6,12 +6,12 @@
     <title>Job Work Order</title>
     <style>
         @page {
-            margin: 2cm;
+            margin: 3.5cm 2cm 3.2cm 2cm;
         }
 
         @media print {
             @page {
-                margin: 2cm;
+                margin: 3.5cm 2cm 3.2cm 2cm;
             }
             body {
                 padding: 0;
@@ -31,14 +31,21 @@
             font-size: 10pt;
             color: #000;
             line-height: 1.3;
-            padding: 0.5cm 0.5cm;
+            padding: 0;
         }
 
-        /* Header */
+        /* Header - fixed position, repeats on every page */
+        .header-wrapper {
+            position: fixed;
+            top: -3cm;
+            left: 0;
+            right: 0;
+        }
+
         .header {
             display: table;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 0;
             border-bottom: 3px solid #CC0000;
         }
 
@@ -328,9 +335,12 @@
             font-size: 8pt;
         }
 
-        /* Footer - static, part of normal document flow */
+        /* Footer - fixed position, repeats on every page */
         .footer-wrapper {
-            margin-top: 0.5cm;
+            position: fixed;
+            bottom: -2.7cm;
+            left: 0;
+            right: 0;
         }
 
         .footer-top {
@@ -357,7 +367,7 @@
 </head>
 <body>
 
-    <!-- HEADER -->
+    <!-- HEADER - position:fixed makes DOMPDF repeat this on every page -->
     <?php
     // Encode logo as base64 for DOMPDF compatibility
     $dept = strtolower(trim($data['Service_Type'] ?? ''));
@@ -371,15 +381,28 @@
         $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_file));
     }
     ?>
-    <div class="header">
-        <div class="header-left">
-            <?php if ($logo_base64): ?>
-            <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Facility Services Group">
-            <?php endif; ?>
+    <div class="header-wrapper">
+        <div class="header">
+            <div class="header-left">
+                <?php if ($logo_base64): ?>
+                <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Facility Services Group">
+                <?php endif; ?>
+            </div>
+            <div class="header-right">
+                <div class="doc-title">JOB WORK ORDER</div>
+                <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
+            </div>
         </div>
-        <div class="header-right">
-            <div class="doc-title">JOB WORK ORDER</div>
-            <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
+    </div>
+
+    <!-- FOOTER - position:fixed makes DOMPDF repeat this on every page -->
+    <div class="footer-wrapper">
+        <div class="footer-top">
+            PRIME FACILITY SERVICES GROUP, INC.
+        </div>
+        <div class="footer-bottom">
+            <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
+            <a href="http://www.primefacilityservicesgroup.com">www.primefacilityservicesgroup.com</a>
         </div>
     </div>
 
@@ -761,16 +784,6 @@
 
     </div>
 
-    <!-- FOOTER -->
-    <div class="footer-wrapper">
-        <div class="footer-top">
-            PRIME FACILITY SERVICES GROUP, INC.
-        </div>
-        <div class="footer-bottom">
-            <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
-            <a href="http://www.primefacilityservicesgroup.com">www.primefacilityservicesgroup.com</a>
-        </div>
-    </div>
 
 </body>
 </html>

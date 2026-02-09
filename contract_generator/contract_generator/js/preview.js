@@ -655,7 +655,18 @@
                 </div>
 
                 <!-- PAGE SEPARATOR -->
+                <div class="jwo-footer-wrapper">
+                    <div class="jwo-footer-top">PRIME FACILITY SERVICES GROUP, INC.</div>
+                    <div class="jwo-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div>
+                </div>
                 <hr class="jwo-page-separator">
+                <div class="jwo-header-exact">
+                    <img src="${logoSrc}" alt="Prime Facility Services Group" onerror="this.style.display='none'">
+                    <div class="title-section">
+                        <div class="doc-title">JOB WORK ORDER</div>
+                        <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
+                    </div>
+                </div>
 
                 <!-- PAGE 2: TERMS AND CONDITIONS -->
                 <div class="jwo-terms-section">
@@ -1108,7 +1119,18 @@
                 </div>
 
                 <!-- PAGE SEPARATOR - Section 9 Notices -->
+                <div class="contract-footer-wrapper">
+                    <div class="contract-footer-top">PRIME HOSPITALITY SERVICES OF TEXAS</div>
+                    <div class="contract-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div>
+                </div>
                 <hr class="contract-page-sep">
+                <div class="contract-header">
+                    <img src="${logoSrc}" alt="Prime Hospitality Services" onerror="this.style.display='none'">
+                    <div class="title-section">
+                        <div class="doc-title">Temporary Staff</div>
+                        <div class="doc-subtitle">SERVICES AGREEMENT</div>
+                    </div>
+                </div>
 
                 <!-- SECTION 9 -->
                 <div class="contract-section-num">9. NOTICES</div>
@@ -1216,6 +1238,10 @@
                 </div>
 
                 <!-- APPENDIX A -->
+                <div class="contract-footer-wrapper">
+                    <div class="contract-footer-top">PRIME HOSPITALITY SERVICES OF TEXAS</div>
+                    <div class="contract-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div>
+                </div>
                 <hr class="contract-page-sep">
                 <div class="contract-header">
                     <img src="${logoSrc}" alt="Prime Hospitality Services" onerror="this.style.display='none'">
@@ -1231,6 +1257,10 @@
                 </div>
 
                 <!-- APPENDIX B -->
+                <div class="contract-footer-wrapper">
+                    <div class="contract-footer-top">PRIME HOSPITALITY SERVICES OF TEXAS</div>
+                    <div class="contract-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div>
+                </div>
                 <hr class="contract-page-sep">
                 <div class="contract-header">
                     <img src="${logoSrc}" alt="Prime Hospitality Services" onerror="this.style.display='none'">
@@ -1262,6 +1292,10 @@
                 </div>
 
                 <!-- APPENDIX C -->
+                <div class="contract-footer-wrapper">
+                    <div class="contract-footer-top">PRIME HOSPITALITY SERVICES OF TEXAS</div>
+                    <div class="contract-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div>
+                </div>
                 <hr class="contract-page-sep">
                 <div class="contract-header">
                     <img src="${logoSrc}" alt="Prime Hospitality Services" onerror="this.style.display='none'">

@@ -42,13 +42,13 @@ $client_email = $data['Email'] ?? '';
     <title>Vent Hood Service Report - <?php echo htmlspecialchars($client_name); ?></title>
     <style>
         @page {
-            margin: 18mm;
+            margin: 35mm 18mm 32mm 18mm;
             size: letter;
         }
 
         @media print {
             @page {
-                margin: 18mm;
+                margin: 35mm 18mm 32mm 18mm;
             }
         }
 
@@ -63,14 +63,22 @@ $client_email = $data['Email'] ?? '';
             font-size: 11px;
             line-height: 1.2;
             color: #333;
-            padding: 0.5cm 1cm;
+            padding: 0;
+        }
+
+        /* Header - fixed position, repeats on every page */
+        .header-wrapper {
+            position: fixed;
+            top: -30mm;
+            left: 0;
+            right: 0;
         }
 
         .header {
             width: 100%;
             border-bottom: 2px solid #001f54;
             padding-bottom: 4px;
-            margin-bottom: 4px;
+            margin-bottom: 0;
             text-align: center;
         }
 
@@ -274,9 +282,12 @@ $client_email = $data['Email'] ?? '';
             page-break-before: always;
         }
 
-        /* Footer - static, part of normal document flow */
+        /* Footer - fixed position, repeats on every page */
         .footer-wrapper {
-            margin-top: 4px;
+            position: fixed;
+            bottom: -27mm;
+            left: 0;
+            right: 0;
         }
 
         .footer-top {
@@ -347,16 +358,29 @@ $client_email = $data['Email'] ?? '';
 </head>
 <body>
 
-    <!-- HEADER -->
-    <div class="header">
-        <?php if ($logo_base64): ?>
-            <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Logo">
-        <?php endif; ?>
-        <div class="company-name"><?php echo htmlspecialchars($company_name); ?></div>
-        <div class="company-info">
-            <?php echo htmlspecialchars($company_address); ?><br>
-            Phone: <?php echo htmlspecialchars($company_phone); ?> ~ Fax: <?php echo htmlspecialchars($company_fax); ?><br>
-            <?php echo htmlspecialchars($company_website); ?>
+    <!-- HEADER - position:fixed makes DOMPDF repeat this on every page -->
+    <div class="header-wrapper">
+        <div class="header">
+            <?php if ($logo_base64): ?>
+                <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Logo">
+            <?php endif; ?>
+            <div class="company-name"><?php echo htmlspecialchars($company_name); ?></div>
+            <div class="company-info">
+                <?php echo htmlspecialchars($company_address); ?><br>
+                Phone: <?php echo htmlspecialchars($company_phone); ?> ~ Fax: <?php echo htmlspecialchars($company_fax); ?><br>
+                <?php echo htmlspecialchars($company_website); ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER - position:fixed makes DOMPDF repeat this on every page -->
+    <div class="footer-wrapper">
+        <div class="footer-top">
+            PRIME FACILITY SERVICES GROUP, INC.
+        </div>
+        <div class="footer-bottom">
+            <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
+            <a href="http://www.primefacilityservicesgroup.com">www.primefacilityservicesgroup.com</a>
         </div>
     </div>
 
@@ -654,16 +678,6 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <div class="footer-wrapper">
-        <div class="footer-top">
-            PRIME FACILITY SERVICES GROUP, INC.
-        </div>
-        <div class="footer-bottom">
-            <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
-            <a href="http://www.primefacilityservicesgroup.com">www.primefacilityservicesgroup.com</a>
-        </div>
-    </div>
 
 </body>
 </html>
