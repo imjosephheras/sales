@@ -1,0 +1,4 @@
+[2026-01-14 17:00:00] INFO: Calendar System initialized
+[2026-01-14 17:00:01] INFO: User logged in (ID: 1)
+[2026-01-14 17:00:05] DEBUG: Loading calendar data for month: 2026-01
+[2026-01-14 17:00:06] INFO: Calendar rendered successfully
