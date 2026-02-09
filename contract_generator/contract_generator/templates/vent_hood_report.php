@@ -46,23 +46,12 @@ $client_email = $data['Email'] ?? '';
             size: letter;
         }
 
-        @media print {
-            @page {
-                margin: 35mm 18mm 32mm 18mm;
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 11px;
             line-height: 1.2;
             color: #333;
+            margin: 0;
             padding: 0;
         }
 
@@ -72,6 +61,7 @@ $client_email = $data['Email'] ?? '';
             top: -30mm;
             left: 0;
             right: 0;
+            overflow: visible;
         }
 
         .header {
@@ -288,6 +278,7 @@ $client_email = $data['Email'] ?? '';
             bottom: -27mm;
             left: 0;
             right: 0;
+            overflow: visible;
         }
 
         .footer-top {

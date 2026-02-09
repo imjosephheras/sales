@@ -9,28 +9,12 @@
             margin: 3.5cm 2cm 3.2cm 2cm;
         }
 
-        @media print {
-            @page {
-                margin: 3.5cm 2cm 3.2cm 2cm;
-            }
-            body {
-                padding: 0;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: Arial, Helvetica, sans-serif;
             font-size: 10pt;
             color: #000;
             line-height: 1.3;
+            margin: 0;
             padding: 0;
         }
 
@@ -40,28 +24,17 @@
             top: -3cm;
             left: 0;
             right: 0;
+            overflow: visible;
         }
 
-        .header {
-            display: table;
+        .header-table {
             width: 100%;
-            margin-bottom: 0;
+            border-collapse: collapse;
             border-bottom: 3px solid #CC0000;
         }
 
-        .header-left {
-            display: table-cell;
-            width: 45%;
+        .header-table td {
             vertical-align: middle;
-            padding: 10px 0;
-        }
-
-        .header-right {
-            display: table-cell;
-            width: 55%;
-            vertical-align: middle;
-            text-align: left;
-            padding: 10px 0 10px 15px;
         }
 
         .header-logo {
@@ -341,6 +314,7 @@
             bottom: -2.7cm;
             left: 0;
             right: 0;
+            overflow: visible;
         }
 
         .footer-top {
@@ -382,17 +356,19 @@
     }
     ?>
     <div class="header-wrapper">
-        <div class="header">
-            <div class="header-left">
-                <?php if ($logo_base64): ?>
-                <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Facility Services Group">
-                <?php endif; ?>
-            </div>
-            <div class="header-right">
-                <div class="doc-title">JOB WORK ORDER</div>
-                <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
-            </div>
-        </div>
+        <table class="header-table">
+            <tr>
+                <td style="width: 45%; padding: 10px 0;">
+                    <?php if ($logo_base64): ?>
+                    <img class="header-logo" src="<?php echo $logo_base64; ?>" alt="Prime Facility Services Group">
+                    <?php endif; ?>
+                </td>
+                <td style="width: 55%; padding: 10px 0 10px 15px; text-align: left;">
+                    <div class="doc-title">JOB WORK ORDER</div>
+                    <div class="doc-subtitle">"The best services in the industry or nothing at all"</div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <!-- FOOTER - position:fixed makes DOMPDF repeat this on every page -->
