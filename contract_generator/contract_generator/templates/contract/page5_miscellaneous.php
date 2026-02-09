@@ -1,4 +1,6 @@
 <!-- PAGE 5 - SECTION 10: MISCELLANEOUS -->
+<?php include __DIR__ . '/_header.php'; ?>
+<?php include __DIR__ . '/_footer.php'; ?>
 <div class="page-break"></div>
 
 <!-- SECTION 10 -->

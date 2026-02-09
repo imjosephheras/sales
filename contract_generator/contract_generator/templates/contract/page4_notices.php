@@ -1,4 +1,6 @@
 <!-- PAGE 4 - SECTION 9: NOTICES -->
+<?php include __DIR__ . '/_header.php'; ?>
+<?php include __DIR__ . '/_footer.php'; ?>
 <div class="page-break"></div>
 
 <div class="section-number">9. NOTICES</div>
