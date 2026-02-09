@@ -1,6 +1,4 @@
 <!-- PAGE 8 - SECTIONS 15-19: LATE PAYMENT, NO RECRUITMENT, NATURE, HEADINGS, ARBITRATION -->
-<?php include __DIR__ . '/_header.php'; ?>
-<?php include __DIR__ . '/_footer.php'; ?>
 <div class="page-break"></div>
 
 <!-- SECTION 15 -->
