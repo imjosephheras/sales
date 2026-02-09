@@ -204,8 +204,7 @@
             'Company_Name', 'Is_New_Client', 'client_name', 'Client_Name', 'Client_Title',
             'Email', 'Number_Phone', 'Company_Address',
             'Site_Visit_Conducted', 'Invoice_Frequency', 'Contract_Duration',
-            'PriceInput', 'Prime_Quoted_Price', 'Total_Price', 'Currency',
-            'includeJanitorial', 'total18', 'taxes18', 'grand18',
+            'total18', 'taxes18', 'grand18',
             'includeKitchen', 'total19', 'taxes19', 'grand19',
             'inflationAdjustment', 'totalArea', 'buildingsIncluded',
             'startDateServices', 'Site_Observation', 'Additional_Comments'
@@ -221,12 +220,6 @@
                 }
             }
         });
-
-        // Clear scope of work
-        const scopeContainer = document.getElementById('scope-items-container');
-        if (scopeContainer) {
-            scopeContainer.innerHTML = '';
-        }
 
         // Hide services sections
         const janitorialSection = document.getElementById('janitorial-section');
@@ -265,14 +258,6 @@
         setValue('Invoice_Frequency', data.Invoice_Frequency);
         setValue('Contract_Duration', data.Contract_Duration);
 
-        // Section 4: Economic (expanded)
-        setValue('PriceInput', data.PriceInput);
-        setValue('Prime_Quoted_Price', data.Prime_Quoted_Price);
-        setValue('Total_Price', data.Total_Price);
-        setValue('Currency', data.Currency);
-        setValue('includeJanitorial', data.includeJanitorial);
-        setValue('includeKitchen', data.includeKitchen);
-
         // Display Janitorial Services if available
         displayJanitorialServices(data);
 
@@ -288,9 +273,6 @@
         // Section 6: Observations
         setValue('Site_Observation', data.Site_Observation);
         setValue('Additional_Comments', data.Additional_Comments);
-
-        // Scope of Work
-        displayScope(data.Scope_Of_Work);
 
         // Actualizar header
         document.getElementById('doc-title').textContent = data.Company_Name || 'Untitled Request';
