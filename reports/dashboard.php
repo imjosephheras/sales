@@ -66,8 +66,8 @@ foreach ($requests as $row) {
         $effectiveStatus = $row['service_status'];
     }
 
-    // Client name (prefer company_name)
-    $clientName = $row['company_name'] ?: ($row['client_name'] ?: 'Unknown');
+    // Client name (prefer client_name)
+    $clientName = $row['client_name'] ?: ($row['company_name'] ?: 'Unknown');
 
     // Store raw data for client-side filtering
     $rawData[] = [
