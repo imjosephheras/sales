@@ -569,11 +569,22 @@ function syncFormToRequests($pdo, $formId, $formData) {
             $existingRequest = $stmt->fetch();
         }
 
-        // Prepare scope of work as JSON
-        $scopeOfWork = null;
+        // Prepare scope of work as JSON (combine Q28 manual + Q19 service scopes)
+        $allScopeItems = [];
         if (isset($formData['Scope_Of_Work']) && is_array($formData['Scope_Of_Work'])) {
-            $scopeOfWork = json_encode($formData['Scope_Of_Work']);
+            $allScopeItems = array_merge($allScopeItems, $formData['Scope_Of_Work']);
         }
+        if (isset($formData['scope19']) && is_array($formData['scope19'])) {
+            foreach ($formData['scope19'] as $scopeJson) {
+                if (!empty($scopeJson)) {
+                    $decoded = json_decode($scopeJson, true);
+                    if (is_array($decoded)) {
+                        $allScopeItems = array_merge($allScopeItems, $decoded);
+                    }
+                }
+            }
+        }
+        $scopeOfWork = !empty($allScopeItems) ? json_encode($allScopeItems) : null;
 
         // Prepare janitorial arrays as JSON
         $type18 = isset($formData['type18']) && is_array($formData['type18']) ? json_encode($formData['type18']) : null;

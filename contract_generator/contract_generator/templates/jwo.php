@@ -607,7 +607,24 @@
 
     <!-- SCOPE OF WORK -->
     <div class="scope-section">
-        <div class="scope-header">SCOPE OF WORK - <?php echo strtoupper(htmlspecialchars($data['Requested_Service'] ?? 'SERVICE DESCRIPTION')); ?></div>
+        <?php
+        // Build scope header from actual Q19 service types
+        $scopeServiceNames = [];
+        if (!empty($hoodVentServices)) {
+            foreach ($hoodVentServices as $svc) {
+                if (!empty($svc['service_type'])) $scopeServiceNames[] = $svc['service_type'];
+            }
+        }
+        if (!empty($kitchenServices)) {
+            foreach ($kitchenServices as $svc) {
+                if (!empty($svc['service_type'])) $scopeServiceNames[] = $svc['service_type'];
+            }
+        }
+        $scopeHeaderName = !empty($scopeServiceNames)
+            ? implode(' / ', array_unique($scopeServiceNames))
+            : ($data['Requested_Service'] ?? 'SERVICE DESCRIPTION');
+        ?>
+        <div class="scope-header">SCOPE OF WORK &ndash; <?php echo strtoupper(htmlspecialchars($scopeHeaderName)); ?></div>
         <div class="scope-content">
             <h4>WORK TO BE PERFORMED:</h4>
             <?php if (!empty($scopeOfWorkTasks)): ?>
