@@ -554,6 +554,83 @@ if (file_exists($logo_path)) {
         }
 
         /* =============================================
+           SECTION 7 - PRODUCTS
+           ============================================= */
+        .products-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 4px 0;
+        }
+
+        .product-card {
+            width: calc(20% - 7px);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 6px;
+            text-align: center;
+            background: white;
+            transition: box-shadow 0.2s;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 4px;
+        }
+
+        .product-card .product-name {
+            font-size: 8px;
+            font-weight: bold;
+            color: #001f54;
+            margin-bottom: 4px;
+            line-height: 1.2;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-card .qty-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 9px;
+            color: #333;
+        }
+
+        .product-card .qty-input {
+            width: 40px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 2px 4px;
+            font-size: 9px;
+            text-align: center;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .product-card .qty-input:focus {
+            border-color: #001f54;
+            background: #e8f0fe;
+        }
+
+        .section-7-hidden {
+            display: none;
+        }
+
+        .btn-add-products {
+            background: #6c5ce7;
+            color: white;
+        }
+
+        /* =============================================
            PRINT STYLES
            ============================================= */
         @media print {
@@ -620,6 +697,15 @@ if (file_exists($logo_path)) {
                 background: #001f54 !important;
             }
 
+            .product-card .qty-input {
+                border: none !important;
+                background: transparent !important;
+            }
+
+            .section-7-hidden {
+                display: none !important;
+            }
+
             @page {
                 margin: 0;
                 size: letter portrait;
@@ -637,6 +723,7 @@ if (file_exists($logo_path)) {
         VENT HOOD REPORT EDITOR
     </div>
     <div class="toolbar-actions">
+        <button class="toolbar-btn btn-add-products" id="btnToggleProducts" onclick="toggleProductsSection()">Add Products Section</button>
         <button class="toolbar-btn btn-clear" onclick="clearAllFields()">Clear All</button>
         <button class="toolbar-btn btn-print" onclick="window.print()">Print Report</button>
         <?php if ($request_id): ?>
@@ -1016,6 +1103,67 @@ if (file_exists($logo_path)) {
         </div>
     </div>
 
+    <!-- =========================================
+         PAGE 3 - PRODUCTS (hidden by default)
+         ========================================= -->
+    <div class="page section-7-hidden" id="page3">
+        <div class="page-label">Page 3</div>
+
+        <!-- Repeat header for page 3 -->
+        <div class="header">
+            <?php if ($logo_base64): ?>
+                <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Prime Facility Services Group">
+            <?php endif; ?>
+            <div class="report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
+        </div>
+
+        <!-- 7. ACCEPTANCE OF REPAIR PARTS -->
+        <div class="section">
+            <div class="section-header">7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION</div>
+            <div class="section-content">
+                <p style="font-size: 9px; color: #555; margin-bottom: 6px;">If additional parts or products are needed, please indicate the quantity required for each item below.</p>
+                <div class="products-grid">
+                    <?php
+                    $products = [
+                        ['image' => 'Downblast HVAC Exhaust Fans.png', 'name' => 'Downblast HVAC Exhaust Fans'],
+                        ['image' => 'Driploc Grease Containment.png', 'name' => 'DripLoc Grease Containment'],
+                        ['image' => 'Exhaust Fan Grease Box.png', 'name' => 'Exhaust Fan Grease Box'],
+                        ['image' => 'Food Truck Exhaust Fans.png', 'name' => 'Food Truck Exhaust Fans'],
+                        ['image' => 'Grease Catcher.png', 'name' => 'Grease Catcher'],
+                        ['image' => 'Grease containment ring.png', 'name' => 'Grease Containment Ring'],
+                        ['image' => 'Hood Filters with Bottom Hooks – All Brands.png', 'name' => 'Hood Filters with Bottom Hooks – All Brands'],
+                        ['image' => 'Kason Welded Grease Filters.png', 'name' => 'Kason Welded Grease Filters'],
+                        ['image' => 'Mavrik Stainless Steel Hood Filters.jpg', 'name' => 'Mavrik Stainless Steel Hood Filters'],
+                        ['image' => 'Replacement Grease Pillows.png', 'name' => 'Replacement Grease Pillows'],
+                        ['image' => 'Restaurant Upblast Exhaust.png', 'name' => 'Restaurant Upblast Exhaust'],
+                        ['image' => 'Roof Curbs.png', 'name' => 'Roof Curbs'],
+                        ['image' => 'Spark Arrestor Hood Filters.png', 'name' => 'Spark Arrestor Hood Filters'],
+                        ['image' => 'Standard Aluminum Grease Filters.png', 'name' => 'Standard Aluminum Grease Filters'],
+                        ['image' => 'Standard Galvanized Grease Filters.png', 'name' => 'Standard Galvanized Grease Filters'],
+                    ];
+                    foreach ($products as $index => $product):
+                    ?>
+                    <div class="product-card">
+                        <img src="../../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                        <div class="product-name"><?php echo htmlspecialchars($product['name']); ?></div>
+                        <div class="qty-row">
+                            <label>Qty:</label>
+                            <input type="number" class="qty-input" id="product_qty_<?php echo $index; ?>" min="0" value="" placeholder="0">
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 3 FOOTER -->
+        <div class="page-footer">
+            <div class="footer-location">Houston, TX 77063</div>
+            <div class="footer-contact">Phone: 713-338-2553 | www.primefacilityservicesgroup.com</div>
+            <div class="footer-legal">This document is confidential and intended solely for the addressee. &copy; <?php echo date('Y'); ?> Prime Facility Services Group</div>
+        </div>
+    </div>
+
 </div>
 
 <!-- =============================================
@@ -1142,6 +1290,28 @@ if (file_exists($logo_path)) {
     };
 
     // =============================================
+    // TOGGLE PRODUCTS SECTION (Section 7)
+    // =============================================
+    window.toggleProductsSection = function() {
+        var page3 = document.getElementById('page3');
+        var btn = document.getElementById('btnToggleProducts');
+        if (page3.classList.contains('section-7-hidden')) {
+            page3.classList.remove('section-7-hidden');
+            btn.textContent = 'Remove Products Section';
+            btn.style.background = '#d63031';
+            page3.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            page3.classList.add('section-7-hidden');
+            btn.textContent = 'Add Products Section';
+            btn.style.background = '#6c5ce7';
+            // Clear all qty inputs when hiding
+            page3.querySelectorAll('.qty-input').forEach(function(input) {
+                input.value = '';
+            });
+        }
+    };
+
+    // =============================================
     // CLEAR ALL FIELDS
     // =============================================
     window.clearAllFields = function() {
@@ -1166,6 +1336,15 @@ if (file_exists($logo_path)) {
         Object.keys(signaturePads).forEach(function(id) {
             clearSignature(id);
         });
+
+        // Hide products section and reset button
+        var page3 = document.getElementById('page3');
+        if (page3 && !page3.classList.contains('section-7-hidden')) {
+            page3.classList.add('section-7-hidden');
+            var btn = document.getElementById('btnToggleProducts');
+            btn.textContent = 'Add Products Section';
+            btn.style.background = '#6c5ce7';
+        }
     };
 
     // =============================================
