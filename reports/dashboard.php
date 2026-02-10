@@ -19,7 +19,11 @@ $stmt = $pdo->query("
         total_cost,
         seller,
         created_at,
-        Work_Date
+        Work_Date,
+        client_name,
+        company_name,
+        status,
+        service_status
     FROM forms
     ORDER BY Work_Date DESC, created_at DESC
 ");
@@ -42,6 +46,7 @@ $salesByYear = [];
 $requestTypes = [];
 $requestServices = [];
 $sellers = [];
+$topClients = [];
 
 // Store raw data per request for client-side filtering
 $rawData = [];
@@ -52,6 +57,17 @@ foreach ($requests as $row) {
     // Use Work_Date if available, otherwise fallback to created_at
     $dateValue = !empty($row['Work_Date']) ? $row['Work_Date'] : $row['created_at'];
     $date = new DateTime($dateValue);
+
+    // Determine effective status
+    $effectiveStatus = 'pending';
+    if (strtolower($row['status'] ?? '') === 'cancelled') {
+        $effectiveStatus = 'cancelled';
+    } elseif (!empty($row['service_status'])) {
+        $effectiveStatus = $row['service_status'];
+    }
+
+    // Client name (prefer company_name)
+    $clientName = $row['company_name'] ?: ($row['client_name'] ?: 'Unknown');
 
     // Store raw data for client-side filtering
     $rawData[] = [
@@ -64,8 +80,16 @@ foreach ($requests as $row) {
         'monthKey' => $date->format('Y-m'),
         'monthLabel' => $date->format('M Y'),
         'yearKey' => $date->format('Y'),
-        'yearLabel' => $date->format('Y')
+        'yearLabel' => $date->format('Y'),
+        'client' => $clientName,
+        'service_status' => $effectiveStatus
     ];
+
+    // Top clients aggregation
+    if (!isset($topClients[$clientName])) {
+        $topClients[$clientName] = 0;
+    }
+    $topClients[$clientName]++;
 
     // Sales by week (ISO week)
     $weekKey = $date->format('Y-W');
@@ -121,6 +145,8 @@ ksort($salesByMonth);
 ksort($salesByYear);
 arsort($requestServices);
 arsort($sellers);
+arsort($topClients);
+$topClients = array_slice($topClients, 0, 5, true);
 
 // Keep only last 12 weeks/months
 $salesByWeek = array_slice($salesByWeek, -12, 12, true);
@@ -379,6 +405,73 @@ $chartRawData = json_encode($rawData);
             background: linear-gradient(90deg, #003080, #0066cc);
             border-radius: 4px;
         }
+
+        /* Status Filter Chips */
+        .status-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .status-chip {
+            padding: 4px 10px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .status-chip:hover {
+            background: #f1f5f9;
+        }
+
+        .status-chip.active {
+            color: white;
+            border-color: transparent;
+        }
+
+        .status-chip.active[data-status=""] { background: #003080; }
+        .status-chip.active[data-status="pending"] { background: #d97706; }
+        .status-chip.active[data-status="scheduled"] { background: #2563eb; }
+        .status-chip.active[data-status="confirmed"] { background: #7c3aed; }
+        .status-chip.active[data-status="in_progress"] { background: #0891b2; }
+        .status-chip.active[data-status="completed"] { background: #16a34a; }
+        .status-chip.active[data-status="not_completed"] { background: #dc2626; }
+        .status-chip.active[data-status="cancelled"] { background: #6b7280; }
+
+        /* Top Clients Mini List */
+        .top-clients-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .top-client-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+        }
+
+        .top-client-name {
+            color: #334155;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 180px;
+        }
+
+        .top-client-count {
+            color: #9333ea;
+            font-weight: 700;
+            font-size: 0.85rem;
+            min-width: 20px;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -410,17 +503,36 @@ $chartRawData = json_encode($rawData);
         </div>
         <div class="summary-card">
             <div class="card-icon purple">
-                <i class="fas fa-tags"></i>
+                <i class="fas fa-users"></i>
             </div>
-            <div class="card-value"><?= count($requestTypes) ?></div>
-            <div class="card-label">Request Types</div>
+            <div class="card-label" style="font-weight:600; margin-bottom:10px; font-size:0.95rem; color:#1e293b;">Top Clients</div>
+            <div id="topClientsList" class="top-clients-list">
+                <?php foreach ($topClients as $client => $count): ?>
+                <div class="top-client-item">
+                    <span class="top-client-name" title="<?= htmlspecialchars($client) ?>"><?= htmlspecialchars($client) ?></span>
+                    <span class="top-client-count"><?= $count ?></span>
+                </div>
+                <?php endforeach; ?>
+                <?php if (empty($topClients)): ?>
+                <div class="top-client-item"><span class="top-client-name" style="color:#94a3b8; font-style:italic;">No data</span></div>
+                <?php endif; ?>
+            </div>
         </div>
         <div class="summary-card">
             <div class="card-icon orange">
-                <i class="fas fa-concierge-bell"></i>
+                <i class="fas fa-filter"></i>
             </div>
-            <div class="card-value"><?= count($requestServices) ?></div>
-            <div class="card-label">Service Types</div>
+            <div class="card-label" style="font-weight:600; margin-bottom:10px; font-size:0.95rem; color:#1e293b;">Status</div>
+            <div id="statusFilters" class="status-filters">
+                <button class="status-chip active" data-status="" onclick="filterByStatus(null)">All</button>
+                <button class="status-chip" data-status="pending" onclick="filterByStatus('pending')">Pending</button>
+                <button class="status-chip" data-status="scheduled" onclick="filterByStatus('scheduled')">Scheduled</button>
+                <button class="status-chip" data-status="confirmed" onclick="filterByStatus('confirmed')">Confirmed</button>
+                <button class="status-chip" data-status="in_progress" onclick="filterByStatus('in_progress')">In Progress</button>
+                <button class="status-chip" data-status="completed" onclick="filterByStatus('completed')">Completed</button>
+                <button class="status-chip" data-status="not_completed" onclick="filterByStatus('not_completed')">Not Completed</button>
+                <button class="status-chip" data-status="cancelled" onclick="filterByStatus('cancelled')">Cancelled</button>
+            </div>
         </div>
     </div>
 
@@ -497,6 +609,7 @@ $chartRawData = json_encode($rawData);
         // Current state
         let currentPeriod = 'month';
         let activeSeller = null;
+        let activeStatus = null;
 
         // Colors for charts
         const colors = {
@@ -507,8 +620,14 @@ $chartRawData = json_encode($rawData);
 
         // ============ SELLER FILTER LOGIC ============
         function getFilteredData() {
-            if (!activeSeller) return rawData;
-            return rawData.filter(item => item.seller === activeSeller);
+            let data = rawData;
+            if (activeSeller) {
+                data = data.filter(item => item.seller === activeSeller);
+            }
+            if (activeStatus) {
+                data = data.filter(item => item.service_status === activeStatus);
+            }
+            return data;
         }
 
         function aggregateSalesData(data, keyField, labelField) {
@@ -559,14 +678,13 @@ $chartRawData = json_encode($rawData);
             // Update summary cards
             const totalSales = filtered.reduce((sum, item) => sum + item.total, 0);
             const totalReqs = filtered.length;
-            const uniqueTypes = new Set(filtered.map(item => item.request_type)).size;
-            const uniqueServices = new Set(filtered.map(item => item.requested_service)).size;
 
             const cardValues = document.querySelectorAll('.summary-card .card-value');
             cardValues[0].textContent = '$' + totalSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             cardValues[1].textContent = totalReqs;
-            cardValues[2].textContent = uniqueTypes;
-            cardValues[3].textContent = uniqueServices;
+
+            // Rebuild top clients list with filtered data
+            rebuildTopClients(filtered);
 
             // Rebuild sales chart
             showSalesChart(currentPeriod);
@@ -762,6 +880,41 @@ $chartRawData = json_encode($rawData);
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // ============ STATUS FILTER ============
+        function filterByStatus(status) {
+            activeStatus = status;
+            document.querySelectorAll('.status-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.getAttribute('data-status') === (status || '')) {
+                    chip.classList.add('active');
+                }
+            });
+            refreshAllCharts();
+        }
+
+        // ============ TOP CLIENTS REBUILD ============
+        function rebuildTopClients(filtered) {
+            const clients = {};
+            filtered.forEach(item => {
+                if (!clients[item.client]) clients[item.client] = 0;
+                clients[item.client]++;
+            });
+            const sorted = Object.entries(clients).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            const container = document.getElementById('topClientsList');
+            if (sorted.length === 0) {
+                container.innerHTML = '<div class="top-client-item"><span class="top-client-name" style="color:#94a3b8; font-style:italic;">No data</span></div>';
+                return;
+            }
+            let html = '';
+            sorted.forEach(([name, count]) => {
+                html += `<div class="top-client-item">
+                    <span class="top-client-name" title="${escapeHtml(name)}">${escapeHtml(name)}</span>
+                    <span class="top-client-count">${count}</span>
+                </div>`;
+            });
+            container.innerHTML = html;
         }
     </script>
 </body>
