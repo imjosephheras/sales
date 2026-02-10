@@ -9,6 +9,20 @@ header('Content-Type: application/json');
 require_once '../config/db_config.php';
 
 try {
+    // Pagination parameters
+    $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+    $limit = isset($_GET['limit']) ? max(1, min(100, intval($_GET['limit']))) : 20;
+    $offset = ($page - 1) * $limit;
+
+    // Get total count first
+    $countSql = "SELECT COUNT(*) as total
+                 FROM requests r
+                 WHERE r.status IN ('pending', 'in_progress', 'draft')";
+    $countStmt = $pdo->prepare($countSql);
+    $countStmt->execute();
+    $totalCount = (int)$countStmt->fetch(PDO::FETCH_ASSOC)['total'];
+    $totalPages = max(1, ceil($totalCount / $limit));
+
     // Get pending requests including drafts, ordered by priority and date
     $sql = "SELECT
                 r.id,
@@ -51,9 +65,12 @@ try {
             ORDER BY
                 FIELD(r.status, 'draft', 'pending', 'in_progress'),
                 FIELD(r.Priority, 'Urgent', 'High', 'Normal', 'Low'),
-                r.created_at DESC";
+                r.created_at DESC
+            LIMIT :limit OFFSET :offset";
 
     $stmt = $pdo->prepare($sql);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -156,7 +173,13 @@ try {
     echo json_encode([
         'success' => true,
         'data' => $requests,
-        'count' => count($requests)
+        'count' => count($requests),
+        'pagination' => [
+            'page' => $page,
+            'limit' => $limit,
+            'total_count' => $totalCount,
+            'total_pages' => $totalPages
+        ]
     ]);
 
 } catch (PDOException $e) {

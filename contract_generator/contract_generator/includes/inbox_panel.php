@@ -23,6 +23,9 @@
                 <p>Loading pending tasks...</p>
             </div>
         </div>
+
+        <!-- Pagination -->
+        <div class="pagination-wrapper" id="pagination-container" style="display: none;"></div>
     </div>
 
     <!-- ========================================= -->

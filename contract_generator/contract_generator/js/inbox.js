@@ -14,6 +14,12 @@
     let completedTasks = [];
     let selectedTaskId = null;
 
+    // Pagination state
+    let currentPage = 1;
+    const itemsPerPage = 20;
+    let totalItems = 0;
+    let totalPages = 1;
+
     // ========================================
     // INITIALIZATION
     // ========================================
@@ -30,7 +36,11 @@
     // LOAD PENDING TASKS
     // ========================================
 
-    function loadPendingTasks() {
+    function loadPendingTasks(page) {
+        if (page !== undefined) {
+            currentPage = page;
+        }
+
         const inboxList = document.getElementById('inbox-list');
 
         // Show loading
@@ -51,13 +61,20 @@
                 });
         };
 
-        // Fetch pending requests
-        safeFetch('controllers/get_pending_requests.php')
+        // Fetch pending requests with pagination
+        safeFetch(`controllers/get_pending_requests.php?page=${currentPage}&limit=${itemsPerPage}`)
         .then(requestsData => {
             let allItems = [];
 
             // Add requests if successful
             if (requestsData.success && requestsData.data) {
+                // Update pagination state from server response
+                if (requestsData.pagination) {
+                    totalItems = requestsData.pagination.total_count;
+                    totalPages = requestsData.pagination.total_pages;
+                    currentPage = requestsData.pagination.page;
+                }
+
                 requestsData.data.forEach(request => {
                     allItems.push({
                         ...request,
@@ -69,16 +86,10 @@
                 });
             }
 
-            // Sort by date (newest first)
-            allItems.sort((a, b) => {
-                const dateA = new Date(a.sort_date || 0);
-                const dateB = new Date(b.sort_date || 0);
-                return dateB - dateA;
-            });
-
             currentTasks = allItems;
             renderPendingTasks(allItems);
-            updatePendingCount(allItems.length);
+            updatePendingCount(totalItems);
+            renderPagination();
         })
         .catch(error => {
             console.error('Error:', error);
@@ -582,6 +593,97 @@
     }
 
     // ========================================
+    // PAGINATION
+    // ========================================
+
+    function goToPage(page) {
+        if (page < 1 || page > totalPages || page === currentPage) return;
+        loadPendingTasks(page);
+
+        // Scroll inbox list to top
+        const inboxList = document.getElementById('inbox-list');
+        if (inboxList) inboxList.scrollTop = 0;
+    }
+
+    function renderPagination() {
+        const container = document.getElementById('pagination-container');
+        if (!container) return;
+
+        // Hide pagination if only one page
+        if (totalPages <= 1) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block';
+
+        const startItem = ((currentPage - 1) * itemsPerPage) + 1;
+        const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+        // Build page numbers with ellipsis
+        let pages = [];
+        const maxVisible = 5;
+
+        if (totalPages <= maxVisible + 2) {
+            // Show all pages
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            // Always show first page
+            pages.push(1);
+
+            let start = Math.max(2, currentPage - 1);
+            let end = Math.min(totalPages - 1, currentPage + 1);
+
+            // Adjust range to always show maxVisible middle pages when near edges
+            if (currentPage <= 3) {
+                start = 2;
+                end = Math.min(maxVisible, totalPages - 1);
+            } else if (currentPage >= totalPages - 2) {
+                start = Math.max(2, totalPages - maxVisible + 1);
+                end = totalPages - 1;
+            }
+
+            if (start > 2) pages.push('...');
+            for (let i = start; i <= end; i++) pages.push(i);
+            if (end < totalPages - 1) pages.push('...');
+
+            // Always show last page
+            pages.push(totalPages);
+        }
+
+        const pageButtons = pages.map(p => {
+            if (p === '...') {
+                return '<span class="pagination-ellipsis">...</span>';
+            }
+            const activeClass = p === currentPage ? ' active' : '';
+            return `<button class="pagination-btn pagination-num${activeClass}" data-page="${p}">${p}</button>`;
+        }).join('');
+
+        container.innerHTML = `
+            <div class="pagination-info">
+                Showing ${startItem.toLocaleString()}-${endItem.toLocaleString()} of ${totalItems.toLocaleString()} orders
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn pagination-arrow" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i> Prev
+                </button>
+                ${pageButtons}
+                <button class="pagination-btn pagination-arrow" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        `;
+
+        // Event delegation for pagination buttons
+        container.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const page = parseInt(this.dataset.page);
+                if (!isNaN(page)) goToPage(page);
+            });
+        });
+    }
+
+    // ========================================
     // UTILITY FUNCTIONS
     // ========================================
 
@@ -655,7 +757,7 @@
 
     function refreshAll() {
         console.log('🔄 Refreshing all inbox data...');
-        loadPendingTasks();
+        loadPendingTasks(currentPage);
         loadCompletedRequests();
     }
 
