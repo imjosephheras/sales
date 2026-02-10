@@ -345,6 +345,39 @@ $client_email = $data['Email'] ?? '';
             text-align: center;
         }
 
+        /* Section 7 - Products */
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .products-table td {
+            width: 20%;
+            padding: 4px;
+            text-align: center;
+            vertical-align: top;
+            border: 1px solid #eee;
+        }
+
+        .products-table img {
+            width: 80px;
+            height: 60px;
+        }
+
+        .product-name-cell {
+            font-size: 7px;
+            font-weight: bold;
+            color: #001f54;
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+
+        .product-qty-cell {
+            font-size: 8px;
+            color: #333;
+            margin-top: 2px;
+        }
+
     </style>
 </head>
 <body>
@@ -668,6 +701,81 @@ $client_email = $data['Email'] ?? '';
             </div>
         </div>
     </div>
+
+    <?php
+    // Section 7 - Products (only shown if product data is provided)
+    $products_list = [
+        ['image' => 'Downblast HVAC Exhaust Fans.png', 'name' => 'Downblast HVAC Exhaust Fans'],
+        ['image' => 'Driploc Grease Containment.png', 'name' => 'DripLoc Grease Containment'],
+        ['image' => 'Exhaust Fan Grease Box.png', 'name' => 'Exhaust Fan Grease Box'],
+        ['image' => 'Food Truck Exhaust Fans.png', 'name' => 'Food Truck Exhaust Fans'],
+        ['image' => 'Grease Catcher.png', 'name' => 'Grease Catcher'],
+        ['image' => 'Grease containment ring.png', 'name' => 'Grease Containment Ring'],
+        ['image' => 'Hood Filters with Bottom Hooks – All Brands.png', 'name' => 'Hood Filters with Bottom Hooks – All Brands'],
+        ['image' => 'Kason Welded Grease Filters.png', 'name' => 'Kason Welded Grease Filters'],
+        ['image' => 'Mavrik Stainless Steel Hood Filters.jpg', 'name' => 'Mavrik Stainless Steel Hood Filters'],
+        ['image' => 'Replacement Grease Pillows.png', 'name' => 'Replacement Grease Pillows'],
+        ['image' => 'Restaurant Upblast Exhaust.png', 'name' => 'Restaurant Upblast Exhaust'],
+        ['image' => 'Roof Curbs.png', 'name' => 'Roof Curbs'],
+        ['image' => 'Spark Arrestor Hood Filters.png', 'name' => 'Spark Arrestor Hood Filters'],
+        ['image' => 'Standard Aluminum Grease Filters.png', 'name' => 'Standard Aluminum Grease Filters'],
+        ['image' => 'Standard Galvanized Grease Filters.png', 'name' => 'Standard Galvanized Grease Filters'],
+    ];
+
+    $show_products = isset($data['show_products']) && $data['show_products'];
+    if ($show_products):
+    ?>
+    <!-- PAGE BREAK for Section 7 -->
+    <div class="page-break"></div>
+
+    <!-- 7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION -->
+    <div class="section">
+        <div class="section-header">7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION</div>
+        <div class="section-content">
+            <p style="font-size: 9px; color: #555; margin-bottom: 4px;">If additional parts or products are needed, please indicate the quantity required for each item below.</p>
+            <table class="products-table">
+                <?php
+                $cols = 5;
+                $total = count($products_list);
+                for ($i = 0; $i < $total; $i += $cols):
+                ?>
+                <tr>
+                    <?php for ($j = $i; $j < $i + $cols && $j < $total; $j++):
+                        $img_path = __DIR__ . '/../../../Images/hoodvent/' . $products_list[$j]['image'];
+                        $ext = pathinfo($products_list[$j]['image'], PATHINFO_EXTENSION);
+                        $mime = ($ext === 'jpg' || $ext === 'jpeg') ? 'image/jpeg' : 'image/png';
+                        $img_b64 = '';
+                        if (file_exists($img_path)) {
+                            $img_b64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($img_path));
+                        }
+                        $qty_key = 'product_qty_' . $j;
+                        $qty_val = $data[$qty_key] ?? '';
+                    ?>
+                    <td>
+                        <?php if ($img_b64): ?>
+                            <img src="<?php echo $img_b64; ?>" alt="<?php echo htmlspecialchars($products_list[$j]['name']); ?>">
+                        <?php endif; ?>
+                        <div class="product-name-cell"><?php echo htmlspecialchars($products_list[$j]['name']); ?></div>
+                        <div class="product-qty-cell">Qty: <?php echo htmlspecialchars($qty_val ?: '____'); ?></div>
+                    </td>
+                    <?php endfor; ?>
+                    <?php
+                    // Fill empty cells if last row is incomplete
+                    $remaining = ($i + $cols) - $total;
+                    if ($remaining > 0 && $i + $cols > $total):
+                        for ($k = 0; $k < $remaining; $k++):
+                    ?>
+                    <td></td>
+                    <?php
+                        endfor;
+                    endif;
+                    ?>
+                </tr>
+                <?php endfor; ?>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
 
 
 </body>
