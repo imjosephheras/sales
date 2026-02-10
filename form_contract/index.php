@@ -382,13 +382,25 @@ $lang = $_SESSION["lang"] ?? "en";
     margin-bottom: 8px;
 }
 
-.form-card-id {
-    font-size: 12px;
+.form-card-business {
+    font-size: 13px;
     font-weight: 700;
     color: #001f54;
+    max-width: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.form-card-wo {
+    font-size: 11px;
+    font-weight: 600;
+    color: #4a5568;
     background: white;
-    padding: 4px 10px;
-    border-radius: 12px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    display: inline-block;
 }
 
 .form-card-date {
@@ -1427,9 +1439,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     card.innerHTML = `
       <div class="form-card-header">
-        <div class="form-card-id">#${formData.form_id}</div>
+        <div class="form-card-business">${formData.company_name || 'No Business'}</div>
         <div class="form-card-date">${formattedDate}</div>
       </div>
+      <div class="form-card-wo">WO #${formData.order_number || '---'}</div>
       <div class="form-card-client">${formData.client_name || 'No Client'}</div>
       <div class="form-card-service">${formData.requested_service || 'No Service'}</div>
       <div class="form-card-footer">
