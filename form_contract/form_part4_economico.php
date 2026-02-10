@@ -303,6 +303,32 @@ function updatePriceLabel() {
     font-style: italic;
     padding: 6px;
   }
+  /* Merged bundle price cell */
+  .bundle-price-merged {
+    vertical-align: middle;
+    background: linear-gradient(135deg, #e8f4fd 0%, #d0e8fa 100%);
+    border-left: 3px solid #0066cc;
+    text-align: center;
+  }
+  .bundle-price-merged input[type="number"] {
+    font-size: 16px;
+    font-weight: 700;
+    color: #001f54;
+    text-align: center;
+    border: 2px solid #0066cc;
+    border-radius: 6px;
+    background: #fff;
+    padding: 8px;
+  }
+  .bundle-price-label {
+    display: block;
+    font-size: 11px;
+    color: #0066cc;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
   .totals18-container {
     margin-top: 25px;
     display: flex;
@@ -719,11 +745,15 @@ function calcTotals18() {
   let total = 0;
 
   document.querySelectorAll(".subtotal18").forEach(input => {
-    // Only count visible (non-hidden) subtotal inputs
-    if (input.style.display !== "none") {
-      const val = parseFloat(input.value);
-      if (!isNaN(val)) total += val;
-    }
+    // Skip secondary bundle rows (their price is included in the primary row)
+    const row = input.closest("tr");
+    if (row && row.classList.contains("bundle-row-secondary")) return;
+
+    // Also skip if input is explicitly hidden (legacy support)
+    if (input.style.display === "none") return;
+
+    const val = parseFloat(input.value);
+    if (!isNaN(val)) total += val;
   });
 
   document.getElementById("total18").value = "$" + total.toFixed(2);
@@ -746,15 +776,20 @@ function bundleSelectedRows18() {
 
   // Collect selected rows and check none are already bundled
   const rows = [];
+  let hasExisting = false;
   checked.forEach(chk => {
     const row = chk.closest("tr");
     const existing = row.querySelector(".bundleGroup18").value;
     if (existing) {
-      alert("<?= ($lang=='en') ? 'Some selected rows are already bundled. Unbundle them first.' : 'Algunas filas ya están unidas. Sepárelas primero.'; ?>");
-      return;
+      hasExisting = true;
     }
     rows.push(row);
   });
+
+  if (hasExisting) {
+    alert("<?= ($lang=='en') ? 'Some selected rows are already bundled. Unbundle them first.' : 'Algunas filas ya están unidas. Sepárelas primero.'; ?>");
+    return;
+  }
 
   if (rows.length < 2) return;
 
@@ -778,20 +813,23 @@ function bundleSelectedRows18() {
     const subtotalInput = row.querySelector(".subtotal18");
 
     if (idx === 0) {
-      // Primary row: shows the combined price
+      // Primary row: merged price cell with rowspan
       row.classList.add("bundle-row-primary");
+      subtotalCell.rowSpan = rows.length;
+      subtotalCell.classList.add("bundle-price-merged");
       subtotalInput.value = sum.toFixed(2);
+
+      // Add bundle price label
+      const label = document.createElement("span");
+      label.className = "bundle-price-label";
+      label.textContent = "<?= ($lang=='en') ? 'Bundle Price' : 'Precio Unido'; ?>";
+      subtotalCell.insertBefore(label, subtotalInput);
     } else {
-      // Secondary rows: hide subtotal, show "Included" label
+      // Secondary rows: hide subtotal cell entirely (covered by rowspan)
       row.classList.add("bundle-row-secondary");
       row.dataset.originalSubtotal = subtotalInput.value || "0";
       subtotalInput.value = "";
-      subtotalInput.style.display = "none";
-
-      const label = document.createElement("span");
-      label.className = "bundle-included-label";
-      label.textContent = "<?= ($lang=='en') ? 'Included' : 'Incluido'; ?>";
-      subtotalCell.appendChild(label);
+      subtotalCell.style.display = "none";
     }
 
     // Uncheck
@@ -844,16 +882,27 @@ function unbundleGroup18(groupId) {
 
       const subtotalCell = row.querySelector(".subtotal-cell18");
       const subtotalInput = row.querySelector(".subtotal18");
-      const label = subtotalCell.querySelector(".bundle-included-label");
 
-      if (label) {
-        label.remove();
-        subtotalInput.style.display = "";
-        // Restore original subtotal if available
-        if (row.dataset.originalSubtotal) {
-          subtotalInput.value = row.dataset.originalSubtotal !== "0" ? row.dataset.originalSubtotal : "";
-          delete row.dataset.originalSubtotal;
-        }
+      // Remove bundle price label if present
+      const bundleLabel = subtotalCell.querySelector(".bundle-price-label");
+      if (bundleLabel) bundleLabel.remove();
+
+      // Remove legacy included label if present
+      const includedLabel = subtotalCell.querySelector(".bundle-included-label");
+      if (includedLabel) includedLabel.remove();
+
+      // Reset rowspan and merged styling on primary
+      subtotalCell.removeAttribute("rowspan");
+      subtotalCell.classList.remove("bundle-price-merged");
+
+      // Restore hidden cells on secondary rows
+      subtotalCell.style.display = "";
+      subtotalInput.style.display = "";
+
+      // Restore original subtotal if available
+      if (row.dataset.originalSubtotal) {
+        subtotalInput.value = row.dataset.originalSubtotal !== "0" ? row.dataset.originalSubtotal : "";
+        delete row.dataset.originalSubtotal;
       }
     }
   });
@@ -885,19 +934,24 @@ function applyBundleVisuals18() {
       const subtotalInput = row.querySelector(".subtotal18");
 
       if (idx === 0) {
+        // Primary row: merged price cell with rowspan
         row.classList.add("bundle-row-primary");
+        subtotalCell.rowSpan = groupRows.length;
+        subtotalCell.classList.add("bundle-price-merged");
+
+        // Add bundle price label if not present
+        if (!subtotalCell.querySelector(".bundle-price-label")) {
+          const label = document.createElement("span");
+          label.className = "bundle-price-label";
+          label.textContent = "<?= ($lang=='en') ? 'Bundle Price' : 'Precio Unido'; ?>";
+          subtotalCell.insertBefore(label, subtotalInput);
+        }
       } else {
+        // Secondary rows: hide subtotal cell (covered by rowspan)
         row.classList.add("bundle-row-secondary");
         row.dataset.originalSubtotal = subtotalInput.value || "0";
         subtotalInput.value = "";
-        subtotalInput.style.display = "none";
-
-        if (!subtotalCell.querySelector(".bundle-included-label")) {
-          const label = document.createElement("span");
-          label.className = "bundle-included-label";
-          label.textContent = "<?= ($lang=='en') ? 'Included' : 'Incluido'; ?>";
-          subtotalCell.appendChild(label);
-        }
+        subtotalCell.style.display = "none";
       }
     });
   }
@@ -1537,10 +1591,15 @@ function calcTotals19() {
   let total = 0;
 
   document.querySelectorAll(".subtotal19").forEach(input => {
-    if (input.style.display !== "none") {
-      const val = parseFloat(input.value);
-      if (!isNaN(val)) total += val;
-    }
+    // Skip secondary bundle rows (their price is included in the primary row)
+    const row = input.closest("tr");
+    if (row && row.classList.contains("bundle-row-secondary")) return;
+
+    // Also skip if input is explicitly hidden (legacy support)
+    if (input.style.display === "none") return;
+
+    const val = parseFloat(input.value);
+    if (!isNaN(val)) total += val;
   });
 
   document.getElementById("total19").value = "$" + total.toFixed(2);
@@ -1562,15 +1621,20 @@ function bundleSelectedRows19() {
   }
 
   const rows = [];
+  let hasExisting = false;
   checked.forEach(chk => {
     const row = chk.closest("tr");
     const existing = row.querySelector(".bundleGroup19").value;
     if (existing) {
-      alert("<?= ($lang=='en') ? 'Some selected rows are already bundled. Unbundle them first.' : 'Algunas filas ya están unidas. Sepárelas primero.'; ?>");
-      return;
+      hasExisting = true;
     }
     rows.push(row);
   });
+
+  if (hasExisting) {
+    alert("<?= ($lang=='en') ? 'Some selected rows are already bundled. Unbundle them first.' : 'Algunas filas ya están unidas. Sepárelas primero.'; ?>");
+    return;
+  }
 
   if (rows.length < 2) return;
 
@@ -1591,18 +1655,23 @@ function bundleSelectedRows19() {
     const subtotalInput = row.querySelector(".subtotal19");
 
     if (idx === 0) {
+      // Primary row: merged price cell with rowspan
       row.classList.add("bundle-row-primary");
+      subtotalCell.rowSpan = rows.length;
+      subtotalCell.classList.add("bundle-price-merged");
       subtotalInput.value = sum.toFixed(2);
+
+      // Add bundle price label
+      const label = document.createElement("span");
+      label.className = "bundle-price-label";
+      label.textContent = "<?= ($lang=='en') ? 'Bundle Price' : 'Precio Unido'; ?>";
+      subtotalCell.insertBefore(label, subtotalInput);
     } else {
+      // Secondary rows: hide subtotal cell entirely (covered by rowspan)
       row.classList.add("bundle-row-secondary");
       row.dataset.originalSubtotal = subtotalInput.value || "0";
       subtotalInput.value = "";
-      subtotalInput.style.display = "none";
-
-      const label = document.createElement("span");
-      label.className = "bundle-included-label";
-      label.textContent = "<?= ($lang=='en') ? 'Included' : 'Incluido'; ?>";
-      subtotalCell.appendChild(label);
+      subtotalCell.style.display = "none";
     }
 
     row.querySelector(".bundle-check19").checked = false;
@@ -1651,15 +1720,27 @@ function unbundleGroup19(groupId) {
 
       const subtotalCell = row.querySelector(".subtotal-cell19");
       const subtotalInput = row.querySelector(".subtotal19");
-      const label = subtotalCell.querySelector(".bundle-included-label");
 
-      if (label) {
-        label.remove();
-        subtotalInput.style.display = "";
-        if (row.dataset.originalSubtotal) {
-          subtotalInput.value = row.dataset.originalSubtotal !== "0" ? row.dataset.originalSubtotal : "";
-          delete row.dataset.originalSubtotal;
-        }
+      // Remove bundle price label if present
+      const bundleLabel = subtotalCell.querySelector(".bundle-price-label");
+      if (bundleLabel) bundleLabel.remove();
+
+      // Remove legacy included label if present
+      const includedLabel = subtotalCell.querySelector(".bundle-included-label");
+      if (includedLabel) includedLabel.remove();
+
+      // Reset rowspan and merged styling on primary
+      subtotalCell.removeAttribute("rowspan");
+      subtotalCell.classList.remove("bundle-price-merged");
+
+      // Restore hidden cells on secondary rows
+      subtotalCell.style.display = "";
+      subtotalInput.style.display = "";
+
+      // Restore original subtotal if available
+      if (row.dataset.originalSubtotal) {
+        subtotalInput.value = row.dataset.originalSubtotal !== "0" ? row.dataset.originalSubtotal : "";
+        delete row.dataset.originalSubtotal;
       }
     }
   });
@@ -1689,19 +1770,24 @@ function applyBundleVisuals19() {
       const subtotalInput = row.querySelector(".subtotal19");
 
       if (idx === 0) {
+        // Primary row: merged price cell with rowspan
         row.classList.add("bundle-row-primary");
+        subtotalCell.rowSpan = groupRows.length;
+        subtotalCell.classList.add("bundle-price-merged");
+
+        // Add bundle price label if not present
+        if (!subtotalCell.querySelector(".bundle-price-label")) {
+          const label = document.createElement("span");
+          label.className = "bundle-price-label";
+          label.textContent = "<?= ($lang=='en') ? 'Bundle Price' : 'Precio Unido'; ?>";
+          subtotalCell.insertBefore(label, subtotalInput);
+        }
       } else {
+        // Secondary rows: hide subtotal cell (covered by rowspan)
         row.classList.add("bundle-row-secondary");
         row.dataset.originalSubtotal = subtotalInput.value || "0";
         subtotalInput.value = "";
-        subtotalInput.style.display = "none";
-
-        if (!subtotalCell.querySelector(".bundle-included-label")) {
-          const label = document.createElement("span");
-          label.className = "bundle-included-label";
-          label.textContent = "<?= ($lang=='en') ? 'Included' : 'Incluido'; ?>";
-          subtotalCell.appendChild(label);
-        }
+        subtotalCell.style.display = "none";
       }
     });
   }
