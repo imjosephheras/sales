@@ -71,8 +71,8 @@ function updatePriceLabel() {
 
   <div id="section18Container" style="display:none; margin-top:20px;">
 
-    <!-- ADD / REMOVE -->
-    <div style="margin-bottom:15px;">
+    <!-- ADD / REMOVE / BUNDLE -->
+    <div style="margin-bottom:15px; display:flex; flex-wrap:wrap; gap:8px;">
       <button type="button" class="btn18 addRow18" onclick="addRow18()">
         ➕ <?= ($lang=='en') ? "Add Row" : "Agregar Fila"; ?>
       </button>
@@ -80,12 +80,21 @@ function updatePriceLabel() {
       <button type="button" class="btn18 removeRow18" onclick="removeRow18()">
         🗑 <?= ($lang=='en') ? "Remove" : "Eliminar"; ?>
       </button>
+
+      <button type="button" class="btn18 bundleBtn18" onclick="bundleSelectedRows18()">
+        🔗 <?= ($lang=='en') ? "Bundle Price" : "Unir Precio"; ?>
+      </button>
+
+      <button type="button" class="btn18 unbundleBtn18" onclick="unbundleSelectedRows18()">
+        ✂️ <?= ($lang=='en') ? "Unbundle" : "Separar Precio"; ?>
+      </button>
     </div>
 
     <!-- TABLE -->
     <table class="service-table18">
       <thead>
         <tr>
+          <th class="th-check">&nbsp;</th>
           <th><?= ($lang=='en') ? "Type of Services" : "Tipo de Servicio"; ?></th>
           <th><?= ($lang=='en') ? "Service Time" : "Tiempo de Servicio"; ?></th>
           <th><?= ($lang=='en') ? "Frequency" : "Frecuencia"; ?></th>
@@ -98,6 +107,12 @@ function updatePriceLabel() {
 
         <!-- ONE INITIAL ROW -->
         <tr>
+
+          <!-- CHECKBOX -->
+          <td class="td-check">
+            <input type="checkbox" class="bundle-check18">
+            <input type="hidden" class="bundleGroup18" name="bundleGroup18[]" value="">
+          </td>
 
           <!-- TYPE OF SERVICES (MODAL SELECTOR) -->
           <td>
@@ -153,7 +168,7 @@ function updatePriceLabel() {
           </td>
 
           <!-- SUBTOTAL -->
-          <td>
+          <td class="subtotal-cell18">
             <input type="number" step="0.01"
               class="subtotal18"
               name="subtotal18[]"
@@ -249,10 +264,45 @@ function updatePriceLabel() {
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    margin-right: 10px;
   }
   .addRow18 { background-color:#008c4a; color:white; }
   .removeRow18 { background-color:#777; color:white; }
+  .bundleBtn18 { background-color:#0066cc; color:white; }
+  .unbundleBtn18 { background-color:#cc6600; color:white; }
+
+  /* Checkbox column */
+  .service-table18 .th-check,
+  .service-table18 .td-check,
+  .service-table19 .th-check,
+  .service-table19 .td-check {
+    width: 32px;
+    min-width: 32px;
+    text-align: center;
+    padding: 4px;
+  }
+
+  /* Bundle visual styles */
+  .bundle-row {
+    position: relative;
+  }
+  .bundle-row > td:first-child {
+    border-left: 4px solid #0066cc;
+  }
+  .bundle-row-primary {
+    background-color: #e8f4fd;
+  }
+  .bundle-row-secondary {
+    background-color: #f0f7fd;
+  }
+  .bundle-included-label {
+    display: block;
+    text-align: center;
+    color: #0066cc;
+    font-weight: 600;
+    font-size: 13px;
+    font-style: italic;
+    padding: 6px;
+  }
   .totals18-container {
     margin-top: 25px;
     display: flex;
@@ -628,6 +678,18 @@ function addRow18() {
   textSpan.textContent = "<?= ($lang=='en') ? 'Select Service...' : 'Seleccionar Servicio...'; ?>";
   btn.classList.remove("has-value");
 
+  // Reset bundle state
+  newRow.classList.remove("bundle-row", "bundle-row-primary", "bundle-row-secondary");
+  const chk = newRow.querySelector(".bundle-check18");
+  if (chk) chk.checked = false;
+  const subtotalCell = newRow.querySelector(".subtotal-cell18");
+  if (subtotalCell) {
+    const lbl = subtotalCell.querySelector(".bundle-included-label");
+    if (lbl) lbl.remove();
+    const inp = subtotalCell.querySelector(".subtotal18");
+    if (inp) inp.style.display = "";
+  }
+
   tbody.appendChild(newRow);
 }
 
@@ -635,6 +697,14 @@ function addRow18() {
 function removeRow18() {
   const tbody = document.getElementById("table18body");
   if (tbody.children.length > 1) {
+    const rowToRemove = tbody.lastElementChild;
+    const bundleGroup = rowToRemove.querySelector(".bundleGroup18")?.value;
+
+    // If removing a bundled row, unbundle the entire group first
+    if (bundleGroup) {
+      unbundleGroup18(bundleGroup);
+    }
+
     tbody.lastElementChild.remove();
     calcTotals18();
   } else {
@@ -649,8 +719,11 @@ function calcTotals18() {
   let total = 0;
 
   document.querySelectorAll(".subtotal18").forEach(input => {
-    const val = parseFloat(input.value);
-    if (!isNaN(val)) total += val;
+    // Only count visible (non-hidden) subtotal inputs
+    if (input.style.display !== "none") {
+      const val = parseFloat(input.value);
+      if (!isNaN(val)) total += val;
+    }
   });
 
   document.getElementById("total18").value = "$" + total.toFixed(2);
@@ -659,6 +732,175 @@ function calcTotals18() {
   document.getElementById("taxes18").value = "$" + taxes.toFixed(2);
 
   document.getElementById("grand18").value = "$" + (total + taxes).toFixed(2);
+}
+
+// ===== BUNDLE SELECTED ROWS =====
+function bundleSelectedRows18() {
+  const tbody = document.getElementById("table18body");
+  const checked = tbody.querySelectorAll(".bundle-check18:checked");
+
+  if (checked.length < 2) {
+    alert("<?= ($lang=='en') ? 'Select at least 2 rows to bundle.' : 'Seleccione al menos 2 filas para unir.'; ?>");
+    return;
+  }
+
+  // Collect selected rows and check none are already bundled
+  const rows = [];
+  checked.forEach(chk => {
+    const row = chk.closest("tr");
+    const existing = row.querySelector(".bundleGroup18").value;
+    if (existing) {
+      alert("<?= ($lang=='en') ? 'Some selected rows are already bundled. Unbundle them first.' : 'Algunas filas ya están unidas. Sepárelas primero.'; ?>");
+      return;
+    }
+    rows.push(row);
+  });
+
+  if (rows.length < 2) return;
+
+  // Generate unique bundle group ID
+  const groupId = "bg_" + Date.now();
+
+  // Sum subtotals from all selected rows
+  let sum = 0;
+  rows.forEach(row => {
+    const inp = row.querySelector(".subtotal18");
+    const val = parseFloat(inp.value);
+    if (!isNaN(val)) sum += val;
+  });
+
+  // Apply bundle to each row
+  rows.forEach((row, idx) => {
+    row.querySelector(".bundleGroup18").value = groupId;
+    row.classList.add("bundle-row");
+
+    const subtotalCell = row.querySelector(".subtotal-cell18");
+    const subtotalInput = row.querySelector(".subtotal18");
+
+    if (idx === 0) {
+      // Primary row: shows the combined price
+      row.classList.add("bundle-row-primary");
+      subtotalInput.value = sum.toFixed(2);
+    } else {
+      // Secondary rows: hide subtotal, show "Included" label
+      row.classList.add("bundle-row-secondary");
+      row.dataset.originalSubtotal = subtotalInput.value || "0";
+      subtotalInput.value = "";
+      subtotalInput.style.display = "none";
+
+      const label = document.createElement("span");
+      label.className = "bundle-included-label";
+      label.textContent = "<?= ($lang=='en') ? 'Included' : 'Incluido'; ?>";
+      subtotalCell.appendChild(label);
+    }
+
+    // Uncheck
+    row.querySelector(".bundle-check18").checked = false;
+  });
+
+  calcTotals18();
+}
+
+// ===== UNBUNDLE SELECTED ROWS =====
+function unbundleSelectedRows18() {
+  const tbody = document.getElementById("table18body");
+  const checked = tbody.querySelectorAll(".bundle-check18:checked");
+
+  if (checked.length === 0) {
+    alert("<?= ($lang=='en') ? 'Select at least one bundled row to unbundle.' : 'Seleccione al menos una fila unida para separar.'; ?>");
+    return;
+  }
+
+  // Collect unique bundle groups from selected rows
+  const groups = new Set();
+  checked.forEach(chk => {
+    const row = chk.closest("tr");
+    const g = row.querySelector(".bundleGroup18").value;
+    if (g) groups.add(g);
+  });
+
+  if (groups.size === 0) {
+    alert("<?= ($lang=='en') ? 'Selected rows are not bundled.' : 'Las filas seleccionadas no están unidas.'; ?>");
+    return;
+  }
+
+  groups.forEach(g => unbundleGroup18(g));
+
+  // Uncheck all
+  checked.forEach(chk => chk.checked = false);
+  calcTotals18();
+}
+
+// ===== UNBUNDLE A SPECIFIC GROUP =====
+function unbundleGroup18(groupId) {
+  const tbody = document.getElementById("table18body");
+  const rows = tbody.querySelectorAll("tr");
+
+  rows.forEach(row => {
+    const bg = row.querySelector(".bundleGroup18");
+    if (bg && bg.value === groupId) {
+      bg.value = "";
+      row.classList.remove("bundle-row", "bundle-row-primary", "bundle-row-secondary");
+
+      const subtotalCell = row.querySelector(".subtotal-cell18");
+      const subtotalInput = row.querySelector(".subtotal18");
+      const label = subtotalCell.querySelector(".bundle-included-label");
+
+      if (label) {
+        label.remove();
+        subtotalInput.style.display = "";
+        // Restore original subtotal if available
+        if (row.dataset.originalSubtotal) {
+          subtotalInput.value = row.dataset.originalSubtotal !== "0" ? row.dataset.originalSubtotal : "";
+          delete row.dataset.originalSubtotal;
+        }
+      }
+    }
+  });
+}
+
+// ===== APPLY BUNDLE VISUAL STATE (for loading saved data) =====
+function applyBundleVisuals18() {
+  const tbody = document.getElementById("table18body");
+  if (!tbody) return;
+
+  const rows = Array.from(tbody.querySelectorAll("tr"));
+  const groups = {};
+
+  // Group rows by bundle_group
+  rows.forEach(row => {
+    const bg = row.querySelector(".bundleGroup18");
+    if (bg && bg.value) {
+      if (!groups[bg.value]) groups[bg.value] = [];
+      groups[bg.value].push(row);
+    }
+  });
+
+  // Apply visuals to each group
+  for (const groupId in groups) {
+    const groupRows = groups[groupId];
+    groupRows.forEach((row, idx) => {
+      row.classList.add("bundle-row");
+      const subtotalCell = row.querySelector(".subtotal-cell18");
+      const subtotalInput = row.querySelector(".subtotal18");
+
+      if (idx === 0) {
+        row.classList.add("bundle-row-primary");
+      } else {
+        row.classList.add("bundle-row-secondary");
+        row.dataset.originalSubtotal = subtotalInput.value || "0";
+        subtotalInput.value = "";
+        subtotalInput.style.display = "none";
+
+        if (!subtotalCell.querySelector(".bundle-included-label")) {
+          const label = document.createElement("span");
+          label.className = "bundle-included-label";
+          label.textContent = "<?= ($lang=='en') ? 'Included' : 'Incluido'; ?>";
+          subtotalCell.appendChild(label);
+        }
+      }
+    });
+  }
 }
 </script>
 
@@ -683,8 +925,8 @@ function calcTotals18() {
 
   <div id="section19Container" style="display:none; margin-top:20px;">
 
-    <!-- ADD / REMOVE -->
-    <div style="margin-bottom:15px;">
+    <!-- ADD / REMOVE / BUNDLE -->
+    <div style="margin-bottom:15px; display:flex; flex-wrap:wrap; gap:8px;">
       <button type="button" class="btn19 addRow19" onclick="addRow19()">
         ➕ <?= ($lang=='en') ? "Add Row" : "Agregar Fila"; ?>
       </button>
@@ -692,12 +934,21 @@ function calcTotals18() {
       <button type="button" class="btn19 removeRow19" onclick="removeRow19()">
         🗑 <?= ($lang=='en') ? "Remove" : "Eliminar"; ?>
       </button>
+
+      <button type="button" class="btn19 bundleBtn19" onclick="bundleSelectedRows19()">
+        🔗 <?= ($lang=='en') ? "Bundle Price" : "Unir Precio"; ?>
+      </button>
+
+      <button type="button" class="btn19 unbundleBtn19" onclick="unbundleSelectedRows19()">
+        ✂️ <?= ($lang=='en') ? "Unbundle" : "Separar Precio"; ?>
+      </button>
     </div>
 
     <!-- TABLE -->
     <table class="service-table19">
       <thead>
         <tr>
+          <th class="th-check">&nbsp;</th>
           <th><?= ($lang=='en') ? "Type of Services" : "Tipo de Servicio"; ?></th>
           <th><?= ($lang=='en') ? "Service Time" : "Tiempo de Servicio"; ?></th>
           <th><?= ($lang=='en') ? "Frequency" : "Frecuencia"; ?></th>
@@ -710,6 +961,12 @@ function calcTotals18() {
 
         <!-- ONE INITIAL ROW -->
         <tr>
+
+          <!-- CHECKBOX -->
+          <td class="td-check">
+            <input type="checkbox" class="bundle-check19">
+            <input type="hidden" class="bundleGroup19" name="bundleGroup19[]" value="">
+          </td>
 
           <!-- TYPE OF SERVICES (MODAL SELECTOR) -->
           <td>
@@ -765,7 +1022,7 @@ function calcTotals18() {
           </td>
 
           <!-- SUBTOTAL -->
-          <td>
+          <td class="subtotal-cell19">
             <input type="number" step="0.01"
               class="subtotal19"
               name="subtotal19[]"
@@ -861,10 +1118,11 @@ function calcTotals18() {
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    margin-right: 10px;
   }
   .addRow19 { background-color:#008c4a; color:white; }
   .removeRow19 { background-color:#777; color:white; }
+  .bundleBtn19 { background-color:#0066cc; color:white; }
+  .unbundleBtn19 { background-color:#cc6600; color:white; }
   .totals19-container {
     margin-top: 25px;
     display: flex;
@@ -1239,6 +1497,18 @@ function addRow19() {
   textSpan.textContent = "<?= ($lang=='en') ? 'Select Service...' : 'Seleccionar Servicio...'; ?>";
   btn.classList.remove("has-value");
 
+  // Reset bundle state
+  newRow.classList.remove("bundle-row", "bundle-row-primary", "bundle-row-secondary");
+  const chk = newRow.querySelector(".bundle-check19");
+  if (chk) chk.checked = false;
+  const subtotalCell = newRow.querySelector(".subtotal-cell19");
+  if (subtotalCell) {
+    const lbl = subtotalCell.querySelector(".bundle-included-label");
+    if (lbl) lbl.remove();
+    const inp = subtotalCell.querySelector(".subtotal19");
+    if (inp) inp.style.display = "";
+  }
+
   tbody.appendChild(newRow);
 }
 
@@ -1246,6 +1516,13 @@ function addRow19() {
 function removeRow19() {
   const tbody = document.getElementById("table19body");
   if (tbody.children.length > 1) {
+    const rowToRemove = tbody.lastElementChild;
+    const bundleGroup = rowToRemove.querySelector(".bundleGroup19")?.value;
+
+    if (bundleGroup) {
+      unbundleGroup19(bundleGroup);
+    }
+
     tbody.lastElementChild.remove();
     calcTotals19();
   } else {
@@ -1260,8 +1537,10 @@ function calcTotals19() {
   let total = 0;
 
   document.querySelectorAll(".subtotal19").forEach(input => {
-    const val = parseFloat(input.value);
-    if (!isNaN(val)) total += val;
+    if (input.style.display !== "none") {
+      const val = parseFloat(input.value);
+      if (!isNaN(val)) total += val;
+    }
   });
 
   document.getElementById("total19").value = "$" + total.toFixed(2);
@@ -1270,6 +1549,162 @@ function calcTotals19() {
   document.getElementById("taxes19").value = "$" + taxes.toFixed(2);
 
   document.getElementById("grand19").value = "$" + (total + taxes).toFixed(2);
+}
+
+// ===== BUNDLE SELECTED ROWS (Q19) =====
+function bundleSelectedRows19() {
+  const tbody = document.getElementById("table19body");
+  const checked = tbody.querySelectorAll(".bundle-check19:checked");
+
+  if (checked.length < 2) {
+    alert("<?= ($lang=='en') ? 'Select at least 2 rows to bundle.' : 'Seleccione al menos 2 filas para unir.'; ?>");
+    return;
+  }
+
+  const rows = [];
+  checked.forEach(chk => {
+    const row = chk.closest("tr");
+    const existing = row.querySelector(".bundleGroup19").value;
+    if (existing) {
+      alert("<?= ($lang=='en') ? 'Some selected rows are already bundled. Unbundle them first.' : 'Algunas filas ya están unidas. Sepárelas primero.'; ?>");
+      return;
+    }
+    rows.push(row);
+  });
+
+  if (rows.length < 2) return;
+
+  const groupId = "bg_" + Date.now();
+
+  let sum = 0;
+  rows.forEach(row => {
+    const inp = row.querySelector(".subtotal19");
+    const val = parseFloat(inp.value);
+    if (!isNaN(val)) sum += val;
+  });
+
+  rows.forEach((row, idx) => {
+    row.querySelector(".bundleGroup19").value = groupId;
+    row.classList.add("bundle-row");
+
+    const subtotalCell = row.querySelector(".subtotal-cell19");
+    const subtotalInput = row.querySelector(".subtotal19");
+
+    if (idx === 0) {
+      row.classList.add("bundle-row-primary");
+      subtotalInput.value = sum.toFixed(2);
+    } else {
+      row.classList.add("bundle-row-secondary");
+      row.dataset.originalSubtotal = subtotalInput.value || "0";
+      subtotalInput.value = "";
+      subtotalInput.style.display = "none";
+
+      const label = document.createElement("span");
+      label.className = "bundle-included-label";
+      label.textContent = "<?= ($lang=='en') ? 'Included' : 'Incluido'; ?>";
+      subtotalCell.appendChild(label);
+    }
+
+    row.querySelector(".bundle-check19").checked = false;
+  });
+
+  calcTotals19();
+}
+
+// ===== UNBUNDLE SELECTED ROWS (Q19) =====
+function unbundleSelectedRows19() {
+  const tbody = document.getElementById("table19body");
+  const checked = tbody.querySelectorAll(".bundle-check19:checked");
+
+  if (checked.length === 0) {
+    alert("<?= ($lang=='en') ? 'Select at least one bundled row to unbundle.' : 'Seleccione al menos una fila unida para separar.'; ?>");
+    return;
+  }
+
+  const groups = new Set();
+  checked.forEach(chk => {
+    const row = chk.closest("tr");
+    const g = row.querySelector(".bundleGroup19").value;
+    if (g) groups.add(g);
+  });
+
+  if (groups.size === 0) {
+    alert("<?= ($lang=='en') ? 'Selected rows are not bundled.' : 'Las filas seleccionadas no están unidas.'; ?>");
+    return;
+  }
+
+  groups.forEach(g => unbundleGroup19(g));
+  checked.forEach(chk => chk.checked = false);
+  calcTotals19();
+}
+
+// ===== UNBUNDLE A SPECIFIC GROUP (Q19) =====
+function unbundleGroup19(groupId) {
+  const tbody = document.getElementById("table19body");
+  const rows = tbody.querySelectorAll("tr");
+
+  rows.forEach(row => {
+    const bg = row.querySelector(".bundleGroup19");
+    if (bg && bg.value === groupId) {
+      bg.value = "";
+      row.classList.remove("bundle-row", "bundle-row-primary", "bundle-row-secondary");
+
+      const subtotalCell = row.querySelector(".subtotal-cell19");
+      const subtotalInput = row.querySelector(".subtotal19");
+      const label = subtotalCell.querySelector(".bundle-included-label");
+
+      if (label) {
+        label.remove();
+        subtotalInput.style.display = "";
+        if (row.dataset.originalSubtotal) {
+          subtotalInput.value = row.dataset.originalSubtotal !== "0" ? row.dataset.originalSubtotal : "";
+          delete row.dataset.originalSubtotal;
+        }
+      }
+    }
+  });
+}
+
+// ===== APPLY BUNDLE VISUAL STATE (Q19 - for loading saved data) =====
+function applyBundleVisuals19() {
+  const tbody = document.getElementById("table19body");
+  if (!tbody) return;
+
+  const rows = Array.from(tbody.querySelectorAll("tr"));
+  const groups = {};
+
+  rows.forEach(row => {
+    const bg = row.querySelector(".bundleGroup19");
+    if (bg && bg.value) {
+      if (!groups[bg.value]) groups[bg.value] = [];
+      groups[bg.value].push(row);
+    }
+  });
+
+  for (const groupId in groups) {
+    const groupRows = groups[groupId];
+    groupRows.forEach((row, idx) => {
+      row.classList.add("bundle-row");
+      const subtotalCell = row.querySelector(".subtotal-cell19");
+      const subtotalInput = row.querySelector(".subtotal19");
+
+      if (idx === 0) {
+        row.classList.add("bundle-row-primary");
+      } else {
+        row.classList.add("bundle-row-secondary");
+        row.dataset.originalSubtotal = subtotalInput.value || "0";
+        subtotalInput.value = "";
+        subtotalInput.style.display = "none";
+
+        if (!subtotalCell.querySelector(".bundle-included-label")) {
+          const label = document.createElement("span");
+          label.className = "bundle-included-label";
+          label.textContent = "<?= ($lang=='en') ? 'Included' : 'Incluido'; ?>";
+          subtotalCell.appendChild(label);
+        }
+      }
+    });
+  }
 }
 </script>
 
