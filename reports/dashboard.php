@@ -19,7 +19,10 @@ $stmt = $pdo->query("
         total_cost,
         seller,
         created_at,
-        Work_Date
+        Work_Date,
+        client_name,
+        company_name,
+        service_status
     FROM forms
     ORDER BY Work_Date DESC, created_at DESC
 ");
@@ -39,9 +42,9 @@ function getRequestTotal($row) {
 $salesByWeek = [];
 $salesByMonth = [];
 $salesByYear = [];
-$requestTypes = [];
-$requestServices = [];
 $sellers = [];
+$topClients = [];
+$statusCounts = [];
 
 // Store raw data per request for client-side filtering
 $rawData = [];
@@ -49,6 +52,8 @@ $rawData = [];
 foreach ($requests as $row) {
     $total = getRequestTotal($row);
     $sellerName = $row['seller'] ?: 'Unknown';
+    $clientName = $row['company_name'] ?: ($row['client_name'] ?: 'Unknown');
+    $serviceStatus = $row['service_status'] ?: 'pending';
     // Use Work_Date if available, otherwise fallback to created_at
     $dateValue = !empty($row['Work_Date']) ? $row['Work_Date'] : $row['created_at'];
     $date = new DateTime($dateValue);
@@ -59,6 +64,8 @@ foreach ($requests as $row) {
         'seller' => $sellerName,
         'request_type' => $row['request_type'] ?: 'Unknown',
         'requested_service' => $row['requested_service'] ?: 'Unknown',
+        'client_name' => $clientName,
+        'service_status' => $serviceStatus,
         'weekKey' => $date->format('Y-W'),
         'weekLabel' => 'Week ' . $date->format('W') . ', ' . $date->format('Y'),
         'monthKey' => $date->format('Y-m'),
@@ -93,13 +100,6 @@ foreach ($requests as $row) {
     $salesByYear[$yearKey]['total'] += $total;
     $salesByYear[$yearKey]['count']++;
 
-    // Request types
-    $type = $row['request_type'] ?: 'Unknown';
-    if (!isset($requestTypes[$type])) {
-        $requestTypes[$type] = 0;
-    }
-    $requestTypes[$type]++;
-
     // Sellers
     if (!isset($sellers[$sellerName])) {
         $sellers[$sellerName] = ['count' => 0, 'total' => 0];
@@ -107,20 +107,28 @@ foreach ($requests as $row) {
     $sellers[$sellerName]['count']++;
     $sellers[$sellerName]['total'] += $total;
 
-    // Requested services
-    $service = $row['requested_service'] ?: 'Unknown';
-    if (!isset($requestServices[$service])) {
-        $requestServices[$service] = 0;
+    // Top clients
+    if (!isset($topClients[$clientName])) {
+        $topClients[$clientName] = ['count' => 0, 'total' => 0];
     }
-    $requestServices[$service]++;
+    $topClients[$clientName]['count']++;
+    $topClients[$clientName]['total'] += $total;
+
+    // Status counts
+    if (!isset($statusCounts[$serviceStatus])) {
+        $statusCounts[$serviceStatus] = 0;
+    }
+    $statusCounts[$serviceStatus]++;
 }
 
 // Sort data
 ksort($salesByWeek);
 ksort($salesByMonth);
 ksort($salesByYear);
-arsort($requestServices);
 arsort($sellers);
+
+// Sort top clients by count descending
+uasort($topClients, function($a, $b) { return $b['count'] - $a['count']; });
 
 // Keep only last 12 weeks/months
 $salesByWeek = array_slice($salesByWeek, -12, 12, true);
@@ -130,12 +138,14 @@ $salesByMonth = array_slice($salesByMonth, -12, 12, true);
 $grandTotalSales = array_sum(array_map('getRequestTotal', $requests));
 $totalRequests = count($requests);
 
+// Get top client info
+$topClientName = !empty($topClients) ? array_key_first($topClients) : 'N/A';
+$topClientCount = !empty($topClients) ? $topClients[$topClientName]['count'] : 0;
+
 // Prepare JSON data for charts
 $chartDataWeek = json_encode(array_values($salesByWeek));
 $chartDataMonth = json_encode(array_values($salesByMonth));
 $chartDataYear = json_encode(array_values($salesByYear));
-$chartDataTypes = json_encode($requestTypes);
-$chartDataServices = json_encode($requestServices);
 $chartDataSellers = json_encode($sellers);
 $chartRawData = json_encode($rawData);
 ?>
@@ -207,6 +217,7 @@ $chartRawData = json_encode($rawData);
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
             padding: 20px 30px;
+            align-items: start;
         }
 
         .summary-card {
@@ -257,6 +268,55 @@ $chartRawData = json_encode($rawData);
         .summary-card .card-label {
             font-size: 0.9rem;
             color: #64748b;
+        }
+
+        /* Top Client card value - smaller font for names */
+        .summary-card .card-value.client-name {
+            font-size: 1.15rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Status Filter Card */
+        .status-filter-card .card-label-title {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        .status-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .status-pill {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.73rem;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #64748b;
+            transition: all 0.2s;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .status-pill:hover {
+            background: #e2e8f0;
+        }
+
+        .status-pill.active {
+            background: #003080;
+            color: white;
+            border-color: #003080;
+        }
+
+        .status-pill .pill-count {
+            font-weight: 600;
+            margin-left: 2px;
         }
 
         /* Charts Grid */
@@ -333,13 +393,13 @@ $chartRawData = json_encode($rawData);
             cursor: pointer;
         }
 
-        /* Services List */
-        .services-list {
+        /* Top Clients List */
+        .clients-list {
             max-height: 350px;
             overflow-y: auto;
         }
 
-        .service-item {
+        .client-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -347,22 +407,56 @@ $chartRawData = json_encode($rawData);
             border-bottom: 1px solid #f1f5f9;
         }
 
-        .service-item:last-child {
+        .client-item:last-child {
             border-bottom: none;
         }
 
-        .service-name {
-            font-size: 0.9rem;
-            color: #334155;
+        .client-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
         }
 
-        .service-count {
+        .client-rank.top-3 {
+            background: #003080;
+            color: white;
+        }
+
+        .client-info {
+            flex: 1;
+            margin: 0 12px;
+            min-width: 0;
+        }
+
+        .client-name {
+            font-size: 0.9rem;
+            color: #334155;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .client-total {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .client-count {
             background: #e0f2fe;
             color: #0284c7;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
+            flex-shrink: 0;
         }
 
         .progress-bar-container {
@@ -398,29 +492,40 @@ $chartRawData = json_encode($rawData);
             <div class="card-icon blue">
                 <i class="fas fa-file-invoice-dollar"></i>
             </div>
-            <div class="card-value">$<?= number_format($grandTotalSales, 2) ?></div>
+            <div class="card-value" id="cardTotalSales">$<?= number_format($grandTotalSales, 2) ?></div>
             <div class="card-label">Total Sales</div>
         </div>
         <div class="summary-card">
             <div class="card-icon green">
                 <i class="fas fa-clipboard-list"></i>
             </div>
-            <div class="card-value"><?= $totalRequests ?></div>
+            <div class="card-value" id="cardTotalRequests"><?= $totalRequests ?></div>
             <div class="card-label">Total Requests</div>
         </div>
+        <!-- Top Client Card (replaces Request Types) -->
         <div class="summary-card">
             <div class="card-icon purple">
-                <i class="fas fa-tags"></i>
+                <i class="fas fa-crown"></i>
             </div>
-            <div class="card-value"><?= count($requestTypes) ?></div>
-            <div class="card-label">Request Types</div>
+            <div class="card-value client-name" id="cardTopClientName"><?= htmlspecialchars($topClientName) ?></div>
+            <div class="card-label"><span id="cardTopClientOrders"><?= $topClientCount ?></span> orders &mdash; Top Client</div>
         </div>
-        <div class="summary-card">
+        <!-- Status Filter Card (replaces Service Types) -->
+        <div class="summary-card status-filter-card">
             <div class="card-icon orange">
-                <i class="fas fa-concierge-bell"></i>
+                <i class="fas fa-filter"></i>
             </div>
-            <div class="card-value"><?= count($requestServices) ?></div>
-            <div class="card-label">Service Types</div>
+            <div class="card-label-title">Status</div>
+            <div class="status-pills" id="statusPills">
+                <span class="status-pill active" data-status="all" onclick="filterByStatus('all')">All <span class="pill-count"><?= $totalRequests ?></span></span>
+                <span class="status-pill" data-status="pending" onclick="filterByStatus('pending')">Pending <span class="pill-count"><?= $statusCounts['pending'] ?? 0 ?></span></span>
+                <span class="status-pill" data-status="scheduled" onclick="filterByStatus('scheduled')">Scheduled <span class="pill-count"><?= $statusCounts['scheduled'] ?? 0 ?></span></span>
+                <span class="status-pill" data-status="confirmed" onclick="filterByStatus('confirmed')">Confirmed <span class="pill-count"><?= $statusCounts['confirmed'] ?? 0 ?></span></span>
+                <span class="status-pill" data-status="in_progress" onclick="filterByStatus('in_progress')">In Progress <span class="pill-count"><?= $statusCounts['in_progress'] ?? 0 ?></span></span>
+                <span class="status-pill" data-status="completed" onclick="filterByStatus('completed')">Completed <span class="pill-count"><?= $statusCounts['completed'] ?? 0 ?></span></span>
+                <span class="status-pill" data-status="not_completed" onclick="filterByStatus('not_completed')">Not Completed <span class="pill-count"><?= $statusCounts['not_completed'] ?? 0 ?></span></span>
+                <span class="status-pill" data-status="cancelled" onclick="filterByStatus('cancelled')">Cancelled <span class="pill-count"><?= $statusCounts['cancelled'] ?? 0 ?></span></span>
+            </div>
         </div>
     </div>
 
@@ -458,28 +563,31 @@ $chartRawData = json_encode($rawData);
             <p style="text-align:center; font-size:0.75rem; color:#94a3b8; margin-top:8px;">Click a seller to filter all charts</p>
         </div>
 
-        <!-- Requested Services -->
+        <!-- Top Clients (replaces Requested Services) -->
         <div class="chart-card">
             <div class="chart-header">
-                <div class="chart-title"><i class="fas fa-list"></i> Requested Services</div>
+                <div class="chart-title"><i class="fas fa-trophy"></i> Top Clients</div>
             </div>
-            <div class="services-list">
+            <div class="clients-list" id="topClientsList">
                 <?php
-                $maxCount = max($requestServices);
-                foreach ($requestServices as $service => $count):
-                    $percentage = ($maxCount > 0) ? ($count / $maxCount) * 100 : 0;
+                $topClientArr = array_slice($topClients, 0, 10, true);
+                $rank = 0;
+                $maxCount = !empty($topClientArr) ? reset($topClientArr)['count'] : 0;
+                foreach ($topClientArr as $client => $data):
+                    $rank++;
                 ?>
-                <div class="service-item">
-                    <span class="service-name"><?= htmlspecialchars($service) ?></span>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: <?= $percentage ?>%"></div>
+                <div class="client-item">
+                    <span class="client-rank <?= $rank <= 3 ? 'top-3' : '' ?>"><?= $rank ?></span>
+                    <div class="client-info">
+                        <div class="client-name"><?= htmlspecialchars($client) ?></div>
+                        <div class="client-total">$<?= number_format($data['total'], 2) ?></div>
                     </div>
-                    <span class="service-count"><?= $count ?></span>
+                    <span class="client-count"><?= $data['count'] ?></span>
                 </div>
                 <?php endforeach; ?>
-                <?php if (empty($requestServices)): ?>
-                <div class="service-item">
-                    <span class="service-name" style="color: #94a3b8; font-style: italic;">No services data available</span>
+                <?php if (empty($topClients)): ?>
+                <div class="client-item">
+                    <span class="client-name" style="color: #94a3b8; font-style: italic;">No client data available</span>
                 </div>
                 <?php endif; ?>
             </div>
@@ -497,6 +605,7 @@ $chartRawData = json_encode($rawData);
         // Current state
         let currentPeriod = 'month';
         let activeSeller = null;
+        let activeStatus = null;
 
         // Colors for charts
         const colors = {
@@ -505,10 +614,16 @@ $chartRawData = json_encode($rawData);
             pieColors: ['#003080', '#0066cc', '#00a3cc', '#00cc99', '#66cc00', '#cc9900', '#cc6600', '#cc3300', '#9933cc', '#ff6699']
         };
 
-        // ============ SELLER FILTER LOGIC ============
+        // ============ FILTER LOGIC ============
         function getFilteredData() {
-            if (!activeSeller) return rawData;
-            return rawData.filter(item => item.seller === activeSeller);
+            let data = rawData;
+            if (activeSeller) {
+                data = data.filter(item => item.seller === activeSeller);
+            }
+            if (activeStatus) {
+                data = data.filter(item => item.service_status === activeStatus);
+            }
+            return data;
         }
 
         function aggregateSalesData(data, keyField, labelField) {
@@ -521,23 +636,22 @@ $chartRawData = json_encode($rawData);
                 agg[key].total += item.total;
                 agg[key].count++;
             });
-            // Sort by key and return values
             const sorted = Object.keys(agg).sort();
             return sorted.map(k => agg[k]);
         }
 
-        function aggregateServices(data) {
+        function aggregateClients(data) {
             const agg = {};
             data.forEach(item => {
-                const svc = item.requested_service;
-                if (!agg[svc]) agg[svc] = 0;
-                agg[svc]++;
+                const client = item.client_name;
+                if (!agg[client]) agg[client] = { count: 0, total: 0 };
+                agg[client].count++;
+                agg[client].total += item.total;
             });
-            // Sort descending by count
-            const sorted = Object.entries(agg).sort((a, b) => b[1] - a[1]);
-            return sorted;
+            return Object.entries(agg).sort((a, b) => b[1].count - a[1].count);
         }
 
+        // ============ SELLER FILTER ============
         function filterBySeller(sellerName) {
             activeSeller = sellerName;
             document.getElementById('sellerFilterIndicator').style.display = 'flex';
@@ -553,26 +667,77 @@ $chartRawData = json_encode($rawData);
             refreshAllCharts();
         }
 
+        // ============ STATUS FILTER ============
+        function filterByStatus(status) {
+            if (status === 'all' || activeStatus === status) {
+                activeStatus = null;
+            } else {
+                activeStatus = status;
+            }
+            updateStatusPillsUI();
+            refreshAllCharts();
+        }
+
+        function updateStatusPillsUI() {
+            document.querySelectorAll('.status-pill').forEach(pill => {
+                pill.classList.remove('active');
+                if ((!activeStatus && pill.dataset.status === 'all') ||
+                    pill.dataset.status === activeStatus) {
+                    pill.classList.add('active');
+                }
+            });
+        }
+
+        function updateStatusPillCounts() {
+            // Counts based on data filtered by seller only (not by status)
+            let sellerFiltered = rawData;
+            if (activeSeller) {
+                sellerFiltered = sellerFiltered.filter(item => item.seller === activeSeller);
+            }
+            const counts = {};
+            sellerFiltered.forEach(item => {
+                const s = item.service_status;
+                if (!counts[s]) counts[s] = 0;
+                counts[s]++;
+            });
+            document.querySelectorAll('.status-pill').forEach(pill => {
+                const status = pill.dataset.status;
+                const countEl = pill.querySelector('.pill-count');
+                if (countEl) {
+                    if (status === 'all') {
+                        countEl.textContent = sellerFiltered.length;
+                    } else {
+                        countEl.textContent = counts[status] || 0;
+                    }
+                }
+            });
+        }
+
+        // ============ REFRESH ALL ============
         function refreshAllCharts() {
             const filtered = getFilteredData();
 
             // Update summary cards
             const totalSales = filtered.reduce((sum, item) => sum + item.total, 0);
             const totalReqs = filtered.length;
-            const uniqueTypes = new Set(filtered.map(item => item.request_type)).size;
-            const uniqueServices = new Set(filtered.map(item => item.requested_service)).size;
 
-            const cardValues = document.querySelectorAll('.summary-card .card-value');
-            cardValues[0].textContent = '$' + totalSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            cardValues[1].textContent = totalReqs;
-            cardValues[2].textContent = uniqueTypes;
-            cardValues[3].textContent = uniqueServices;
+            document.getElementById('cardTotalSales').textContent = '$' + totalSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('cardTotalRequests').textContent = totalReqs;
+
+            // Update top client card
+            const clients = aggregateClients(filtered);
+            const topClient = clients.length > 0 ? clients[0] : null;
+            document.getElementById('cardTopClientName').textContent = topClient ? topClient[0] : 'N/A';
+            document.getElementById('cardTopClientOrders').textContent = topClient ? topClient[1].count : 0;
+
+            // Update status pill counts
+            updateStatusPillCounts();
 
             // Rebuild sales chart
             showSalesChart(currentPeriod);
 
-            // Rebuild services list
-            rebuildServicesList(filtered);
+            // Rebuild top clients list
+            rebuildTopClientsList(filtered);
         }
 
         // ============ SALES CHART ============
@@ -595,8 +760,8 @@ $chartRawData = json_encode($rawData);
                     datasets: [{
                         label: 'Total Sales ($)',
                         data: values,
-                        backgroundColor: activeSeller ? colors.secondary : colors.primary,
-                        borderColor: activeSeller ? colors.secondary : colors.primary,
+                        backgroundColor: (activeSeller || activeStatus) ? colors.secondary : colors.primary,
+                        borderColor: (activeSeller || activeStatus) ? colors.secondary : colors.primary,
                         borderWidth: 1,
                         borderRadius: 6,
                         barThickness: 40
@@ -620,6 +785,7 @@ $chartRawData = json_encode($rawData);
                                         `Requests: ${count}`
                                     ];
                                     if (activeSeller) lines.push(`Seller: ${activeSeller}`);
+                                    if (activeStatus) lines.push(`Status: ${activeStatus.replace('_', ' ')}`);
                                     return lines;
                                 }
                             }
@@ -735,24 +901,25 @@ $chartRawData = json_encode($rawData);
             }
         });
 
-        // ============ SERVICES LIST REBUILD ============
-        function rebuildServicesList(filtered) {
-            const services = aggregateServices(filtered);
-            const container = document.querySelector('.services-list');
-            if (services.length === 0) {
-                container.innerHTML = '<div class="service-item"><span class="service-name" style="color:#94a3b8; font-style:italic;">No services data available</span></div>';
+        // ============ TOP CLIENTS LIST REBUILD ============
+        function rebuildTopClientsList(filtered) {
+            const clients = aggregateClients(filtered);
+            const container = document.getElementById('topClientsList');
+            if (clients.length === 0) {
+                container.innerHTML = '<div class="client-item"><span class="client-name" style="color:#94a3b8; font-style:italic;">No client data available</span></div>';
                 return;
             }
-            const maxCount = services[0][1];
+            const top10 = clients.slice(0, 10);
             let html = '';
-            services.forEach(([name, count]) => {
-                const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
-                html += `<div class="service-item">
-                    <span class="service-name">${escapeHtml(name)}</span>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width:${pct}%"></div>
+            top10.forEach(([name, data], index) => {
+                const rank = index + 1;
+                html += `<div class="client-item">
+                    <span class="client-rank ${rank <= 3 ? 'top-3' : ''}">${rank}</span>
+                    <div class="client-info">
+                        <div class="client-name">${escapeHtml(name)}</div>
+                        <div class="client-total">$${data.total.toLocaleString('en-US', {minimumFractionDigits: 2})}</div>
                     </div>
-                    <span class="service-count">${count}</span>
+                    <span class="client-count">${data.count}</span>
                 </div>`;
             });
             container.innerHTML = html;
