@@ -582,5 +582,107 @@
       color: var(--primary-color);
       font-weight: 500;
     }
+
+    /* ======= PRINT STYLES ======= */
+    @media print {
+      @page {
+        margin: 15mm;
+      }
+
+      body {
+        background: white !important;
+        padding: 0 !important;
+        color: #000 !important;
+      }
+
+      /* Hide navigation, sidebar, buttons, modals, calculator */
+      .top-navbar,
+      .pending-forms-sidebar,
+      .form-actions,
+      .janitorial-modal-overlay,
+      .service-modal-overlay,
+      #previewModal,
+      .addRow18, .removeRow18,
+      .addRow19, .removeRow19,
+      .btn18, .btn19,
+      #toggleCalculator,
+      .nav-btn,
+      .calculator-side {
+        display: none !important;
+      }
+
+      /* Hide catalog sections (Q18 and Q19 service tables) */
+      #q18,
+      #q19 {
+        display: none !important;
+      }
+
+      /* Clean container */
+      .container {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        max-width: 100% !important;
+      }
+
+      .form-header {
+        background: #001f54 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        padding: 20px 30px !important;
+      }
+
+      .section-title {
+        background: #001f54 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .section-content {
+        display: block !important;
+        border: 1px solid #ccc !important;
+      }
+
+      .section-content.hidden {
+        display: block !important;
+      }
+
+      /* Replace empty date inputs with blank format */
+      .print-date-blank {
+        display: inline-block;
+        font-size: 14px;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        min-width: 150px;
+        color: #999;
+        letter-spacing: 2px;
+      }
+
+      input[type="date"].print-hidden,
+      select.print-hidden,
+      input[type="text"].print-hidden,
+      input[type="email"].print-hidden,
+      input[type="number"].print-hidden,
+      input[type="tel"].print-hidden,
+      textarea.print-hidden {
+        display: none !important;
+      }
+
+      .print-value-display {
+        display: inline-block !important;
+        font-size: 14px;
+        padding: 8px 12px;
+        border-bottom: 1px solid #333;
+        min-width: 200px;
+      }
+    }
+
+    /* Hide print elements in screen mode */
+    @media screen {
+      .print-date-blank,
+      .print-value-display {
+        display: none !important;
+      }
+    }
   </style>
 </head>

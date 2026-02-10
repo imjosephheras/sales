@@ -2261,5 +2261,90 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+<!-- ====================================================== -->
+<!-- PRINT PREPARATION: Blank fields show empty format -->
+<!-- ====================================================== -->
+<script>
+(function() {
+  const printOverlays = [];
+
+  function preparePrintFields() {
+    // Handle empty date inputs: show "  /  /    " instead of "dd/mm/aaaa"
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+      const span = document.createElement('span');
+      span.className = 'print-date-blank';
+      if (input.value) {
+        // Format filled date as mm/dd/yyyy
+        const parts = input.value.split('-');
+        span.textContent = parts[1] + '/' + parts[2] + '/' + parts[0];
+      } else {
+        span.textContent = '  /  /      ';
+      }
+      input.classList.add('print-hidden');
+      input.parentNode.insertBefore(span, input.nextSibling);
+      printOverlays.push({ input: input, span: span });
+    });
+
+    // Handle empty text/email/tel/number inputs
+    document.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="number"]').forEach(input => {
+      // Skip hidden inputs and catalog-related inputs (inside #q18, #q19)
+      if (input.type === 'hidden' || input.closest('#q18') || input.closest('#q19')) return;
+      const span = document.createElement('span');
+      span.className = 'print-value-display';
+      span.textContent = input.value || ' ';
+      input.classList.add('print-hidden');
+      input.parentNode.insertBefore(span, input.nextSibling);
+      printOverlays.push({ input: input, span: span });
+    });
+
+    // Handle empty selects
+    document.querySelectorAll('select').forEach(sel => {
+      if (sel.closest('#q18') || sel.closest('#q19')) return;
+      const span = document.createElement('span');
+      span.className = 'print-value-display';
+      const selected = sel.options[sel.selectedIndex];
+      span.textContent = (selected && selected.value) ? selected.text : ' ';
+      sel.classList.add('print-hidden');
+      sel.parentNode.insertBefore(span, sel.nextSibling);
+      printOverlays.push({ input: sel, span: span });
+    });
+
+    // Handle empty textareas
+    document.querySelectorAll('textarea').forEach(ta => {
+      const span = document.createElement('span');
+      span.className = 'print-value-display';
+      span.style.whiteSpace = 'pre-wrap';
+      span.textContent = ta.value || ' ';
+      ta.classList.add('print-hidden');
+      ta.parentNode.insertBefore(span, ta.nextSibling);
+      printOverlays.push({ input: ta, span: span });
+    });
+
+    // Expand all collapsed sections for print
+    document.querySelectorAll('.section-content.hidden').forEach(sec => {
+      sec.classList.remove('hidden');
+      sec.dataset.wasHidden = 'true';
+    });
+  }
+
+  function restorePrintFields() {
+    printOverlays.forEach(({ input, span }) => {
+      input.classList.remove('print-hidden');
+      if (span.parentNode) span.parentNode.removeChild(span);
+    });
+    printOverlays.length = 0;
+
+    // Re-collapse sections that were hidden
+    document.querySelectorAll('.section-content[data-was-hidden="true"]').forEach(sec => {
+      sec.classList.add('hidden');
+      delete sec.dataset.wasHidden;
+    });
+  }
+
+  window.addEventListener('beforeprint', preparePrintFields);
+  window.addEventListener('afterprint', restorePrintFields);
+})();
+</script>
+
 </body>
 </html>
