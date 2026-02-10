@@ -29,6 +29,26 @@
         }
     }
 
+    // Pre-compute bundle groups for merged subtotal cells
+    $bundleGroupInfo = [];
+    foreach ($allServices as $idx => $svc) {
+        $bg = $svc['bundle_group'] ?? '';
+        if ($bg !== '') {
+            if (!isset($bundleGroupInfo[$bg])) {
+                $bundleGroupInfo[$bg] = [
+                    'count' => 0,
+                    'first_index' => $idx,
+                    'total' => 0.0,
+                ];
+            }
+            $bundleGroupInfo[$bg]['count']++;
+            $svcSub = floatval($svc['subtotal'] ?? 0);
+            if ($svcSub > 0) {
+                $bundleGroupInfo[$bg]['total'] = $svcSub;
+            }
+        }
+    }
+
     if ($hasServices && !empty($allServices)):
     ?>
     <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
@@ -42,13 +62,25 @@
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($allServices as $svc): ?>
-            <tr>
+            <?php foreach ($allServices as $idx => $svc):
+                $bg = $svc['bundle_group'] ?? '';
+                $isBundle = ($bg !== '' && isset($bundleGroupInfo[$bg]) && $bundleGroupInfo[$bg]['count'] > 1);
+                $isFirstInBundle = $isBundle && ($bundleGroupInfo[$bg]['first_index'] === $idx);
+                $isSecondaryInBundle = $isBundle && !$isFirstInBundle;
+            ?>
+            <tr<?php if ($isBundle): ?> style="border-left: 3px solid #0066cc;"<?php endif; ?>>
                 <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: left;"><?php echo htmlspecialchars($svc['service_type'] ?? ''); ?></td>
                 <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: center;"><?php echo htmlspecialchars($svc['service_time'] ?? ''); ?></td>
                 <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: center;"><?php echo htmlspecialchars($svc['frequency'] ?? ''); ?></td>
                 <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: left;"><?php echo htmlspecialchars($svc['description'] ?? ''); ?></td>
+                <?php if ($isFirstInBundle): ?>
+                <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: right; font-weight: bold; vertical-align: middle; background: linear-gradient(135deg, #e8f4fd, #d0ebff);" rowspan="<?php echo $bundleGroupInfo[$bg]['count']; ?>">
+                    $<?php echo number_format($bundleGroupInfo[$bg]['total'], 2); ?>
+                    <br><span style="font-size: 6pt; color: #0066cc; font-weight: normal;">BUNDLE PRICE</span>
+                </td>
+                <?php elseif (!$isSecondaryInBundle): ?>
                 <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: right; font-weight: bold;">$<?php echo number_format(floatval($svc['subtotal'] ?? 0), 2); ?></td>
+                <?php endif; ?>
             </tr>
             <?php endforeach; ?>
         </tbody>
