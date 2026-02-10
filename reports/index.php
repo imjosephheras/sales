@@ -273,6 +273,61 @@ function formatCurrency($value) {
             background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
         }
 
+        /* Filter row */
+        .data-table thead tr:first-child th {
+            top: 0;
+        }
+
+        .data-table .filter-row th {
+            background: #f1f5f9;
+            padding: 6px 8px;
+            border-bottom: 2px solid #003080;
+            top: 48px;
+        }
+
+        .column-filter {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid #dde2e8;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            color: #334155;
+            background: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .column-filter:focus {
+            outline: none;
+            border-color: #003080;
+            box-shadow: 0 0 0 2px rgba(0,48,128,0.15);
+        }
+
+        .column-filter::placeholder {
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .filter-active {
+            border-color: #003080 !important;
+            background: #f0f4ff !important;
+        }
+
+        .clear-filters-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: none;
+            margin-left: 8px;
+        }
+
+        .clear-filters-btn:hover {
+            background: #dc2626;
+        }
+
         .data-table th .sort-icon {
             margin-left: 6px;
             opacity: 0.4;
@@ -500,6 +555,18 @@ function formatCurrency($value) {
                                 </th>
                             <?php endforeach; ?>
                         </tr>
+                        <tr class="filter-row">
+                            <th class="row-num">
+                                <button class="clear-filters-btn" id="clearFiltersBtn" title="Clear all filters" onclick="clearAllFilters()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </th>
+                            <?php foreach ($columns as $label => $field): ?>
+                                <th>
+                                    <input type="text" class="column-filter" data-column="<?= htmlspecialchars($field) ?>" placeholder="Filter <?= htmlspecialchars($label) ?>..." title="Filter by <?= htmlspecialchars($label) ?>">
+                                </th>
+                            <?php endforeach; ?>
+                        </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($requests as $index => $row): ?>
@@ -548,15 +615,56 @@ function formatCurrency($value) {
     </div>
 
     <script>
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
+        // Combined filter function (global search + column filters)
+        function applyAllFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const columnFilters = document.querySelectorAll('.column-filter');
             const rows = document.querySelectorAll('#dataTable tbody tr');
             let visibleCount = 0;
+            let anyColumnFilterActive = false;
+
+            // Collect active column filters
+            const filters = [];
+            columnFilters.forEach((input, idx) => {
+                const val = input.value.toLowerCase().trim();
+                filters.push(val);
+                if (val) {
+                    anyColumnFilterActive = true;
+                    input.classList.add('filter-active');
+                } else {
+                    input.classList.remove('filter-active');
+                }
+            });
+
+            // Show/hide clear filters button
+            const clearBtn = document.getElementById('clearFiltersBtn');
+            clearBtn.style.display = anyColumnFilterActive ? 'inline-block' : 'none';
 
             rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const isVisible = text.includes(searchTerm);
+                const cells = row.querySelectorAll('td');
+                let matchesSearch = true;
+                let matchesColumnFilters = true;
+
+                // Global search
+                if (searchTerm) {
+                    const text = row.textContent.toLowerCase();
+                    matchesSearch = text.includes(searchTerm);
+                }
+
+                // Column filters (skip cell 0 which is row number)
+                if (matchesSearch) {
+                    for (let i = 0; i < filters.length; i++) {
+                        if (filters[i]) {
+                            const cellText = (cells[i + 1]?.textContent || '').toLowerCase().trim();
+                            if (!cellText.includes(filters[i])) {
+                                matchesColumnFilters = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                const isVisible = matchesSearch && matchesColumnFilters;
                 row.style.display = isVisible ? '' : 'none';
                 if (isVisible) visibleCount++;
             });
@@ -564,21 +672,80 @@ function formatCurrency($value) {
             // Update status bar
             const statusBar = document.querySelector('.status-bar span:first-child');
             statusBar.textContent = `Showing ${visibleCount} of ${rows.length} records`;
+        }
+
+        // Clear all column filters
+        function clearAllFilters() {
+            document.querySelectorAll('.column-filter').forEach(input => {
+                input.value = '';
+                input.classList.remove('filter-active');
+            });
+            document.getElementById('clearFiltersBtn').style.display = 'none';
+            applyAllFilters();
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            applyAllFilters();
         });
 
-        // Export to CSV
+        // Column filter listeners
+        document.querySelectorAll('.column-filter').forEach(input => {
+            input.addEventListener('input', function() {
+                applyAllFilters();
+            });
+            // Prevent sort from triggering when clicking on filter inputs
+            input.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+
+        // Export to CSV - only specified columns
         function exportCSV() {
             const table = document.getElementById('dataTable');
-            const rows = table.querySelectorAll('tr');
+            // Column headers from the first row (not filter row)
+            const headerRow = table.querySelector('thead tr:first-child');
+            const headerCells = headerRow.querySelectorAll('th');
+
+            // Columns to include in CSV export
+            const csvColumns = [
+                'Service Type', 'Requested Service', 'Client Name', 'Contact Name',
+                'Email', 'Phone Number', 'Company Name', 'Address',
+                'Invoice Frequency', 'Seller', 'Total Cost', 'Additional Comments',
+                'Document Date', 'Work Date', 'Nomenclature'
+            ];
+
+            // Find which column indices to include (skip index 0 = row number)
+            const includeIndices = [];
+            headerCells.forEach((cell, index) => {
+                if (index === 0) return; // Skip row number
+                const headerText = cell.textContent.replace(/[\n\r]/g, '').trim();
+                if (csvColumns.some(col => headerText.includes(col))) {
+                    includeIndices.push(index);
+                }
+            });
+
             let csv = [];
 
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('th, td');
+            // Add header row
+            const csvHeader = [];
+            includeIndices.forEach(idx => {
+                let text = headerCells[idx].textContent.replace(/[\n\r]/g, '').trim();
+                if (text.includes(',') || text.includes('"')) {
+                    text = '"' + text.replace(/"/g, '""') + '"';
+                }
+                csvHeader.push(text);
+            });
+            csv.push(csvHeader.join(','));
+
+            // Add data rows (only visible ones)
+            const dataRows = table.querySelectorAll('tbody tr');
+            dataRows.forEach(row => {
+                if (row.style.display === 'none') return; // Skip filtered-out rows
+                const cells = row.querySelectorAll('td');
                 const rowData = [];
-                cells.forEach((cell, index) => {
-                    if (index === 0) return; // Skip row numbers
-                    let text = cell.textContent.trim();
-                    // Escape quotes and wrap in quotes if contains comma
+                includeIndices.forEach(idx => {
+                    let text = (cells[idx]?.textContent || '').trim();
                     if (text.includes(',') || text.includes('"')) {
                         text = '"' + text.replace(/"/g, '""') + '"';
                     }
@@ -600,8 +767,8 @@ function formatCurrency($value) {
             document.body.removeChild(link);
         }
 
-        // Column sorting
-        document.querySelectorAll('#dataTable th:not(.row-num)').forEach((th, index) => {
+        // Column sorting (only header row, not filter row)
+        document.querySelectorAll('#dataTable thead tr:first-child th:not(.row-num)').forEach((th, index) => {
             th.style.cursor = 'pointer';
             th.addEventListener('click', function() {
                 sortTable(index + 1); // +1 because of row number column
