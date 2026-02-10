@@ -378,6 +378,44 @@ $client_email = $data['Email'] ?? '';
             margin-top: 2px;
         }
 
+        .authorization-block {
+            margin-top: 8px;
+            padding: 6px 8px;
+            background: #f0f4fa;
+            border: 1px solid #c0d0e0;
+            font-size: 8px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .authorization-sig-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            border-top: 1px solid #ccc;
+        }
+
+        .authorization-sig-table td {
+            padding: 6px 8px;
+            vertical-align: top;
+            font-size: 8px;
+            color: #555;
+            width: 33.33%;
+        }
+
+        .authorization-sig-table .sig-label {
+            font-weight: bold;
+            color: #001f54;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .sig-line {
+            border-bottom: 1px solid #333;
+            height: 25px;
+            margin-top: 4px;
+        }
+
     </style>
 </head>
 <body>
@@ -733,45 +771,85 @@ $client_email = $data['Email'] ?? '';
         <div class="section-header">7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION</div>
         <div class="section-content">
             <p style="font-size: 9px; color: #555; margin-bottom: 4px;">If additional parts or products are needed, please indicate the quantity required for each item below.</p>
+            <?php
+            // Filter only products that have a quantity
+            $selected_products = [];
+            foreach ($products_list as $j => $prod) {
+                $qty_key = 'product_qty_' . $j;
+                $qty_val = $data[$qty_key] ?? '';
+                if (!empty($qty_val) && $qty_val != '0') {
+                    $selected_products[] = ['index' => $j, 'product' => $prod, 'qty' => $qty_val];
+                }
+            }
+
+            if (!empty($selected_products)):
+            ?>
             <table class="products-table">
                 <?php
-                $cols = 5;
-                $total = count($products_list);
-                for ($i = 0; $i < $total; $i += $cols):
+                $cols = 3;
+                $total_sel = count($selected_products);
+                for ($i = 0; $i < $total_sel; $i += $cols):
                 ?>
                 <tr>
-                    <?php for ($j = $i; $j < $i + $cols && $j < $total; $j++):
-                        $img_path = __DIR__ . '/../../../Images/hoodvent/' . $products_list[$j]['image'];
-                        $ext = pathinfo($products_list[$j]['image'], PATHINFO_EXTENSION);
+                    <?php for ($j = $i; $j < $i + $cols && $j < $total_sel; $j++):
+                        $prod = $selected_products[$j]['product'];
+                        $qty_val = $selected_products[$j]['qty'];
+                        $img_path = __DIR__ . '/../../../Images/hoodvent/' . $prod['image'];
+                        $ext = pathinfo($prod['image'], PATHINFO_EXTENSION);
                         $mime = ($ext === 'jpg' || $ext === 'jpeg') ? 'image/jpeg' : 'image/png';
                         $img_b64 = '';
                         if (file_exists($img_path)) {
                             $img_b64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($img_path));
                         }
-                        $qty_key = 'product_qty_' . $j;
-                        $qty_val = $data[$qty_key] ?? '';
                     ?>
-                    <td>
+                    <td style="width: 33.33%;">
                         <?php if ($img_b64): ?>
-                            <img src="<?php echo $img_b64; ?>" alt="<?php echo htmlspecialchars($products_list[$j]['name']); ?>">
+                            <img src="<?php echo $img_b64; ?>" alt="<?php echo htmlspecialchars($prod['name']); ?>">
                         <?php endif; ?>
-                        <div class="product-name-cell"><?php echo htmlspecialchars($products_list[$j]['name']); ?></div>
-                        <div class="product-qty-cell">Qty: <?php echo htmlspecialchars($qty_val ?: '____'); ?></div>
+                        <div class="product-name-cell"><?php echo htmlspecialchars($prod['name']); ?></div>
+                        <div class="product-qty-cell">Qty: <?php echo htmlspecialchars($qty_val); ?></div>
                     </td>
                     <?php endfor; ?>
                     <?php
-                    // Fill empty cells if last row is incomplete
-                    $remaining = ($i + $cols) - $total;
-                    if ($remaining > 0 && $i + $cols > $total):
+                    $remaining = ($i + $cols) - $total_sel;
+                    if ($remaining > 0 && $i + $cols > $total_sel):
                         for ($k = 0; $k < $remaining; $k++):
                     ?>
-                    <td></td>
+                    <td style="width: 33.33%;"></td>
                     <?php
                         endfor;
                     endif;
                     ?>
                 </tr>
                 <?php endfor; ?>
+            </table>
+            <?php else: ?>
+            <p style="font-size: 8px; color: #888; font-style: italic;">No products selected.</p>
+            <?php endif; ?>
+
+            <div class="authorization-block">
+                <p>By signing below, the Customer acknowledges and agrees to the repair parts listed above and the recommended repairs described in the Technician Notes/Observations. The Customer authorizes Prime to proceed with the described repairs and installations.</p>
+            </div>
+
+            <table class="authorization-sig-table">
+                <tr>
+                    <td>
+                        <span class="sig-label">Client / Manager:</span>
+                        <span>Name: <?php echo htmlspecialchars($data['auth_client_name'] ?? '________________'); ?></span>
+                    </td>
+                    <td>
+                        <span class="sig-label">Signature:</span>
+                        <?php if (!empty($data['auth_client_signature'])): ?>
+                            <img src="<?php echo $data['auth_client_signature']; ?>" style="max-height: 25px;">
+                        <?php else: ?>
+                            <div class="sig-line"></div>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <span class="sig-label">Date:</span>
+                        <span><?php echo htmlspecialchars($data['auth_client_date'] ?? '____/____/______'); ?></span>
+                    </td>
+                </tr>
             </table>
         </div>
     </div>
