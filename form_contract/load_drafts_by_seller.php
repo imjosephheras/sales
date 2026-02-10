@@ -31,6 +31,8 @@ try {
                 request_type,
                 requested_service,
                 client_name,
+                company_name,
+                order_number,
                 total_cost,
                 seller,
                 status,
