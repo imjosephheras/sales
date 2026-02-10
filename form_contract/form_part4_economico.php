@@ -52,6 +52,9 @@ function updatePriceLabel() {
 }
 </script>
 
+<!-- Load Janitorial Services Catalog -->
+<script src="janitorial_services_catalog.js"></script>
+
 <!-- 18️⃣ Janitorial Services -->
 <div class="question-block" id="q18">
   <label for="includeJanitorial" class="question-label">
@@ -65,15 +68,13 @@ function updatePriceLabel() {
     <option value="No"><?= ($lang=='en') ? "No" : "No"; ?></option>
     <option value="Yes"><?= ($lang=='en') ? "Yes" : "Sí"; ?></option>
   </select>
-</div>
-
-
-  <!-- (todo el contenido interno permanece igual, solo traducimos headers y labels) -->
 
   <div id="section18Container" style="display:none; margin-top:20px;">
+
+    <!-- ADD / REMOVE -->
     <div style="margin-bottom:15px;">
       <button type="button" class="btn18 addRow18" onclick="addRow18()">
-        ➕ <?= ($lang=='en') ? "Add Row" : "Agregar fila"; ?>
+        ➕ <?= ($lang=='en') ? "Add Row" : "Agregar Fila"; ?>
       </button>
 
       <button type="button" class="btn18 removeRow18" onclick="removeRow18()">
@@ -81,81 +82,83 @@ function updatePriceLabel() {
       </button>
     </div>
 
+    <!-- TABLE -->
     <table class="service-table18">
       <thead>
         <tr>
-          <th><?= ($lang=='en') ? "Type of Services" : "Tipo de servicio"; ?></th>
-          <th><?= ($lang=='en') ? "Service Time" : "Tiempo de servicio"; ?></th>
+          <th><?= ($lang=='en') ? "Type of Services" : "Tipo de Servicio"; ?></th>
+          <th><?= ($lang=='en') ? "Service Time" : "Tiempo de Servicio"; ?></th>
           <th><?= ($lang=='en') ? "Frequency" : "Frecuencia"; ?></th>
           <th><?= ($lang=='en') ? "Description" : "Descripción"; ?></th>
           <th><?= ($lang=='en') ? "Subtotal" : "Subtotal"; ?></th>
         </tr>
       </thead>
 
-
       <tbody id="table18body">
 
-        <!-- ONLY ONE INITIAL ROW -->
+        <!-- ONE INITIAL ROW -->
         <tr>
 
-          <!-- TYPE OF SERVICES (WITH WRITE...) -->
+          <!-- TYPE OF SERVICES (MODAL SELECTOR) -->
           <td>
-            <select class="type18" name="type18[]" onchange="toggleWriteOption18(this)">
-              <option value="__write__">✍️ Write...</option>
-              <option value="">-- Select Service --</option>
-
-              <!-- JANITORIAL OPTIONS -->
-              <option>Window Cleaning</option>
-              <option>Window Tint</option>
-              <option>Carpet Cleaning</option>
-              <option>Painting</option>
-              <option>Powerwashing Facade</option>
-              <option>Furniture Upholstery Cleaning</option>
-              <option>Restroom Cleaning</option>
-            </select>
-
-            <input type="text" class="write-field-18" name="write18[]" style="display:none; margin-top:5px;" placeholder="Write service...">
+            <input type="hidden" class="type18" name="type18[]" value="">
+            <input type="hidden" class="scope18" name="scope18[]" value="">
+            <div class="janitorial-selector-btn" onclick="openJanitorialModal(this)">
+              <span class="janitorial-selector-text"><?= ($lang=='en') ? "Select Service..." : "Seleccionar Servicio..."; ?></span>
+              <span class="janitorial-selector-icon">&#9662;</span>
+            </div>
           </td>
 
           <!-- SERVICE TIME -->
           <td>
             <select class="time18" name="time18[]">
-              <option value="">-- Select Time --</option>
-              <option>1 Day</option>
-              <option>1-2 Days</option>
-              <option>3 Days</option>
-              <option>4 Days</option>
-              <option>5 Days</option>
-              <option>6 Days</option>
-              <option>7 Days</option>
+              <option value="">
+                <?= ($lang=='en') ? "-- Select Time --" : "-- Seleccione tiempo --"; ?>
+              </option>
+              <option><?= ($lang=='en') ? "1 Day" : "1 Dia"; ?></option>
+              <option><?= ($lang=='en') ? "1-2 Days" : "1-2 Dias"; ?></option>
+              <option><?= ($lang=='en') ? "3 Days" : "3 Dias"; ?></option>
+              <option><?= ($lang=='en') ? "4 Days" : "4 Dias"; ?></option>
+              <option><?= ($lang=='en') ? "5 Days" : "5 Dias"; ?></option>
+              <option><?= ($lang=='en') ? "6 Days" : "6 Dias"; ?></option>
+              <option><?= ($lang=='en') ? "7 Days" : "7 Dias"; ?></option>
             </select>
           </td>
 
           <!-- FREQUENCY -->
           <td>
             <select class="freq18" name="freq18[]">
-              <option value="">-- Select Period --</option>
-              <option>One Time</option>
-              <option>Weekly</option>
-              <option>Every 2 Weeks</option>
-              <option>Every 3 Weeks</option>
-              <option>Monthly</option>
-              <option>Bimonthly</option>
-              <option>Quarterly</option>
-              <option>Every 4 Months</option>
-              <option>Semiannual</option>
-              <option>Annual</option>
+              <option value="">
+                <?= ($lang=='en') ? "-- Select Period --" : "-- Seleccione periodo --"; ?>
+              </option>
+              <option><?= ($lang=='en') ? "One Time" : "Una Vez"; ?></option>
+              <option><?= ($lang=='en') ? "Weekly" : "Semanal"; ?></option>
+              <option><?= ($lang=='en') ? "Every 2 Weeks" : "Cada 2 Semanas"; ?></option>
+              <option><?= ($lang=='en') ? "Every 3 Weeks" : "Cada 3 Semanas"; ?></option>
+              <option><?= ($lang=='en') ? "Monthly" : "Mensual"; ?></option>
+              <option><?= ($lang=='en') ? "Bimonthly" : "Bimestral"; ?></option>
+              <option><?= ($lang=='en') ? "Quarterly" : "Trimestral"; ?></option>
+              <option><?= ($lang=='en') ? "Every 4 Months" : "Cada 4 Meses"; ?></option>
+              <option><?= ($lang=='en') ? "Semiannual" : "Semestral"; ?></option>
+              <option><?= ($lang=='en') ? "Annual" : "Anual"; ?></option>
             </select>
           </td>
 
-          <!-- DESCRIPTION (FREE INPUT) -->
+          <!-- DESCRIPTION -->
           <td>
-            <input type="text" class="desc18" name="desc18[]" placeholder="Write description...">
+            <input type="text"
+              class="desc18"
+              name="desc18[]"
+              placeholder="<?= ($lang=='en') ? 'Write description...' : 'Escriba la descripcion...'; ?>">
           </td>
 
-          <!-- SUBTOTAL (FREE INPUT) -->
+          <!-- SUBTOTAL -->
           <td>
-            <input type="number" step="0.01" class="subtotal18" name="subtotal18[]" placeholder="0.00" oninput="calcTotals18()">
+            <input type="number" step="0.01"
+              class="subtotal18"
+              name="subtotal18[]"
+              placeholder="0.00"
+              oninput="calcTotals18()">
           </td>
 
         </tr>
@@ -167,53 +170,79 @@ function updatePriceLabel() {
     <div class="totals18-container">
 
       <div class="tot-box-18">
-        <div class="tot-header-18">TOTAL</div>
-        <input type="text" id="total18" name="total18" readonly>
+        <div class="tot-header-18">
+          <?= ($lang=='en') ? "TOTAL" : "TOTAL"; ?>
+        </div>
+        <input type="text" id="total18" readonly name="total18">
       </div>
 
       <div class="tot-box-18">
-        <div class="tot-header-18">TAXES (8.25%)</div>
-        <input type="text" id="taxes18" name="taxes18" readonly>
+        <div class="tot-header-18">
+          <?= ($lang=='en') ? "TAXES (8.25%)" : "IMPUESTOS (8.25%)"; ?>
+        </div>
+        <input type="text" id="taxes18" readonly name="taxes18">
       </div>
 
       <div class="tot-box-18">
-        <div class="tot-header-18">GRAND TOTAL</div>
-        <input type="text" id="grand18" name="grand18" readonly>
+        <div class="tot-header-18">
+          <?= ($lang=='en') ? "GRAND TOTAL" : "TOTAL GENERAL"; ?>
+        </div>
+        <input type="text" id="grand18" readonly name="grand18">
       </div>
 
     </div>
 
   </div>
+</div>
 
+<!-- ======================================= -->
+<!-- JANITORIAL SERVICE SELECTOR MODAL -->
+<!-- ======================================= -->
+<div id="janitorialModal" class="janitorial-modal-overlay" style="display:none;">
+  <div class="janitorial-modal">
+    <div class="janitorial-modal-header">
+      <h3><?= ($lang=='en') ? "Select a Janitorial Service" : "Seleccionar un Servicio de Limpieza"; ?></h3>
+      <button type="button" class="janitorial-modal-close" onclick="closeJanitorialModal()">&times;</button>
+    </div>
+
+    <div class="janitorial-modal-search">
+      <input type="text" id="janitorialModalSearch"
+        placeholder="<?= ($lang=='en') ? 'Search services...' : 'Buscar servicios...'; ?>"
+        oninput="filterJanitorialCards()">
+    </div>
+
+    <div class="janitorial-modal-body" id="janitorialModalBody">
+      <!-- Cards are generated dynamically from janitorialServicesCatalog -->
+    </div>
+  </div>
+</div>
 
 <style>
+  /* ===== TABLE 18 STYLES ===== */
   .service-table18 {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
     font-size: 14px;
   }
-
   .service-table18 th {
     background-color: #c00;
     color: #fff;
     padding: 8px;
     text-align: center;
   }
-
   .service-table18 td {
     border: 1px solid #ddd;
     padding: 8px;
   }
-
   .service-table18 select,
-  .service-table18 input {
+  .service-table18 input[type="text"],
+  .service-table18 input[type="number"] {
     width: 100%;
     padding: 6px;
     border: 1px solid #ccc;
     border-radius: 4px;
   }
-
   .btn18 {
     padding: 6px 14px;
     border: none;
@@ -222,17 +251,14 @@ function updatePriceLabel() {
     font-weight: bold;
     margin-right: 10px;
   }
-
   .addRow18 { background-color:#008c4a; color:white; }
   .removeRow18 { background-color:#777; color:white; }
-
   .totals18-container {
     margin-top: 25px;
     display: flex;
     gap: 25px;
     flex-wrap: wrap;
   }
-
   .tot-box-18 {
     width: 220px;
     border: 1px solid #ddd;
@@ -240,7 +266,6 @@ function updatePriceLabel() {
     background:white;
     box-shadow:0 2px 5px rgba(0,0,0,0.1);
   }
-
   .tot-header-18 {
     background-color:#c00;
     color:white;
@@ -248,7 +273,6 @@ function updatePriceLabel() {
     text-align:center;
     font-weight:bold;
   }
-
   .tot-box-18 input {
     width:100%;
     padding:10px;
@@ -257,45 +281,370 @@ function updatePriceLabel() {
     background:#f7f7f7;
     border:none;
   }
+
+  /* ===== JANITORIAL SELECTOR BUTTON ===== */
+  .janitorial-selector-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #fff;
+    min-height: 38px;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .janitorial-selector-btn:hover {
+    border-color: #001f54;
+    background: #f0f4ff;
+  }
+  .janitorial-selector-btn.has-value {
+    border-color: #001f54;
+    background: #e8f0fe;
+  }
+  .janitorial-selector-text {
+    flex: 1;
+    color: #666;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .janitorial-selector-btn.has-value .janitorial-selector-text {
+    color: #001f54;
+    font-weight: 600;
+  }
+  .janitorial-selector-icon {
+    margin-left: 8px;
+    color: #999;
+    font-size: 12px;
+  }
+
+  /* ===== JANITORIAL MODAL ===== */
+  .janitorial-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .janitorial-modal {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  .janitorial-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    background: #001f54;
+    color: #fff;
+  }
+  .janitorial-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .janitorial-modal-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .janitorial-modal-close:hover {
+    opacity: 1;
+  }
+  .janitorial-modal-search {
+    padding: 16px 24px 8px;
+  }
+  .janitorial-modal-search input {
+    width: 100%;
+    padding: 10px 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .janitorial-modal-search input:focus {
+    border-color: #001f54;
+  }
+  .janitorial-modal-body {
+    padding: 16px 24px 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  /* ===== JANITORIAL CATEGORY HEADER ===== */
+  .janitorial-modal-category {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #999;
+    margin: 16px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #eee;
+  }
+  .janitorial-modal-category:first-child {
+    margin-top: 0;
+  }
+
+  /* ===== JANITORIAL SERVICE CARDS ===== */
+  .janitorial-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .janitorial-card {
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    background: #fafbfc;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .janitorial-card:hover {
+    border-color: #001f54;
+    background: #e8f0fe;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,31,84,0.15);
+  }
+  .janitorial-card-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #001f54;
+  }
+  .janitorial-card-scope-count {
+    font-size: 11px;
+    color: #888;
+  }
+  .janitorial-card-no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-style: italic;
+  }
+  .janitorial-card-other {
+    border-style: dashed;
+    border-color: #999;
+    background: #f9f9f9;
+  }
+  .janitorial-card-other:hover {
+    border-color: #c00;
+    background: #fff5f5;
+  }
+  .janitorial-card-other .janitorial-card-name {
+    color: #666;
+  }
 </style>
 
 <script>
-// SHOW/HIDE SECTION
+// ===== JANITORIAL MODAL STATE =====
+let activeJanitorialRow = null;
+
+// ===== TOGGLE SECTION 18 =====
 function toggleSection18() {
   document.getElementById("section18Container").style.display =
     document.getElementById("includeJanitorial").value === "Yes"
     ? "block" : "none";
 }
 
-// WRITE OPTION
-function toggleWriteOption18(select) {
-  const input = select.parentElement.querySelector('.write-field-18');
-  input.style.display = (select.value === "__write__") ? "block" : "none";
+// ===== OPEN JANITORIAL MODAL =====
+function openJanitorialModal(btn) {
+  activeJanitorialRow = btn.closest("tr");
+  const modal = document.getElementById("janitorialModal");
+  const search = document.getElementById("janitorialModalSearch");
+
+  search.value = "";
+  renderJanitorialCards("");
+
+  modal.style.display = "flex";
+  setTimeout(() => search.focus(), 100);
 }
 
-// ADD ROW
+// ===== CLOSE JANITORIAL MODAL =====
+function closeJanitorialModal() {
+  document.getElementById("janitorialModal").style.display = "none";
+  activeJanitorialRow = null;
+}
+
+// Close modal on overlay click
+document.addEventListener("click", function(e) {
+  if (e.target.id === "janitorialModal") closeJanitorialModal();
+});
+
+// Close modal on Escape key
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape" && document.getElementById("janitorialModal").style.display === "flex") {
+    closeJanitorialModal();
+  }
+});
+
+// ===== RENDER JANITORIAL SERVICE CARDS =====
+function renderJanitorialCards(filter) {
+  const body = document.getElementById("janitorialModalBody");
+  const lowerFilter = filter.toLowerCase();
+
+  const filtered = janitorialServicesCatalog.filter(svc =>
+    svc.name.toLowerCase().includes(lowerFilter) ||
+    svc.category.toLowerCase().includes(lowerFilter)
+  );
+
+  let html = "";
+
+  if (filtered.length === 0) {
+    html += '<div class="janitorial-cards-grid"><div class="janitorial-card-no-results">' +
+      '<?= ($lang=="en") ? "No services found" : "No se encontraron servicios"; ?>' +
+      '</div></div>';
+  } else {
+    // Group by category
+    const grouped = {};
+    filtered.forEach(svc => {
+      if (!grouped[svc.category]) grouped[svc.category] = [];
+      grouped[svc.category].push(svc);
+    });
+
+    for (const cat in grouped) {
+      html += '<div class="janitorial-modal-category">' + cat + '</div>';
+      html += '<div class="janitorial-cards-grid">';
+      grouped[cat].forEach(svc => {
+        const scopeCount = svc.scope ? svc.scope.length : 0;
+        html += '<div class="janitorial-card" onclick="selectJanitorialService(\'' + svc.id + '\')">';
+        html += '<div class="janitorial-card-name">' + svc.name + '</div>';
+        html += '<div class="janitorial-card-scope-count">' + scopeCount + ' <?= ($lang=="en") ? "scope items" : "elementos de scope"; ?></div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+  }
+
+  // Always show "Other" option at the bottom
+  html += '<div class="janitorial-modal-category"><?= ($lang=="en") ? "Other" : "Otro"; ?></div>';
+  html += '<div class="janitorial-cards-grid">';
+  html += '<div class="janitorial-card janitorial-card-other" onclick="selectCustomJanitorialService()">';
+  html += '<div class="janitorial-card-name"><?= ($lang=="en") ? "Other (Custom)" : "Otro (Personalizado)"; ?></div>';
+  html += '<div class="janitorial-card-scope-count"><?= ($lang=="en") ? "Enter service name manually" : "Ingrese el nombre del servicio manualmente"; ?></div>';
+  html += '</div>';
+  html += '</div>';
+
+  body.innerHTML = html;
+}
+
+// ===== FILTER JANITORIAL SERVICE CARDS =====
+function filterJanitorialCards() {
+  const val = document.getElementById("janitorialModalSearch").value;
+  renderJanitorialCards(val);
+}
+
+// ===== SELECT JANITORIAL SERVICE FROM MODAL =====
+function selectJanitorialService(serviceId) {
+  if (!activeJanitorialRow) return;
+
+  const svc = janitorialCatalogById[serviceId];
+  if (!svc) return;
+
+  // Set hidden type18 value
+  const typeInput = activeJanitorialRow.querySelector(".type18");
+  typeInput.value = svc.name;
+
+  // Set hidden scope18 value (JSON array of scope items)
+  const scopeInput = activeJanitorialRow.querySelector(".scope18");
+  scopeInput.value = JSON.stringify(svc.scope || []);
+
+  // Update button display
+  const btn = activeJanitorialRow.querySelector(".janitorial-selector-btn");
+  const textSpan = btn.querySelector(".janitorial-selector-text");
+  textSpan.textContent = svc.name;
+  btn.classList.add("has-value");
+
+  closeJanitorialModal();
+}
+
+// ===== SELECT CUSTOM JANITORIAL SERVICE (Other) =====
+function selectCustomJanitorialService() {
+  if (!activeJanitorialRow) return;
+
+  const customName = prompt(
+    '<?= ($lang=="en") ? "Enter the service name:" : "Ingrese el nombre del servicio:"; ?>'
+  );
+
+  if (!customName || customName.trim() === '') return;
+
+  const trimmedName = customName.trim();
+
+  // Set hidden type18 value with custom name
+  const typeInput = activeJanitorialRow.querySelector(".type18");
+  typeInput.value = trimmedName;
+
+  // Set empty scope18 (no predefined scope for custom services)
+  const scopeInput = activeJanitorialRow.querySelector(".scope18");
+  scopeInput.value = '[]';
+
+  // Update button display
+  const btn = activeJanitorialRow.querySelector(".janitorial-selector-btn");
+  const textSpan = btn.querySelector(".janitorial-selector-text");
+  textSpan.textContent = trimmedName;
+  btn.classList.add("has-value");
+
+  closeJanitorialModal();
+}
+
+// ===== ADD ROW =====
 function addRow18() {
   const tbody = document.getElementById("table18body");
   const newRow = tbody.children[0].cloneNode(true);
 
+  // Reset all inputs
   newRow.querySelectorAll("select, input").forEach(el => el.value = "");
-  newRow.querySelector('.write-field-18').style.display = "none";
+
+  // Reset janitorial selector button
+  const btn = newRow.querySelector(".janitorial-selector-btn");
+  const textSpan = btn.querySelector(".janitorial-selector-text");
+  textSpan.textContent = "<?= ($lang=='en') ? 'Select Service...' : 'Seleccionar Servicio...'; ?>";
+  btn.classList.remove("has-value");
 
   tbody.appendChild(newRow);
 }
 
-// REMOVE ROW
+// ===== REMOVE ROW =====
 function removeRow18() {
   const tbody = document.getElementById("table18body");
   if (tbody.children.length > 1) {
     tbody.lastElementChild.remove();
     calcTotals18();
   } else {
-    alert("At least one row must remain.");
+    alert("<?= ($lang=='en')
+      ? 'At least one row must remain.'
+      : 'Debe permanecer al menos una fila.'; ?>");
   }
 }
 
-// CALCULATE TOTALS
+// ===== CALCULATE TOTALS =====
 function calcTotals18() {
   let total = 0;
 
@@ -313,7 +662,7 @@ function calcTotals18() {
 }
 </script>
 
-<!-- Load Services Catalog -->
+<!-- Load Services Catalog (for Q19) -->
 <script src="services_catalog.js"></script>
 
 <!-- 19️⃣ Hoodvent & Kitchen Cleaning -->
