@@ -601,10 +601,13 @@
       .form-actions,
       .janitorial-modal-overlay,
       .service-modal-overlay,
+      .product-modal-overlay,
       #previewModal,
       .addRow18, .removeRow18,
       .addRow19, .removeRow19,
       .btn18, .btn19,
+      .product-catalog-btn-wrap,
+      .selected-product-remove,
       #toggleCalculator,
       .nav-btn,
       .calculator-side {
