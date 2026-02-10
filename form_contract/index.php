@@ -1553,7 +1553,7 @@ document.addEventListener("DOMContentLoaded", () => {
      POPULATE JANITORIAL COSTS (Q18)
      =============================== */
   window.populateJanitorialCosts = function(costs) {
-    console.log('🧹 Populating Janitorial Services (Q18) with data:', costs);
+    console.log('Populating Janitorial Services (Q18) with data:', costs);
 
     // Set includeJanitorial to "Yes"
     const includeJanitorial = document.getElementById('includeJanitorial');
@@ -1578,23 +1578,29 @@ document.addEventListener("DOMContentLoaded", () => {
     // Clear existing rows
     tbody.innerHTML = '';
 
-    // Add rows with data
+    // Add rows with data (using new modal-based selector)
     costs.forEach((cost, index) => {
+      const serviceType = cost.service_type || '';
+
+      // Look up scope from janitorial catalog if available
+      let scopeJson = '[]';
+      if (typeof janitorialCatalogByName !== 'undefined' && janitorialCatalogByName[serviceType]) {
+        scopeJson = JSON.stringify(janitorialCatalogByName[serviceType].scope || []);
+      }
+
+      const hasValue = serviceType ? ' has-value' : '';
+      const displayText = serviceType || 'Select Service...';
+      const textColor = serviceType ? 'color: #001f54; font-weight: 600;' : '';
+
       const newRow = document.createElement('tr');
       newRow.innerHTML = `
         <td>
-          <select class="type18" name="type18[]" onchange="toggleWriteOption18(this)">
-            <option value="__write__">✍️ Write...</option>
-            <option value="">-- Select Service --</option>
-            <option>Window Cleaning</option>
-            <option>Window Tint</option>
-            <option>Carpet Cleaning</option>
-            <option>Painting</option>
-            <option>Powerwashing Facade</option>
-            <option>Furniture Upholstery Cleaning</option>
-            <option>Restroom Cleaning</option>
-          </select>
-          <input type="text" class="write-field-18" name="write18[]" style="display:none; margin-top:5px;" placeholder="Write service...">
+          <input type="hidden" class="type18" name="type18[]" value="${serviceType}">
+          <input type="hidden" class="scope18" name="scope18[]" value='${scopeJson.replace(/'/g, "&#39;")}'>
+          <div class="janitorial-selector-btn${hasValue}" onclick="openJanitorialModal(this)">
+            <span class="janitorial-selector-text" style="${textColor}">${serviceType || 'Select Service...'}</span>
+            <span class="janitorial-selector-icon">&#9662;</span>
+          </div>
         </td>
         <td>
           <select class="time18" name="time18[]">
@@ -1632,26 +1638,11 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       tbody.appendChild(newRow);
 
-      // Set the values
-      const typeSelect = newRow.querySelector('.type18');
-      const writeField = newRow.querySelector('.write-field-18');
+      // Set the remaining values
       const timeSelect = newRow.querySelector('.time18');
       const freqSelect = newRow.querySelector('.freq18');
       const descInput = newRow.querySelector('.desc18');
       const subtotalInput = newRow.querySelector('.subtotal18');
-
-      // Check if service_type is in the dropdown options
-      const serviceType = cost.service_type || '';
-      const optionExists = Array.from(typeSelect.options).some(opt => opt.value === serviceType || opt.text === serviceType);
-
-      if (optionExists) {
-        typeSelect.value = serviceType;
-      } else {
-        // Custom value - use write field
-        typeSelect.value = '__write__';
-        writeField.style.display = 'block';
-        writeField.value = serviceType;
-      }
 
       if (timeSelect) timeSelect.value = cost.service_time || '';
       if (freqSelect) freqSelect.value = cost.frequency || '';
@@ -1664,7 +1655,7 @@ document.addEventListener("DOMContentLoaded", () => {
       calcTotals18();
     }
 
-    console.log('✅ Janitorial costs populated successfully');
+    console.log('Janitorial costs populated successfully');
   };
 
   /* ===============================

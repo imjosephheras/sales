@@ -610,8 +610,13 @@
     // Load PHP services catalog for scope descriptions
     require_once __DIR__ . '/services_catalog.php';
 
-    // Collect all Q19 service types (unique)
+    // Collect all service types (unique) from Q18 Janitorial + Q19 Kitchen/Hood
     $scopeServiceNames = [];
+    if (!empty($janitorialServices)) {
+        foreach ($janitorialServices as $svc) {
+            if (!empty($svc['service_type'])) $scopeServiceNames[] = $svc['service_type'];
+        }
+    }
     if (!empty($hoodVentServices)) {
         foreach ($hoodVentServices as $svc) {
             if (!empty($svc['service_type'])) $scopeServiceNames[] = $svc['service_type'];
