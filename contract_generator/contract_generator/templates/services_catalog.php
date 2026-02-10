@@ -39,6 +39,27 @@ $servicesCatalog = [
         "Leave the work area clean, safe, and ready for normal operations upon completion of the service."
     ],
 
+    "Wall Cleaning" => [
+        "Perform wall cleaning to remove dust, dirt, grease, stains, and surface contaminants.",
+        "Clean accessible wall surfaces in designated areas based on the approved scope.",
+        "Degrease wall surfaces where applicable, particularly in kitchen or food service environments.",
+        "Remove visible marks and buildup without damaging existing finishes.",
+        "Use appropriate cleaning products, chemicals, and methods suitable for the wall surface type.",
+        "Follow applicable safety procedures during the performance of the service.",
+        "Perform a final visual inspection to confirm proper cleaning.",
+        "Leave wall areas clean, safe, and ready for normal operations upon completion of the service."
+    ],
+
+    "Kitchen Equipment Cleaning" => [
+        "Perform kitchen equipment cleaning to remove dirt, grease, residue, and accumulated contaminants.",
+        "Clean exterior surfaces of kitchen equipment in accordance with the approved scope.",
+        "Focus on high-use and high-grease areas without disassembling equipment unless otherwise specified.",
+        "Use appropriate and professional-grade cleaning and degreasing products.",
+        "Follow applicable safety and sanitation procedures during the performance of the service.",
+        "Perform a final inspection to confirm proper equipment cleaning.",
+        "Leave kitchen equipment clean, safe, and ready for normal operations upon completion of the service."
+    ],
+
     "Carpet Cleaning & Shampooing" => [
         "Perform professional carpet cleaning to remove dirt, stains, and accumulated contaminants.",
         "Apply shampooing/extraction process using equipment and products appropriate for the carpet type.",
