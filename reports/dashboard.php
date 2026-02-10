@@ -17,6 +17,7 @@ $stmt = $pdo->query("
         request_type,
         requested_service,
         total_cost,
+        seller,
         created_at,
         Work_Date
     FROM forms
@@ -40,12 +41,31 @@ $salesByMonth = [];
 $salesByYear = [];
 $requestTypes = [];
 $requestServices = [];
+$sellers = [];
+
+// Store raw data per request for client-side filtering
+$rawData = [];
 
 foreach ($requests as $row) {
     $total = getRequestTotal($row);
+    $sellerName = $row['seller'] ?: 'Unknown';
     // Use Work_Date if available, otherwise fallback to created_at
     $dateValue = !empty($row['Work_Date']) ? $row['Work_Date'] : $row['created_at'];
     $date = new DateTime($dateValue);
+
+    // Store raw data for client-side filtering
+    $rawData[] = [
+        'total' => $total,
+        'seller' => $sellerName,
+        'request_type' => $row['request_type'] ?: 'Unknown',
+        'requested_service' => $row['requested_service'] ?: 'Unknown',
+        'weekKey' => $date->format('Y-W'),
+        'weekLabel' => 'Week ' . $date->format('W') . ', ' . $date->format('Y'),
+        'monthKey' => $date->format('Y-m'),
+        'monthLabel' => $date->format('M Y'),
+        'yearKey' => $date->format('Y'),
+        'yearLabel' => $date->format('Y')
+    ];
 
     // Sales by week (ISO week)
     $weekKey = $date->format('Y-W');
@@ -80,6 +100,13 @@ foreach ($requests as $row) {
     }
     $requestTypes[$type]++;
 
+    // Sellers
+    if (!isset($sellers[$sellerName])) {
+        $sellers[$sellerName] = ['count' => 0, 'total' => 0];
+    }
+    $sellers[$sellerName]['count']++;
+    $sellers[$sellerName]['total'] += $total;
+
     // Requested services
     $service = $row['requested_service'] ?: 'Unknown';
     if (!isset($requestServices[$service])) {
@@ -93,6 +120,7 @@ ksort($salesByWeek);
 ksort($salesByMonth);
 ksort($salesByYear);
 arsort($requestServices);
+arsort($sellers);
 
 // Keep only last 12 weeks/months
 $salesByWeek = array_slice($salesByWeek, -12, 12, true);
@@ -108,6 +136,8 @@ $chartDataMonth = json_encode(array_values($salesByMonth));
 $chartDataYear = json_encode(array_values($salesByYear));
 $chartDataTypes = json_encode($requestTypes);
 $chartDataServices = json_encode($requestServices);
+$chartDataSellers = json_encode($sellers);
+$chartRawData = json_encode($rawData);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -300,6 +330,7 @@ $chartDataServices = json_encode($requestServices);
 
         .chart-container.pie {
             height: 350px;
+            cursor: pointer;
         }
 
         /* Services List */
@@ -410,14 +441,21 @@ $chartDataServices = json_encode($requestServices);
             </div>
         </div>
 
-        <!-- Request Types Pie Chart -->
+        <!-- Sellers Pie Chart -->
         <div class="chart-card">
             <div class="chart-header">
-                <div class="chart-title"><i class="fas fa-chart-pie"></i> Request Types</div>
+                <div class="chart-title"><i class="fas fa-chart-pie"></i> Sellers</div>
+                <div id="sellerFilterIndicator" style="display:none;">
+                    <span id="sellerFilterName" style="font-size:0.85rem; color:#003080; font-weight:600;"></span>
+                    <button onclick="clearSellerFilter()" style="background:#ef4444; color:white; border:none; padding:4px 10px; border-radius:4px; font-size:0.75rem; cursor:pointer; margin-left:8px;">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
             </div>
             <div class="chart-container pie">
-                <canvas id="typesChart"></canvas>
+                <canvas id="sellersChart"></canvas>
             </div>
+            <p style="text-align:center; font-size:0.75rem; color:#94a3b8; margin-top:8px;">Click a seller to filter all charts</p>
         </div>
 
         <!-- Requested Services -->
@@ -453,16 +491,91 @@ $chartDataServices = json_encode($requestServices);
         const salesDataWeek = <?= $chartDataWeek ?>;
         const salesDataMonth = <?= $chartDataMonth ?>;
         const salesDataYear = <?= $chartDataYear ?>;
-        const requestTypesData = <?= $chartDataTypes ?>;
+        const sellersData = <?= $chartDataSellers ?>;
+        const rawData = <?= $chartRawData ?>;
+
+        // Current state
+        let currentPeriod = 'month';
+        let activeSeller = null;
 
         // Colors for charts
         const colors = {
             primary: '#003080',
             secondary: '#0066cc',
-            pieColors: ['#003080', '#0066cc', '#00a3cc', '#00cc99', '#66cc00', '#cc9900', '#cc6600', '#cc3300']
+            pieColors: ['#003080', '#0066cc', '#00a3cc', '#00cc99', '#66cc00', '#cc9900', '#cc6600', '#cc3300', '#9933cc', '#ff6699']
         };
 
-        // Sales Chart
+        // ============ SELLER FILTER LOGIC ============
+        function getFilteredData() {
+            if (!activeSeller) return rawData;
+            return rawData.filter(item => item.seller === activeSeller);
+        }
+
+        function aggregateSalesData(data, keyField, labelField) {
+            const agg = {};
+            data.forEach(item => {
+                const key = item[keyField];
+                if (!agg[key]) {
+                    agg[key] = { label: item[labelField], total: 0, count: 0 };
+                }
+                agg[key].total += item.total;
+                agg[key].count++;
+            });
+            // Sort by key and return values
+            const sorted = Object.keys(agg).sort();
+            return sorted.map(k => agg[k]);
+        }
+
+        function aggregateServices(data) {
+            const agg = {};
+            data.forEach(item => {
+                const svc = item.requested_service;
+                if (!agg[svc]) agg[svc] = 0;
+                agg[svc]++;
+            });
+            // Sort descending by count
+            const sorted = Object.entries(agg).sort((a, b) => b[1] - a[1]);
+            return sorted;
+        }
+
+        function filterBySeller(sellerName) {
+            activeSeller = sellerName;
+            document.getElementById('sellerFilterIndicator').style.display = 'flex';
+            document.getElementById('sellerFilterIndicator').style.alignItems = 'center';
+            document.getElementById('sellerFilterIndicator').style.gap = '8px';
+            document.getElementById('sellerFilterName').textContent = 'Filtered: ' + sellerName;
+            refreshAllCharts();
+        }
+
+        function clearSellerFilter() {
+            activeSeller = null;
+            document.getElementById('sellerFilterIndicator').style.display = 'none';
+            refreshAllCharts();
+        }
+
+        function refreshAllCharts() {
+            const filtered = getFilteredData();
+
+            // Update summary cards
+            const totalSales = filtered.reduce((sum, item) => sum + item.total, 0);
+            const totalReqs = filtered.length;
+            const uniqueTypes = new Set(filtered.map(item => item.request_type)).size;
+            const uniqueServices = new Set(filtered.map(item => item.requested_service)).size;
+
+            const cardValues = document.querySelectorAll('.summary-card .card-value');
+            cardValues[0].textContent = '$' + totalSales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            cardValues[1].textContent = totalReqs;
+            cardValues[2].textContent = uniqueTypes;
+            cardValues[3].textContent = uniqueServices;
+
+            // Rebuild sales chart
+            showSalesChart(currentPeriod);
+
+            // Rebuild services list
+            rebuildServicesList(filtered);
+        }
+
+        // ============ SALES CHART ============
         let salesChart;
         const salesCtx = document.getElementById('salesChart').getContext('2d');
 
@@ -482,8 +595,8 @@ $chartDataServices = json_encode($requestServices);
                     datasets: [{
                         label: 'Total Sales ($)',
                         data: values,
-                        backgroundColor: colors.primary,
-                        borderColor: colors.primary,
+                        backgroundColor: activeSeller ? colors.secondary : colors.primary,
+                        borderColor: activeSeller ? colors.secondary : colors.primary,
                         borderWidth: 1,
                         borderRadius: 6,
                         barThickness: 40
@@ -502,10 +615,12 @@ $chartDataServices = json_encode($requestServices);
                                     const index = context.dataIndex;
                                     const total = context.parsed.y;
                                     const count = counts[index];
-                                    return [
+                                    const lines = [
                                         `Total: $${total.toLocaleString('en-US', {minimumFractionDigits: 2})}`,
                                         `Requests: ${count}`
                                     ];
+                                    if (activeSeller) lines.push(`Seller: ${activeSeller}`);
+                                    return lines;
                                 }
                             }
                         }
@@ -533,39 +648,45 @@ $chartDataServices = json_encode($requestServices);
         }
 
         function showSalesChart(period) {
+            currentPeriod = period;
+
             // Update active button
             document.querySelectorAll('.chart-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            const btns = document.querySelectorAll('.chart-btn');
+            if (period === 'week') btns[0].classList.add('active');
+            else if (period === 'month') btns[1].classList.add('active');
+            else if (period === 'year') btns[2].classList.add('active');
 
-            // Show appropriate data
+            const filtered = getFilteredData();
+            let keyField, labelField;
             switch(period) {
-                case 'week':
-                    createSalesChart(salesDataWeek);
-                    break;
-                case 'month':
-                    createSalesChart(salesDataMonth);
-                    break;
-                case 'year':
-                    createSalesChart(salesDataYear);
-                    break;
+                case 'week': keyField = 'weekKey'; labelField = 'weekLabel'; break;
+                case 'month': keyField = 'monthKey'; labelField = 'monthLabel'; break;
+                case 'year': keyField = 'yearKey'; labelField = 'yearLabel'; break;
             }
+            let data = aggregateSalesData(filtered, keyField, labelField);
+            // Keep last 12 for week/month
+            if (period !== 'year' && data.length > 12) {
+                data = data.slice(-12);
+            }
+            createSalesChart(data);
         }
 
         // Initialize with month view
-        createSalesChart(salesDataMonth);
+        showSalesChart('month');
 
-        // Request Types Pie Chart
-        const typesCtx = document.getElementById('typesChart').getContext('2d');
-        const typeLabels = Object.keys(requestTypesData);
-        const typeValues = Object.values(requestTypesData);
+        // ============ SELLERS PIE CHART ============
+        const sellersCtx = document.getElementById('sellersChart').getContext('2d');
+        const sellerLabels = Object.keys(sellersData);
+        const sellerCounts = sellerLabels.map(s => sellersData[s].count);
 
-        new Chart(typesCtx, {
+        const sellersChart = new Chart(sellersCtx, {
             type: 'pie',
             data: {
-                labels: typeLabels,
+                labels: sellerLabels,
                 datasets: [{
-                    data: typeValues,
-                    backgroundColor: colors.pieColors.slice(0, typeLabels.length),
+                    data: sellerCounts,
+                    backgroundColor: colors.pieColors.slice(0, sellerLabels.length),
                     borderWidth: 2,
                     borderColor: '#fff'
                 }]
@@ -573,6 +694,17 @@ $chartDataServices = json_encode($requestServices);
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                onClick: function(event, elements) {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const clickedSeller = sellerLabels[index];
+                        if (activeSeller === clickedSeller) {
+                            clearSellerFilter();
+                        } else {
+                            filterBySeller(clickedSeller);
+                        }
+                    }
+                },
                 plugins: {
                     legend: {
                         position: 'bottom',
@@ -590,13 +722,47 @@ $chartDataServices = json_encode($requestServices);
                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                 const value = context.parsed;
                                 const percentage = ((value / total) * 100).toFixed(1);
-                                return `${context.label}: ${value} (${percentage}%)`;
+                                const sellerName = context.label;
+                                const sellerTotal = sellersData[sellerName]?.total || 0;
+                                return [
+                                    `${sellerName}: ${value} requests (${percentage}%)`,
+                                    `Sales: $${sellerTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}`
+                                ];
                             }
                         }
                     }
                 }
             }
         });
+
+        // ============ SERVICES LIST REBUILD ============
+        function rebuildServicesList(filtered) {
+            const services = aggregateServices(filtered);
+            const container = document.querySelector('.services-list');
+            if (services.length === 0) {
+                container.innerHTML = '<div class="service-item"><span class="service-name" style="color:#94a3b8; font-style:italic;">No services data available</span></div>';
+                return;
+            }
+            const maxCount = services[0][1];
+            let html = '';
+            services.forEach(([name, count]) => {
+                const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
+                html += `<div class="service-item">
+                    <span class="service-name">${escapeHtml(name)}</span>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width:${pct}%"></div>
+                    </div>
+                    <span class="service-count">${count}</span>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
     </script>
 </body>
 </html>
