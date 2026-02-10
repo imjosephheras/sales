@@ -502,6 +502,79 @@ $lang = $_SESSION["lang"] ?? "en";
 }
 
 /* ========================================= */
+/* PAGINATION */
+/* ========================================= */
+.pagination-wrapper {
+    padding: 12px 15px;
+    border-top: 2px solid #e1e8ed;
+    background: #f4f7fc;
+    flex-shrink: 0;
+}
+
+.pagination-info {
+    text-align: center;
+    font-size: 11px;
+    color: #718096;
+    margin-bottom: 8px;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.pagination-btn {
+    background: white;
+    border: 1px solid #e1e8ed;
+    color: #1a202c;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+}
+
+.pagination-btn:hover:not(:disabled):not(.active) {
+    background: #001f54;
+    color: white;
+    border-color: #001f54;
+}
+
+.pagination-btn.active {
+    background: #001f54;
+    color: white;
+    border-color: #001f54;
+    font-weight: 700;
+    cursor: default;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-arrow {
+    gap: 4px;
+    padding: 4px 10px;
+}
+
+.pagination-ellipsis {
+    padding: 4px;
+    font-size: 12px;
+    color: #718096;
+    user-select: none;
+}
+
+/* ========================================= */
 /* SPLIT SCREEN LAYOUT - 3 PANELS SUPPORT */
 /* ========================================= */
 .split-screen-wrapper {
@@ -765,7 +838,10 @@ $lang = $_SESSION["lang"] ?? "en";
             <div class="pending-forms-list" id="pendingFormsList">
                 <!-- Formularios pendientes se cargarán aquí dinámicamente -->
             </div>
-            
+
+            <!-- Pagination -->
+            <div class="pagination-wrapper" id="pagination-container" style="display: none;"></div>
+
             <div class="no-forms-message" style="display:none;">
                 <p>📭 <?= ($lang=='en') ? "No pending forms" : "No hay formularios pendientes"; ?></p>
             </div>
@@ -1150,23 +1226,44 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ===============================
-     LOAD PENDING FORMS (ALL FORMS)
-     Muestra todos los formularios pendientes sin filtro de vendedor
+     PAGINATION STATE
   =============================== */
-  function loadPendingForms() {
+  let pendingCurrentPage = 1;
+  const pendingItemsPerPage = 20;
+  let pendingTotalItems = 0;
+  let pendingTotalPages = 1;
+
+  /* ===============================
+     LOAD PENDING FORMS (ALL FORMS)
+     Muestra todos los formularios pendientes con paginación
+  =============================== */
+  function loadPendingForms(page) {
+    if (page !== undefined) {
+      pendingCurrentPage = page;
+    }
+
     const loadingIndicator = document.querySelector(".loading-indicator");
     const formsList = document.getElementById("pendingFormsList");
     const noFormsMessage = document.querySelector(".no-forms-message");
+    const paginationContainer = document.getElementById("pagination-container");
 
     if (loadingIndicator) loadingIndicator.style.display = "block";
     if (formsList) formsList.innerHTML = "";
     if (noFormsMessage) noFormsMessage.style.display = "none";
+    if (paginationContainer) paginationContainer.style.display = "none";
 
-    // Cargar todos los formularios pendientes (sin filtro de vendedor)
-    fetch('load_drafts_by_seller.php')
+    // Cargar formularios pendientes con paginación
+    fetch(`load_drafts_by_seller.php?page=${pendingCurrentPage}&limit=${pendingItemsPerPage}`)
       .then(response => response.json())
       .then(data => {
         if (loadingIndicator) loadingIndicator.style.display = "none";
+
+        // Update pagination state
+        if (data.pagination) {
+          pendingTotalItems = data.pagination.total_count;
+          pendingTotalPages = data.pagination.total_pages;
+          pendingCurrentPage = data.pagination.page;
+        }
 
         if (data.success && data.forms && data.forms.length > 0) {
           formsList.innerHTML = "";
@@ -1174,6 +1271,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const card = createFormCard(form);
             formsList.appendChild(card);
           });
+          renderPendingPagination();
         } else {
           if (noFormsMessage) {
             noFormsMessage.innerHTML = '<p>📭 No hay formularios pendientes</p>';
@@ -1189,6 +1287,87 @@ document.addEventListener("DOMContentLoaded", () => {
           noFormsMessage.style.display = "block";
         }
       });
+  }
+
+  /* ===============================
+     PAGINATION RENDERING
+  =============================== */
+  function goToPendingPage(page) {
+    if (page < 1 || page > pendingTotalPages || page === pendingCurrentPage) return;
+    loadPendingForms(page);
+
+    // Scroll sidebar content to top
+    const sidebarContent = document.getElementById("pendingFormsContent");
+    if (sidebarContent) sidebarContent.scrollTop = 0;
+  }
+
+  function renderPendingPagination() {
+    const container = document.getElementById("pagination-container");
+    if (!container) return;
+
+    // Hide pagination if only one page
+    if (pendingTotalPages <= 1) {
+      container.style.display = "none";
+      return;
+    }
+
+    container.style.display = "block";
+
+    const startItem = ((pendingCurrentPage - 1) * pendingItemsPerPage) + 1;
+    const endItem = Math.min(pendingCurrentPage * pendingItemsPerPage, pendingTotalItems);
+
+    // Build page numbers with ellipsis
+    let pages = [];
+    const maxVisible = 3;
+
+    if (pendingTotalPages <= maxVisible + 2) {
+      for (let i = 1; i <= pendingTotalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+
+      let start = Math.max(2, pendingCurrentPage - 1);
+      let end = Math.min(pendingTotalPages - 1, pendingCurrentPage + 1);
+
+      if (pendingCurrentPage <= 3) {
+        start = 2;
+        end = Math.min(maxVisible, pendingTotalPages - 1);
+      } else if (pendingCurrentPage >= pendingTotalPages - 2) {
+        start = Math.max(2, pendingTotalPages - maxVisible + 1);
+        end = pendingTotalPages - 1;
+      }
+
+      if (start > 2) pages.push('...');
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (end < pendingTotalPages - 1) pages.push('...');
+
+      pages.push(pendingTotalPages);
+    }
+
+    const pageButtons = pages.map(p => {
+      if (p === '...') {
+        return '<span class="pagination-ellipsis">...</span>';
+      }
+      const activeClass = p === pendingCurrentPage ? ' active' : '';
+      return '<button class="pagination-btn' + activeClass + '" data-page="' + p + '">' + p + '</button>';
+    }).join('');
+
+    container.innerHTML =
+      '<div class="pagination-info">' +
+        startItem + '-' + endItem + ' of ' + pendingTotalItems + ' forms' +
+      '</div>' +
+      '<div class="pagination-controls">' +
+        '<button class="pagination-btn pagination-arrow" data-page="' + (pendingCurrentPage - 1) + '"' + (pendingCurrentPage === 1 ? ' disabled' : '') + '>◀ Prev</button>' +
+        pageButtons +
+        '<button class="pagination-btn pagination-arrow" data-page="' + (pendingCurrentPage + 1) + '"' + (pendingCurrentPage === pendingTotalPages ? ' disabled' : '') + '>Next ▶</button>' +
+      '</div>';
+
+    // Event delegation for pagination buttons
+    container.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const page = parseInt(this.dataset.page);
+        if (!isNaN(page)) goToPendingPage(page);
+      });
+    });
   }
 
   /* ===============================
