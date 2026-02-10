@@ -1,0 +1,206 @@
+<?php
+// ============================================================
+// services_catalog.php — PHP mirror of services_catalog.js
+// Used by PDF templates to look up scope descriptions by service name
+// ============================================================
+
+$servicesCatalog = [
+
+    "Hood Cleaning (Basic)" => [
+        "Perform hood cleaning to remove grease, residue, and accumulated contaminants from accessible surfaces.",
+        "Clean accessible hood surfaces and visible components.",
+        "Clean accessible exhaust ductwork (reachable/visible areas).",
+        "Remove existing grease filters, clean them, inspect/diagnose to determine if replacement is needed, and reinstall properly (or replace when applicable).",
+        "Clean the grease box (where present) and secure/reinstall properly.",
+        "Replace fan pillow block bearings (\"pillow blocks\"), only when the HoodVent unit is equipped with this adaptation (where applicable).",
+        "Inspect hinges on access doors/panels (where applicable) and report visible conditions.",
+        "Visually inspect the electrical system and the fan (visible wiring/connections) and report any observed conditions.",
+        "Use appropriate degreasing products and methods for the surfaces being cleaned.",
+        "Follow all required safety procedures during the performance of the service.",
+        "Coordinate access and work conditions with the Client prior to service.",
+        "Perform a final inspection upon completion to confirm the system has been serviced.",
+        "Leave the work area clean, safe, and ready for normal operations upon completion of the service."
+    ],
+
+    "Hood Cleaning (Detailed)" => [
+        "Perform detailed hood cleaning to remove grease, residue, and accumulated contaminants, requiring additional manual cleaning (\"elbow grease\") to meet standards.",
+        "Clean accessible hood surfaces and visible components, including hard-to-remove grease buildup on accessible areas.",
+        "Clean accessible exhaust ductwork, including grease buildup in reachable areas requiring additional manual cleaning.",
+        "Remove existing grease filters, clean them thoroughly, inspect/diagnose to determine if replacement is needed, and reinstall properly (or replace when applicable).",
+        "Clean grease troughs/grease cups (where present) and reinstall properly.",
+        "Clean the grease box (where present) thoroughly and secure/reinstall properly.",
+        "Replace fan pillow block bearings (\"pillow blocks\"), only when the HoodVent unit is equipped with this adaptation (where applicable).",
+        "Inspect hinges on access doors/panels (where applicable) and report any observed conditions (wear/damage/looseness).",
+        "Visually inspect the electrical system and the fan (wiring, connections, and visible components) and provide observations/recommendations if any abnormal conditions are noted.",
+        "Use appropriate degreasing products and methods for the surfaces being cleaned.",
+        "Follow all required safety procedures during the performance of the service.",
+        "Coordinate access and work conditions with the Client prior to service.",
+        "Perform a final inspection upon completion to confirm the hood system has been properly serviced.",
+        "Leave the work area clean, safe, and ready for normal operations upon completion of the service."
+    ],
+
+    "Carpet Cleaning & Shampooing" => [
+        "Perform professional carpet cleaning to remove dirt, stains, and accumulated contaminants.",
+        "Apply shampooing/extraction process using equipment and products appropriate for the carpet type.",
+        "Treat visible stains as applicable (complete removal of permanent stains is not guaranteed).",
+        "Use appropriate and safe cleaning products for the treated surfaces.",
+        "Allow adequate drying time prior to normal use of the area.",
+        "Leave the area clean, safe, and ready for normal operations upon completion of the service."
+    ],
+
+    "Dining Room Cleaning" => [
+        "Perform general cleaning of the dining room area to remove dust, dirt, and debris.",
+        "Clean and disinfect tables, chairs, and accessible surfaces.",
+        "Clean horizontal surfaces and high-touch points (where applicable).",
+        "Vacuum and/or mop floors according to the surface type.",
+        "Empty trash receptacles and replace liners as needed.",
+        "Use appropriate and safe cleaning products for the treated surfaces.",
+        "Leave the area clean, orderly, and ready for normal use upon completion of the service."
+    ],
+
+    "FOH (Front of House) Cleaning" => [
+        "Perform general cleaning of FOH areas to remove dust, dirt, and debris.",
+        "Clean and disinfect accessible surfaces, including counters, tables, and furnishings (where applicable).",
+        "Clean horizontal surfaces and high-touch points.",
+        "Vacuum, sweep, scrub, and mop floors according to the surface type.",
+        "Empty trash receptacles and replace liners as needed.",
+        "Clean entry doors, handles, and public-facing visible areas.",
+        "Use appropriate and safe cleaning products for the treated surfaces.",
+        "Leave FOH areas clean, orderly, and ready for normal use upon completion of the service."
+    ],
+
+    "Deep Kitchen Cleaning" => [
+        "Perform intensive deep kitchen cleaning to remove heavy grease, dirt, and accumulated contaminants.",
+        "Degrease and thoroughly clean accessible surfaces, including work tables, food preparation areas, and food-contact surfaces.",
+        "Clean exterior surfaces of kitchen equipment, including ranges, ovens, grills, fryers, refrigerators, hoods, and surrounding areas (where applicable).",
+        "Move small and medium equipment (when safe and feasible) to clean underneath and behind.",
+        "Clean vertical and horizontal surfaces, including walls, doors, backsplashes, and accessible areas.",
+        "Degrease areas with severe grease buildup and adhered residues.",
+        "Clean and disinfect sinks, accessible drains, and wash areas.",
+        "Sweep, mop, degrease, and disinfect floors according to the surface type.",
+        "Empty trash receptacles and replace liners as needed.",
+        "Use appropriate, safe, and professional-grade cleaning and degreasing products and methods.",
+        "Follow applicable safety and sanitation procedures during the performance of the service.",
+        "Perform a final inspection to confirm deep cleaning has been completed.",
+        "Leave the kitchen area clean, disinfected, and ready for normal operations upon completion of the service."
+    ],
+
+    "Kitchen Cleaning (Basic)" => [
+        "Perform general kitchen cleaning to remove dirt, light grease, and debris.",
+        "Clean and disinfect accessible surfaces, including work tables and visible surfaces.",
+        "Clean exterior surfaces of kitchen equipment (visible surfaces only).",
+        "Clean horizontal surfaces and high-touch points.",
+        "Sweep and mop floors according to the surface type.",
+        "Empty trash receptacles and replace liners as needed.",
+        "Use appropriate and safe cleaning products for the treated surfaces.",
+        "Leave the kitchen area clean and ready for normal operations upon completion of the service."
+    ],
+
+    "Kitchen Cleaning (Detailed)" => [
+        "Perform deep kitchen cleaning to remove accumulated grease, dirt, and contaminants.",
+        "Clean and disinfect accessible surfaces, including work tables, food preparation areas, and equipment.",
+        "Clean exterior surfaces of kitchen equipment, including ranges, ovens, refrigerators, hoods, and surrounding areas (where applicable).",
+        "Degrease surfaces with heavy grease buildup.",
+        "Clean vertical and horizontal surfaces and high-touch points.",
+        "Sweep, mop, and degrease floors according to the surface type.",
+        "Empty trash receptacles and replace liners as needed.",
+        "Use appropriate cleaning and degreasing products and methods for the treated surfaces.",
+        "Follow applicable safety and sanitation procedures during the performance of the service.",
+        "Leave the kitchen area clean, safe, and ready for normal operations upon completion of the service."
+    ],
+
+    "Post-Construction Kitchen Cleaning (Basic)" => [
+        "Perform initial kitchen cleaning following construction or remodeling work.",
+        "Remove dust, light construction debris, and loose materials from accessible surfaces.",
+        "Clean visible surfaces, including work tables, equipment, and preparation areas.",
+        "Clean exterior surfaces of kitchen equipment (visible surfaces only).",
+        "Sweep and mop floors to remove construction dust and debris.",
+        "Empty trash receptacles and remove cleaning-generated waste (does not include removal of heavy construction debris).",
+        "Use appropriate cleaning products and methods for new or recently installed surfaces.",
+        "Leave the kitchen area clean and ready for initial use or normal operations."
+    ],
+
+    "Post-Construction Kitchen Cleaning (Detailed)" => [
+        "Perform deep kitchen cleaning following construction or remodeling work.",
+        "Remove construction dust, debris, light adhesives, and accumulated contaminants.",
+        "Clean and disinfect accessible surfaces, including work tables, food preparation areas, and equipment.",
+        "Clean exterior surfaces of kitchen equipment, including ranges, ovens, refrigerators, hoods, and surrounding areas (where applicable).",
+        "Clean vertical and horizontal surfaces, including walls, doors, and accessible areas.",
+        "Degrease and clean surfaces with fine dust buildup or adhered residues.",
+        "Sweep, mop, and disinfect floors according to the surface type.",
+        "Empty trash receptacles and remove cleaning-generated waste (does not include removal of heavy construction debris).",
+        "Use appropriate and safe cleaning products and methods for new or recently installed surfaces.",
+        "Follow applicable safety and sanitation procedures during the performance of the service.",
+        "Leave the kitchen area clean, safe, and ready for use or normal operations."
+    ],
+
+    "Kitchen Floor Cleaning (Basic)" => [
+        "Perform basic kitchen floor cleaning to remove dirt, debris, and light grease.",
+        "Sweep and mop floors according to the surface type.",
+        "Clean accessible areas around fixed equipment.",
+        "Use appropriate and safe cleaning products for kitchen floors.",
+        "Leave floors clean and ready for normal use upon completion of the service."
+    ],
+
+    "Kitchen Floor Cleaning (Detailed)" => [
+        "Perform deep kitchen floor cleaning to remove heavy grease, dirt, and accumulated contaminants.",
+        "Sweep, mop, degrease, and disinfect floors according to the surface type.",
+        "Clean grout lines, edges, and hard-to-reach areas.",
+        "Clean accessible areas under and around fixed equipment (where applicable).",
+        "Clean accessible floor drains (surface level only).",
+        "Use professional-grade cleaning and degreasing products and methods.",
+        "Follow applicable safety and sanitation procedures during the performance of the service.",
+        "Leave kitchen floors clean, safe, and ready for normal operations upon completion of the service."
+    ],
+
+    "Bar Cleaning (Basic)" => [
+        "Perform general bar cleaning to remove dirt, debris, and light spills.",
+        "Clean and disinfect accessible surfaces, including bar tops, counters, and visible surfaces.",
+        "Clean exterior surfaces of bar equipment (visible surfaces only).",
+        "Clean horizontal surfaces and high-touch points.",
+        "Sweep and mop floors according to the surface type.",
+        "Empty trash receptacles and replace liners as needed.",
+        "Use appropriate and safe cleaning products for the treated surfaces.",
+        "Leave the bar area clean and ready for normal use upon completion of the service."
+    ],
+
+    "Bar Cleaning (Detailed)" => [
+        "Perform deep bar cleaning to remove dirt, debris, spills, and buildup of grease or sugar.",
+        "Clean and disinfect accessible surfaces, including bar tops, counters, service stations, and preparation areas.",
+        "Clean exterior surfaces of bar equipment, including refrigerators, ice machines (exterior), beverage stations, and surrounding areas (where applicable).",
+        "Clean vertical and horizontal surfaces and high-touch points.",
+        "Degrease and clean areas with heavy residue buildup.",
+        "Sweep, mop, and/or degrease floors according to the surface type.",
+        "Empty trash receptacles and replace liners as needed.",
+        "Use appropriate and safe cleaning products and methods for the treated surfaces.",
+        "Follow applicable safety and sanitation procedures during the performance of the service.",
+        "Leave the bar area clean, safe, and ready for normal use upon completion of the service."
+    ],
+
+    "Restroom Cleaning (Basic)" => [
+        "Perform general restroom cleaning to remove visible dirt and debris.",
+        "Clean and disinfect toilets, urinals, and sinks.",
+        "Clean accessible surfaces, including mirrors, counters, and visible fixtures.",
+        "Clean and disinfect high-touch points (handles, dispensers, switches).",
+        "Sweep and mop floors.",
+        "Empty trash receptacles and replace liners as needed.",
+        "Restock basic supplies (toilet paper, soap, towels) when applicable and provided by the client.",
+        "Use appropriate and safe cleaning and disinfecting products.",
+        "Leave restrooms clean and ready for normal use upon completion of the service."
+    ],
+
+    "Restroom Cleaning (Detailed)" => [
+        "Perform deep restroom cleaning to remove accumulated dirt, stains, and contaminants.",
+        "Clean, disinfect, and descale toilets, urinals, and sinks.",
+        "Clean and disinfect accessible surfaces, including mirrors, counters, partitions, and fixtures.",
+        "Clean walls, doors, and accessible vertical areas (where applicable).",
+        "Clean and disinfect high-touch points.",
+        "Sweep, mop, and disinfect floors.",
+        "Empty trash receptacles and replace liners as needed.",
+        "Restock basic supplies (toilet paper, soap, towels) when applicable and provided by the client.",
+        "Use appropriate cleaning and disinfecting products and methods.",
+        "Follow applicable safety and sanitation procedures during the performance of the service.",
+        "Leave restrooms clean, disinfected, and ready for normal use upon completion of the service."
+    ]
+
+];

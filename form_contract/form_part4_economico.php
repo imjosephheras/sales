@@ -712,6 +712,18 @@ function calcTotals18() {
     color: #999;
     font-style: italic;
   }
+  .service-card-other {
+    border-style: dashed;
+    border-color: #999;
+    background: #f9f9f9;
+  }
+  .service-card-other:hover {
+    border-color: #c00;
+    background: #fff5f5;
+  }
+  .service-card-other .service-card-name {
+    color: #666;
+  }
 </style>
 
 <script>
@@ -765,33 +777,42 @@ function renderServiceCards(filter) {
     svc.category.toLowerCase().includes(lowerFilter)
   );
 
+  let html = "";
+
   if (filtered.length === 0) {
-    body.innerHTML = '<div class="service-cards-grid"><div class="service-card-no-results">' +
+    html += '<div class="service-cards-grid"><div class="service-card-no-results">' +
       '<?= ($lang=="en") ? "No services found" : "No se encontraron servicios"; ?>' +
       '</div></div>';
-    return;
-  }
-
-  // Group by category
-  const grouped = {};
-  filtered.forEach(svc => {
-    if (!grouped[svc.category]) grouped[svc.category] = [];
-    grouped[svc.category].push(svc);
-  });
-
-  let html = "";
-  for (const cat in grouped) {
-    html += '<div class="service-modal-category">' + cat + '</div>';
-    html += '<div class="service-cards-grid">';
-    grouped[cat].forEach(svc => {
-      const scopeCount = svc.scope ? svc.scope.length : 0;
-      html += '<div class="service-card" onclick="selectService(\'' + svc.id + '\')">';
-      html += '<div class="service-card-name">' + svc.name + '</div>';
-      html += '<div class="service-card-scope-count">' + scopeCount + ' <?= ($lang=="en") ? "scope items" : "elementos de scope"; ?></div>';
-      html += '</div>';
+  } else {
+    // Group by category
+    const grouped = {};
+    filtered.forEach(svc => {
+      if (!grouped[svc.category]) grouped[svc.category] = [];
+      grouped[svc.category].push(svc);
     });
-    html += '</div>';
+
+    for (const cat in grouped) {
+      html += '<div class="service-modal-category">' + cat + '</div>';
+      html += '<div class="service-cards-grid">';
+      grouped[cat].forEach(svc => {
+        const scopeCount = svc.scope ? svc.scope.length : 0;
+        html += '<div class="service-card" onclick="selectService(\'' + svc.id + '\')">';
+        html += '<div class="service-card-name">' + svc.name + '</div>';
+        html += '<div class="service-card-scope-count">' + scopeCount + ' <?= ($lang=="en") ? "scope items" : "elementos de scope"; ?></div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
   }
+
+  // Always show "Other" option at the bottom
+  html += '<div class="service-modal-category"><?= ($lang=="en") ? "Other" : "Otro"; ?></div>';
+  html += '<div class="service-cards-grid">';
+  html += '<div class="service-card service-card-other" onclick="selectCustomService()">';
+  html += '<div class="service-card-name"><?= ($lang=="en") ? "Other (Custom)" : "Otro (Personalizado)"; ?></div>';
+  html += '<div class="service-card-scope-count"><?= ($lang=="en") ? "Enter service name manually" : "Ingrese el nombre del servicio manualmente"; ?></div>';
+  html += '</div>';
+  html += '</div>';
 
   body.innerHTML = html;
 }
@@ -821,6 +842,35 @@ function selectService(serviceId) {
   const btn = activeServiceRow.querySelector(".service-selector-btn");
   const textSpan = btn.querySelector(".service-selector-text");
   textSpan.textContent = svc.name;
+  btn.classList.add("has-value");
+
+  closeServiceModal();
+}
+
+// ===== SELECT CUSTOM SERVICE (Other) =====
+function selectCustomService() {
+  if (!activeServiceRow) return;
+
+  const customName = prompt(
+    '<?= ($lang=="en") ? "Enter the service name:" : "Ingrese el nombre del servicio:"; ?>'
+  );
+
+  if (!customName || customName.trim() === '') return;
+
+  const trimmedName = customName.trim();
+
+  // Set hidden type19 value with custom name
+  const typeInput = activeServiceRow.querySelector(".type19");
+  typeInput.value = trimmedName;
+
+  // Set empty scope19 (no predefined scope for custom services)
+  const scopeInput = activeServiceRow.querySelector(".scope19");
+  scopeInput.value = '[]';
+
+  // Update button display
+  const btn = activeServiceRow.querySelector(".service-selector-btn");
+  const textSpan = btn.querySelector(".service-selector-text");
+  textSpan.textContent = trimmedName;
   btn.classList.add("has-value");
 
   closeServiceModal();

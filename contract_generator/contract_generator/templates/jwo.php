@@ -606,55 +606,135 @@
     </table>
 
     <!-- SCOPE OF WORK -->
-    <div class="scope-section">
-        <?php
-        // Build scope header from actual Q19 service types
-        $scopeServiceNames = [];
-        if (!empty($hoodVentServices)) {
-            foreach ($hoodVentServices as $svc) {
-                if (!empty($svc['service_type'])) $scopeServiceNames[] = $svc['service_type'];
-            }
-        }
-        if (!empty($kitchenServices)) {
-            foreach ($kitchenServices as $svc) {
-                if (!empty($svc['service_type'])) $scopeServiceNames[] = $svc['service_type'];
-            }
-        }
-        $scopeHeaderName = !empty($scopeServiceNames)
-            ? implode(' / ', array_unique($scopeServiceNames))
-            : ($data['Requested_Service'] ?? 'SERVICE DESCRIPTION');
-        ?>
-        <div class="scope-header">SCOPE OF WORK &ndash; <?php echo strtoupper(htmlspecialchars($scopeHeaderName)); ?></div>
-        <div class="scope-content">
-            <h4>WORK TO BE PERFORMED:</h4>
-            <?php if (!empty($scopeOfWorkTasks)): ?>
-                <ul>
-                <?php foreach ($scopeOfWorkTasks as $task): ?>
-                    <li><?php echo htmlspecialchars($task); ?></li>
-                <?php endforeach; ?>
-                </ul>
-            <?php elseif (!empty($data['Scope_Of_Work']) && is_array($data['Scope_Of_Work'])): ?>
-                <ul>
-                <?php foreach ($data['Scope_Of_Work'] as $task): ?>
-                    <li><?php echo htmlspecialchars($task); ?></li>
-                <?php endforeach; ?>
-                </ul>
-            <?php elseif (!empty($data['scope_of_work'])): ?>
-                <?php echo $data['scope_of_work']; ?>
-            <?php else: ?>
-                <ul>
-                    <li>Professional service as per client requirements</li>
-                    <li>All work performed to industry standards with quality assurance</li>
-                    <li>Final inspection to ensure satisfactory completion</li>
-                </ul>
-            <?php endif; ?>
+    <?php
+    // Load PHP services catalog for scope descriptions
+    require_once __DIR__ . '/services_catalog.php';
 
-            <?php if (!empty($data['Additional_Comments'])): ?>
-                <h4>ADDITIONAL NOTES:</h4>
-                <p><?php echo nl2br(htmlspecialchars($data['Additional_Comments'])); ?></p>
-            <?php endif; ?>
+    // Collect all Q19 service types (unique)
+    $scopeServiceNames = [];
+    if (!empty($hoodVentServices)) {
+        foreach ($hoodVentServices as $svc) {
+            if (!empty($svc['service_type'])) $scopeServiceNames[] = $svc['service_type'];
+        }
+    }
+    if (!empty($kitchenServices)) {
+        foreach ($kitchenServices as $svc) {
+            if (!empty($svc['service_type'])) $scopeServiceNames[] = $svc['service_type'];
+        }
+    }
+    $scopeServiceNames = array_unique($scopeServiceNames);
+
+    // Determine if we have specific services selected
+    $hasServices = !empty($scopeServiceNames);
+    ?>
+
+    <?php if ($hasServices): ?>
+        <?php // Show one scope section per service type ?>
+        <?php foreach ($scopeServiceNames as $serviceName): ?>
+        <div class="scope-section">
+            <div class="scope-header">SCOPE OF WORK &ndash; <?php echo strtoupper(htmlspecialchars($serviceName)); ?></div>
+            <div class="scope-content">
+                <?php
+                // Look up scope description from PHP catalog
+                $catalogScope = $servicesCatalog[$serviceName] ?? null;
+                ?>
+                <?php if (!empty($catalogScope)): ?>
+                    <h4>WORK TO BE PERFORMED:</h4>
+                    <ul>
+                    <?php foreach ($catalogScope as $item): ?>
+                        <li><?php echo htmlspecialchars($item); ?></li>
+                    <?php endforeach; ?>
+                    </ul>
+                <?php elseif (!empty($scopeOfWorkTasks)): ?>
+                    <h4>WORK TO BE PERFORMED:</h4>
+                    <ul>
+                    <?php foreach ($scopeOfWorkTasks as $task): ?>
+                        <li><?php echo htmlspecialchars($task); ?></li>
+                    <?php endforeach; ?>
+                    </ul>
+                <?php elseif (!empty($data['Scope_Of_Work']) && is_array($data['Scope_Of_Work'])): ?>
+                    <h4>WORK TO BE PERFORMED:</h4>
+                    <ul>
+                    <?php foreach ($data['Scope_Of_Work'] as $task): ?>
+                        <li><?php echo htmlspecialchars($task); ?></li>
+                    <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+
+        <?php // Show additional Q28 scope items if they exist and differ from catalog ?>
+        <?php
+        $hasQ28Scope = !empty($scopeOfWorkTasks) || (!empty($data['Scope_Of_Work']) && is_array($data['Scope_Of_Work']));
+        // Check if Q28 items are different from catalog items (avoid duplicates)
+        $q28Items = !empty($scopeOfWorkTasks) ? $scopeOfWorkTasks : ($data['Scope_Of_Work'] ?? []);
+        $catalogItems = [];
+        foreach ($scopeServiceNames as $sn) {
+            if (isset($servicesCatalog[$sn])) {
+                $catalogItems = array_merge($catalogItems, $servicesCatalog[$sn]);
+            }
+        }
+        $extraQ28Items = array_diff($q28Items, $catalogItems);
+        ?>
+        <?php if (!empty($extraQ28Items)): ?>
+        <div class="scope-section">
+            <div class="scope-header">ADDITIONAL SCOPE ITEMS</div>
+            <div class="scope-content">
+                <ul>
+                <?php foreach ($extraQ28Items as $task): ?>
+                    <li><?php echo htmlspecialchars($task); ?></li>
+                <?php endforeach; ?>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+    <?php else: ?>
+        <?php // No specific services — show generic scope section ?>
+        <div class="scope-section">
+            <?php
+            $scopeHeaderName = $data['Requested_Service'] ?? 'SERVICE DESCRIPTION';
+            ?>
+            <div class="scope-header">SCOPE OF WORK &ndash; <?php echo strtoupper(htmlspecialchars($scopeHeaderName)); ?></div>
+            <div class="scope-content">
+                <?php if (!empty($scopeOfWorkTasks)): ?>
+                    <h4>WORK TO BE PERFORMED:</h4>
+                    <ul>
+                    <?php foreach ($scopeOfWorkTasks as $task): ?>
+                        <li><?php echo htmlspecialchars($task); ?></li>
+                    <?php endforeach; ?>
+                    </ul>
+                <?php elseif (!empty($data['Scope_Of_Work']) && is_array($data['Scope_Of_Work'])): ?>
+                    <h4>WORK TO BE PERFORMED:</h4>
+                    <ul>
+                    <?php foreach ($data['Scope_Of_Work'] as $task): ?>
+                        <li><?php echo htmlspecialchars($task); ?></li>
+                    <?php endforeach; ?>
+                    </ul>
+                <?php elseif (!empty($data['scope_of_work'])): ?>
+                    <?php echo $data['scope_of_work']; ?>
+                <?php else: ?>
+                    <h4>WORK TO BE PERFORMED:</h4>
+                    <ul>
+                        <li>Professional service as per client requirements</li>
+                        <li>All work performed to industry standards with quality assurance</li>
+                        <li>Final inspection to ensure satisfactory completion</li>
+                    </ul>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php // Additional comments shown once at the end ?>
+    <?php if (!empty($data['Additional_Comments'])): ?>
+    <div class="scope-section">
+        <div class="scope-content">
+            <h4>ADDITIONAL NOTES:</h4>
+            <p><?php echo nl2br(htmlspecialchars($data['Additional_Comments'])); ?></p>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- PAGE 2: TERMS AND CONDITIONS -->
     <div class="terms-section">
