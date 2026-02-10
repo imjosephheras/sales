@@ -1621,6 +1621,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Add rows with data (using new modal-based selector)
     costs.forEach((cost, index) => {
       const serviceType = cost.service_type || '';
+      const bundleGroup = cost.bundle_group || '';
 
       // Look up scope from janitorial catalog if available
       let scopeJson = '[]';
@@ -1634,6 +1635,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const newRow = document.createElement('tr');
       newRow.innerHTML = `
+        <td class="td-check">
+          <input type="checkbox" class="bundle-check18">
+          <input type="hidden" class="bundleGroup18" name="bundleGroup18[]" value="${bundleGroup}">
+        </td>
         <td>
           <input type="hidden" class="type18" name="type18[]" value="${serviceType}">
           <input type="hidden" class="scope18" name="scope18[]" value='${scopeJson.replace(/'/g, "&#39;")}'>
@@ -1672,7 +1677,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>
           <input type="text" class="desc18" name="desc18[]" placeholder="Write description...">
         </td>
-        <td>
+        <td class="subtotal-cell18">
           <input type="number" step="0.01" class="subtotal18" name="subtotal18[]" placeholder="0.00" oninput="calcTotals18()">
         </td>
       `;
@@ -1690,6 +1695,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (subtotalInput) subtotalInput.value = cost.subtotal || '';
     });
 
+    // Apply bundle visuals for grouped rows
+    if (typeof applyBundleVisuals18 === 'function') {
+      applyBundleVisuals18();
+    }
+
     // Recalculate totals
     if (typeof calcTotals18 === 'function') {
       calcTotals18();
@@ -1702,7 +1712,7 @@ document.addEventListener("DOMContentLoaded", () => {
      POPULATE KITCHEN COSTS (Q19)
      =============================== */
   window.populateKitchenCosts = function(kitchenCosts, hoodCosts) {
-    console.log('🍳 Populating Kitchen & Hood Services (Q19)');
+    console.log('Populating Kitchen & Hood Services (Q19)');
 
     // Combine both arrays
     const allCosts = [...kitchenCosts, ...hoodCosts];
@@ -1737,11 +1747,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add rows with data
     allCosts.forEach((cost, index) => {
+      const bundleGroup = cost.bundle_group || '';
       const newRow = document.createElement('tr');
       newRow.innerHTML = `
+        <td class="td-check">
+          <input type="checkbox" class="bundle-check19">
+          <input type="hidden" class="bundleGroup19" name="bundleGroup19[]" value="${bundleGroup}">
+        </td>
         <td>
           <select class="type19" name="type19[]" onchange="toggleWriteOption19(this)">
-            <option value="__write__">✍️ Write...</option>
+            <option value="__write__">Write...</option>
             <option value="">-- Select Service --</option>
             <option>Kitchen Cleaning</option>
             <option>Vent Hood</option>
@@ -1782,7 +1797,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <td>
           <input type="text" class="desc19" name="desc19[]" placeholder="Write description...">
         </td>
-        <td>
+        <td class="subtotal-cell19">
           <input type="number" step="0.01" class="subtotal19" name="subtotal19[]" placeholder="0.00" oninput="calcTotals19()">
         </td>
       `;
@@ -1815,12 +1830,17 @@ document.addEventListener("DOMContentLoaded", () => {
       if (subtotalInput) subtotalInput.value = cost.subtotal || '';
     });
 
+    // Apply bundle visuals for grouped rows
+    if (typeof applyBundleVisuals19 === 'function') {
+      applyBundleVisuals19();
+    }
+
     // Recalculate totals
     if (typeof calcTotals19 === 'function') {
       calcTotals19();
     }
 
-    console.log('✅ Kitchen/Hood costs populated successfully');
+    console.log('Kitchen/Hood costs populated successfully');
   };
 
 /* ===============================

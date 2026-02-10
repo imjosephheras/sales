@@ -247,15 +247,15 @@ try {
     // ============================================================
     if (isset($_POST['includeJanitorial']) && $_POST['includeJanitorial'] === 'Yes') {
         $pdo->prepare("DELETE FROM janitorial_services_costs WHERE form_id = ?")->execute([$saved_form_id]);
-        
+
         if (isset($_POST['type18']) && is_array($_POST['type18'])) {
             $stmt = $pdo->prepare("
                 INSERT INTO janitorial_services_costs (
-                    form_id, service_number, service_type, service_time, 
-                    frequency, description, subtotal
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    form_id, service_number, service_type, service_time,
+                    frequency, description, subtotal, bundle_group
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
-            
+
             $count = count($_POST['type18']);
             for ($i = 0; $i < $count; $i++) {
                 // Obtener tipo de servicio
@@ -265,12 +265,13 @@ try {
                 } elseif (isset($_POST['write18'][$i]) && !empty($_POST['write18'][$i])) {
                     $serviceType = $_POST['write18'][$i];
                 }
-                
+
                 // Solo guardar si hay datos
                 if (!empty($serviceType)) {
                     // ⚠️ Convertir subtotal vacío a NULL
                     $subtotal = !empty($_POST['subtotal18'][$i]) ? $_POST['subtotal18'][$i] : null;
-                    
+                    $bundleGroup = !empty($_POST['bundleGroup18'][$i]) ? $_POST['bundleGroup18'][$i] : null;
+
                     $stmt->execute([
                         $saved_form_id,
                         $i + 1,
@@ -278,7 +279,8 @@ try {
                         $_POST['time18'][$i] ?? null,
                         $_POST['freq18'][$i] ?? null,
                         $_POST['desc18'][$i] ?? null,
-                        $subtotal
+                        $subtotal,
+                        $bundleGroup
                     ]);
                 }
             }
@@ -296,15 +298,15 @@ try {
             $stmt_kitchen = $pdo->prepare("
                 INSERT INTO kitchen_cleaning_costs (
                     form_id, service_number, service_type, service_time,
-                    frequency, description, subtotal
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    frequency, description, subtotal, bundle_group
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $stmt_hood = $pdo->prepare("
                 INSERT INTO hood_vent_costs (
                     form_id, service_number, service_type, service_time,
-                    frequency, description, subtotal
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    frequency, description, subtotal, bundle_group
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
 
             $count = count($_POST['type19']);
@@ -324,6 +326,7 @@ try {
 
                     // ⚠️ Convertir subtotal vacío a NULL
                     $subtotal = !empty($_POST['subtotal19'][$i]) ? $_POST['subtotal19'][$i] : null;
+                    $bundleGroup = !empty($_POST['bundleGroup19'][$i]) ? $_POST['bundleGroup19'][$i] : null;
 
                     // Determinar si es Kitchen o Hood Vent
                     $isHoodVent = (stripos($serviceType, 'hood') !== false ||
@@ -339,7 +342,8 @@ try {
                             $serviceTime,
                             $frequency,
                             $description,
-                            $subtotal
+                            $subtotal,
+                            $bundleGroup
                         ]);
                     } else {
                         $stmt_kitchen->execute([
@@ -349,7 +353,8 @@ try {
                             $serviceTime,
                             $frequency,
                             $description,
-                            $subtotal
+                            $subtotal,
+                            $bundleGroup
                         ]);
                     }
                 }

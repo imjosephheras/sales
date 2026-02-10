@@ -98,6 +98,7 @@ function initializeFormsTable($pdo) {
       `frequency` VARCHAR(100) DEFAULT NULL,
       `description` TEXT DEFAULT NULL,
       `subtotal` DECIMAL(12,2) DEFAULT NULL,
+      `bundle_group` VARCHAR(50) DEFAULT NULL,
       INDEX `idx_form_id` (`form_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
@@ -113,6 +114,7 @@ function initializeFormsTable($pdo) {
       `frequency` VARCHAR(100) DEFAULT NULL,
       `description` TEXT DEFAULT NULL,
       `subtotal` DECIMAL(12,2) DEFAULT NULL,
+      `bundle_group` VARCHAR(50) DEFAULT NULL,
       INDEX `idx_form_id` (`form_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
@@ -128,6 +130,7 @@ function initializeFormsTable($pdo) {
       `frequency` VARCHAR(100) DEFAULT NULL,
       `description` TEXT DEFAULT NULL,
       `subtotal` DECIMAL(12,2) DEFAULT NULL,
+      `bundle_group` VARCHAR(50) DEFAULT NULL,
       INDEX `idx_form_id` (`form_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
@@ -204,6 +207,14 @@ function addMissingColumnsToForms($pdo) {
             $colInfo = $stmt->fetch();
             if (strpos($colInfo['Type'], 'scheduled') === false) {
                 $pdo->exec("ALTER TABLE `forms` MODIFY COLUMN `service_status` ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed') DEFAULT 'pending'");
+            }
+        }
+        // Add bundle_group column to service cost tables if missing
+        $serviceTables = ['janitorial_services_costs', 'kitchen_cleaning_costs', 'hood_vent_costs'];
+        foreach ($serviceTables as $table) {
+            $stmt = $pdo->query("SHOW COLUMNS FROM `$table` LIKE 'bundle_group'");
+            if ($stmt->rowCount() == 0) {
+                $pdo->exec("ALTER TABLE `$table` ADD COLUMN `bundle_group` VARCHAR(50) DEFAULT NULL");
             }
         }
     } catch (Exception $e) {
