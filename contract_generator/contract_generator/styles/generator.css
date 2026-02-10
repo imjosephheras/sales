@@ -545,6 +545,11 @@ body {
 .inbox-section .inbox-list {
   flex: 1;
   min-height: 100px;
+  overflow-y: auto;
+}
+
+.inbox-section .pagination-wrapper {
+  flex-shrink: 0;
 }
 
 .inbox-header {
@@ -901,6 +906,84 @@ body {
   font-size: 0.85rem;
   color: var(--text-gray);
   margin-top: 0.5rem;
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.pagination-wrapper {
+  padding: 0.75rem 1rem;
+  border-top: 2px solid var(--border-color);
+  background: var(--bg-light);
+  flex-shrink: 0;
+}
+
+.pagination-info {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-gray);
+  margin-bottom: 0.5rem;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  color: var(--text-dark);
+  padding: 0.3rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+}
+
+.pagination-btn:hover:not(:disabled):not(.active) {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.pagination-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  font-weight: 700;
+  cursor: default;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-arrow {
+  gap: 0.25rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.pagination-arrow i {
+  font-size: 0.65rem;
+}
+
+.pagination-ellipsis {
+  padding: 0.3rem 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-gray);
+  user-select: none;
 }
 
 /* ============================================
