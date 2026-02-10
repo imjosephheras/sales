@@ -467,6 +467,7 @@
                 'freq' => $svc['frequency'] ?? '',
                 'desc' => $svc['description'] ?? '',
                 'subtotal' => $svcSubtotal,
+                'bundle_group' => $svc['bundle_group'] ?? '',
             ];
         }
     } elseif (($data['includeJanitorial'] ?? '') === 'Yes' && !empty($data['type18']) && is_array($data['type18'])) {
@@ -481,6 +482,7 @@
                 'freq' => $data['freq18'][$i] ?? '',
                 'desc' => $data['desc18'][$i] ?? '',
                 'subtotal' => $svcSubtotal,
+                'bundle_group' => '',
             ];
         }
     }
@@ -497,6 +499,7 @@
                 'freq' => $svc['frequency'] ?? '',
                 'desc' => $svc['description'] ?? '',
                 'subtotal' => $svcSubtotal,
+                'bundle_group' => $svc['bundle_group'] ?? '',
             ];
         }
     } elseif (($data['includeKitchen'] ?? '') === 'Yes' && !empty($data['type19']) && is_array($data['type19']) && empty($hoodVentServices)) {
@@ -515,6 +518,7 @@
                 'freq' => $data['freq19'][$i] ?? '',
                 'desc' => $data['desc19'][$i] ?? '',
                 'subtotal' => $svcSubtotal,
+                'bundle_group' => '',
             ];
         }
     }
@@ -531,6 +535,7 @@
                 'freq' => $svc['frequency'] ?? '',
                 'desc' => $svc['description'] ?? '',
                 'subtotal' => $svcSubtotal,
+                'bundle_group' => $svc['bundle_group'] ?? '',
             ];
         }
     }
@@ -563,7 +568,28 @@
             'freq' => $data['Service_Frequency'] ?? 'One Time',
             'desc' => $service_description,
             'subtotal' => $subtotal,
+            'bundle_group' => '',
         ];
+    }
+
+    // Pre-compute bundle groups: count rows per group and find the bundle total (primary row subtotal)
+    $bundleGroupInfo = [];
+    foreach ($allServiceRows as $idx => $row) {
+        $bg = $row['bundle_group'] ?? '';
+        if ($bg !== '') {
+            if (!isset($bundleGroupInfo[$bg])) {
+                $bundleGroupInfo[$bg] = [
+                    'count' => 0,
+                    'first_index' => $idx,
+                    'total' => 0.0,
+                ];
+            }
+            $bundleGroupInfo[$bg]['count']++;
+            // The primary row holds the bundle total; secondary rows are 0
+            if ($row['subtotal'] > 0) {
+                $bundleGroupInfo[$bg]['total'] = $row['subtotal'];
+            }
+        }
     }
     ?>
     <table class="services-table">
@@ -577,13 +603,25 @@
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($allServiceRows as $row): ?>
-            <tr>
+            <?php foreach ($allServiceRows as $idx => $row):
+                $bg = $row['bundle_group'] ?? '';
+                $isBundle = ($bg !== '' && isset($bundleGroupInfo[$bg]) && $bundleGroupInfo[$bg]['count'] > 1);
+                $isFirstInBundle = $isBundle && ($bundleGroupInfo[$bg]['first_index'] === $idx);
+                $isSecondaryInBundle = $isBundle && !$isFirstInBundle;
+            ?>
+            <tr<?php if ($isBundle): ?> style="border-left: 3px solid #0066cc;"<?php endif; ?>>
                 <td class="service-desc"><?php echo htmlspecialchars($row['type']); ?></td>
                 <td><?php echo htmlspecialchars($row['time']); ?></td>
                 <td><?php echo htmlspecialchars($row['freq']); ?></td>
                 <td class="service-desc"><?php echo htmlspecialchars($row['desc']); ?></td>
+                <?php if ($isFirstInBundle): ?>
+                <td class="amount" style="text-align: right; vertical-align: middle; background: linear-gradient(135deg, #e8f4fd, #d0ebff);" rowspan="<?php echo $bundleGroupInfo[$bg]['count']; ?>">
+                    $<?php echo number_format($bundleGroupInfo[$bg]['total'], 2); ?>
+                    <br><span style="font-size: 6pt; color: #0066cc; font-weight: normal;">BUNDLE PRICE</span>
+                </td>
+                <?php elseif (!$isSecondaryInBundle): ?>
                 <td class="amount" style="text-align: right;">$<?php echo number_format($row['subtotal'], 2); ?></td>
+                <?php endif; ?>
             </tr>
             <?php endforeach; ?>
         </tbody>
