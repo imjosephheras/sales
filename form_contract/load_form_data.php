@@ -107,6 +107,9 @@ try {
         'Work_Date' => $form['Work_Date'],
         'Order_Nomenclature' => $form['Order_Nomenclature'],
         'order_number' => $form['order_number'],
+
+        // Section 10: Service Status
+        'service_status' => $form['service_status'],
     ];
     
     echo json_encode([

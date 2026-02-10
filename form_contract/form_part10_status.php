@@ -12,8 +12,17 @@
     <option value="pending">
       <?= ($lang=='en') ? "Pending" : "Pendiente"; ?>
     </option>
+    <option value="scheduled">
+      <?= ($lang=='en') ? "Scheduled" : "Programado"; ?>
+    </option>
     <option value="confirmed">
       <?= ($lang=='en') ? "Confirmed" : "Confirmado"; ?>
+    </option>
+    <option value="in_progress">
+      <?= ($lang=='en') ? "In Progress" : "En Progreso"; ?>
+    </option>
+    <option value="completed">
+      <?= ($lang=='en') ? "Completed" : "Completado"; ?>
     </option>
     <option value="not_completed">
       <?= ($lang=='en') ? "Not Completed" : "No Completado"; ?>
