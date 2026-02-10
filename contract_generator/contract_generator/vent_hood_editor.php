@@ -554,49 +554,117 @@ if (file_exists($logo_path)) {
         }
 
         /* =============================================
-           SECTION 7 - PRODUCTS
+           SECTION 7 - PRODUCT PREVIEW GRID
            ============================================= */
-        .products-grid {
+        .product-preview-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 4px 0;
+        }
+
+        .product-preview-tile {
+            width: calc(20% - 5px);
+            aspect-ratio: 1;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .product-preview-tile:hover {
+            border-color: #003080;
+            box-shadow: 0 2px 10px rgba(0,31,84,0.2);
+            transform: translateY(-1px);
+        }
+
+        .product-preview-tile.selected {
+            border-color: #001f54;
+            box-shadow: 0 0 0 2px #001f54, 0 2px 10px rgba(0,31,84,0.3);
+        }
+
+        .product-preview-tile.selected::after {
+            content: "\2713";
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background: #001f54;
+            color: white;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .product-preview-tile img {
+            width: 100%;
+            height: 65%;
+            object-fit: contain;
+            padding: 4px;
+        }
+
+        .product-preview-tile .preview-name {
+            font-size: 7px;
+            font-weight: bold;
+            color: #001f54;
+            text-align: center;
+            padding: 0 3px 3px 3px;
+            line-height: 1.2;
+            height: 35%;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        /* Section 7 detail (hidden until products selected) */
+        .section-7-detail {
+            margin-top: 8px;
+            display: none;
+        }
+
+        .section-7-detail.visible {
+            display: block;
+        }
+
+        .selected-products-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             padding: 4px 0;
         }
 
-        .product-card {
-            width: calc(20% - 7px);
+        .selected-product-card {
+            width: calc(33.33% - 6px);
             border: 1px solid #ddd;
             border-radius: 4px;
             padding: 6px;
             text-align: center;
             background: white;
-            transition: box-shadow 0.2s;
         }
 
-        .product-card:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .product-card img {
+        .selected-product-card img {
             width: 100%;
-            height: 80px;
+            height: 70px;
             object-fit: contain;
             margin-bottom: 4px;
         }
 
-        .product-card .product-name {
+        .selected-product-card .product-name {
             font-size: 8px;
             font-weight: bold;
             color: #001f54;
             margin-bottom: 4px;
             line-height: 1.2;
-            min-height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .product-card .qty-row {
+        .selected-product-card .qty-row {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -605,7 +673,7 @@ if (file_exists($logo_path)) {
             color: #333;
         }
 
-        .product-card .qty-input {
+        .selected-product-card .qty-input {
             width: 40px;
             border: 1px solid #ccc;
             border-radius: 3px;
@@ -616,9 +684,48 @@ if (file_exists($logo_path)) {
             font-family: inherit;
         }
 
-        .product-card .qty-input:focus {
+        .selected-product-card .qty-input:focus {
             border-color: #001f54;
             background: #e8f0fe;
+        }
+
+        .authorization-block {
+            margin-top: 10px;
+            padding: 8px 10px;
+            background: #f0f4fa;
+            border: 1px solid #c0d0e0;
+            border-radius: 4px;
+            font-size: 9px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .authorization-block p {
+            margin-bottom: 6px;
+        }
+
+        .authorization-signature {
+            display: table;
+            width: 100%;
+            margin-top: 10px;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+        }
+
+        .authorization-sig-box {
+            display: table-cell;
+            width: 33.33%;
+            padding: 4px 8px;
+            vertical-align: top;
+            font-size: 9px;
+            color: #555;
+        }
+
+        .authorization-sig-box label {
+            display: block;
+            font-weight: bold;
+            color: #001f54;
+            margin-bottom: 3px;
         }
 
         .section-7-hidden {
@@ -697,9 +804,26 @@ if (file_exists($logo_path)) {
                 background: #001f54 !important;
             }
 
-            .product-card .qty-input {
+            .selected-product-card .qty-input {
                 border: none !important;
                 background: transparent !important;
+            }
+
+            .product-preview-tile {
+                border: 1px solid #ddd;
+            }
+
+            .product-preview-tile.selected {
+                border: 2px solid #001f54;
+            }
+
+            .section-7-detail.visible {
+                display: block !important;
+            }
+
+            .authorization-block {
+                background: #f0f4fa !important;
+                border: 1px solid #c0d0e0 !important;
             }
 
             .section-7-hidden {
@@ -1117,12 +1241,12 @@ if (file_exists($logo_path)) {
             <div class="report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
         </div>
 
-        <!-- 7. ACCEPTANCE OF REPAIR PARTS -->
+        <!-- PRODUCT PREVIEW GRID -->
         <div class="section">
-            <div class="section-header">7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION</div>
+            <div class="section-header">PRODUCT CATALOG - SELECT ITEMS</div>
             <div class="section-content">
-                <p style="font-size: 9px; color: #555; margin-bottom: 6px;">If additional parts or products are needed, please indicate the quantity required for each item below.</p>
-                <div class="products-grid">
+                <p style="font-size: 9px; color: #555; margin-bottom: 6px;">Select the products needed by clicking on them. Selected items will appear in the authorization section below.</p>
+                <div class="product-preview-grid" id="productPreviewGrid">
                     <?php
                     $products = [
                         ['image' => 'Downblast HVAC Exhaust Fans.png', 'name' => 'Downblast HVAC Exhaust Fans'],
@@ -1143,15 +1267,45 @@ if (file_exists($logo_path)) {
                     ];
                     foreach ($products as $index => $product):
                     ?>
-                    <div class="product-card">
+                    <div class="product-preview-tile" data-index="<?php echo $index; ?>" data-image="../../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" data-name="<?php echo htmlspecialchars($product['name']); ?>" onclick="toggleProductSelection(this)">
                         <img src="../../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
-                        <div class="product-name"><?php echo htmlspecialchars($product['name']); ?></div>
-                        <div class="qty-row">
-                            <label>Qty:</label>
-                            <input type="number" class="qty-input" id="product_qty_<?php echo $index; ?>" min="0" value="" placeholder="0">
-                        </div>
+                        <div class="preview-name"><?php echo htmlspecialchars($product['name']); ?></div>
                     </div>
                     <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION (appears when products selected) -->
+        <div class="section section-7-detail" id="section7Detail">
+            <div class="section-header">7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION</div>
+            <div class="section-content">
+                <p style="font-size: 9px; color: #555; margin-bottom: 6px;">If additional parts or products are needed, please indicate the quantity required for each item below.</p>
+                <div class="selected-products-grid" id="selectedProductsGrid">
+                    <!-- Dynamically populated by JavaScript -->
+                </div>
+
+                <div class="authorization-block">
+                    <p>By signing below, the Customer acknowledges and agrees to the repair parts listed above and the recommended repairs described in the Technician Notes/Observations. The Customer authorizes Prime to proceed with the described repairs and installations.</p>
+
+                    <div class="authorization-signature">
+                        <div class="authorization-sig-box">
+                            <label>Client / Manager:</label>
+                            <span>Name:</span>
+                            <input type="text" class="editable-field" id="auth_client_name" style="width: 140px;" placeholder="________________">
+                        </div>
+                        <div class="authorization-sig-box">
+                            <label>Signature:</label>
+                            <div class="signature-canvas-wrapper">
+                                <canvas class="signature-canvas" id="sig-auth-client"></canvas>
+                                <button class="clear-sig-btn" onclick="clearSignature('sig-auth-client')">Clear</button>
+                            </div>
+                        </div>
+                        <div class="authorization-sig-box">
+                            <label>Date:</label>
+                            <input type="date" class="editable-field date-field" id="auth_client_date">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1304,12 +1458,61 @@ if (file_exists($logo_path)) {
             page3.classList.add('section-7-hidden');
             btn.textContent = 'Add Products Section';
             btn.style.background = '#6c5ce7';
-            // Clear all qty inputs when hiding
-            page3.querySelectorAll('.qty-input').forEach(function(input) {
-                input.value = '';
+            // Clear all selections and qty inputs when hiding
+            document.querySelectorAll('.product-preview-tile.selected').forEach(function(tile) {
+                tile.classList.remove('selected');
             });
+            document.getElementById('selectedProductsGrid').innerHTML = '';
+            document.getElementById('section7Detail').classList.remove('visible');
+            var authName = document.getElementById('auth_client_name');
+            var authDate = document.getElementById('auth_client_date');
+            if (authName) authName.value = '';
+            if (authDate) authDate.value = '';
+            clearSignature('sig-auth-client');
         }
     };
+
+    // =============================================
+    // PRODUCT SELECTION (Preview Grid)
+    // =============================================
+    window.toggleProductSelection = function(tile) {
+        tile.classList.toggle('selected');
+        updateSelectedProducts();
+    };
+
+    function updateSelectedProducts() {
+        var selectedTiles = document.querySelectorAll('.product-preview-tile.selected');
+        var grid = document.getElementById('selectedProductsGrid');
+        var detail = document.getElementById('section7Detail');
+
+        if (selectedTiles.length === 0) {
+            detail.classList.remove('visible');
+            grid.innerHTML = '';
+            return;
+        }
+
+        detail.classList.add('visible');
+        grid.innerHTML = '';
+
+        selectedTiles.forEach(function(tile) {
+            var index = tile.getAttribute('data-index');
+            var name = tile.getAttribute('data-name');
+            var image = tile.getAttribute('data-image');
+
+            var card = document.createElement('div');
+            card.className = 'selected-product-card';
+            card.innerHTML =
+                '<img src="' + image + '" alt="' + name + '">' +
+                '<div class="product-name">' + name + '</div>' +
+                '<div class="qty-row">' +
+                    '<label>Qty:</label>' +
+                    '<input type="number" class="qty-input" id="product_qty_' + index + '" min="0" value="" placeholder="0">' +
+                '</div>';
+            grid.appendChild(card);
+        });
+
+        detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 
     // =============================================
     // CLEAR ALL FIELDS
@@ -1345,6 +1548,12 @@ if (file_exists($logo_path)) {
             btn.textContent = 'Add Products Section';
             btn.style.background = '#6c5ce7';
         }
+        // Clear product selections
+        document.querySelectorAll('.product-preview-tile.selected').forEach(function(tile) {
+            tile.classList.remove('selected');
+        });
+        document.getElementById('selectedProductsGrid').innerHTML = '';
+        document.getElementById('section7Detail').classList.remove('visible');
     };
 
     // =============================================
@@ -1353,6 +1562,7 @@ if (file_exists($logo_path)) {
     document.addEventListener('DOMContentLoaded', function() {
         initSignaturePad('sig-tech');
         initSignaturePad('sig-client');
+        initSignaturePad('sig-auth-client');
 
         // Re-init on window resize for signature canvases
         window.addEventListener('resize', function() {
