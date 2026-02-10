@@ -63,6 +63,7 @@ try {
             order_number = :order_number,
             Order_Nomenclature = :order_nomenclature,
             status = :status,
+            service_status = :service_status,
             updated_at = NOW()
         WHERE form_id = :form_id";
         
@@ -80,7 +81,7 @@ try {
             site_observation, additional_comments, email_information_sent,
             seller, include_staff,
             Document_Date, Work_Date, order_number, Order_Nomenclature,
-            status, submitted_by, created_at
+            status, service_status, submitted_by, created_at
         ) VALUES (
             :service_type, :request_type, :priority, :requested_service,
             :client_name, :company_name, :contact_name, :phone, :email, :address, :city, :state, :is_new_client,
@@ -90,7 +91,7 @@ try {
             :site_observation, :additional_comments, :email_information_sent,
             :seller, :include_staff,
             :document_date, :work_date, :order_number, :order_nomenclature,
-            :status, :submitted_by, NOW()
+            :status, :service_status, :submitted_by, NOW()
         )";
         
         $stmt = $pdo->prepare($sql);
@@ -201,6 +202,9 @@ try {
 
     // Status
     $stmt->bindValue(':status', $status);
+
+    // Section 10: Service Status
+    $stmt->bindValue(':service_status', emptyToNull($_POST['service_status'] ?? null));
 
     $stmt->execute();
     

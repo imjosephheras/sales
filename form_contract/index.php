@@ -438,9 +438,24 @@ $lang = $_SESSION["lang"] ?? "en";
     color: #92400e;
 }
 
+.form-card-status.scheduled {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
 .form-card-status.confirmed {
     background: #d1fae5;
     color: #065f46;
+}
+
+.form-card-status.in-progress {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.form-card-status.completed {
+    background: #dcfce7;
+    color: #166534;
 }
 
 .form-card-status.not-completed {
@@ -1388,10 +1403,22 @@ document.addEventListener("DOMContentLoaded", () => {
     let statusText = 'PENDING';
     let statusIcon = '⏳';
 
-    if (serviceStatus === 'completed' || serviceStatus === 'confirmed') {
+    if (serviceStatus === 'scheduled') {
+      statusClass = 'scheduled';
+      statusText = 'SCHEDULED';
+      statusIcon = '📅';
+    } else if (serviceStatus === 'confirmed') {
       statusClass = 'confirmed';
       statusText = 'CONFIRMED';
       statusIcon = '✅';
+    } else if (serviceStatus === 'in_progress') {
+      statusClass = 'in-progress';
+      statusText = 'IN PROGRESS';
+      statusIcon = '🔄';
+    } else if (serviceStatus === 'completed') {
+      statusClass = 'completed';
+      statusText = 'COMPLETED';
+      statusIcon = '✔️';
     } else if (serviceStatus === 'not_completed') {
       statusClass = 'not-completed';
       statusText = 'NOT COMPLETED';
