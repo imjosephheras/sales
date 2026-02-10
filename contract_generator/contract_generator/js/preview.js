@@ -284,6 +284,26 @@
             `;
         }
 
+        // Build scope header from actual Q19 service types
+        var scopeServiceNames = [];
+        if (data.hood_vent_services && Array.isArray(data.hood_vent_services)) {
+            data.hood_vent_services.forEach(function(svc) {
+                if (svc.service_type && scopeServiceNames.indexOf(svc.service_type) === -1) {
+                    scopeServiceNames.push(svc.service_type);
+                }
+            });
+        }
+        if (data.kitchen_services && Array.isArray(data.kitchen_services)) {
+            data.kitchen_services.forEach(function(svc) {
+                if (svc.service_type && scopeServiceNames.indexOf(svc.service_type) === -1) {
+                    scopeServiceNames.push(svc.service_type);
+                }
+            });
+        }
+        var scopeHeaderName = scopeServiceNames.length > 0
+            ? scopeServiceNames.join(' / ')
+            : requestedService;
+
         // Determine logo based on Service_Type (same as PDF)
         const deptLower = (data.Service_Type || '').toLowerCase();
         const logoSrc = deptLower.includes('hospitality') ? '/sales/Images/phospitality.png' : '/sales/Images/pfacility.png';
@@ -641,7 +661,7 @@
                 <!-- SCOPE OF WORK - Exact match to PDF -->
                 <div class="jwo-scope-exact">
                     <div class="jwo-scope-header-exact">
-                        SCOPE OF WORK - ${escapeHtml(requestedService).toUpperCase()}
+                        SCOPE OF WORK &ndash; ${escapeHtml(scopeHeaderName).toUpperCase()}
                     </div>
                     <div class="jwo-scope-content-exact">
                         <h4>WORK TO BE PERFORMED:</h4>

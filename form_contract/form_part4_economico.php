@@ -313,6 +313,9 @@ function calcTotals18() {
 }
 </script>
 
+<!-- Load Services Catalog -->
+<script src="services_catalog.js"></script>
+
 <!-- 19️⃣ Hoodvent & Kitchen Cleaning -->
 <div class="question-block" id="q19">
   <label for="includeKitchen" class="question-label">
@@ -359,30 +362,14 @@ function calcTotals18() {
         <!-- ONE INITIAL ROW -->
         <tr>
 
-          <!-- TYPE OF SERVICES -->
+          <!-- TYPE OF SERVICES (MODAL SELECTOR) -->
           <td>
-            <select class="type19" name="type19[]" onchange="toggleWriteOption19(this)">
-              <option value="__write__">
-                ✍️ <?= ($lang=='en') ? "Write..." : "Escribir..."; ?>
-              </option>
-
-              <option value="">
-                <?= ($lang=='en') ? "-- Select Service --" : "-- Seleccione un servicio --"; ?>
-              </option>
-
-              <option><?= ($lang=='en') ? "Kitchen Cleaning" : "Limpieza de Cocina"; ?></option>
-              <option><?= ($lang=='en') ? "Vent Hood" : "Campana Extractora (Hood)"; ?></option>
-              <option><?= ($lang=='en') ? "Bar Cleaning" : "Limpieza de Bar"; ?></option>
-              <option><?= ($lang=='en') ? "Grease Trap Cleaning" : "Limpieza de Trampa de Grasa"; ?></option>
-              <option><?= ($lang=='en') ? "Restroom Cleaning" : "Limpieza de Baños"; ?></option>
-              <option><?= ($lang=='en') ? "Dinning Room Cleaning" : "Limpieza de Comedor"; ?></option>
-            </select>
-
-            <input type="text"
-              class="write-field-19"
-              name="write19[]"
-              style="display:none; margin-top:5px;"
-              placeholder="<?= ($lang=='en') ? 'Write service...' : 'Escriba el servicio...'; ?>">
+            <input type="hidden" class="type19" name="type19[]" value="">
+            <input type="hidden" class="scope19" name="scope19[]" value="">
+            <div class="service-selector-btn" onclick="openServiceModal(this)">
+              <span class="service-selector-text"><?= ($lang=='en') ? "Select Service..." : "Seleccionar Servicio..."; ?></span>
+              <span class="service-selector-icon">&#9662;</span>
+            </div>
           </td>
 
           <!-- SERVICE TIME -->
@@ -391,13 +378,13 @@ function calcTotals18() {
               <option value="">
                 <?= ($lang=='en') ? "-- Select Time --" : "-- Seleccione tiempo --"; ?>
               </option>
-              <option><?= ($lang=='en') ? "1 Day" : "1 Día"; ?></option>
-              <option><?= ($lang=='en') ? "1-2 Days" : "1-2 Días"; ?></option>
-              <option><?= ($lang=='en') ? "3 Days" : "3 Días"; ?></option>
-              <option><?= ($lang=='en') ? "4 Days" : "4 Días"; ?></option>
-              <option><?= ($lang=='en') ? "5 Days" : "5 Días"; ?></option>
-              <option><?= ($lang=='en') ? "6 Days" : "6 Días"; ?></option>
-              <option><?= ($lang=='en') ? "7 Days" : "7 Días"; ?></option>
+              <option><?= ($lang=='en') ? "1 Day" : "1 Dia"; ?></option>
+              <option><?= ($lang=='en') ? "1-2 Days" : "1-2 Dias"; ?></option>
+              <option><?= ($lang=='en') ? "3 Days" : "3 Dias"; ?></option>
+              <option><?= ($lang=='en') ? "4 Days" : "4 Dias"; ?></option>
+              <option><?= ($lang=='en') ? "5 Days" : "5 Dias"; ?></option>
+              <option><?= ($lang=='en') ? "6 Days" : "6 Dias"; ?></option>
+              <option><?= ($lang=='en') ? "7 Days" : "7 Dias"; ?></option>
             </select>
           </td>
 
@@ -425,7 +412,7 @@ function calcTotals18() {
             <input type="text"
               class="desc19"
               name="desc19[]"
-              placeholder="<?= ($lang=='en') ? 'Write description...' : 'Escriba la descripción...'; ?>">
+              placeholder="<?= ($lang=='en') ? 'Write description...' : 'Escriba la descripcion...'; ?>">
           </td>
 
           <!-- SUBTOTAL -->
@@ -471,7 +458,30 @@ function calcTotals18() {
   </div>
 </div>
 
+<!-- ======================================= -->
+<!-- SERVICE SELECTOR MODAL -->
+<!-- ======================================= -->
+<div id="serviceModal" class="service-modal-overlay" style="display:none;">
+  <div class="service-modal">
+    <div class="service-modal-header">
+      <h3><?= ($lang=='en') ? "Select a Service" : "Seleccionar un Servicio"; ?></h3>
+      <button type="button" class="service-modal-close" onclick="closeServiceModal()">&times;</button>
+    </div>
+
+    <div class="service-modal-search">
+      <input type="text" id="serviceModalSearch"
+        placeholder="<?= ($lang=='en') ? 'Search services...' : 'Buscar servicios...'; ?>"
+        oninput="filterServiceCards()">
+    </div>
+
+    <div class="service-modal-body" id="serviceModalBody">
+      <!-- Cards are generated dynamically from servicesCatalog -->
+    </div>
+  </div>
+</div>
+
 <style>
+  /* ===== TABLE 19 STYLES ===== */
   .service-table19 {
     width: 100%;
     border-collapse: collapse;
@@ -489,7 +499,8 @@ function calcTotals18() {
     padding: 8px;
   }
   .service-table19 select,
-  .service-table19 input {
+  .service-table19 input[type="text"],
+  .service-table19 input[type="number"] {
     width: 100%;
     padding: 6px;
     border: 1px solid #ccc;
@@ -533,31 +544,306 @@ function calcTotals18() {
     background:#f7f7f7;
     border:none;
   }
+
+  /* ===== SERVICE SELECTOR BUTTON ===== */
+  .service-selector-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #fff;
+    min-height: 38px;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .service-selector-btn:hover {
+    border-color: #001f54;
+    background: #f0f4ff;
+  }
+  .service-selector-btn.has-value {
+    border-color: #001f54;
+    background: #e8f0fe;
+  }
+  .service-selector-text {
+    flex: 1;
+    color: #666;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .service-selector-btn.has-value .service-selector-text {
+    color: #001f54;
+    font-weight: 600;
+  }
+  .service-selector-icon {
+    margin-left: 8px;
+    color: #999;
+    font-size: 12px;
+  }
+
+  /* ===== SERVICE MODAL ===== */
+  .service-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .service-modal {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 800px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  .service-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    background: #001f54;
+    color: #fff;
+  }
+  .service-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .service-modal-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .service-modal-close:hover {
+    opacity: 1;
+  }
+  .service-modal-search {
+    padding: 16px 24px 8px;
+  }
+  .service-modal-search input {
+    width: 100%;
+    padding: 10px 16px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .service-modal-search input:focus {
+    border-color: #001f54;
+  }
+  .service-modal-body {
+    padding: 16px 24px 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  /* ===== CATEGORY HEADER ===== */
+  .service-modal-category {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #999;
+    margin: 16px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #eee;
+  }
+  .service-modal-category:first-child {
+    margin-top: 0;
+  }
+
+  /* ===== SERVICE CARDS ===== */
+  .service-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .service-card {
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    background: #fafbfc;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .service-card:hover {
+    border-color: #001f54;
+    background: #e8f0fe;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,31,84,0.15);
+  }
+  .service-card-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #001f54;
+  }
+  .service-card-scope-count {
+    font-size: 11px;
+    color: #888;
+  }
+  .service-card-no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-style: italic;
+  }
 </style>
 
 <script>
+// ===== MODAL STATE =====
+let activeServiceRow = null;
+
+// ===== TOGGLE SECTION 19 =====
 function toggleSection19() {
   document.getElementById("section19Container").style.display =
     document.getElementById("includeKitchen").value === "Yes"
-    ? "block"
-    : "none";
+    ? "block" : "none";
 }
 
-function toggleWriteOption19(select) {
-  const input = select.parentElement.querySelector('.write-field-19');
-  input.style.display = (select.value === "__write__") ? "block" : "none";
+// ===== OPEN SERVICE MODAL =====
+function openServiceModal(btn) {
+  activeServiceRow = btn.closest("tr");
+  const modal = document.getElementById("serviceModal");
+  const body = document.getElementById("serviceModalBody");
+  const search = document.getElementById("serviceModalSearch");
+
+  search.value = "";
+  renderServiceCards("");
+
+  modal.style.display = "flex";
+  setTimeout(() => search.focus(), 100);
 }
 
+// ===== CLOSE SERVICE MODAL =====
+function closeServiceModal() {
+  document.getElementById("serviceModal").style.display = "none";
+  activeServiceRow = null;
+}
+
+// Close modal on overlay click
+document.addEventListener("click", function(e) {
+  if (e.target.id === "serviceModal") closeServiceModal();
+});
+
+// Close modal on Escape key
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") closeServiceModal();
+});
+
+// ===== RENDER SERVICE CARDS =====
+function renderServiceCards(filter) {
+  const body = document.getElementById("serviceModalBody");
+  const lowerFilter = filter.toLowerCase();
+
+  const filtered = servicesCatalog.filter(svc =>
+    svc.name.toLowerCase().includes(lowerFilter) ||
+    svc.category.toLowerCase().includes(lowerFilter)
+  );
+
+  if (filtered.length === 0) {
+    body.innerHTML = '<div class="service-cards-grid"><div class="service-card-no-results">' +
+      '<?= ($lang=="en") ? "No services found" : "No se encontraron servicios"; ?>' +
+      '</div></div>';
+    return;
+  }
+
+  // Group by category
+  const grouped = {};
+  filtered.forEach(svc => {
+    if (!grouped[svc.category]) grouped[svc.category] = [];
+    grouped[svc.category].push(svc);
+  });
+
+  let html = "";
+  for (const cat in grouped) {
+    html += '<div class="service-modal-category">' + cat + '</div>';
+    html += '<div class="service-cards-grid">';
+    grouped[cat].forEach(svc => {
+      const scopeCount = svc.scope ? svc.scope.length : 0;
+      html += '<div class="service-card" onclick="selectService(\'' + svc.id + '\')">';
+      html += '<div class="service-card-name">' + svc.name + '</div>';
+      html += '<div class="service-card-scope-count">' + scopeCount + ' <?= ($lang=="en") ? "scope items" : "elementos de scope"; ?></div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  body.innerHTML = html;
+}
+
+// ===== FILTER SERVICE CARDS =====
+function filterServiceCards() {
+  const val = document.getElementById("serviceModalSearch").value;
+  renderServiceCards(val);
+}
+
+// ===== SELECT SERVICE FROM MODAL =====
+function selectService(serviceId) {
+  if (!activeServiceRow) return;
+
+  const svc = servicesCatalogById[serviceId];
+  if (!svc) return;
+
+  // Set hidden type19 value
+  const typeInput = activeServiceRow.querySelector(".type19");
+  typeInput.value = svc.name;
+
+  // Set hidden scope19 value (JSON array of scope items)
+  const scopeInput = activeServiceRow.querySelector(".scope19");
+  scopeInput.value = JSON.stringify(svc.scope || []);
+
+  // Update button display
+  const btn = activeServiceRow.querySelector(".service-selector-btn");
+  const textSpan = btn.querySelector(".service-selector-text");
+  textSpan.textContent = svc.name;
+  btn.classList.add("has-value");
+
+  closeServiceModal();
+}
+
+// ===== ADD ROW =====
 function addRow19() {
   const tbody = document.getElementById("table19body");
   const newRow = tbody.children[0].cloneNode(true);
 
+  // Reset all inputs
   newRow.querySelectorAll("select, input").forEach(el => el.value = "");
-  newRow.querySelector('.write-field-19').style.display = "none";
+
+  // Reset service selector button
+  const btn = newRow.querySelector(".service-selector-btn");
+  const textSpan = btn.querySelector(".service-selector-text");
+  textSpan.textContent = "<?= ($lang=='en') ? 'Select Service...' : 'Seleccionar Servicio...'; ?>";
+  btn.classList.remove("has-value");
 
   tbody.appendChild(newRow);
 }
 
+// ===== REMOVE ROW =====
 function removeRow19() {
   const tbody = document.getElementById("table19body");
   if (tbody.children.length > 1) {
@@ -570,6 +856,7 @@ function removeRow19() {
   }
 }
 
+// ===== CALCULATE TOTALS =====
 function calcTotals19() {
   let total = 0;
 
