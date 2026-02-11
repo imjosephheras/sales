@@ -98,7 +98,7 @@
                                 <label>Seller / Sales Person</label>
                                 <select name="Seller" id="Seller">
                                     <option value="">-- Select --</option>
-                                    <option value="Keny Howe">Keny Howe</option>
+                                    <option value="Kenny Howe">Kenny Howe</option>
                                     <option value="Norma Bustos">Norma Bustos</option>
                                     <option value="Sandra Hernandez">Sandra Hernandez</option>
                                     <option value="Miguel Palma">Miguel Palma</option>

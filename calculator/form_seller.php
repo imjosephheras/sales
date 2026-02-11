@@ -19,7 +19,7 @@
                 class="form-control"
                 onchange="calculateSellerCommission()">
             <option value="">Select a seller...</option>
-            <option value="Keny Howe">Keny Howe</option>
+            <option value="Kenny Howe">Kenny Howe</option>
             <option value="Norma Bustos">Norma Bustos</option>
             <option value="Sandra Hernandez">Sandra Hernandez</option>
             <option value="Miguel Palma">Miguel Palma</option>

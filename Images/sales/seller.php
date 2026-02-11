@@ -57,7 +57,7 @@ $t = $t ?? [];
 
   <select name="Lead_Closer" id="Lead_Closer" required>
     <option value=""><?= $t["ph_select_salesperson"] ?? "Select salesperson" ?></option>
-    <option value="Keny Howe">Keny Howe</option>
+    <option value="Kenny Howe">Kenny Howe</option>
     <option value="Norma Bustos">Norma Bustos</option>
     <option value="Sandra Hernandez">Sandra Hernandez</option>
     <option value="Miguel Palma">Miguel Palma</option>

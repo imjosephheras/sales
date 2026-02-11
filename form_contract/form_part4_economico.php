@@ -16,7 +16,7 @@
     <option value="">
       <?= ($lang=='en') ? "Select a seller" : "Seleccione un vendedor"; ?>
     </option>
-    <option value="Keny Howe">Keny Howe</option>
+    <option value="Kenny Howe">Kenny Howe</option>
     <option value="Norma Bustos">Norma Bustos</option>
     <option value="Sandra Hernandez">Sandra Hernandez</option>
     <option value="Miguel Palma">Miguel Palma</option>
