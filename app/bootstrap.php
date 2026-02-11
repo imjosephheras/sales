@@ -227,3 +227,69 @@ try {
 } catch (PDOException $e) {
     // Silently skip if FK already exists or constraint fails
 }
+
+// ─── RBAC: Add description & created_at to roles if missing ──
+try {
+    $cols = $pdo->query("SHOW COLUMNS FROM `roles` LIKE 'description'")->fetchAll();
+    if (empty($cols)) {
+        $pdo->exec("ALTER TABLE `roles` ADD COLUMN `description` VARCHAR(255) DEFAULT '' AFTER `name`");
+    }
+    $cols = $pdo->query("SHOW COLUMNS FROM `roles` LIKE 'created_at'")->fetchAll();
+    if (empty($cols)) {
+        $pdo->exec("ALTER TABLE `roles` ADD COLUMN `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER `description`");
+    }
+} catch (PDOException $e) {
+    // skip
+}
+
+// ─── RBAC: Permissions table ──────────────────────────────────
+$pdo->exec("
+    CREATE TABLE IF NOT EXISTS `permissions` (
+        `permission_id` INT AUTO_INCREMENT PRIMARY KEY,
+        `name`          VARCHAR(100) NOT NULL,
+        `description`   VARCHAR(255) DEFAULT '',
+        `perm_key`      VARCHAR(100) NOT NULL UNIQUE,
+        `created_at`    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+");
+
+// ─── RBAC: Role ↔ Permission junction ─────────────────────────
+$pdo->exec("
+    CREATE TABLE IF NOT EXISTS `role_permission` (
+        `role_id`       INT NOT NULL,
+        `permission_id` INT NOT NULL,
+        PRIMARY KEY (`role_id`, `permission_id`),
+        FOREIGN KEY (`role_id`)       REFERENCES `roles`(`role_id`)             ON DELETE CASCADE,
+        FOREIGN KEY (`permission_id`) REFERENCES `permissions`(`permission_id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+");
+
+// ─── Add photo column to users if missing ─────────────────────
+try {
+    $cols = $pdo->query("SHOW COLUMNS FROM `users` LIKE 'photo'")->fetchAll();
+    if (empty($cols)) {
+        $pdo->exec("ALTER TABLE `users` ADD COLUMN `photo` VARCHAR(255) DEFAULT NULL AFTER `full_name`");
+    }
+} catch (PDOException $e) {
+    // skip
+}
+
+// ─── Seed default permissions ─────────────────────────────────
+$permCount = $pdo->query("SELECT COUNT(*) FROM permissions")->fetchColumn();
+if ((int)$permCount === 0) {
+    $pdo->exec("
+        INSERT INTO `permissions` (`name`, `description`, `perm_key`) VALUES
+        ('Manage Users',       'Create, edit and list users',       'manage_users'),
+        ('Manage Roles',       'Create, edit and list roles',       'manage_roles'),
+        ('Manage Permissions', 'Create, edit and list permissions', 'manage_permissions'),
+        ('View Reports',       'Access the reports module',         'view_reports'),
+        ('Manage Billing',     'Access billing / accounting',       'manage_billing'),
+        ('Manage Calendar',    'Access the calendar module',        'manage_calendar')
+    ");
+
+    // Assign all permissions to Admin role
+    $pdo->exec("
+        INSERT IGNORE INTO `role_permission` (`role_id`, `permission_id`)
+        SELECT 1, `permission_id` FROM `permissions`
+    ");
+}
