@@ -19,7 +19,8 @@ $servicesCatalog = [
         "Follow all required safety procedures during the performance of the service.",
         "Coordinate access and work conditions with the Client prior to service.",
         "Perform a final inspection upon completion to confirm the system has been serviced.",
-        "Leave the work area clean, safe, and ready for normal operations upon completion of the service."
+        "Leave the work area clean, safe, and ready for normal operations upon completion of the service.",
+        "Generate and provide a service contract documenting the scope of work, terms, and conditions applicable to the hood cleaning service performed, available for download upon request."
     ],
 
     "Hood Cleaning (Detailed)" => [
@@ -36,7 +37,8 @@ $servicesCatalog = [
         "Follow all required safety procedures during the performance of the service.",
         "Coordinate access and work conditions with the Client prior to service.",
         "Perform a final inspection upon completion to confirm the hood system has been properly serviced.",
-        "Leave the work area clean, safe, and ready for normal operations upon completion of the service."
+        "Leave the work area clean, safe, and ready for normal operations upon completion of the service.",
+        "Generate and provide a service contract documenting the scope of work, terms, and conditions applicable to the hood cleaning service performed, available for download upon request."
     ],
 
     "Wall Cleaning" => [
