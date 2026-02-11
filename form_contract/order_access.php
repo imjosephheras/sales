@@ -52,9 +52,10 @@ function getOrderRbacFilter(array $user): array
     }
 
     // Vendedor and any other role: restrict to own orders
+    // Normalize with TRIM + LOWER to avoid mismatches from extra spaces or casing
     return [
-        'sql'    => 'AND seller = :rbac_seller',
-        'params' => [':rbac_seller' => $user['full_name']],
+        'sql'    => 'AND LOWER(TRIM(seller)) = LOWER(TRIM(:rbac_seller))',
+        'params' => [':rbac_seller' => trim($user['full_name'])],
     ];
 }
 
@@ -80,7 +81,8 @@ function canAccessOrder(PDO $pdo, int $formId, array $user): bool
         return false;
     }
 
-    return $form['seller'] === $user['full_name'];
+    // Normalize both sides: trim whitespace and compare case-insensitively
+    return mb_strtolower(trim($form['seller'])) === mb_strtolower(trim($user['full_name']));
 }
 
 /**

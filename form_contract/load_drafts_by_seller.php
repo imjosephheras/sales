@@ -18,6 +18,19 @@ try {
 
     $pdo = getDBConnection();
 
+    // ── TEMPORARY DEBUG: Log seller matching details ──
+    // TODO: Remove this debug block once the Kenny Howe issue is confirmed resolved
+    $debugSellerName = trim($currentUser['full_name']);
+    $debugStmt = $pdo->prepare("SELECT DISTINCT seller, HEX(seller) as seller_hex, LENGTH(seller) as seller_len FROM forms WHERE status IN ('draft','pending') AND seller IS NOT NULL");
+    $debugStmt->execute();
+    $debugSellers = $debugStmt->fetchAll(PDO::FETCH_ASSOC);
+    error_log("[SELLER-DEBUG] Authenticated user: '{$debugSellerName}' (length=" . strlen($debugSellerName) . ", hex=" . bin2hex($debugSellerName) . ", role_id={$currentUser['role_id']})");
+    foreach ($debugSellers as $ds) {
+        $match = (mb_strtolower(trim($ds['seller'])) === mb_strtolower($debugSellerName)) ? 'MATCH' : 'NO-MATCH';
+        error_log("[SELLER-DEBUG] DB seller: '{$ds['seller']}' (length={$ds['seller_len']}, hex={$ds['seller_hex']}) => {$match}");
+    }
+    // ── END TEMPORARY DEBUG ──
+
     // Pagination parameters
     $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
     $limit = isset($_GET['limit']) ? max(1, min(100, intval($_GET['limit']))) : 20;
