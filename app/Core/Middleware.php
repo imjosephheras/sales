@@ -18,7 +18,7 @@ class Middleware
         if (!Auth::check()) {
             // Store intended URL so we can redirect after login
             $_SESSION['intended_url'] = $_SERVER['REQUEST_URI'] ?? '/';
-            header('Location: /public/index.php?action=login');
+            header('Location: ' . BASE_PATH . '/public/index.php?action=login');
             exit;
         }
     }
@@ -30,7 +30,7 @@ class Middleware
     public static function guest(): void
     {
         if (Auth::check()) {
-            header('Location: /public/index.php?action=dashboard');
+            header('Location: ' . BASE_PATH . '/public/index.php?action=dashboard');
             exit;
         }
     }

@@ -128,7 +128,7 @@ $styleMap = [
             <?php endforeach; ?>
         </div>
 
-        <a href="/public/index.php?action=logout" style="display:inline-block;margin-top:30px;padding:10px 30px;background:#f5f5f5;color:#666;text-decoration:none;border-radius:8px;font-weight:500;">Sign Out</a>
+        <a href="<?= BASE_PATH ?>/public/index.php?action=logout" style="display:inline-block;margin-top:30px;padding:10px 30px;background:#f5f5f5;color:#666;text-decoration:none;border-radius:8px;font-weight:500;">Sign Out</a>
 
         <div class="footer">
             &copy; <?= date('Y'); ?> — Prime Facility Services Group

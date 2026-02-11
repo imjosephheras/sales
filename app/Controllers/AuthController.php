@@ -30,7 +30,7 @@ class AuthController
 
         if (empty($identity) || empty($password)) {
             $_SESSION['login_error'] = 'Please enter your username/email and password.';
-            header('Location: /public/index.php?action=login');
+            header('Location: ' . BASE_PATH . '/public/index.php?action=login');
             exit;
         }
 
@@ -38,7 +38,7 @@ class AuthController
 
         if (!$user) {
             $_SESSION['login_error'] = 'Invalid credentials.';
-            header('Location: /public/index.php?action=login');
+            header('Location: ' . BASE_PATH . '/public/index.php?action=login');
             exit;
         }
 
@@ -46,7 +46,7 @@ class AuthController
         Csrf::regenerate();
 
         // Redirect to intended URL or dashboard
-        $redirect = $_SESSION['intended_url'] ?? '/public/index.php?action=dashboard';
+        $redirect = $_SESSION['intended_url'] ?? (BASE_PATH . '/public/index.php?action=dashboard');
         unset($_SESSION['intended_url']);
         header('Location: ' . $redirect);
         exit;
@@ -58,7 +58,7 @@ class AuthController
     public static function logout(): void
     {
         Auth::logout();
-        header('Location: /public/index.php?action=login');
+        header('Location: ' . BASE_PATH . '/public/index.php?action=login');
         exit;
     }
 
@@ -179,7 +179,7 @@ class AuthController
 <body>
     <div class="login-card">
         <div class="logo-container">
-            <img src="/form_contract/Images/Facility.png" alt="Prime Facility Logo">
+            <img src="<?= BASE_PATH ?>/form_contract/Images/Facility.png" alt="Prime Facility Logo">
         </div>
         <h1>Sign In</h1>
         <p class="subtitle">Sales Management System</p>
@@ -188,7 +188,7 @@ class AuthController
             <div class="error-msg"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
         <?php endif; ?>
 
-        <form method="POST" action="/public/index.php?action=process_login">
+        <form method="POST" action="<?= BASE_PATH ?>/public/index.php?action=process_login">
             <?= Csrf::field() ?>
 
             <div class="form-group">
@@ -313,7 +313,7 @@ class AuthController
 <body>
     <div class="container">
         <div class="logo-container">
-            <img src="/form_contract/Images/Facility.png" alt="Prime Facility Logo">
+            <img src="<?= BASE_PATH ?>/form_contract/Images/Facility.png" alt="Prime Facility Logo">
         </div>
 
         <div class="user-info">
@@ -322,16 +322,16 @@ class AuthController
         </div>
 
         <div class="buttons-container">
-            <a href="/form_contract/" class="btn btn-contract">Form for Contract</a>
-            <a href="/contract_generator/contract_generator/" class="btn btn-contract">Contract Generator</a>
-            <a href="/employee_work_report/" class="btn btn-sales">Employee Work Report</a>
-            <a href="/reports/" class="btn btn-reports">Reports</a>
-            <a href="/billing/" class="btn btn-billing">Billing / Accounting</a>
-            <a href="/service_confirmation/" class="btn btn-confirm">Admin Panel</a>
-            <a href="/calendar/" class="btn btn-calendar">Calendar</a>
+            <a href="<?= BASE_PATH ?>/form_contract/" class="btn btn-contract">Form for Contract</a>
+            <a href="<?= BASE_PATH ?>/contract_generator/contract_generator/" class="btn btn-contract">Contract Generator</a>
+            <a href="<?= BASE_PATH ?>/employee_work_report/" class="btn btn-sales">Employee Work Report</a>
+            <a href="<?= BASE_PATH ?>/reports/" class="btn btn-reports">Reports</a>
+            <a href="<?= BASE_PATH ?>/billing/" class="btn btn-billing">Billing / Accounting</a>
+            <a href="<?= BASE_PATH ?>/service_confirmation/" class="btn btn-confirm">Admin Panel</a>
+            <a href="<?= BASE_PATH ?>/calendar/" class="btn btn-calendar">Calendar</a>
         </div>
 
-        <a href="/public/index.php?action=logout" class="btn-logout">Sign Out</a>
+        <a href="<?= BASE_PATH ?>/public/index.php?action=logout" class="btn-logout">Sign Out</a>
 
         <div class="footer">
             &copy; <?= date('Y') ?> &mdash; Prime Facility Services Group
