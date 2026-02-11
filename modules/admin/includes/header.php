@@ -4,12 +4,14 @@
  *
  * Variables expected from the including page:
  *   $page_title  (string)  e.g. "Admin Panel"
+ *   $page_icon   (string)  Font Awesome class, defaults to "fas fa-cogs"
  *   $back_url    (string)  URL for the back button, or '' to hide it
- *   $back_label  (string)  Label for the back button
+ *   $back_label  (string)  Label for the back button, or '' to hide Home btn
  */
 $current_user = $_SESSION['full_name'] ?? 'Admin';
 $isAdmin      = ((int)($_SESSION['role_id'] ?? 0)) === 1;
 $page_title   = $page_title ?? 'Admin Panel';
+$page_icon    = $page_icon ?? 'fas fa-cogs';
 $back_url     = $back_url ?? '';
 $back_label   = $back_label ?? 'Home';
 
@@ -172,10 +174,10 @@ if (count($nameParts) > 1) {
     <div class="adm-header-left">
         <?php if ($back_url): ?>
             <a href="<?= $back_url ?>" class="adm-back-btn"><i class="fas fa-arrow-left"></i> <?= htmlspecialchars($back_label, ENT_QUOTES, 'UTF-8') ?></a>
-        <?php else: ?>
+        <?php elseif ($back_label !== ''): ?>
             <a href="<?= url('/') ?>" class="adm-back-btn"><i class="fas fa-home"></i> Home</a>
         <?php endif; ?>
-        <h1><i class="fas fa-cogs"></i> <?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?></h1>
+        <h1><i class="<?= htmlspecialchars($page_icon, ENT_QUOTES, 'UTF-8') ?>"></i> <?= htmlspecialchars($page_title, ENT_QUOTES, 'UTF-8') ?></h1>
     </div>
 
     <?php if ($isAdmin): ?>
@@ -202,9 +204,9 @@ if (count($nameParts) > 1) {
         </div>
     </div>
     <?php else: ?>
-    <div style="display:flex;align-items:center;gap:8px;font-size:0.95rem;">
-        <i class="fas fa-user-circle"></i>
-        <span><?= htmlspecialchars($current_user, ENT_QUOTES, 'UTF-8') ?></span>
+    <div style="display:flex;align-items:center;gap:14px;font-size:0.95rem;">
+        <span><i class="fas fa-user-circle"></i> <?= htmlspecialchars($current_user, ENT_QUOTES, 'UTF-8') ?></span>
+        <a href="<?= url('/public/index.php?action=logout') ?>" style="color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.85rem;" title="Cerrar Sesión"><i class="fas fa-sign-out-alt"></i></a>
     </div>
     <?php endif; ?>
 </div>
