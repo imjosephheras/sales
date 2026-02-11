@@ -185,7 +185,7 @@ if ((int)$modulesCount === 0) {
         (3, 'Employee Work Report',  'work_report',   '&#x1F9F9;', 'employee_work_report/'),
         (4, 'Reports',              'reports',        '&#x1F4CB;', 'reports/'),
         (5, 'Billing / Accounting', 'billing',        '&#x1F4B0;', 'billing/'),
-        (6, 'Admin Panel',          'admin_panel',    '&#x2699;&#xFE0F;',  'service_confirmation/'),
+        (6, 'Admin Panel',          'admin_panel',    '&#x2699;&#xFE0F;',  'modules/admin/'),
         (7, 'Calendar',             'calendar',       '&#x1F4C5;', 'calendar/')
     ");
 }
