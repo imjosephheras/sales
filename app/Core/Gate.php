@@ -1,29 +1,28 @@
 <?php
 /**
- * Gate - Modular authorization based on roles and modules
+ * Gate - Authorization based on roles, modules, and granular permissions
  *
- * Checks if the current user's role has access to a given module.
- * Caches permissions in session to avoid repeated DB queries.
+ * Module-level:
+ *   Gate::allows('billing');        // checks role_module
  *
- * Usage:
- *   Gate::allows('billing');        // true/false
- *   Gate::modules();               // array of allowed modules for current user
+ * Granular permission:
+ *   Gate::can('manage_users');      // checks role_permission by perm_key
+ *
+ * All allowed modules:
+ *   Gate::modules();
  */
 
 class Gate
 {
     private static ?PDO $pdo = null;
 
-    /**
-     * Initialize with database connection
-     */
     public static function init(PDO $pdo): void
     {
         self::$pdo = $pdo;
     }
 
     /**
-     * Check if the current user has access to a module
+     * Check if the current user has access to a module slug
      */
     public static function allows(string $slug): bool
     {
@@ -32,15 +31,28 @@ class Gate
             return false;
         }
 
-        $permissions = self::loadPermissions((int) $user['role_id']);
+        $permissions = self::loadModulePermissions((int) $user['role_id']);
 
         return in_array($slug, $permissions, true);
     }
 
     /**
-     * Get all modules the current user has access to (with name, slug, icon, url)
-     *
-     * @return array List of module rows the user can access
+     * Check if the current user's role has a granular permission (perm_key)
+     */
+    public static function can(string $permKey): bool
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return false;
+        }
+
+        $perms = self::loadRolePermissions((int) $user['role_id']);
+
+        return in_array($permKey, $perms, true);
+    }
+
+    /**
+     * Get all modules the current user has access to
      */
     public static function modules(): array
     {
@@ -50,9 +62,8 @@ class Gate
         }
 
         $roleId = (int) $user['role_id'];
-
-        // Check session cache
         $cacheKey = 'gate_modules_' . $roleId;
+
         if (isset($_SESSION[$cacheKey])) {
             return $_SESSION[$cacheKey];
         }
@@ -79,7 +90,7 @@ class Gate
     /**
      * Load allowed module slugs for a role (cached in session)
      */
-    private static function loadPermissions(int $roleId): array
+    private static function loadModulePermissions(int $roleId): array
     {
         $cacheKey = 'gate_perms_' . $roleId;
 
@@ -106,12 +117,43 @@ class Gate
     }
 
     /**
-     * Clear cached permissions (call after role change)
+     * Load granular perm_keys for a role (cached in session)
+     */
+    private static function loadRolePermissions(int $roleId): array
+    {
+        $cacheKey = 'gate_role_perms_' . $roleId;
+
+        if (isset($_SESSION[$cacheKey])) {
+            return $_SESSION[$cacheKey];
+        }
+
+        if (!self::$pdo) {
+            return [];
+        }
+
+        $stmt = self::$pdo->prepare(
+            'SELECT p.perm_key
+             FROM permissions p
+             INNER JOIN role_permission rp ON rp.permission_id = p.permission_id
+             WHERE rp.role_id = :role_id'
+        );
+        $stmt->execute([':role_id' => $roleId]);
+        $keys = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $_SESSION[$cacheKey] = $keys;
+
+        return $keys;
+    }
+
+    /**
+     * Clear all cached permissions (call after role/permission change)
      */
     public static function clearCache(): void
     {
         foreach (array_keys($_SESSION) as $key) {
-            if (str_starts_with($key, 'gate_perms_') || str_starts_with($key, 'gate_modules_')) {
+            if (str_starts_with($key, 'gate_perms_')
+                || str_starts_with($key, 'gate_modules_')
+                || str_starts_with($key, 'gate_role_perms_')) {
                 unset($_SESSION[$key]);
             }
         }
