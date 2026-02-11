@@ -20,7 +20,7 @@ switch ($action) {
 
     case 'process_login':
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . BASE_PATH . '/public/index.php?action=login');
+            header('Location: ' . url('/public/index.php?action=login'));
             exit;
         }
         AuthController::processLogin();

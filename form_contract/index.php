@@ -19,7 +19,7 @@ $lang = $_SESSION["lang"] ?? "en";
 <!-- 🎯 FIXED TOP NAVIGATION BAR -->
 <div class="top-navbar">
     <div class="nav-left">
-        <a href="../index.php" class="nav-btn nav-home">
+        <a href="<?= url('/') ?>" class="nav-btn nav-home">
             🏠 <span>Home</span>
         </a>
         <button id="togglePendingPanel" class="nav-btn nav-pending">
@@ -2245,7 +2245,7 @@ window.loadFormData = function(formId) {
             <iframe 
                 id="calculatorIframe" 
                 class="calculator-iframe" 
-                src="../calculator/index.php"
+                src="<?= url('/calculator/index.php') ?>"
                 title="Cost Calculator">
             </iframe>
         </div>

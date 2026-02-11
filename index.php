@@ -111,7 +111,7 @@ $styleMap = [
     <div class="container">
 
         <div class="logo-container">
-            <img src="form_contract/Images/Facility.png" alt="Prime Facility Logo">
+            <img src="<?= url('/form_contract/Images/Facility.png') ?>" alt="Prime Facility Logo">
         </div>
 
         <h1>Welcome, <?= htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8') ?></h1>
@@ -119,7 +119,7 @@ $styleMap = [
 
         <div class="buttons-container">
             <?php foreach ($modules as $mod): ?>
-                <a href="<?= htmlspecialchars($mod['url'], ENT_QUOTES, 'UTF-8') ?>"
+                <a href="<?= url('/' . ltrim($mod['url'], '/')) ?>"
                    class="btn"
                    style="<?= $styleMap[$mod['slug']] ?? 'background:#333;' ?>">
                     <span><?= $mod['icon'] ?></span>
@@ -128,7 +128,7 @@ $styleMap = [
             <?php endforeach; ?>
         </div>
 
-        <a href="<?= BASE_PATH ?>/public/index.php?action=logout" style="display:inline-block;margin-top:30px;padding:10px 30px;background:#f5f5f5;color:#666;text-decoration:none;border-radius:8px;font-weight:500;">Sign Out</a>
+        <a href="<?= url('/public/index.php?action=logout') ?>" style="display:inline-block;margin-top:30px;padding:10px 30px;background:#f5f5f5;color:#666;text-decoration:none;border-radius:8px;font-weight:500;">Sign Out</a>
 
         <div class="footer">
             &copy; <?= date('Y'); ?> — Prime Facility Services Group

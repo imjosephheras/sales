@@ -17,7 +17,7 @@ $t = $translations[$lang];
 <body>
 
 <!-- 🏠 HOME BUTTON -->
-<a href="../index.php" class="home-btn">🏠 <?= $t["home"] ?></a>
+<a href="<?= url('/') ?>" class="home-btn">🏠 <?= $t["home"] ?></a>
 
 <!-- 🌍 LANGUAGE SWITCH -->
 <div class="lang-switch">
