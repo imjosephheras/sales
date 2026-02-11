@@ -32,13 +32,15 @@ class Auth
         }
 
         // Allow login with username OR email
+        // Use two distinct placeholders — native prepared statements
+        // (ATTR_EMULATE_PREPARES = false) forbid reusing the same name.
         $stmt = self::$pdo->prepare(
             'SELECT user_id, username, email, password_hash, full_name, timezone, role_id
              FROM users
-             WHERE username = :identity OR email = :identity
+             WHERE username = :username OR email = :email
              LIMIT 1'
         );
-        $stmt->execute([':identity' => $identity]);
+        $stmt->execute([':username' => $identity, ':email' => $identity]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // IMPORTANT: Always run password_verify even if user not found
