@@ -64,6 +64,13 @@ $pdo->exec("
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ");
 
+// ─── Add role_id column if missing (table created before role support) ──
+$columns = $pdo->query("SHOW COLUMNS FROM `users` LIKE 'role_id'")->fetchAll();
+if (empty($columns)) {
+    $pdo->exec("ALTER TABLE `users` ADD COLUMN `role_id` INT DEFAULT 1");
+    $pdo->exec("ALTER TABLE `users` ADD INDEX `idx_role` (`role_id`)");
+}
+
 // ─── Seed a default admin user if table is empty ───────────
 $count = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
 if ((int)$count === 0) {
