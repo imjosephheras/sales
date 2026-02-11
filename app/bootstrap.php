@@ -16,6 +16,20 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// ─── Detect application base path ─────────────────────────
+// Auto-detect the URL prefix when the app lives in a subdirectory
+// e.g. if deployed at /sales/, BASE_PATH will be '/sales'
+if (!defined('BASE_PATH')) {
+    $projectRoot = realpath(__DIR__ . '/..');
+    $docRoot     = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
+
+    if ($docRoot && $projectRoot && str_starts_with($projectRoot, $docRoot)) {
+        define('BASE_PATH', rtrim(substr($projectRoot, strlen($docRoot)), '/'));
+    } else {
+        define('BASE_PATH', '');
+    }
+}
+
 // ─── Load core classes ─────────────────────────────────────
 require_once __DIR__ . '/Core/Auth.php';
 require_once __DIR__ . '/Core/Csrf.php';
