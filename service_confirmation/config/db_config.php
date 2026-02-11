@@ -99,6 +99,30 @@ function addServiceConfirmationColumns($pdo) {
             $pdo->exec("ALTER TABLE `requests` ADD COLUMN `Order_Nomenclature` VARCHAR(50) DEFAULT NULL COMMENT 'Auto-generated nomenclature'");
         }
 
+        // Check and add task_tracking column (JSON for task checklist)
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'task_tracking'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `task_tracking` JSON DEFAULT NULL COMMENT 'JSON con estado de tareas: site_visit, quote_sent, contract_signed, staff_assigned, work_started, work_completed, client_approved, invoice_ready'");
+        }
+
+        // Check and add task_tracking_updated_at column
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'task_tracking_updated_at'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `task_tracking_updated_at` TIMESTAMP NULL DEFAULT NULL COMMENT 'Ultima actualizacion del tracking'");
+        }
+
+        // Check and add admin_notes column
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'admin_notes'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `admin_notes` TEXT DEFAULT NULL COMMENT 'Notas internas del administrador'");
+        }
+
+        // Check and add completed_at column
+        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'completed_at'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `completed_at` TIMESTAMP NULL DEFAULT NULL");
+        }
+
         // Add indexes if they don't exist
         $stmt = $pdo->query("SHOW INDEX FROM `requests` WHERE Key_name = 'idx_service_status'");
         if ($stmt->rowCount() == 0) {
