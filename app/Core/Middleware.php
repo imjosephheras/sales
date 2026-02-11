@@ -53,4 +53,22 @@ class Middleware
             die('403 Forbidden - You do not have permission to access this page.');
         }
     }
+
+    /**
+     * Require access to a specific module.
+     * Uses Gate::allows() to check role-based module permissions.
+     *
+     * Usage: Middleware::module('billing');
+     *
+     * @param string $slug Module slug (e.g. 'billing', 'contracts', 'admin_panel')
+     */
+    public static function module(string $slug): void
+    {
+        self::auth();
+
+        if (!Gate::allows($slug)) {
+            http_response_code(403);
+            die('403 Forbidden - You do not have permission to access this module.');
+        }
+    }
 }

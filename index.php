@@ -7,6 +7,18 @@ require_once __DIR__ . '/app/bootstrap.php';
 Middleware::auth();
 
 $user = Auth::user();
+$modules = Gate::modules();
+
+// Style map per module slug (preserves original look & feel)
+$styleMap = [
+    'contracts'    => 'background: linear-gradient(135deg, #a30000, #c70734); box-shadow: 0 4px 15px rgba(163,0,0,0.35);',
+    'generator'    => 'background: linear-gradient(135deg, #a30000, #c70734); box-shadow: 0 4px 15px rgba(163,0,0,0.35);',
+    'work_report'  => 'background: linear-gradient(135deg, #001f54, #003080); box-shadow: 0 4px 15px rgba(0,31,84,0.35);',
+    'reports'      => 'background: linear-gradient(135deg, #1a5f1a, #2d8a2d); box-shadow: 0 4px 15px rgba(26,95,26,0.35);',
+    'billing'      => 'background: linear-gradient(135deg, #6f42c1, #8257d8); box-shadow: 0 4px 15px rgba(111,66,193,0.35);',
+    'admin_panel'  => 'background: linear-gradient(135deg, #17a2b8, #138496); box-shadow: 0 4px 15px rgba(23,162,184,0.35);',
+    'calendar'     => 'background: linear-gradient(135deg, #e67e22, #d35400); box-shadow: 0 4px 15px rgba(230,126,34,0.35);',
+];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -72,36 +84,6 @@ $user = Auth::user();
             color: white;
         }
 
-        .btn-contract {
-            background: linear-gradient(135deg, #a30000, #c70734);
-            box-shadow: 0 4px 15px rgba(163,0,0,0.35);
-        }
-
-        .btn-sales {
-            background: linear-gradient(135deg, #001f54, #003080);
-            box-shadow: 0 4px 15px rgba(0,31,84,0.35);
-        }
-
-        .btn-reports {
-            background: linear-gradient(135deg, #1a5f1a, #2d8a2d);
-            box-shadow: 0 4px 15px rgba(26,95,26,0.35);
-        }
-
-        .btn-billing {
-            background: linear-gradient(135deg, #6f42c1, #8257d8);
-            box-shadow: 0 4px 15px rgba(111,66,193,0.35);
-        }
-
-        .btn-confirmation {
-            background: linear-gradient(135deg, #17a2b8, #138496);
-            box-shadow: 0 4px 15px rgba(23,162,184,0.35);
-        }
-
-        .btn-calendar {
-            background: linear-gradient(135deg, #e67e22, #d35400);
-            box-shadow: 0 4px 15px rgba(230,126,34,0.35);
-        }
-
         .btn:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.35);
@@ -136,36 +118,15 @@ $user = Auth::user();
         <p class="subtitle">Select the application you want to access</p>
 
         <div class="buttons-container">
-
-    <a href="form_contract/" class="btn btn-contract">
-        <span>💼</span> Form for Contract
-    </a>
-
-    <a href="contract_generator/contract_generator/" class="btn btn-contract">
-        <span>📝</span> Contract Generator
-    </a>
-
-    <a href="employee_work_report/" class="btn btn-sales">
-        <span>🧹</span> Employee Work Report
-    </a>
-
-    <a href="reports/" class="btn btn-reports">
-        <span>📋</span> Reports
-    </a>
-
-    <a href="billing/" class="btn btn-billing">
-        <span>💰</span> Billing / Accounting
-    </a>
-
-    <a href="service_confirmation/" class="btn btn-confirmation">
-        <span>⚙️</span> Admin Panel
-    </a>
-
-    <a href="calendar/" class="btn btn-calendar">
-        <span>📅</span> Calendar
-    </a>
-
-</div>
+            <?php foreach ($modules as $mod): ?>
+                <a href="<?= htmlspecialchars($mod['url'], ENT_QUOTES, 'UTF-8') ?>"
+                   class="btn"
+                   style="<?= $styleMap[$mod['slug']] ?? 'background:#333;' ?>">
+                    <span><?= $mod['icon'] ?></span>
+                    <?= htmlspecialchars($mod['name'], ENT_QUOTES, 'UTF-8') ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
 
         <a href="/public/index.php?action=logout" style="display:inline-block;margin-top:30px;padding:10px 30px;background:#f5f5f5;color:#666;text-decoration:none;border-radius:8px;font-weight:500;">Sign Out</a>
 
