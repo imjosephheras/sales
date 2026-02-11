@@ -105,6 +105,60 @@ body {
 }
 
 /* ========================================
+   Admin Dropdown
+   ======================================== */
+.adm-dropdown { position: relative; }
+.adm-dropdown-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.adm-dropdown-btn:hover { background: rgba(255,255,255,0.25); }
+.adm-dropdown-btn .chevron {
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+}
+.adm-dropdown.open .chevron { transform: rotate(180deg); }
+.adm-dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    min-width: 230px;
+    z-index: 1001;
+    overflow: hidden;
+}
+.adm-dropdown.open .adm-dropdown-menu { display: block; }
+.adm-dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.15s;
+}
+.adm-dropdown-menu a:hover { background: #f0f2f5; }
+.adm-dropdown-menu a i { width: 18px; text-align: center; color: #666; }
+.adm-dropdown-divider { height: 1px; background: #eee; margin: 4px 0; }
+.adm-dropdown-menu a.logout-link { color: #dc3545; }
+.adm-dropdown-menu a.logout-link i { color: #dc3545; }
+
+/* ========================================
    Main Layout - 3 Columns
    ======================================== */
 .container {

@@ -24,6 +24,7 @@ Middleware::module('admin_panel');
 require_once 'config/db_config.php';
 
 $current_user = $_SESSION['full_name'] ?? 'Admin';
+$isAdmin      = ((int)($_SESSION['role_id'] ?? 0)) === 1;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -46,10 +47,28 @@ $current_user = $_SESSION['full_name'] ?? 'Admin';
                 <i class="fas fa-cogs"></i>
                 <h1>Admin Panel</h1>
             </div>
+            <?php if ($isAdmin): ?>
+            <div class="adm-dropdown" id="adminDropdown">
+                <button class="adm-dropdown-btn" type="button" onclick="this.parentElement.classList.toggle('open')">
+                    <i class="fas fa-user-shield"></i>
+                    <span><?= htmlspecialchars($current_user, ENT_QUOTES, 'UTF-8') ?></span>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </button>
+                <div class="adm-dropdown-menu">
+                    <a href="<?= url('/modules/admin/users/') ?>"><i class="fas fa-users-cog"></i> Gestión de Usuarios</a>
+                    <a href="<?= url('/modules/admin/roles/') ?>"><i class="fas fa-user-tag"></i> Gestión de Roles</a>
+                    <a href="<?= url('/modules/admin/permissions/') ?>"><i class="fas fa-key"></i> Gestión de Permisos</a>
+                    <div class="adm-dropdown-divider"></div>
+                    <a href="<?= url('/modules/admin/profile/') ?>"><i class="fas fa-user-edit"></i> Mi Perfil</a>
+                    <a href="<?= url('/public/index.php?action=logout') ?>" class="logout-link"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                </div>
+            </div>
+            <?php else: ?>
             <div class="user-section">
                 <i class="fas fa-user-circle"></i>
-                <span><?php echo htmlspecialchars($current_user); ?></span>
+                <span><?= htmlspecialchars($current_user, ENT_QUOTES, 'UTF-8') ?></span>
             </div>
+            <?php endif; ?>
         </div>
     </header>
 
@@ -74,5 +93,13 @@ $current_user = $_SESSION['full_name'] ?? 'Admin';
     </div>
 
     <script src="js/service_confirmation.js"></script>
+    <script>
+    document.addEventListener('click', function(e) {
+        var dd = document.getElementById('adminDropdown');
+        if (dd && !dd.contains(e.target)) {
+            dd.classList.remove('open');
+        }
+    });
+    </script>
 </body>
 </html>
