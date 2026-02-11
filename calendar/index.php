@@ -22,7 +22,7 @@ Middleware::module('calendar');
     <header class="main-header">
         <div class="header-content">
             <div class="logo-section">
-                <a href="../index.php" class="home-btn" title="Back to Home">
+                <a href="<?= url('/') ?>" class="home-btn" title="Back to Home">
                     <i class="fas fa-home"></i> Home
                 </a>
                 <i class="fas fa-calendar-alt"></i>

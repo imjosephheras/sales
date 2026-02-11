@@ -17,16 +17,47 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // ─── Detect application base path ─────────────────────────
-// Auto-detect the URL prefix when the app lives in a subdirectory
-// e.g. if deployed at /sales/, BASE_PATH will be '/sales'
+// Auto-detect the URL prefix when the app lives in a subdirectory.
+// e.g. if deployed at http://localhost/sales/, BASE_PATH = '/sales'
+// If deployed at root http://localhost/, BASE_PATH = ''
+//
+// This makes the entire system portable: you can move the project
+// to any folder (or to root) and all URLs will work automatically.
 if (!defined('BASE_PATH')) {
     $projectRoot = realpath(__DIR__ . '/..');
     $docRoot     = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
 
     if ($docRoot && $projectRoot && str_starts_with($projectRoot, $docRoot)) {
-        define('BASE_PATH', rtrim(substr($projectRoot, strlen($docRoot)), '/'));
+        $detected = str_replace('\\', '/', substr($projectRoot, strlen($docRoot)));
+        define('BASE_PATH', rtrim($detected, '/'));
     } else {
-        define('BASE_PATH', '');
+        // Fallback: try to infer from SCRIPT_NAME
+        // e.g. SCRIPT_NAME = '/sales/public/index.php' → BASE_PATH = '/sales'
+        $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+        // Walk up to find the app root (where /app/bootstrap.php lives)
+        $parts = explode('/', trim($scriptDir, '/'));
+        // The first segment is typically the project folder
+        define('BASE_PATH', !empty($parts[0]) ? '/' . $parts[0] : '');
+    }
+}
+
+// ─── URL helper function ──────────────────────────────────
+// Generates an absolute URL path relative to the application root.
+//
+// Usage:
+//   url('/public/index.php?action=login')  → '/sales/public/index.php?action=login'
+//   url('/billing/')                       → '/sales/billing/'
+//   url('/')                               → '/sales/'
+//
+// When the app moves to root, the same calls produce:
+//   url('/public/index.php?action=login')  → '/public/index.php?action=login'
+//   url('/billing/')                       → '/billing/'
+//
+// This is the ONLY way URLs should be built in the application.
+if (!function_exists('url')) {
+    function url(string $path = '/'): string
+    {
+        return BASE_PATH . $path;
     }
 }
 
