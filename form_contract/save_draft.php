@@ -7,16 +7,26 @@
 
 header('Content-Type: application/json');
 
-// Incluir configuración de base de datos
+// Incluir configuración de base de datos y RBAC
 require_once 'db_config.php';
+require_once 'order_access.php';
 
 try {
+    // Enforce authentication + module access
+    $currentUser = requireOrderAccess();
+
     $pdo = getDBConnection();
-    $pdo->beginTransaction();
-    
+
     // Obtener datos del formulario
     $form_id = isset($_POST['form_id']) ? (int)$_POST['form_id'] : null;
     $status = isset($_POST['status']) ? $_POST['status'] : 'draft';
+
+    // RBAC: If updating an existing form, verify the user has access
+    if ($form_id && !canAccessOrder($pdo, $form_id, $currentUser)) {
+        denyOrderAccess();
+    }
+
+    $pdo->beginTransaction();
     
     // ============================================================
     // HELPER FUNCTION: Convertir string vacío a NULL
