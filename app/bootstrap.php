@@ -19,6 +19,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // ─── Load core classes ─────────────────────────────────────
 require_once __DIR__ . '/Core/Auth.php';
 require_once __DIR__ . '/Core/Csrf.php';
+require_once __DIR__ . '/Core/Gate.php';
 require_once __DIR__ . '/Core/Middleware.php';
 require_once __DIR__ . '/Controllers/AuthController.php';
 
@@ -45,8 +46,9 @@ try {
     die('Database connection failed.');
 }
 
-// ─── Initialize Auth ───────────────────────────────────────
+// ─── Initialize Auth & Gate ────────────────────────────────
 Auth::init($pdo);
+Gate::init($pdo);
 
 // ─── Ensure users table exists ─────────────────────────────
 $pdo->exec("
@@ -85,4 +87,98 @@ if ((int)$count === 0) {
         ':full_name'     => 'Administrator',
         ':role_id'       => 1,
     ]);
+}
+
+// ─── Authorization tables: roles, modules, role_module ─────
+$pdo->exec("
+    CREATE TABLE IF NOT EXISTS `roles` (
+        `role_id`   INT AUTO_INCREMENT PRIMARY KEY,
+        `name`      VARCHAR(50) NOT NULL UNIQUE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+");
+
+$pdo->exec("
+    CREATE TABLE IF NOT EXISTS `modules` (
+        `module_id` INT AUTO_INCREMENT PRIMARY KEY,
+        `name`      VARCHAR(100) NOT NULL,
+        `slug`      VARCHAR(100) NOT NULL UNIQUE,
+        `icon`      VARCHAR(50)  DEFAULT '',
+        `url`       VARCHAR(255) DEFAULT ''
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+");
+
+$pdo->exec("
+    CREATE TABLE IF NOT EXISTS `role_module` (
+        `role_id`   INT NOT NULL,
+        `module_id` INT NOT NULL,
+        PRIMARY KEY (`role_id`, `module_id`),
+        FOREIGN KEY (`role_id`)   REFERENCES `roles`(`role_id`)   ON DELETE CASCADE,
+        FOREIGN KEY (`module_id`) REFERENCES `modules`(`module_id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+");
+
+// ─── Seed roles ────────────────────────────────────────────
+$rolesCount = $pdo->query("SELECT COUNT(*) FROM roles")->fetchColumn();
+if ((int)$rolesCount === 0) {
+    $pdo->exec("
+        INSERT INTO `roles` (`role_id`, `name`) VALUES
+        (1, 'Admin'),
+        (2, 'Leader'),
+        (3, 'Vendedor'),
+        (4, 'Empleado'),
+        (5, 'Contabilidad')
+    ");
+}
+
+// ─── Seed modules ──────────────────────────────────────────
+$modulesCount = $pdo->query("SELECT COUNT(*) FROM modules")->fetchColumn();
+if ((int)$modulesCount === 0) {
+    $pdo->exec("
+        INSERT INTO `modules` (`module_id`, `name`, `slug`, `icon`, `url`) VALUES
+        (1, 'Form for Contract',     'contracts',     '&#x1F4BC;', 'form_contract/'),
+        (2, 'Contract Generator',    'generator',     '&#x1F4DD;', 'contract_generator/contract_generator/'),
+        (3, 'Employee Work Report',  'work_report',   '&#x1F9F9;', 'employee_work_report/'),
+        (4, 'Reports',              'reports',        '&#x1F4CB;', 'reports/'),
+        (5, 'Billing / Accounting', 'billing',        '&#x1F4B0;', 'billing/'),
+        (6, 'Admin Panel',          'admin_panel',    '&#x2699;&#xFE0F;',  'service_confirmation/'),
+        (7, 'Calendar',             'calendar',       '&#x1F4C5;', 'calendar/')
+    ");
+}
+
+// ─── Seed role_module permissions ──────────────────────────
+$rmCount = $pdo->query("SELECT COUNT(*) FROM role_module")->fetchColumn();
+if ((int)$rmCount === 0) {
+    $pdo->exec("
+        INSERT INTO `role_module` (`role_id`, `module_id`) VALUES
+        -- contracts (1): Admin, Leader, Vendedor
+        (1, 1), (2, 1), (3, 1),
+        -- generator (2): Admin, Leader
+        (1, 2), (2, 2),
+        -- work_report (3): Admin, Leader, Empleado
+        (1, 3), (2, 3), (4, 3),
+        -- reports (4): Admin, Leader
+        (1, 4), (2, 4),
+        -- billing (5): Admin, Leader, Contabilidad
+        (1, 5), (2, 5), (5, 5),
+        -- admin_panel (6): Admin
+        (1, 6),
+        -- calendar (7): Admin, Leader
+        (1, 7), (2, 7)
+    ");
+}
+
+// ─── Add foreign key from users.role_id → roles if not present ──
+try {
+    $fkCheck = $pdo->query("
+        SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'users'
+          AND COLUMN_NAME = 'role_id'
+          AND REFERENCED_TABLE_NAME = 'roles'
+    ")->fetchColumn();
+    if ((int)$fkCheck === 0) {
+        $pdo->exec("ALTER TABLE `users` ADD FOREIGN KEY (`role_id`) REFERENCES `roles`(`role_id`) ON DELETE SET NULL");
+    }
+} catch (PDOException $e) {
+    // Silently skip if FK already exists or constraint fails
 }

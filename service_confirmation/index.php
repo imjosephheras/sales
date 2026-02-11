@@ -18,10 +18,12 @@
  * Note: Sellers confirm from their Request Form.
  * This panel is for internal management/tracking only.
  */
-require_once 'config/db_config.php';
-session_start();
+require_once __DIR__ . '/../app/bootstrap.php';
+Middleware::module('admin_panel');
 
-$current_user = $_SESSION['user_name'] ?? 'Admin';
+require_once 'config/db_config.php';
+
+$current_user = $_SESSION['full_name'] ?? 'Admin';
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -3,7 +3,8 @@
  * CALENDAR MODULE
  * Month-by-month calendar with agendas, mini form, drag & drop, recurrence
  */
-session_start();
+require_once __DIR__ . '/../app/bootstrap.php';
+Middleware::module('calendar');
 ?>
 <!DOCTYPE html>
 <html lang="en">

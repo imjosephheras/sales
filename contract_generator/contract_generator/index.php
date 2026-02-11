@@ -7,11 +7,12 @@
  * - Derecha: Preview en tiempo real del contrato
  */
 
-require_once 'config/db_config.php';
-session_start();
+require_once __DIR__ . '/../../app/bootstrap.php';
+Middleware::module('generator');
 
-// Usuario actual (temporal, luego integrar con sistema de auth)
-$current_user = $_SESSION['user_name'] ?? 'Admin';
+require_once 'config/db_config.php';
+
+$current_user = $_SESSION['full_name'] ?? 'Admin';
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/../app/bootstrap.php';
+Middleware::module('contracts');
+?>
 <!DOCTYPE html>
 <html lang="es">
 <?php include 'header.php'; ?>

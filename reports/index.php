@@ -4,6 +4,9 @@
  * Displays contract request data in a clean spreadsheet format
  */
 
+require_once __DIR__ . '/../app/bootstrap.php';
+Middleware::module('reports');
+
 // Include database configuration
 require_once __DIR__ . '/../form_contract/db_config.php';
 
