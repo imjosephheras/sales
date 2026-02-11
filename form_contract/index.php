@@ -1745,9 +1745,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // Clear existing rows
     tbody.innerHTML = '';
 
-    // Add rows with data
+    // Add rows with data (using modal-based selector, same as create mode)
     allCosts.forEach((cost, index) => {
+      const serviceType = cost.service_type || '';
       const bundleGroup = cost.bundle_group || '';
+
+      // Look up scope from services catalog if available
+      let scopeJson = '[]';
+      if (typeof servicesCatalogByName !== 'undefined' && servicesCatalogByName[serviceType]) {
+        scopeJson = JSON.stringify(servicesCatalogByName[serviceType].scope || []);
+      }
+
+      const hasValue = serviceType ? ' has-value' : '';
+      const displayText = serviceType || 'Select Service...';
+      const textColor = serviceType ? 'color: #001f54; font-weight: 600;' : '';
+
       const newRow = document.createElement('tr');
       newRow.innerHTML = `
         <td class="td-check">
@@ -1755,17 +1767,12 @@ document.addEventListener("DOMContentLoaded", () => {
           <input type="hidden" class="bundleGroup19" name="bundleGroup19[]" value="${bundleGroup}">
         </td>
         <td>
-          <select class="type19" name="type19[]" onchange="toggleWriteOption19(this)">
-            <option value="__write__">Write...</option>
-            <option value="">-- Select Service --</option>
-            <option>Kitchen Cleaning</option>
-            <option>Vent Hood</option>
-            <option>Bar Cleaning</option>
-            <option>Grease Trap Cleaning</option>
-            <option>Restroom Cleaning</option>
-            <option>Dinning Room Cleaning</option>
-          </select>
-          <input type="text" class="write-field-19" name="write19[]" style="display:none; margin-top:5px;" placeholder="Write service...">
+          <input type="hidden" class="type19" name="type19[]" value="${serviceType}">
+          <input type="hidden" class="scope19" name="scope19[]" value='${scopeJson.replace(/'/g, "&#39;")}'>
+          <div class="service-selector-btn${hasValue}" onclick="openServiceModal(this)">
+            <span class="service-selector-text" style="${textColor}">${displayText}</span>
+            <span class="service-selector-icon">&#9662;</span>
+          </div>
         </td>
         <td>
           <select class="time19" name="time19[]">
@@ -1803,26 +1810,11 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       tbody.appendChild(newRow);
 
-      // Set the values
-      const typeSelect = newRow.querySelector('.type19');
-      const writeField = newRow.querySelector('.write-field-19');
+      // Set the remaining values
       const timeSelect = newRow.querySelector('.time19');
       const freqSelect = newRow.querySelector('.freq19');
       const descInput = newRow.querySelector('.desc19');
       const subtotalInput = newRow.querySelector('.subtotal19');
-
-      // Check if service_type is in the dropdown options
-      const serviceType = cost.service_type || '';
-      const optionExists = Array.from(typeSelect.options).some(opt => opt.value === serviceType || opt.text === serviceType);
-
-      if (optionExists) {
-        typeSelect.value = serviceType;
-      } else {
-        // Custom value - use write field
-        typeSelect.value = '__write__';
-        writeField.style.display = 'block';
-        writeField.value = serviceType;
-      }
 
       if (timeSelect) timeSelect.value = cost.service_time || '';
       if (freqSelect) freqSelect.value = cost.frequency || '';

@@ -6,7 +6,7 @@
     <title>Job Work Order</title>
     <style>
         @page {
-            margin: 3.5cm 2cm 3.2cm 2cm;
+            margin: 3cm 2cm 2.8cm 2cm;
         }
 
         body {
@@ -21,7 +21,7 @@
         /* Header - fixed position, repeats on every page */
         .header-wrapper {
             position: fixed;
-            top: -3cm;
+            top: -2.5cm;
             left: 0;
             right: 0;
             overflow: visible;
@@ -122,7 +122,7 @@
             width: 280px;
             border-collapse: collapse;
             margin-left: auto;
-            margin-bottom: 15px;
+            margin-bottom: 6px;
         }
 
         .totals-table td {
@@ -156,74 +156,71 @@
 
         /* Scope Section */
         .scope-section {
-            margin-bottom: 15px;
-            page-break-inside: avoid;
+            margin-bottom: 4px;
             border: none;
         }
 
         .scope-header {
             color: #CC0000;
             font-weight: bold;
-            padding: 6px 10px;
-            margin-bottom: 8px;
+            padding: 3px 10px;
+            margin-bottom: 2px;
             font-size: 9pt;
             text-transform: uppercase;
         }
 
         .scope-content {
             border: none;
-            padding: 10px 0;
+            padding: 2px 0;
             background-color: transparent;
         }
 
         .scope-content h4 {
             font-size: 9pt;
             font-weight: bold;
-            margin: 8px 0 4px 0;
+            margin: 3px 0 2px 0;
             text-transform: uppercase;
         }
 
         .scope-content ul {
             margin-left: 20px;
-            margin-bottom: 8px;
+            margin-bottom: 3px;
         }
 
         .scope-content li {
-            margin-bottom: 3px;
+            margin-bottom: 1px;
             font-size: 9pt;
         }
 
         .scope-content p {
-            margin-bottom: 6px;
+            margin-bottom: 3px;
             font-size: 9pt;
         }
 
         /* Terms Section */
         .terms-section {
-            margin-top: 20px;
+            margin-top: 6px;
             padding-left: 15px;
-            page-break-before: auto;
         }
 
         .terms-main-title {
             color: #CC0000;
             font-weight: bold;
-            padding: 8px 10px;
+            padding: 4px 10px;
             font-size: 10pt;
-            margin-bottom: 15px;
+            margin-bottom: 4px;
             text-transform: uppercase;
         }
 
         .term-box {
-            margin-bottom: 12px;
+            margin-bottom: 4px;
             padding-left: 15px;
-            page-break-inside: avoid;
         }
 
         .term-title {
             font-weight: bold;
             font-size: 9pt;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
             text-transform: uppercase;
             color: #CC0000;
         }
@@ -233,7 +230,7 @@
         }
 
         .term-box li {
-            margin-bottom: 3px;
+            margin-bottom: 1px;
             font-size: 9pt;
             color: #000;
         }
@@ -241,7 +238,7 @@
         .term-box p {
             margin-left: 15px;
             font-size: 9pt;
-            margin-bottom: 5px;
+            margin-bottom: 2px;
             color: #000;
         }
 
@@ -249,8 +246,7 @@
         .final-section {
             display: table;
             width: 100%;
-            margin-top: 30px;
-            page-break-inside: avoid;
+            margin-top: 10px;
         }
 
         .contact-column {
@@ -311,7 +307,7 @@
         /* Footer - fixed position, repeats on every page */
         .footer-wrapper {
             position: fixed;
-            bottom: -2.7cm;
+            bottom: -2.3cm;
             left: 0;
             right: 0;
             overflow: visible;
@@ -467,6 +463,7 @@
                 'freq' => $svc['frequency'] ?? '',
                 'desc' => $svc['description'] ?? '',
                 'subtotal' => $svcSubtotal,
+                'bundle_group' => $svc['bundle_group'] ?? '',
             ];
         }
     } elseif (($data['includeJanitorial'] ?? '') === 'Yes' && !empty($data['type18']) && is_array($data['type18'])) {
@@ -481,6 +478,7 @@
                 'freq' => $data['freq18'][$i] ?? '',
                 'desc' => $data['desc18'][$i] ?? '',
                 'subtotal' => $svcSubtotal,
+                'bundle_group' => '',
             ];
         }
     }
@@ -497,6 +495,7 @@
                 'freq' => $svc['frequency'] ?? '',
                 'desc' => $svc['description'] ?? '',
                 'subtotal' => $svcSubtotal,
+                'bundle_group' => $svc['bundle_group'] ?? '',
             ];
         }
     } elseif (($data['includeKitchen'] ?? '') === 'Yes' && !empty($data['type19']) && is_array($data['type19']) && empty($hoodVentServices)) {
@@ -515,6 +514,7 @@
                 'freq' => $data['freq19'][$i] ?? '',
                 'desc' => $data['desc19'][$i] ?? '',
                 'subtotal' => $svcSubtotal,
+                'bundle_group' => '',
             ];
         }
     }
@@ -531,6 +531,7 @@
                 'freq' => $svc['frequency'] ?? '',
                 'desc' => $svc['description'] ?? '',
                 'subtotal' => $svcSubtotal,
+                'bundle_group' => $svc['bundle_group'] ?? '',
             ];
         }
     }
@@ -563,7 +564,28 @@
             'freq' => $data['Service_Frequency'] ?? 'One Time',
             'desc' => $service_description,
             'subtotal' => $subtotal,
+            'bundle_group' => '',
         ];
+    }
+
+    // Pre-compute bundle groups: count rows per group and find the bundle total (primary row subtotal)
+    $bundleGroupInfo = [];
+    foreach ($allServiceRows as $idx => $row) {
+        $bg = $row['bundle_group'] ?? '';
+        if ($bg !== '') {
+            if (!isset($bundleGroupInfo[$bg])) {
+                $bundleGroupInfo[$bg] = [
+                    'count' => 0,
+                    'first_index' => $idx,
+                    'total' => 0.0,
+                ];
+            }
+            $bundleGroupInfo[$bg]['count']++;
+            // The primary row holds the bundle total; secondary rows are 0
+            if ($row['subtotal'] > 0) {
+                $bundleGroupInfo[$bg]['total'] = $row['subtotal'];
+            }
+        }
     }
     ?>
     <table class="services-table">
@@ -577,13 +599,25 @@
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($allServiceRows as $row): ?>
-            <tr>
+            <?php foreach ($allServiceRows as $idx => $row):
+                $bg = $row['bundle_group'] ?? '';
+                $isBundle = ($bg !== '' && isset($bundleGroupInfo[$bg]) && $bundleGroupInfo[$bg]['count'] > 1);
+                $isFirstInBundle = $isBundle && ($bundleGroupInfo[$bg]['first_index'] === $idx);
+                $isSecondaryInBundle = $isBundle && !$isFirstInBundle;
+            ?>
+            <tr<?php if ($isBundle): ?> style="border-left: 3px solid #0066cc;"<?php endif; ?>>
                 <td class="service-desc"><?php echo htmlspecialchars($row['type']); ?></td>
                 <td><?php echo htmlspecialchars($row['time']); ?></td>
                 <td><?php echo htmlspecialchars($row['freq']); ?></td>
                 <td class="service-desc"><?php echo htmlspecialchars($row['desc']); ?></td>
+                <?php if ($isFirstInBundle): ?>
+                <td class="amount" style="text-align: right; vertical-align: middle; background: linear-gradient(135deg, #e8f4fd, #d0ebff);" rowspan="<?php echo $bundleGroupInfo[$bg]['count']; ?>">
+                    $<?php echo number_format($bundleGroupInfo[$bg]['total'], 2); ?>
+                    <br><span style="font-size: 6pt; color: #0066cc; font-weight: normal;">BUNDLE PRICE</span>
+                </td>
+                <?php elseif (!$isSecondaryInBundle): ?>
                 <td class="amount" style="text-align: right;">$<?php echo number_format($row['subtotal'], 2); ?></td>
+                <?php endif; ?>
             </tr>
             <?php endforeach; ?>
         </tbody>
@@ -828,7 +862,7 @@
         </div>
 
         <!-- ACCEPTANCE / SIGNATURES SECTION -->
-        <div class="terms-main-title" style="margin-top: 20px;">ACCEPTANCE / SIGNATURES</div>
+        <div class="terms-main-title" style="margin-top: 8px;">ACCEPTANCE / SIGNATURES</div>
 
         <div class="final-section">
             <div class="contact-column">

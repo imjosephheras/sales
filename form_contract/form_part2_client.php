@@ -81,13 +81,13 @@
     <label for="client_name" class="question-label">
       <?= ($lang=='en') ? "5. Client Name*" : "5. Nombre del Cliente*"; ?>
     </label>
-    <input
-      type="text"
+    <textarea
       name="Client_Name"
       id="client_name"
+      rows="3"
       placeholder="<?= ($lang=='en') ? 'Enter client name' : 'Ingresa el nombre del cliente'; ?>"
       required
-    >
+    ></textarea>
   </div>
 
   <!-- 6️⃣ Client Title -->
@@ -95,12 +95,12 @@
     <label for="Client_Title" class="question-label">
       <?= ($lang=='en') ? "6. Client Title" : "6. Puesto del Cliente"; ?>
     </label>
-    <input
-      type="text"
+    <textarea
       name="Client_Title"
       id="Client_Title"
+      rows="3"
       placeholder="<?= ($lang=='en') ? 'Enter client title or position' : 'Ingresa el puesto o título del cliente'; ?>"
-    >
+    ></textarea>
   </div>
 
   <!-- 7️⃣ Email -->
@@ -108,13 +108,13 @@
     <label for="Email" class="question-label">
       <?= ($lang=='en') ? "7. Email*" : "7. Correo Electrónico*"; ?>
     </label>
-    <input
-      type="email"
+    <textarea
       name="Email"
       id="Email"
+      rows="3"
       placeholder="<?= ($lang=='en') ? 'example@domain.com' : 'ejemplo@dominio.com'; ?>"
       required
-    >
+    ></textarea>
   </div>
 
   <!-- 8️⃣ Phone Number -->
@@ -122,13 +122,13 @@
     <label for="Number_Phone" class="question-label">
       <?= ($lang=='en') ? "8. Phone Number*" : "8. Número Telefónico*"; ?>
     </label>
-    <input
-      type="text"
+    <textarea
       name="Number_Phone"
       id="Number_Phone"
+      rows="3"
       placeholder="<?= ($lang=='en') ? 'Enter phone number' : 'Ingresa el número telefónico'; ?>"
       required
-    >
+    ></textarea>
   </div>
 
   <!-- 9️⃣ Company Name -->
@@ -136,13 +136,13 @@
     <label for="Company_Name" class="question-label">
       <?= ($lang=='en') ? "9. Company Name*" : "9. Nombre de la Empresa*"; ?>
     </label>
-    <input
-      type="text"
+    <textarea
       name="Company_Name"
       id="Company_Name"
+      rows="3"
       placeholder="<?= ($lang=='en') ? 'Enter company name' : 'Ingresa el nombre de la empresa'; ?>"
       required
-    >
+    ></textarea>
   </div>
 
   <!-- 🔟 Company Address -->
@@ -150,13 +150,13 @@
     <label for="Company_Address" class="question-label">
       <?= ($lang=='en') ? "10. Company Address*" : "10. Dirección de la Empresa*"; ?>
     </label>
-    <input
-      type="text"
+    <textarea
       name="Company_Address"
       id="Company_Address"
+      rows="3"
       placeholder="<?= ($lang=='en') ? 'Enter company address' : 'Ingresa la dirección de la empresa'; ?>"
       required
-    >
+    ></textarea>
   </div>
 
   <!-- 1️⃣1️⃣ Is this a new client? -->

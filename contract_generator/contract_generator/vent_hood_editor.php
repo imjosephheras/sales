@@ -553,76 +553,6 @@ if (file_exists($logo_path)) {
             color: #999;
         }
 
-        /* =============================================
-           SECTION 7 - PRODUCT PREVIEW GRID
-           ============================================= */
-        .product-preview-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            padding: 4px 0;
-        }
-
-        .product-preview-tile {
-            width: calc(20% - 5px);
-            aspect-ratio: 1;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            cursor: pointer;
-            overflow: hidden;
-            position: relative;
-            background: white;
-            transition: all 0.2s;
-        }
-
-        .product-preview-tile:hover {
-            border-color: #003080;
-            box-shadow: 0 2px 10px rgba(0,31,84,0.2);
-            transform: translateY(-1px);
-        }
-
-        .product-preview-tile.selected {
-            border-color: #001f54;
-            box-shadow: 0 0 0 2px #001f54, 0 2px 10px rgba(0,31,84,0.3);
-        }
-
-        .product-preview-tile.selected::after {
-            content: "\2713";
-            position: absolute;
-            top: 3px;
-            right: 3px;
-            background: #001f54;
-            color: white;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .product-preview-tile img {
-            width: 100%;
-            height: 65%;
-            object-fit: contain;
-            padding: 4px;
-        }
-
-        .product-preview-tile .preview-name {
-            font-size: 7px;
-            font-weight: bold;
-            color: #001f54;
-            text-align: center;
-            padding: 0 3px 3px 3px;
-            line-height: 1.2;
-            height: 35%;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-        }
-
         /* Section 7 detail (hidden until products selected) */
         .section-7-detail {
             margin-top: 8px;
@@ -738,6 +668,171 @@ if (file_exists($logo_path)) {
         }
 
         /* =============================================
+           SIDE PANEL - PRODUCT CATALOG
+           ============================================= */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            transition: margin-right 0.3s ease;
+        }
+
+        .main-content.panel-open {
+            margin-right: 370px;
+        }
+
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -370px;
+            width: 370px;
+            height: 100vh;
+            background: #f5f6fa;
+            box-shadow: -3px 0 15px rgba(0,0,0,0.2);
+            z-index: 999;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        .side-panel-header {
+            background: linear-gradient(135deg, #001f54 0%, #003080 100%);
+            color: white;
+            padding: 52px 16px 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .side-panel-header h3 {
+            font-size: 13px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .side-panel-close {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 4px;
+            width: 28px;
+            height: 28px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .side-panel-close:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .side-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .side-panel-body p.panel-hint {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .side-panel .product-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .side-panel .product-preview-tile {
+            width: 100%;
+            aspect-ratio: 1;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .side-panel .product-preview-tile:hover {
+            border-color: #003080;
+            box-shadow: 0 2px 10px rgba(0,31,84,0.2);
+            transform: translateY(-1px);
+        }
+
+        .side-panel .product-preview-tile.selected {
+            border-color: #001f54;
+            box-shadow: 0 0 0 2px #001f54, 0 2px 10px rgba(0,31,84,0.3);
+        }
+
+        .side-panel .product-preview-tile.selected::after {
+            content: "\2713";
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background: #001f54;
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .side-panel .product-preview-tile img {
+            width: 100%;
+            height: 65%;
+            object-fit: contain;
+            padding: 4px;
+        }
+
+        .side-panel .product-preview-tile .preview-name {
+            font-size: 8px;
+            font-weight: bold;
+            color: #001f54;
+            text-align: center;
+            padding: 0 4px 4px 4px;
+            line-height: 1.2;
+            height: 35%;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .side-panel-count {
+            background: #001f54;
+            color: white;
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            flex-shrink: 0;
+            display: none;
+        }
+
+        .side-panel-count.has-items {
+            display: block;
+        }
+
+        /* =============================================
            PRINT STYLES
            ============================================= */
         @media print {
@@ -809,12 +904,12 @@ if (file_exists($logo_path)) {
                 background: transparent !important;
             }
 
-            .product-preview-tile {
-                border: 1px solid #ddd;
+            .side-panel {
+                display: none !important;
             }
 
-            .product-preview-tile.selected {
-                border: 2px solid #001f54;
+            .main-content.panel-open {
+                margin-right: 0 !important;
             }
 
             .section-7-detail.visible {
@@ -855,6 +950,52 @@ if (file_exists($logo_path)) {
         <?php endif; ?>
     </div>
 </div>
+
+<!-- =============================================
+     SIDE PANEL - PRODUCT CATALOG
+     ============================================= -->
+<div class="side-panel" id="sidePanel">
+    <div class="side-panel-header">
+        <h3>PRODUCT CATALOG</h3>
+        <button class="side-panel-close" onclick="closeSidePanel()" title="Close panel">&times;</button>
+    </div>
+    <div class="side-panel-body">
+        <p class="panel-hint">Select the products needed by clicking on them. Selected items will appear in Section 7 of the document.</p>
+        <div class="product-preview-grid" id="productPreviewGrid">
+            <?php
+            $products = [
+                ['image' => 'Downblast HVAC Exhaust Fans.png', 'name' => 'Downblast HVAC Exhaust Fans'],
+                ['image' => 'Driploc Grease Containment.png', 'name' => 'DripLoc Grease Containment'],
+                ['image' => 'Exhaust Fan Grease Box.png', 'name' => 'Exhaust Fan Grease Box'],
+                ['image' => 'Food Truck Exhaust Fans.png', 'name' => 'Food Truck Exhaust Fans'],
+                ['image' => 'Grease Catcher.png', 'name' => 'Grease Catcher'],
+                ['image' => 'Grease containment ring.png', 'name' => 'Grease Containment Ring'],
+                ['image' => 'Hood Filters with Bottom Hooks – All Brands.png', 'name' => 'Hood Filters with Bottom Hooks – All Brands'],
+                ['image' => 'Kason Welded Grease Filters.png', 'name' => 'Kason Welded Grease Filters'],
+                ['image' => 'Mavrik Stainless Steel Hood Filters.jpg', 'name' => 'Mavrik Stainless Steel Hood Filters'],
+                ['image' => 'Replacement Grease Pillows.png', 'name' => 'Replacement Grease Pillows'],
+                ['image' => 'Restaurant Upblast Exhaust.png', 'name' => 'Restaurant Upblast Exhaust'],
+                ['image' => 'Roof Curbs.png', 'name' => 'Roof Curbs'],
+                ['image' => 'Spark Arrestor Hood Filters.png', 'name' => 'Spark Arrestor Hood Filters'],
+                ['image' => 'Standard Aluminum Grease Filters.png', 'name' => 'Standard Aluminum Grease Filters'],
+                ['image' => 'Standard Galvanized Grease Filters.png', 'name' => 'Standard Galvanized Grease Filters'],
+            ];
+            foreach ($products as $index => $product):
+            ?>
+            <div class="product-preview-tile" data-index="<?php echo $index; ?>" data-image="../../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" data-name="<?php echo htmlspecialchars($product['name']); ?>" onclick="toggleProductSelection(this)">
+                <img src="../../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+                <div class="preview-name"><?php echo htmlspecialchars($product['name']); ?></div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <div class="side-panel-count" id="sidePanelCount">0 products selected</div>
+</div>
+
+<!-- =============================================
+     MAIN CONTENT
+     ============================================= -->
+<div class="main-content" id="mainContent">
 
 <!-- =============================================
      PAGES CONTAINER
@@ -1241,42 +1382,7 @@ if (file_exists($logo_path)) {
             <div class="report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
         </div>
 
-        <!-- PRODUCT PREVIEW GRID -->
-        <div class="section">
-            <div class="section-header">PRODUCT CATALOG - SELECT ITEMS</div>
-            <div class="section-content">
-                <p style="font-size: 9px; color: #555; margin-bottom: 6px;">Select the products needed by clicking on them. Selected items will appear in the authorization section below.</p>
-                <div class="product-preview-grid" id="productPreviewGrid">
-                    <?php
-                    $products = [
-                        ['image' => 'Downblast HVAC Exhaust Fans.png', 'name' => 'Downblast HVAC Exhaust Fans'],
-                        ['image' => 'Driploc Grease Containment.png', 'name' => 'DripLoc Grease Containment'],
-                        ['image' => 'Exhaust Fan Grease Box.png', 'name' => 'Exhaust Fan Grease Box'],
-                        ['image' => 'Food Truck Exhaust Fans.png', 'name' => 'Food Truck Exhaust Fans'],
-                        ['image' => 'Grease Catcher.png', 'name' => 'Grease Catcher'],
-                        ['image' => 'Grease containment ring.png', 'name' => 'Grease Containment Ring'],
-                        ['image' => 'Hood Filters with Bottom Hooks – All Brands.png', 'name' => 'Hood Filters with Bottom Hooks – All Brands'],
-                        ['image' => 'Kason Welded Grease Filters.png', 'name' => 'Kason Welded Grease Filters'],
-                        ['image' => 'Mavrik Stainless Steel Hood Filters.jpg', 'name' => 'Mavrik Stainless Steel Hood Filters'],
-                        ['image' => 'Replacement Grease Pillows.png', 'name' => 'Replacement Grease Pillows'],
-                        ['image' => 'Restaurant Upblast Exhaust.png', 'name' => 'Restaurant Upblast Exhaust'],
-                        ['image' => 'Roof Curbs.png', 'name' => 'Roof Curbs'],
-                        ['image' => 'Spark Arrestor Hood Filters.png', 'name' => 'Spark Arrestor Hood Filters'],
-                        ['image' => 'Standard Aluminum Grease Filters.png', 'name' => 'Standard Aluminum Grease Filters'],
-                        ['image' => 'Standard Galvanized Grease Filters.png', 'name' => 'Standard Galvanized Grease Filters'],
-                    ];
-                    foreach ($products as $index => $product):
-                    ?>
-                    <div class="product-preview-tile" data-index="<?php echo $index; ?>" data-image="../../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" data-name="<?php echo htmlspecialchars($product['name']); ?>" onclick="toggleProductSelection(this)">
-                        <img src="../../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
-                        <div class="preview-name"><?php echo htmlspecialchars($product['name']); ?></div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-
-        <!-- 7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION (appears when products selected) -->
+        <!-- 7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION (appears when products selected from side panel) -->
         <div class="section section-7-detail" id="section7Detail">
             <div class="section-header">7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION</div>
             <div class="section-content">
@@ -1319,6 +1425,8 @@ if (file_exists($logo_path)) {
     </div>
 
 </div>
+
+</div><!-- /main-content -->
 
 <!-- =============================================
      JAVASCRIPT
@@ -1444,31 +1552,56 @@ if (file_exists($logo_path)) {
     };
 
     // =============================================
+    // SIDE PANEL - OPEN / CLOSE
+    // =============================================
+    function openSidePanel() {
+        var panel = document.getElementById('sidePanel');
+        var main = document.getElementById('mainContent');
+        var btn = document.getElementById('btnToggleProducts');
+        panel.classList.add('open');
+        main.classList.add('panel-open');
+        btn.textContent = 'Close Product Catalog';
+        btn.style.background = '#d63031';
+    }
+
+    window.closeSidePanel = function() {
+        var panel = document.getElementById('sidePanel');
+        var main = document.getElementById('mainContent');
+        var btn = document.getElementById('btnToggleProducts');
+        panel.classList.remove('open');
+        main.classList.remove('panel-open');
+        btn.textContent = 'Add Products Section';
+        btn.style.background = '#6c5ce7';
+    };
+
+    // =============================================
     // TOGGLE PRODUCTS SECTION (Section 7)
     // =============================================
     window.toggleProductsSection = function() {
-        var page3 = document.getElementById('page3');
-        var btn = document.getElementById('btnToggleProducts');
-        if (page3.classList.contains('section-7-hidden')) {
-            page3.classList.remove('section-7-hidden');
-            btn.textContent = 'Remove Products Section';
-            btn.style.background = '#d63031';
-            page3.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
+        var panel = document.getElementById('sidePanel');
+        if (panel.classList.contains('open')) {
+            // Close panel and clear selections
+            closeSidePanel();
+            // Hide page 3 and clear selections
+            var page3 = document.getElementById('page3');
             page3.classList.add('section-7-hidden');
-            btn.textContent = 'Add Products Section';
-            btn.style.background = '#6c5ce7';
-            // Clear all selections and qty inputs when hiding
             document.querySelectorAll('.product-preview-tile.selected').forEach(function(tile) {
                 tile.classList.remove('selected');
             });
             document.getElementById('selectedProductsGrid').innerHTML = '';
             document.getElementById('section7Detail').classList.remove('visible');
+            updatePanelCount();
             var authName = document.getElementById('auth_client_name');
             var authDate = document.getElementById('auth_client_date');
             if (authName) authName.value = '';
             if (authDate) authDate.value = '';
             clearSignature('sig-auth-client');
+        } else {
+            // Open the side panel
+            openSidePanel();
+            // Show page 3 (for Section 7)
+            var page3 = document.getElementById('page3');
+            page3.classList.remove('section-7-hidden');
         }
     };
 
@@ -1480,10 +1613,23 @@ if (file_exists($logo_path)) {
         updateSelectedProducts();
     };
 
+    function updatePanelCount() {
+        var count = document.querySelectorAll('.product-preview-tile.selected').length;
+        var countEl = document.getElementById('sidePanelCount');
+        if (count > 0) {
+            countEl.textContent = count + ' product' + (count > 1 ? 's' : '') + ' selected';
+            countEl.classList.add('has-items');
+        } else {
+            countEl.classList.remove('has-items');
+        }
+    }
+
     function updateSelectedProducts() {
         var selectedTiles = document.querySelectorAll('.product-preview-tile.selected');
         var grid = document.getElementById('selectedProductsGrid');
         var detail = document.getElementById('section7Detail');
+
+        updatePanelCount();
 
         if (selectedTiles.length === 0) {
             detail.classList.remove('visible');
@@ -1540,13 +1686,11 @@ if (file_exists($logo_path)) {
             clearSignature(id);
         });
 
-        // Hide products section and reset button
+        // Close side panel and hide products section
+        closeSidePanel();
         var page3 = document.getElementById('page3');
-        if (page3 && !page3.classList.contains('section-7-hidden')) {
+        if (page3) {
             page3.classList.add('section-7-hidden');
-            var btn = document.getElementById('btnToggleProducts');
-            btn.textContent = 'Add Products Section';
-            btn.style.background = '#6c5ce7';
         }
         // Clear product selections
         document.querySelectorAll('.product-preview-tile.selected').forEach(function(tile) {
@@ -1554,6 +1698,7 @@ if (file_exists($logo_path)) {
         });
         document.getElementById('selectedProductsGrid').innerHTML = '';
         document.getElementById('section7Detail').classList.remove('visible');
+        updatePanelCount();
     };
 
     // =============================================
