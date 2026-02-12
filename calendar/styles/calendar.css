@@ -40,6 +40,16 @@
     --status-draft-color: #495057;
     --status-submitted-bg: #d4edda;
     --status-submitted-color: #155724;
+
+    /* Service status colors (calendar chips) */
+    --svc-completed-color: #28a745;
+    --svc-completed-bg: #e6f4ea;
+    --svc-not-completed-color: #dc3545;
+    --svc-not-completed-bg: #fde8e8;
+    --svc-pending-color: #d4a017;
+    --svc-pending-bg: #fff8e1;
+    --svc-other-color: #1a73e8;
+    --svc-other-bg: #e3f0ff;
 }
 
 /* Dark Theme */
@@ -77,6 +87,16 @@
     --status-draft-color: #9ea7b3;
     --status-submitted-bg: rgba(52, 208, 88, 0.15);
     --status-submitted-color: #34d058;
+
+    /* Service status colors (calendar chips) - dark theme */
+    --svc-completed-color: #3dd68c;
+    --svc-completed-bg: rgba(61, 214, 140, 0.15);
+    --svc-not-completed-color: #f87171;
+    --svc-not-completed-bg: rgba(248, 113, 113, 0.15);
+    --svc-pending-color: #fbbf24;
+    --svc-pending-bg: rgba(251, 191, 36, 0.15);
+    --svc-other-color: #4a9eff;
+    --svc-other-bg: rgba(74, 158, 255, 0.15);
 }
 
 * {
@@ -710,6 +730,50 @@ body {
     border-left-color: var(--color-quote);
 }
 
+/* Service status color coding for chips */
+.event-chip.chip-status-completed {
+    background: var(--svc-completed-bg);
+    border-left-color: var(--svc-completed-color);
+}
+.event-chip.chip-status-not-completed {
+    background: var(--svc-not-completed-bg);
+    border-left-color: var(--svc-not-completed-color);
+}
+.event-chip.chip-status-pending {
+    background: var(--svc-pending-bg);
+    border-left-color: var(--svc-pending-color);
+}
+.event-chip.chip-status-other {
+    background: var(--svc-other-bg);
+    border-left-color: var(--svc-other-color);
+}
+
+/* Service status badge inside detail panel */
+.detail-svc-status {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.detail-svc-status.svc-completed {
+    background: var(--svc-completed-bg);
+    color: var(--svc-completed-color);
+}
+.detail-svc-status.svc-not-completed {
+    background: var(--svc-not-completed-bg);
+    color: var(--svc-not-completed-color);
+}
+.detail-svc-status.svc-pending {
+    background: var(--svc-pending-bg);
+    color: var(--svc-pending-color);
+}
+.detail-svc-status.svc-other {
+    background: var(--svc-other-bg);
+    color: var(--svc-other-color);
+}
+
 .event-chip:hover {
     filter: brightness(0.95);
 }
@@ -736,19 +800,23 @@ body {
     margin-bottom: 1px;
 }
 
-.chip-contract .chip-type-badge {
+.chip-contract .chip-type-badge,
+.chip-type-badge.chip-contract {
     background: var(--color-contract);
     color: white;
 }
-.chip-proposal .chip-type-badge {
+.chip-proposal .chip-type-badge,
+.chip-type-badge.chip-proposal {
     background: var(--color-proposal);
     color: white;
 }
-.chip-jwo .chip-type-badge {
+.chip-jwo .chip-type-badge,
+.chip-type-badge.chip-jwo {
     background: var(--color-jwo);
     color: white;
 }
-.chip-quote .chip-type-badge {
+.chip-quote .chip-type-badge,
+.chip-type-badge.chip-quote {
     background: var(--color-quote);
     color: white;
 }
@@ -1573,6 +1641,24 @@ body {
     .event-more {
         font-size: 0.55rem;
         color: #444;
+    }
+
+    /* Service status chip colors for print */
+    .event-chip.chip-status-completed {
+        background: #e6f4ea !important;
+        border-left-color: #28a745 !important;
+    }
+    .event-chip.chip-status-not-completed {
+        background: #fde8e8 !important;
+        border-left-color: #dc3545 !important;
+    }
+    .event-chip.chip-status-pending {
+        background: #fff8e1 !important;
+        border-left-color: #d4a017 !important;
+    }
+    .event-chip.chip-status-other {
+        background: #e3f0ff !important;
+        border-left-color: #1a73e8 !important;
     }
 
     /* Has-events border highlight */
