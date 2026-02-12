@@ -794,11 +794,8 @@ $client_email = $data['Email'] ?? '';
     $show_products = isset($data['show_products']) && $data['show_products'];
     if ($show_products):
     ?>
-    <!-- PAGE BREAK for Section 7 -->
-    <div class="page-break"></div>
-
     <!-- 7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION -->
-    <div class="section">
+    <div class="section" style="page-break-inside: auto;">
         <div class="section-header">7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION</div>
         <div class="section-content">
             <p style="font-size: 9px; color: #555; margin-bottom: 4px;">If additional parts or products are needed, please indicate the quantity required for each item below.</p>
