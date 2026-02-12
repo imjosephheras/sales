@@ -615,6 +615,52 @@ body {
     background: rgba(255,255,255,0.35);
 }
 
+/* Calendar Nav Toggle Buttons (sidebar visibility) */
+.calendar-nav-toggles {
+    display: flex;
+    gap: 6px;
+    margin-left: 8px;
+}
+
+.nav-toggle-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.5);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.nav-toggle-btn:hover {
+    background: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.8);
+}
+
+.nav-toggle-btn.active {
+    background: rgba(255,255,255,0.25);
+    border-color: rgba(255,255,255,0.5);
+    color: white;
+}
+
+.nav-toggle-btn.active:hover {
+    background: rgba(255,255,255,0.35);
+}
+
+.nav-toggle-btn i {
+    font-size: 0.7rem;
+}
+
+.nav-toggle-btn span {
+    font-size: 0.75rem;
+}
+
 /* Calendar Grid */
 .calendar-grid {
     padding: 16px 24px 24px;
@@ -1498,6 +1544,7 @@ body {
     .today-btn,
     .print-btn,
     .theme-toggle,
+    .calendar-nav-toggles,
     .event-detail-panel,
     .mini-form-overlay,
     .mini-form-panel {
@@ -1786,11 +1833,20 @@ body {
 
     .calendar-nav {
         padding: 16px 20px;
+        flex-wrap: wrap;
     }
 
     .calendar-nav h2 {
         font-size: 1.15rem;
         min-width: auto;
+    }
+
+    .nav-toggle-btn span {
+        display: none;
+    }
+
+    .nav-toggle-btn {
+        padding: 6px 10px;
     }
 
     .nav-btn {

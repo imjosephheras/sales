@@ -104,6 +104,7 @@ class Calendar {
         // Sidebar controls
         this.initSidebar();
         this.initServiceSidebar();
+        this.initNavToggles();
 
         this.loadAndRender();
     }
@@ -145,12 +146,14 @@ class Calendar {
             this.sidebarEl.classList.add('collapsed');
             this.expandBtn.classList.add('visible');
             localStorage.setItem('calendar-sidebar', 'collapsed');
+            if (this.toggleClientBtn) this.toggleClientBtn.classList.remove('active');
         });
 
         this.expandBtn.addEventListener('click', () => {
             this.sidebarEl.classList.remove('collapsed');
             this.expandBtn.classList.remove('visible');
             localStorage.setItem('calendar-sidebar', 'expanded');
+            if (this.toggleClientBtn) this.toggleClientBtn.classList.add('active');
         });
     }
 
@@ -191,12 +194,63 @@ class Calendar {
             this.serviceSidebarEl.classList.add('collapsed');
             this.serviceExpandBtn.classList.add('visible');
             localStorage.setItem('calendar-service-sidebar', 'collapsed');
+            if (this.toggleServiceBtn) this.toggleServiceBtn.classList.remove('active');
         });
 
         this.serviceExpandBtn.addEventListener('click', () => {
             this.serviceSidebarEl.classList.remove('collapsed');
             this.serviceExpandBtn.classList.remove('visible');
             localStorage.setItem('calendar-service-sidebar', 'expanded');
+            if (this.toggleServiceBtn) this.toggleServiceBtn.classList.add('active');
+        });
+    }
+
+    /**
+     * Initialize nav toggle buttons for sidebar visibility
+     */
+    initNavToggles() {
+        this.toggleClientBtn = document.getElementById('toggle-client-sidebar');
+        this.toggleServiceBtn = document.getElementById('toggle-service-sidebar');
+
+        // Sync initial state from localStorage
+        const clientCollapsed = localStorage.getItem('calendar-sidebar') === 'collapsed';
+        const serviceCollapsed = localStorage.getItem('calendar-service-sidebar') === 'collapsed';
+
+        if (clientCollapsed) {
+            this.toggleClientBtn.classList.remove('active');
+        }
+        if (serviceCollapsed) {
+            this.toggleServiceBtn.classList.remove('active');
+        }
+
+        this.toggleClientBtn.addEventListener('click', () => {
+            const isCollapsed = this.sidebarEl.classList.contains('collapsed');
+            if (isCollapsed) {
+                this.sidebarEl.classList.remove('collapsed');
+                this.expandBtn.classList.remove('visible');
+                this.toggleClientBtn.classList.add('active');
+                localStorage.setItem('calendar-sidebar', 'expanded');
+            } else {
+                this.sidebarEl.classList.add('collapsed');
+                this.expandBtn.classList.add('visible');
+                this.toggleClientBtn.classList.remove('active');
+                localStorage.setItem('calendar-sidebar', 'collapsed');
+            }
+        });
+
+        this.toggleServiceBtn.addEventListener('click', () => {
+            const isCollapsed = this.serviceSidebarEl.classList.contains('collapsed');
+            if (isCollapsed) {
+                this.serviceSidebarEl.classList.remove('collapsed');
+                this.serviceExpandBtn.classList.remove('visible');
+                this.toggleServiceBtn.classList.add('active');
+                localStorage.setItem('calendar-service-sidebar', 'expanded');
+            } else {
+                this.serviceSidebarEl.classList.add('collapsed');
+                this.serviceExpandBtn.classList.add('visible');
+                this.toggleServiceBtn.classList.remove('active');
+                localStorage.setItem('calendar-service-sidebar', 'collapsed');
+            }
         });
     }
 
