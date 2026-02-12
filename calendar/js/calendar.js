@@ -49,6 +49,10 @@ class Calendar {
         this.selectedClients = new Set();
         this.allClients = [];
 
+        // Service type filter state
+        this.selectedServiceTypes = new Set();
+        this.allServiceTypes = [];
+
         // Drag state
         this.draggedEvent = null;
         this.draggedElement = null;
@@ -99,6 +103,7 @@ class Calendar {
 
         // Sidebar controls
         this.initSidebar();
+        this.initServiceSidebar();
 
         this.loadAndRender();
     }
@@ -149,6 +154,52 @@ class Calendar {
         });
     }
 
+    /**
+     * Initialize service type filter sidebar elements and event listeners
+     */
+    initServiceSidebar() {
+        this.serviceSidebarEl = document.getElementById('service-filter-sidebar');
+        this.serviceTypeListEl = document.getElementById('service-type-list');
+        this.serviceSearchEl = document.getElementById('service-search');
+        this.serviceSelectAllBtn = document.getElementById('service-select-all-btn');
+        this.serviceDeselectAllBtn = document.getElementById('service-deselect-all-btn');
+        this.serviceFilterCountEl = document.getElementById('service-filter-count');
+        this.serviceCollapseBtn = document.getElementById('service-sidebar-collapse-btn');
+        this.serviceExpandBtn = document.getElementById('service-sidebar-expand-btn');
+
+        this.serviceSearchEl.addEventListener('input', () => this.renderServiceTypeList());
+
+        this.serviceSelectAllBtn.addEventListener('click', () => {
+            this.allServiceTypes.forEach(s => this.selectedServiceTypes.add(s));
+            this.renderServiceTypeList();
+            this.applyFilter();
+        });
+
+        this.serviceDeselectAllBtn.addEventListener('click', () => {
+            this.selectedServiceTypes.clear();
+            this.renderServiceTypeList();
+            this.applyFilter();
+        });
+
+        const savedServiceSidebar = localStorage.getItem('calendar-service-sidebar');
+        if (savedServiceSidebar === 'collapsed') {
+            this.serviceSidebarEl.classList.add('collapsed');
+            this.serviceExpandBtn.classList.add('visible');
+        }
+
+        this.serviceCollapseBtn.addEventListener('click', () => {
+            this.serviceSidebarEl.classList.add('collapsed');
+            this.serviceExpandBtn.classList.add('visible');
+            localStorage.setItem('calendar-service-sidebar', 'collapsed');
+        });
+
+        this.serviceExpandBtn.addEventListener('click', () => {
+            this.serviceSidebarEl.classList.remove('collapsed');
+            this.serviceExpandBtn.classList.remove('visible');
+            localStorage.setItem('calendar-service-sidebar', 'expanded');
+        });
+    }
+
     changeMonth(delta) {
         this.currentMonth += delta;
         if (this.currentMonth > 11) {
@@ -171,6 +222,7 @@ class Calendar {
     async loadAndRender() {
         await this.fetchEvents();
         this.extractClients();
+        this.extractServiceTypes();
         this.applyFilter();
     }
 
@@ -190,6 +242,22 @@ class Calendar {
                     if (!this.allEvents[day]) {
                         this.allEvents[day] = [];
                     }
+
+                    // Parse service types from Q18 (janitorial) and Q19 (kitchen)
+                    const serviceTypesList = [];
+                    if (ev.janitorial_services) {
+                        ev.janitorial_services.split('||').forEach(s => {
+                            const trimmed = s.trim();
+                            if (trimmed) serviceTypesList.push(trimmed);
+                        });
+                    }
+                    if (ev.kitchen_services) {
+                        ev.kitchen_services.split('||').forEach(s => {
+                            const trimmed = s.trim();
+                            if (trimmed) serviceTypesList.push(trimmed);
+                        });
+                    }
+
                     this.allEvents[day].push({
                         eventId: parseInt(ev.event_id, 10),
                         formId: parseInt(ev.form_id, 10),
@@ -210,7 +278,8 @@ class Calendar {
                         nomenclature: ev.Order_Nomenclature || '',
                         seller: ev.seller || '',
                         documentDate: ev.Document_Date || '',
-                        serviceStatus: ev.service_status || 'pending'
+                        serviceStatus: ev.service_status || 'pending',
+                        serviceTypesList: serviceTypesList
                     });
                 });
             }
@@ -232,6 +301,114 @@ class Calendar {
         this.selectedClients = new Set(this.allClients);
         this.clientSearchEl.value = '';
         this.renderClientList();
+    }
+
+    /**
+     * Extract unique service types from all events for the service filter sidebar
+     */
+    extractServiceTypes() {
+        const serviceSet = new Set();
+        Object.values(this.allEvents).forEach(dayEvents => {
+            dayEvents.forEach(ev => {
+                if (ev.serviceTypesList && ev.serviceTypesList.length > 0) {
+                    ev.serviceTypesList.forEach(s => serviceSet.add(s));
+                }
+            });
+        });
+
+        this.allServiceTypes = Array.from(serviceSet).sort((a, b) =>
+            a.localeCompare(b, undefined, { sensitivity: 'base' })
+        );
+
+        this.selectedServiceTypes = new Set(this.allServiceTypes);
+        this.serviceSearchEl.value = '';
+        this.renderServiceTypeList();
+    }
+
+    /**
+     * Render service type checkboxes in the service sidebar
+     */
+    renderServiceTypeList() {
+        const searchTerm = this.serviceSearchEl.value.toLowerCase().trim();
+        const filtered = searchTerm
+            ? this.allServiceTypes.filter(s => s.toLowerCase().includes(searchTerm))
+            : this.allServiceTypes;
+
+        if (this.allServiceTypes.length === 0) {
+            this.serviceTypeListEl.innerHTML = `
+                <div class="client-list-empty">
+                    <i class="fas fa-concierge-bell"></i>
+                    <span>No services this month</span>
+                </div>`;
+            this.updateServiceFilterCount();
+            return;
+        }
+
+        if (filtered.length === 0) {
+            this.serviceTypeListEl.innerHTML = `
+                <div class="client-list-empty">
+                    <i class="fas fa-search"></i>
+                    <span>No matching services</span>
+                </div>`;
+            return;
+        }
+
+        // Count events per service type
+        const serviceCounts = {};
+        Object.values(this.allEvents).forEach(dayEvents => {
+            dayEvents.forEach(ev => {
+                if (ev.serviceTypesList) {
+                    ev.serviceTypesList.forEach(s => {
+                        serviceCounts[s] = (serviceCounts[s] || 0) + 1;
+                    });
+                }
+            });
+        });
+
+        let html = '';
+        filtered.forEach(service => {
+            const isChecked = this.selectedServiceTypes.has(service);
+            const count = serviceCounts[service] || 0;
+            html += `
+                <label class="client-item ${isChecked ? 'active' : ''}">
+                    <input type="checkbox" value="${this.escapeHtml(service)}" ${isChecked ? 'checked' : ''}>
+                    <span class="client-checkbox-custom">
+                        <i class="fas fa-check"></i>
+                    </span>
+                    <span class="client-name">${this.escapeHtml(service)}</span>
+                    <span class="client-count">${count}</span>
+                </label>`;
+        });
+
+        this.serviceTypeListEl.innerHTML = html;
+
+        this.serviceTypeListEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.addEventListener('change', (e) => {
+                const serviceName = e.target.value;
+                if (e.target.checked) {
+                    this.selectedServiceTypes.add(serviceName);
+                } else {
+                    this.selectedServiceTypes.delete(serviceName);
+                }
+                e.target.closest('.client-item').classList.toggle('active', e.target.checked);
+                this.applyFilter();
+            });
+        });
+
+        this.updateServiceFilterCount();
+    }
+
+    /**
+     * Update the service filter count display in the sidebar footer
+     */
+    updateServiceFilterCount() {
+        const total = this.allServiceTypes.length;
+        const selected = this.selectedServiceTypes.size;
+        if (selected === total) {
+            this.serviceFilterCountEl.textContent = `Showing all (${total})`;
+        } else {
+            this.serviceFilterCountEl.textContent = `${selected} of ${total} selected`;
+        }
     }
 
     renderClientList() {
@@ -312,18 +489,34 @@ class Calendar {
     applyFilter() {
         this.events = {};
 
-        if (this.selectedClients.size === this.allClients.length) {
-            this.events = { ...this.allEvents };
-        } else {
-            Object.entries(this.allEvents).forEach(([day, dayEvents]) => {
-                const filtered = dayEvents.filter(ev => this.selectedClients.has(ev.client));
-                if (filtered.length > 0) {
-                    this.events[day] = filtered;
+        const allClientsSelected = this.selectedClients.size === this.allClients.length;
+        const allServicesSelected = this.selectedServiceTypes.size === this.allServiceTypes.length;
+
+        Object.entries(this.allEvents).forEach(([day, dayEvents]) => {
+            const filtered = dayEvents.filter(ev => {
+                // Client filter
+                const clientPass = allClientsSelected || this.selectedClients.has(ev.client);
+
+                // Service type filter (inclusive: at least one match)
+                let servicePass;
+                if (allServicesSelected) {
+                    servicePass = true;
+                } else if (!ev.serviceTypesList || ev.serviceTypesList.length === 0) {
+                    // Events with no service types pass only when all services are selected
+                    servicePass = false;
+                } else {
+                    servicePass = ev.serviceTypesList.some(s => this.selectedServiceTypes.has(s));
                 }
+
+                return clientPass && servicePass;
             });
-        }
+            if (filtered.length > 0) {
+                this.events[day] = filtered;
+            }
+        });
 
         this.updateFilterCount();
+        this.updateServiceFilterCount();
         this.render();
     }
 
