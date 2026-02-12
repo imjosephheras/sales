@@ -222,7 +222,7 @@ class Calendar {
     async loadAndRender() {
         await this.fetchEvents();
         this.extractClients();
-        this.extractServiceTypes();
+        await this.fetchServiceTypes();
         this.applyFilter();
     }
 
@@ -243,7 +243,7 @@ class Calendar {
                         this.allEvents[day] = [];
                     }
 
-                    // Parse service types from Q18 (janitorial) and Q19 (kitchen)
+                    // Parse service types from janitorial, kitchen and hood vent costs
                     const serviceTypesList = [];
                     if (ev.janitorial_services) {
                         ev.janitorial_services.split('||').forEach(s => {
@@ -253,6 +253,12 @@ class Calendar {
                     }
                     if (ev.kitchen_services) {
                         ev.kitchen_services.split('||').forEach(s => {
+                            const trimmed = s.trim();
+                            if (trimmed) serviceTypesList.push(trimmed);
+                        });
+                    }
+                    if (ev.hood_vent_services) {
+                        ev.hood_vent_services.split('||').forEach(s => {
                             const trimmed = s.trim();
                             if (trimmed) serviceTypesList.push(trimmed);
                         });
@@ -304,21 +310,22 @@ class Calendar {
     }
 
     /**
-     * Extract unique service types from all events for the service filter sidebar
+     * Fetch all distinct service types from the database
+     * (hood_vent_costs, janitorial_services_costs, kitchen_cleaning_costs)
      */
-    extractServiceTypes() {
-        const serviceSet = new Set();
-        Object.values(this.allEvents).forEach(dayEvents => {
-            dayEvents.forEach(ev => {
-                if (ev.serviceTypesList && ev.serviceTypesList.length > 0) {
-                    ev.serviceTypesList.forEach(s => serviceSet.add(s));
-                }
-            });
-        });
-
-        this.allServiceTypes = Array.from(serviceSet).sort((a, b) =>
-            a.localeCompare(b, undefined, { sensitivity: 'base' })
-        );
+    async fetchServiceTypes() {
+        try {
+            const resp = await fetch('get_service_types.php');
+            const data = await resp.json();
+            if (data.success && data.service_types) {
+                this.allServiceTypes = data.service_types;
+            } else {
+                this.allServiceTypes = [];
+            }
+        } catch (err) {
+            console.error('Error fetching service types:', err);
+            this.allServiceTypes = [];
+        }
 
         this.selectedServiceTypes = new Set(this.allServiceTypes);
         this.serviceSearchEl.value = '';

@@ -59,7 +59,12 @@ try {
              FROM kitchen_cleaning_costs kcc
              WHERE kcc.form_id = ce.form_id
                AND kcc.service_type IS NOT NULL
-               AND kcc.service_type != '') AS kitchen_services
+               AND kcc.service_type != '') AS kitchen_services,
+            (SELECT GROUP_CONCAT(DISTINCT hvc.service_type SEPARATOR '||')
+             FROM hood_vent_costs hvc
+             WHERE hvc.form_id = ce.form_id
+               AND hvc.service_type IS NOT NULL
+               AND hvc.service_type != '') AS hood_vent_services
         FROM calendar_events ce
         JOIN forms f ON ce.form_id = f.form_id
         WHERE MONTH(ce.event_date) = :month
