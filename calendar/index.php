@@ -135,6 +135,17 @@ Middleware::module('calendar');
                     <button class="nav-btn" id="next-month" title="Next month">
                         <i class="fas fa-chevron-right"></i>
                     </button>
+
+                    <div class="calendar-nav-toggles">
+                        <button class="nav-toggle-btn active" id="toggle-client-sidebar" title="Toggle Client Filter">
+                            <i class="fas fa-filter"></i>
+                            <span>Clients</span>
+                        </button>
+                        <button class="nav-toggle-btn active" id="toggle-service-sidebar" title="Toggle Service Filter">
+                            <i class="fas fa-concierge-bell"></i>
+                            <span>Services</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Grid -->
