@@ -220,7 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
-        input.capture = "environment";
         input.name = type + "[]";
         input.style.display = "none";
 

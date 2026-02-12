@@ -15,13 +15,12 @@
     </div>
     
     <div class="photo-upload-container">
-        <input 
-            type="file" 
-            id="photo-input" 
-            name="photos[]" 
-            accept="image/*" 
-            capture="environment"
-            multiple 
+        <input
+            type="file"
+            id="photo-input"
+            name="photos[]"
+            accept="image/*"
+            multiple
             style="display: none;"
         >
         
