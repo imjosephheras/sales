@@ -558,7 +558,7 @@ class Calendar {
                 // Client filter
                 const clientPass = allClientsSelected || this.selectedClients.has(ev.client);
 
-                // Service type filter (inclusive: at least one match)
+                // Service type filter: all event services must be selected
                 let servicePass;
                 if (allServicesSelected) {
                     servicePass = true;
@@ -566,7 +566,7 @@ class Calendar {
                     // Events with no service types pass only when all services are selected
                     servicePass = false;
                 } else {
-                    servicePass = ev.serviceTypesList.some(s => this.selectedServiceTypes.has(s));
+                    servicePass = ev.serviceTypesList.every(s => this.selectedServiceTypes.has(s));
                 }
 
                 return clientPass && servicePass;
