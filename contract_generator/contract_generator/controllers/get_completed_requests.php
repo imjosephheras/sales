@@ -8,6 +8,18 @@ header('Content-Type: application/json');
 require_once '../config/db_config.php';
 
 try {
+    // Search parameter
+    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+    // Build search condition
+    $searchCondition = '';
+    $searchParams = [];
+    if ($search !== '') {
+        $searchCondition = " AND (client_name LIKE :search OR Company_Name LIKE :search2)";
+        $searchParams[':search'] = '%' . $search . '%';
+        $searchParams[':search2'] = '%' . $search . '%';
+    }
+
     // Get completed requests ordered by completion date (newest first)
     $sql = "SELECT
                 id,
@@ -24,10 +36,13 @@ try {
                 updated_at,
                 completed_at
             FROM requests
-            WHERE status IN ('ready', 'completed')
+            WHERE status IN ('ready', 'completed')" . $searchCondition . "
             ORDER BY completed_at DESC, updated_at DESC";
 
     $stmt = $pdo->prepare($sql);
+    foreach ($searchParams as $key => $val) {
+        $stmt->bindValue($key, $val, PDO::PARAM_STR);
+    }
     $stmt->execute();
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

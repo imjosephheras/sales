@@ -236,6 +236,75 @@ body {
   border-color: var(--primary-color);
 }
 
+/* Inbox Search Bar */
+.inbox-search-bar {
+  padding: 0.75rem 1rem;
+  background: var(--bg-white);
+  border-bottom: 2px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.inbox-search-bar .search-box {
+  position: relative;
+  margin-top: 0;
+}
+
+.inbox-search-bar .search-box i.fa-search {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-gray);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.inbox-search-bar .search-box input {
+  width: 100%;
+  padding: 0.6rem 2.25rem 0.6rem 2.25rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: var(--bg-light);
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.inbox-search-bar .search-box input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: var(--bg-white);
+  box-shadow: 0 0 0 3px rgba(0, 31, 84, 0.1);
+}
+
+.inbox-search-bar .search-box input::placeholder {
+  color: var(--text-gray);
+  font-size: 0.8rem;
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-gray);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  transition: all 0.2s;
+}
+
+.search-clear-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--danger-color);
+}
+
 /* Lista de solicitudes */
 .inbox-list {
   flex: 1;

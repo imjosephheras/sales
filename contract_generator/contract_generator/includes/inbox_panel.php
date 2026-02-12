@@ -5,6 +5,19 @@
 <div class="inbox-container">
 
     <!-- ========================================= -->
+    <!-- SEARCH BAR -->
+    <!-- ========================================= -->
+    <div class="inbox-search-bar">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="client-search-input" placeholder="Search by client or company name..." autocomplete="off">
+            <button class="search-clear-btn" id="search-clear-btn" style="display: none;" title="Clear search">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================= -->
     <!-- SECTION 1: PENDING TASKS -->
     <!-- ========================================= -->
     <div class="inbox-section" id="pending-section">
