@@ -36,17 +36,30 @@ try {
     $limit = isset($_GET['limit']) ? max(1, min(100, intval($_GET['limit']))) : 20;
     $offset = ($page - 1) * $limit;
 
-    // Get total count for pagination (with RBAC filter)
-    $countSql = "SELECT COUNT(*) as total FROM forms WHERE status IN ('draft', 'pending') " . $rbac['sql'];
+    // Search parameter (filters by company_name or client_name)
+    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+    $searchSql = '';
+    $searchParams = [];
+    if ($search !== '') {
+        $searchSql = " AND (LOWER(company_name) LIKE LOWER(:search_company) OR LOWER(client_name) LIKE LOWER(:search_client))";
+        $searchParams[':search_company'] = '%' . $search . '%';
+        $searchParams[':search_client'] = '%' . $search . '%';
+    }
+
+    // Get total count for pagination (with RBAC filter + search)
+    $countSql = "SELECT COUNT(*) as total FROM forms WHERE status IN ('draft', 'pending') " . $rbac['sql'] . $searchSql;
     $countStmt = $pdo->prepare($countSql);
     foreach ($rbac['params'] as $key => $value) {
+        $countStmt->bindValue($key, $value);
+    }
+    foreach ($searchParams as $key => $value) {
         $countStmt->bindValue($key, $value);
     }
     $countStmt->execute();
     $totalCount = (int)$countStmt->fetch(PDO::FETCH_ASSOC)['total'];
     $totalPages = max(1, ceil($totalCount / $limit));
 
-    // Cargar formularios con paginación (with RBAC filter)
+    // Cargar formularios con paginación (with RBAC filter + search)
     $sql = "SELECT
                 form_id,
                 service_type,
@@ -62,12 +75,15 @@ try {
                 created_at,
                 updated_at
             FROM forms
-            WHERE status IN ('draft', 'pending') " . $rbac['sql'] . "
+            WHERE status IN ('draft', 'pending') " . $rbac['sql'] . $searchSql . "
             ORDER BY updated_at DESC, created_at DESC
             LIMIT :limit OFFSET :offset";
 
     $stmt = $pdo->prepare($sql);
     foreach ($rbac['params'] as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    foreach ($searchParams as $key => $value) {
         $stmt->bindValue($key, $value);
     }
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
