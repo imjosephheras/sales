@@ -658,6 +658,69 @@ if (file_exists($logo_path)) {
             margin-bottom: 3px;
         }
 
+        /* Authorization Checkbox */
+        .authorization-checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding: 8px 10px;
+            background: #fff8e1;
+            border: 1.5px solid #f0c040;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .authorization-checkbox-wrapper:hover {
+            background: #fff3c4;
+        }
+
+        .authorization-checkbox-wrapper.checked {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .authorization-checkbox-wrapper input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-top: 1px;
+            accent-color: #001f54;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .authorization-checkbox-label {
+            font-size: 9px;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* Disabled signature overlay */
+        .authorization-signature.disabled {
+            position: relative;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .authorization-signature.disabled::after {
+            content: 'Please check the authorization box above to enable signing';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #999;
+            font-style: italic;
+            background: rgba(255,255,255,0.5);
+        }
+
         .section-7-hidden {
             display: none;
         }
@@ -1425,7 +1488,12 @@ if (file_exists($logo_path)) {
                 <div class="authorization-block">
                     <p>By signing below, the Customer acknowledges and agrees to the repair parts listed above and the recommended repairs described in the Technician Notes/Observations. The Customer authorizes Prime to proceed with the described repairs and installations.</p>
 
-                    <div class="authorization-signature">
+                    <label class="authorization-checkbox-wrapper" id="authCheckboxWrapper">
+                        <input type="checkbox" id="authCheckbox">
+                        <span class="authorization-checkbox-label">I authorize the additional repairs and parts listed above and approve the associated charges.</span>
+                    </label>
+
+                    <div class="authorization-signature disabled" id="authSignatureArea">
                         <div class="authorization-sig-box">
                             <label>Client / Manager:</label>
                             <span>Name:</span>
@@ -1498,6 +1566,13 @@ if (file_exists($logo_path)) {
     // =============================================
     var signaturePads = {};
 
+    function applyContextStyles(ctx) {
+        ctx.strokeStyle = '#001f54';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    }
+
     function initSignaturePad(canvasId) {
         var canvas = document.getElementById(canvasId);
         if (!canvas) return;
@@ -1506,24 +1581,39 @@ if (file_exists($logo_path)) {
         var drawing = false;
         var lastX = 0;
         var lastY = 0;
+        var initialized = false;
 
-        // Set canvas internal resolution to match display
+        // Set canvas internal resolution to match display size, accounting for devicePixelRatio
         function resizeCanvas() {
             var rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
+            // Skip if canvas is hidden (zero dimensions)
+            if (rect.width === 0 || rect.height === 0) {
+                initialized = false;
+                return;
+            }
+            var dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            // Re-apply context styles after canvas dimension change (resets context)
+            applyContextStyles(ctx);
+            initialized = true;
         }
-        resizeCanvas();
 
-        ctx.strokeStyle = '#001f54';
-        ctx.lineWidth = 1.5;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        // Ensure canvas is properly sized before first draw
+        function ensureInitialized() {
+            if (!initialized) {
+                resizeCanvas();
+            }
+        }
+
+        resizeCanvas();
+        applyContextStyles(ctx);
 
         function getPos(e) {
             var rect = canvas.getBoundingClientRect();
             var clientX, clientY;
-            if (e.touches) {
+            if (e.touches && e.touches.length > 0) {
                 clientX = e.touches[0].clientX;
                 clientY = e.touches[0].clientY;
             } else {
@@ -1538,10 +1628,15 @@ if (file_exists($logo_path)) {
 
         function startDraw(e) {
             e.preventDefault();
+            ensureInitialized();
             drawing = true;
             var pos = getPos(e);
             lastX = pos.x;
             lastY = pos.y;
+            // Draw a dot for single taps/clicks
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, 0.5, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         function draw(e) {
@@ -1567,18 +1662,24 @@ if (file_exists($logo_path)) {
         canvas.addEventListener('mouseup', stopDraw);
         canvas.addEventListener('mouseleave', stopDraw);
 
-        // Touch events
+        // Touch events - prevent scrolling while signing
         canvas.addEventListener('touchstart', startDraw, { passive: false });
         canvas.addEventListener('touchmove', draw, { passive: false });
         canvas.addEventListener('touchend', stopDraw, { passive: false });
 
-        signaturePads[canvasId] = { canvas: canvas, ctx: ctx, resize: resizeCanvas };
+        signaturePads[canvasId] = {
+            canvas: canvas,
+            ctx: ctx,
+            resize: resizeCanvas,
+            ensureInit: ensureInitialized
+        };
     }
 
     window.clearSignature = function(canvasId) {
         var pad = signaturePads[canvasId];
         if (pad) {
-            pad.ctx.clearRect(0, 0, pad.canvas.width, pad.canvas.height);
+            var dpr = window.devicePixelRatio || 1;
+            pad.ctx.clearRect(0, 0, pad.canvas.width / dpr, pad.canvas.height / dpr);
         }
     };
 
@@ -1627,12 +1728,23 @@ if (file_exists($logo_path)) {
             if (authName) authName.value = '';
             if (authDate) authDate.value = '';
             clearSignature('sig-auth-client');
+            // Reset authorization checkbox
+            var authCheckbox = document.getElementById('authCheckbox');
+            var authWrapper = document.getElementById('authCheckboxWrapper');
+            var authSigArea = document.getElementById('authSignatureArea');
+            if (authCheckbox) authCheckbox.checked = false;
+            if (authWrapper) authWrapper.classList.remove('checked');
+            if (authSigArea) authSigArea.classList.add('disabled');
         } else {
             // Open the side panel
             openSidePanel();
             // Show page 3 (for Section 7)
             var page3 = document.getElementById('page3');
             page3.classList.remove('section-7-hidden');
+            // Re-initialize sig-auth-client canvas now that page 3 is visible
+            if (signaturePads['sig-auth-client']) {
+                signaturePads['sig-auth-client'].ensureInit();
+            }
         }
     };
 
@@ -1717,6 +1829,14 @@ if (file_exists($logo_path)) {
             clearSignature(id);
         });
 
+        // Reset authorization checkbox
+        var authCheckbox = document.getElementById('authCheckbox');
+        var authWrapper = document.getElementById('authCheckboxWrapper');
+        var authSigArea = document.getElementById('authSignatureArea');
+        if (authCheckbox) authCheckbox.checked = false;
+        if (authWrapper) authWrapper.classList.remove('checked');
+        if (authSigArea) authSigArea.classList.add('disabled');
+
         // Close side panel and hide products section
         closeSidePanel();
         var page3 = document.getElementById('page3');
@@ -1733,12 +1853,42 @@ if (file_exists($logo_path)) {
     };
 
     // =============================================
+    // AUTHORIZATION CHECKBOX LOGIC
+    // =============================================
+    function initAuthorizationCheckbox() {
+        var checkbox = document.getElementById('authCheckbox');
+        var wrapper = document.getElementById('authCheckboxWrapper');
+        var sigArea = document.getElementById('authSignatureArea');
+
+        if (!checkbox || !sigArea) return;
+
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                sigArea.classList.remove('disabled');
+                wrapper.classList.add('checked');
+                // Ensure signature canvas is initialized now that it's enabled
+                if (signaturePads['sig-auth-client']) {
+                    signaturePads['sig-auth-client'].ensureInit();
+                }
+            } else {
+                sigArea.classList.add('disabled');
+                wrapper.classList.remove('checked');
+                // Clear signature when unchecking authorization
+                clearSignature('sig-auth-client');
+            }
+        });
+    }
+
+    // =============================================
     // INITIALIZE
     // =============================================
     document.addEventListener('DOMContentLoaded', function() {
         initSignaturePad('sig-tech');
         initSignaturePad('sig-client');
         initSignaturePad('sig-auth-client');
+
+        // Initialize authorization checkbox
+        initAuthorizationCheckbox();
 
         // Re-init on window resize for signature canvases
         window.addEventListener('resize', function() {
