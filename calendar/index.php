@@ -68,9 +68,45 @@ Middleware::module('calendar');
             </div>
         </aside>
 
-        <!-- Collapsed sidebar toggle -->
+        <!-- Collapsed client sidebar toggle -->
         <button class="sidebar-expand-btn" id="sidebar-expand-btn" title="Show client filter">
             <i class="fas fa-filter"></i>
+        </button>
+
+        <!-- Service Type Filter Sidebar -->
+        <aside class="filter-sidebar service-filter-sidebar" id="service-filter-sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-concierge-bell"></i> Type of Services</h3>
+                <button class="sidebar-collapse-btn" id="service-sidebar-collapse-btn" title="Collapse sidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="service-search" placeholder="Search services...">
+            </div>
+
+            <div class="sidebar-actions">
+                <button class="sidebar-action-btn" id="service-select-all-btn">Select All</button>
+                <button class="sidebar-action-btn" id="service-deselect-all-btn">Deselect All</button>
+            </div>
+
+            <div class="client-list" id="service-type-list">
+                <div class="client-list-empty">
+                    <i class="fas fa-concierge-bell"></i>
+                    <span>No services this month</span>
+                </div>
+            </div>
+
+            <div class="sidebar-footer" id="service-sidebar-footer">
+                <span id="service-filter-count">Showing all</span>
+            </div>
+        </aside>
+
+        <!-- Collapsed service sidebar toggle -->
+        <button class="sidebar-expand-btn" id="service-sidebar-expand-btn" title="Show service filter">
+            <i class="fas fa-concierge-bell"></i>
         </button>
 
         <!-- Calendar -->

@@ -27,7 +27,7 @@ try {
     $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('n');
     $year  = isset($_GET['year'])  ? (int)$_GET['year']  : (int)date('Y');
 
-    // Fetch calendar events joined with form data
+    // Fetch calendar events joined with form data + service types from Q18/Q19
     $sql = "
         SELECT
             ce.event_id,
@@ -49,7 +49,17 @@ try {
             f.requested_service,
             f.Order_Nomenclature,
             f.seller,
-            f.Document_Date
+            f.Document_Date,
+            (SELECT GROUP_CONCAT(DISTINCT jsc.service_type SEPARATOR '||')
+             FROM janitorial_services_costs jsc
+             WHERE jsc.form_id = ce.form_id
+               AND jsc.service_type IS NOT NULL
+               AND jsc.service_type != '') AS janitorial_services,
+            (SELECT GROUP_CONCAT(DISTINCT kcc.service_type SEPARATOR '||')
+             FROM kitchen_cleaning_costs kcc
+             WHERE kcc.form_id = ce.form_id
+               AND kcc.service_type IS NOT NULL
+               AND kcc.service_type != '') AS kitchen_services
         FROM calendar_events ce
         JOIN forms f ON ce.form_id = f.form_id
         WHERE MONTH(ce.event_date) = :month
