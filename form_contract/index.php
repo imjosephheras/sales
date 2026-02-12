@@ -984,6 +984,91 @@ $lang = $_SESSION["lang"] ?? "en";
   </p>
 </div>
 
+<!-- TOOLBAR: New Form / Copy / Paste -->
+<div class="form-clipboard-toolbar">
+  <button type="button" id="btnNewForm" class="clipboard-btn clipboard-new">
+    📄 <?= ($lang=='en') ? "New Form" : "Nuevo Formulario"; ?>
+  </button>
+  <button type="button" id="btnCopyForm" class="clipboard-btn clipboard-copy">
+    📋 <?= ($lang=='en') ? "Copy" : "Copiar"; ?>
+  </button>
+  <button type="button" id="btnPasteForm" class="clipboard-btn clipboard-paste">
+    📌 <?= ($lang=='en') ? "Paste" : "Pegar"; ?>
+  </button>
+</div>
+
+<style>
+/* ========================================= */
+/* CLIPBOARD TOOLBAR */
+/* ========================================= */
+.form-clipboard-toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: #f4f7fc;
+  border-bottom: 2px solid #e1e8ed;
+}
+
+.clipboard-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  border: 2px solid transparent;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.clipboard-new {
+  background: linear-gradient(135deg, #001f54 0%, #003080 100%);
+  color: white;
+}
+
+.clipboard-new:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,31,84,0.3);
+}
+
+.clipboard-copy {
+  background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+  color: white;
+}
+
+.clipboard-copy:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,102,204,0.3);
+}
+
+.clipboard-paste {
+  background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+  color: white;
+}
+
+.clipboard-paste:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+}
+
+@media (max-width: 768px) {
+  .form-clipboard-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 15px;
+  }
+  .clipboard-btn {
+    padding: 8px 16px;
+    font-size: 12px;
+    flex: 1;
+    justify-content: center;
+  }
+}
+</style>
+
 <!-- 📋 Contenido -->
 <div class="form-content">
 
@@ -2329,6 +2414,328 @@ window.loadFormData = function(formId) {
         }
       }
     }
+  });
+
+  /* ===============================
+     CLIPBOARD: New Form / Copy / Paste
+     Uses localStorage to store sections 1,2,3,4,6
+  =============================== */
+  const formLang = '<?= $lang ?>';
+  const CLIPBOARD_KEY = 'form_contract_clipboard';
+
+  // ===== NEW FORM =====
+  document.getElementById('btnNewForm')?.addEventListener('click', function() {
+    const msg = formLang === 'en'
+      ? 'Create a new empty form? Unsaved changes will be lost.'
+      : '¿Crear un nuevo formulario vacío? Los cambios no guardados se perderán.';
+    if (!confirm(msg)) return;
+
+    // Reset HTML form
+    form.reset();
+    currentFormId = null;
+
+    // Hide janitorial section and reset table
+    const section18 = document.getElementById('section18Container');
+    if (section18) section18.style.display = 'none';
+    const tbody18 = document.getElementById('table18body');
+    if (tbody18) {
+      while (tbody18.children.length > 1) tbody18.lastElementChild.remove();
+      const row18 = tbody18.children[0];
+      if (row18) {
+        row18.querySelectorAll('select, input').forEach(el => el.value = '');
+        row18.classList.remove('bundle-row', 'bundle-row-primary', 'bundle-row-secondary');
+        const btn18 = row18.querySelector('.janitorial-selector-btn');
+        if (btn18) {
+          btn18.classList.remove('has-value');
+          const txt = btn18.querySelector('.janitorial-selector-text');
+          if (txt) txt.textContent = formLang === 'en' ? 'Select Service...' : 'Seleccionar Servicio...';
+        }
+        const sc18 = row18.querySelector('.subtotal-cell18');
+        if (sc18) { sc18.removeAttribute('rowspan'); sc18.classList.remove('bundle-price-merged'); sc18.style.display = ''; }
+      }
+    }
+
+    // Hide kitchen section and reset table
+    const section19 = document.getElementById('section19Container');
+    if (section19) section19.style.display = 'none';
+    const tbody19 = document.getElementById('table19body');
+    if (tbody19) {
+      while (tbody19.children.length > 1) tbody19.lastElementChild.remove();
+      const row19 = tbody19.children[0];
+      if (row19) {
+        row19.querySelectorAll('select, input').forEach(el => el.value = '');
+        row19.classList.remove('bundle-row', 'bundle-row-primary', 'bundle-row-secondary');
+        const btn19 = row19.querySelector('.service-selector-btn');
+        if (btn19) {
+          btn19.classList.remove('has-value');
+          const txt = btn19.querySelector('.service-selector-text');
+          if (txt) txt.textContent = formLang === 'en' ? 'Select Service...' : 'Seleccionar Servicio...';
+        }
+        const sc19 = row19.querySelector('.subtotal-cell19');
+        if (sc19) { sc19.removeAttribute('rowspan'); sc19.classList.remove('bundle-price-merged'); sc19.style.display = ''; }
+      }
+    }
+
+    // Reset totals
+    ['total18','taxes18','grand18','total19','taxes19','grand19'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+    // Hide and reset staff section
+    const staffContainer = document.getElementById('staffTablesContainer');
+    if (staffContainer) { staffContainer.innerHTML = ''; staffContainer.style.display = 'none'; }
+
+    // Reset theme (logo and colors)
+    const dynLogo = document.getElementById('dynamicLogo');
+    if (dynLogo) dynLogo.style.display = 'none';
+    const fHeader = document.getElementById('formHeader');
+    if (fHeader) {
+      fHeader.style.borderRadius = '24px 24px 0 0';
+      fHeader.style.background = 'linear-gradient(135deg, #001f54 0%, #003080 100%)';
+    }
+    document.querySelectorAll('.section-title').forEach(t => {
+      t.style.background = 'linear-gradient(135deg, #001f54 0%, #003080 100%)';
+    });
+
+    // Deselect form cards in sidebar
+    document.querySelectorAll('.form-card').forEach(c => c.classList.remove('active'));
+
+    // Collapse all sections and open Section 1
+    titles.forEach(t => {
+      t.classList.add('collapsed');
+      if (t.nextElementSibling) t.nextElementSibling.classList.add('hidden');
+    });
+    const t1 = document.querySelector('[data-section="1"]');
+    const c1 = document.querySelector('[data-section-content="1"]');
+    if (t1) t1.classList.remove('collapsed');
+    if (c1) c1.classList.remove('hidden');
+
+    // Scroll to top
+    const formSide = document.getElementById('formSide');
+    if (formSide) formSide.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // ===== COPY =====
+  document.getElementById('btnCopyForm')?.addEventListener('click', function() {
+    const data = {};
+
+    // Section 1
+    data.Service_Type = document.getElementById('Service_Type')?.value || '';
+    data.Request_Type = document.getElementById('Request_Type')?.value || '';
+    data.Priority = document.getElementById('Priority')?.value || '';
+    data.Requested_Service = document.getElementById('Requested_Service')?.value || '';
+
+    // Section 2
+    data.Client_Name = document.getElementById('client_name')?.value || '';
+    data.Client_Title = document.getElementById('Client_Title')?.value || '';
+    data.Email = document.getElementById('Email')?.value || '';
+    data.Number_Phone = document.getElementById('Number_Phone')?.value || '';
+    data.Company_Name = document.getElementById('Company_Name')?.value || '';
+    data.Company_Address = document.getElementById('Company_Address')?.value || '';
+    data.Is_New_Client = document.getElementById('Is_New_Client')?.value || '';
+
+    // Section 3
+    data.Site_Visit_Conducted = document.getElementById('siteVisitSelect')?.value || '';
+    data.Invoice_Frequency = document.getElementById('Invoice_Frequency')?.value || '';
+    data.Contract_Duration = document.getElementById('Contract_Duration')?.value || '';
+
+    // Section 4 - simple fields
+    data.Seller = document.getElementById('Seller')?.value || '';
+    data.PriceInput = document.getElementById('PriceInput')?.value || '';
+    data.includeJanitorial = document.getElementById('includeJanitorial')?.value || '';
+    data.includeKitchen = document.getElementById('includeKitchen')?.value || '';
+    data.includeStaff = document.getElementById('includeStaff')?.value || '';
+
+    // Section 4 - Janitorial table rows (Q18)
+    data.janitorial_rows = [];
+    if (data.includeJanitorial === 'Yes') {
+      document.querySelectorAll('#table18body tr').forEach(row => {
+        data.janitorial_rows.push({
+          service_type: row.querySelector('.type18')?.value || '',
+          bundle_group: row.querySelector('.bundleGroup18')?.value || '',
+          service_time: row.querySelector('.time18')?.value || '',
+          frequency: row.querySelector('.freq18')?.value || '',
+          description: row.querySelector('.desc18')?.value || '',
+          subtotal: row.querySelector('.subtotal18')?.value || ''
+        });
+      });
+    }
+
+    // Section 4 - Kitchen table rows (Q19)
+    data.kitchen_rows = [];
+    if (data.includeKitchen === 'Yes') {
+      document.querySelectorAll('#table19body tr').forEach(row => {
+        data.kitchen_rows.push({
+          service_type: row.querySelector('.type19')?.value || '',
+          bundle_group: row.querySelector('.bundleGroup19')?.value || '',
+          service_time: row.querySelector('.time19')?.value || '',
+          frequency: row.querySelector('.freq19')?.value || '',
+          description: row.querySelector('.desc19')?.value || '',
+          subtotal: row.querySelector('.subtotal19')?.value || ''
+        });
+      });
+    }
+
+    // Section 4 - Staff data (Q20)
+    data.staff_data = {};
+    if (data.includeStaff === 'Yes') {
+      document.querySelectorAll('#staffTablesContainer input[name]').forEach(input => {
+        if (input.value) data.staff_data[input.name] = input.value;
+      });
+    }
+
+    // Section 6
+    data.Site_Observation = document.getElementById('Site_Observation')?.value || '';
+    data.Additional_Comments = document.getElementById('Additional_Comments')?.value || '';
+    data.Email_Information_Sent = document.getElementById('Email_Information_Sent')?.value || '';
+
+    localStorage.setItem(CLIPBOARD_KEY, JSON.stringify(data));
+
+    alert(formLang === 'en'
+      ? '✅ Data from Sections 1, 2, 3, 4 and 6 copied successfully!'
+      : '✅ Datos de las Secciones 1, 2, 3, 4 y 6 copiados exitosamente!');
+  });
+
+  // ===== PASTE =====
+  document.getElementById('btnPasteForm')?.addEventListener('click', function() {
+    const stored = localStorage.getItem(CLIPBOARD_KEY);
+    if (!stored) {
+      alert(formLang === 'en'
+        ? 'No copied data available to paste.'
+        : 'No hay datos copiados disponibles para pegar.');
+      return;
+    }
+
+    const msg = formLang === 'en'
+      ? 'Paste copied data into Sections 1, 2, 3, 4 and 6?'
+      : '¿Pegar datos copiados en las Secciones 1, 2, 3, 4 y 6?';
+    if (!confirm(msg)) return;
+
+    const data = JSON.parse(stored);
+
+    // --- Section 1 ---
+    // Set Service_Type first and trigger change for dynamic options/theme
+    const serviceType = document.getElementById('Service_Type');
+    if (serviceType && data.Service_Type) {
+      serviceType.value = data.Service_Type;
+      serviceType.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Wait for dynamic options to be generated after Service_Type change
+    setTimeout(() => {
+      const requestType = document.getElementById('Request_Type');
+      if (requestType && data.Request_Type) {
+        requestType.value = data.Request_Type;
+        requestType.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      const priority = document.getElementById('Priority');
+      if (priority && data.Priority) priority.value = data.Priority;
+
+      // Wait for Requested_Service options
+      setTimeout(() => {
+        const reqService = document.getElementById('Requested_Service');
+        if (reqService && data.Requested_Service) {
+          reqService.value = data.Requested_Service;
+          reqService.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        // --- Section 2 ---
+        const s2Fields = {
+          'client_name': data.Client_Name,
+          'Client_Title': data.Client_Title,
+          'Email': data.Email,
+          'Number_Phone': data.Number_Phone,
+          'Company_Name': data.Company_Name,
+          'Company_Address': data.Company_Address,
+          'Is_New_Client': data.Is_New_Client
+        };
+        Object.keys(s2Fields).forEach(id => {
+          const el = document.getElementById(id);
+          if (el && s2Fields[id]) el.value = s2Fields[id];
+        });
+
+        // --- Section 3 ---
+        const siteVisit = document.getElementById('siteVisitSelect');
+        if (siteVisit && data.Site_Visit_Conducted) siteVisit.value = data.Site_Visit_Conducted;
+
+        const invFreq = document.getElementById('Invoice_Frequency');
+        if (invFreq && data.Invoice_Frequency) invFreq.value = data.Invoice_Frequency;
+
+        const duration = document.getElementById('Contract_Duration');
+        if (duration && data.Contract_Duration) duration.value = data.Contract_Duration;
+
+        // --- Section 4: Simple fields ---
+        const seller = document.getElementById('Seller');
+        if (seller && data.Seller) {
+          seller.value = data.Seller;
+          seller.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        const priceInput = document.getElementById('PriceInput');
+        if (priceInput && data.PriceInput) priceInput.value = data.PriceInput;
+
+        // Section 4: Janitorial (Q18)
+        if (data.includeJanitorial === 'Yes' && data.janitorial_rows && data.janitorial_rows.length > 0
+            && data.janitorial_rows.some(r => r.service_type)) {
+          if (typeof populateJanitorialCosts === 'function') {
+            populateJanitorialCosts(data.janitorial_rows);
+          }
+        } else {
+          const inclJan = document.getElementById('includeJanitorial');
+          if (inclJan && data.includeJanitorial) inclJan.value = data.includeJanitorial;
+        }
+
+        // Section 4: Kitchen (Q19)
+        if (data.includeKitchen === 'Yes' && data.kitchen_rows && data.kitchen_rows.length > 0
+            && data.kitchen_rows.some(r => r.service_type)) {
+          if (typeof populateKitchenCosts === 'function') {
+            populateKitchenCosts(data.kitchen_rows, []);
+          }
+        } else {
+          const inclKit = document.getElementById('includeKitchen');
+          if (inclKit && data.includeKitchen) inclKit.value = data.includeKitchen;
+        }
+
+        // Section 4: Staff (Q20)
+        if (data.includeStaff === 'Yes' && data.staff_data && Object.keys(data.staff_data).length > 0) {
+          const inclStaff = document.getElementById('includeStaff');
+          if (inclStaff) {
+            inclStaff.value = 'Yes';
+            inclStaff.dispatchEvent(new Event('change', { bubbles: true }));
+            // Wait for staff tables to render
+            setTimeout(() => {
+              Object.keys(data.staff_data).forEach(name => {
+                const inp = document.querySelector('[name="' + name + '"]');
+                if (inp) {
+                  inp.value = data.staff_data[name];
+                  inp.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+              });
+            }, 300);
+          }
+        } else {
+          const inclStaff = document.getElementById('includeStaff');
+          if (inclStaff && data.includeStaff) inclStaff.value = data.includeStaff;
+        }
+
+        // --- Section 6 ---
+        const siteObs = document.getElementById('Site_Observation');
+        if (siteObs && data.Site_Observation) siteObs.value = data.Site_Observation;
+
+        const addComments = document.getElementById('Additional_Comments');
+        if (addComments && data.Additional_Comments) addComments.value = data.Additional_Comments;
+
+        const emailSent = document.getElementById('Email_Information_Sent');
+        if (emailSent && data.Email_Information_Sent) emailSent.value = data.Email_Information_Sent;
+
+        alert(formLang === 'en'
+          ? '✅ Data pasted successfully into Sections 1, 2, 3, 4 and 6!'
+          : '✅ Datos pegados exitosamente en las Secciones 1, 2, 3, 4 y 6!');
+
+      }, 200);
+    }, 200);
   });
 
 });

@@ -599,6 +599,7 @@
       .top-navbar,
       .pending-forms-sidebar,
       .form-actions,
+      .form-clipboard-toolbar,
       .janitorial-modal-overlay,
       .service-modal-overlay,
       .product-modal-overlay,
