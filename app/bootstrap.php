@@ -212,6 +212,18 @@ if ((int)$rmCount === 0) {
     ");
 }
 
+// ─── Ensure Vendedor has calendar module access ─────────────────
+try {
+    $calExists = $pdo->query(
+        "SELECT COUNT(*) FROM role_module WHERE role_id = 3 AND module_id = 7"
+    )->fetchColumn();
+    if ((int)$calExists === 0) {
+        $pdo->exec("INSERT INTO role_module (role_id, module_id) VALUES (3, 7)");
+    }
+} catch (PDOException $e) {
+    // skip if already present or table not ready
+}
+
 // ─── Add foreign key from users.role_id → roles if not present ──
 try {
     $fkCheck = $pdo->query("

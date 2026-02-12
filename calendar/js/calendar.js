@@ -209,7 +209,8 @@ class Calendar {
                         requestedService: ev.requested_service || '',
                         nomenclature: ev.Order_Nomenclature || '',
                         seller: ev.seller || '',
-                        documentDate: ev.Document_Date || ''
+                        documentDate: ev.Document_Date || '',
+                        serviceStatus: ev.service_status || 'pending'
                     });
                 });
             }
@@ -344,6 +345,34 @@ class Calendar {
         return '';
     }
 
+    getServiceStatusClass(serviceStatus) {
+        const s = (serviceStatus || '').toLowerCase();
+        if (s === 'completed') return 'chip-status-completed';
+        if (s === 'not_completed') return 'chip-status-not-completed';
+        if (s === 'pending') return 'chip-status-pending';
+        // scheduled, confirmed, in_progress → blue
+        return 'chip-status-other';
+    }
+
+    getServiceStatusLabel(serviceStatus) {
+        const s = (serviceStatus || '').toLowerCase();
+        if (s === 'completed') return 'Completed';
+        if (s === 'not_completed') return 'Not Completed';
+        if (s === 'pending') return 'Pending';
+        if (s === 'scheduled') return 'Scheduled';
+        if (s === 'confirmed') return 'Confirmed';
+        if (s === 'in_progress') return 'In Progress';
+        return serviceStatus || 'Pending';
+    }
+
+    getServiceStatusDetailClass(serviceStatus) {
+        const s = (serviceStatus || '').toLowerCase();
+        if (s === 'completed') return 'svc-completed';
+        if (s === 'not_completed') return 'svc-not-completed';
+        if (s === 'pending') return 'svc-pending';
+        return 'svc-other';
+    }
+
     escapeHtml(str) {
         const div = document.createElement('div');
         div.textContent = str;
@@ -392,15 +421,16 @@ class Calendar {
                 eventsForDay.slice(0, maxVisible).forEach(ev => {
                     const typeClass = this.getRequestTypeClass(ev.requestType);
                     const typeShort = this.getRequestTypeShort(ev.requestType);
+                    const statusClass = this.getServiceStatusClass(ev.serviceStatus);
                     const priorityClass = ev.priority === 'Rush' ? 'priority-rush' : '';
                     const baseClass = ev.isBaseEvent ? 'event-base' : 'event-recurring';
 
-                    html += `<div class="event-chip ${typeClass} ${priorityClass} ${baseClass}"
+                    html += `<div class="event-chip ${statusClass} ${priorityClass} ${baseClass}"
                                   draggable="true"
                                   data-event-id="${ev.eventId}"
                                   title="${this.escapeHtml(ev.client)} - ${this.escapeHtml(ev.company)} | ${ev.requestType} | ${ev.requestedService}${ev.isBaseEvent ? ' [BASE]' : ' [Recurring]'}">`;
                     if (typeShort) {
-                        html += `<span class="chip-type-badge">${typeShort}</span>`;
+                        html += `<span class="chip-type-badge ${typeClass}">${typeShort}</span>`;
                     }
                     if (!ev.isBaseEvent) {
                         html += `<span class="chip-recurring-badge"><i class="fas fa-sync-alt"></i></span>`;
@@ -690,6 +720,9 @@ class Calendar {
             const statusClass = ev.status === 'submitted' ? 'status-submitted' :
                                 ev.status === 'draft' ? 'status-draft' : 'status-pending';
             const typeClass = this.getRequestTypeClass(ev.requestType);
+            const svcStatusClass = this.getServiceStatusClass(ev.serviceStatus);
+            const svcDetailClass = this.getServiceStatusDetailClass(ev.serviceStatus);
+            const svcLabel = this.getServiceStatusLabel(ev.serviceStatus);
             const isPriorityRush = ev.priority === 'Rush';
 
             html += `<div class="detail-item ${typeClass}-border" data-event-id="${ev.eventId}" style="cursor:pointer;">`;
@@ -708,6 +741,9 @@ class Calendar {
             }
             html += `<span class="detail-status ${statusClass}">${ev.status}</span>`;
             html += `</div>`;
+
+            // Service status badge
+            html += `<div style="margin-bottom:2px;"><span class="detail-svc-status ${svcDetailClass}"><i class="fas fa-circle" style="font-size:0.4rem;margin-right:4px;"></i>${svcLabel}</span></div>`;
 
             // Badges
             html += `<div class="detail-badges">`;

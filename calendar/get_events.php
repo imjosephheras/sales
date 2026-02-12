@@ -3,6 +3,7 @@
  * GET EVENTS API
  * Returns calendar events (agendas) joined with form data for calendar display.
  * Fetches from calendar_events table + forms table.
+ * Applies RBAC: Vendedor only sees their own orders; Admin/Leader see all.
  *
  * GET params:
  *   month (int) - 1-12
@@ -10,7 +11,15 @@
  */
 header('Content-Type: application/json');
 
+require_once __DIR__ . '/../form_contract/order_access.php';
 require_once __DIR__ . '/../form_contract/db_config.php';
+
+// Enforce authentication and calendar module access
+Middleware::module('calendar');
+$user = Auth::user();
+
+// Build RBAC filter (Vendedor sees only own orders)
+$rbac = getOrderRbacFilter($user);
 
 try {
     $pdo = getDBConnection();
@@ -19,7 +28,7 @@ try {
     $year  = isset($_GET['year'])  ? (int)$_GET['year']  : (int)date('Y');
 
     // Fetch calendar events joined with form data
-    $stmt = $pdo->prepare("
+    $sql = "
         SELECT
             ce.event_id,
             ce.form_id,
@@ -33,6 +42,7 @@ try {
             f.company_name,
             f.Work_Date,
             f.status,
+            f.service_status,
             f.service_type,
             f.request_type,
             f.priority,
@@ -44,12 +54,16 @@ try {
         JOIN forms f ON ce.form_id = f.form_id
         WHERE MONTH(ce.event_date) = :month
           AND YEAR(ce.event_date) = :year
+          {$rbac['sql']}
         ORDER BY ce.event_date ASC, ce.is_base_event DESC
-    ");
-    $stmt->execute([
-        ':month' => $month,
-        ':year'  => $year
-    ]);
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $params = array_merge(
+        [':month' => $month, ':year' => $year],
+        $rbac['params']
+    );
+    $stmt->execute($params);
 
     $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
