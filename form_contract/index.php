@@ -357,6 +357,64 @@ $lang = $_SESSION["lang"] ?? "en";
     gap: 12px;
 }
 
+/* Search Filter */
+.search-filter-wrapper {
+    margin-bottom: 15px;
+}
+
+.search-filter-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-filter-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 14px;
+    pointer-events: none;
+}
+
+.search-filter-input {
+    width: 100%;
+    padding: 10px 36px 10px 38px;
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    font-size: 13px;
+    background: #f4f7fc;
+    color: #001f54;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-filter-input:focus {
+    border-color: #003080;
+    box-shadow: 0 0 0 3px rgba(0, 48, 128, 0.15);
+    background: #fff;
+}
+
+.search-filter-input::placeholder {
+    color: #8899aa;
+    font-size: 12px;
+}
+
+.search-filter-clear {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #8899aa;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.search-filter-clear:hover {
+    color: #dc3545;
+}
+
 .form-card {
     background: #f4f7fc;
     border: 2px solid #e1e8ed;
@@ -861,11 +919,26 @@ $lang = $_SESSION["lang"] ?? "en";
         </div>
         
         <div class="sidebar-content" id="pendingFormsContent">
+            <!-- Search Filter -->
+            <div class="search-filter-wrapper">
+                <div class="search-filter-input-wrapper">
+                    <span class="search-filter-icon">🔍</span>
+                    <input
+                        type="text"
+                        id="searchFormsInput"
+                        class="search-filter-input"
+                        placeholder="<?= ($lang=='en') ? 'Search by company or client...' : 'Buscar por compania o cliente...'; ?>"
+                        autocomplete="off"
+                    />
+                    <button id="clearSearchBtn" class="search-filter-clear" title="Clear" style="display:none;">&times;</button>
+                </div>
+            </div>
+
             <div class="loading-indicator" style="display:none;">
                 <div class="loader"></div>
                 <p><?= ($lang=='en') ? "Loading..." : "Cargando..."; ?></p>
             </div>
-            
+
             <div class="pending-forms-list" id="pendingFormsList">
                 <!-- Formularios pendientes se cargarán aquí dinámicamente -->
             </div>
@@ -1263,6 +1336,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const pendingItemsPerPage = 20;
   let pendingTotalItems = 0;
   let pendingTotalPages = 1;
+  let pendingSearchQuery = '';
 
   /* ===============================
      LOAD PENDING FORMS (ALL FORMS)
@@ -1283,8 +1357,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (noFormsMessage) noFormsMessage.style.display = "none";
     if (paginationContainer) paginationContainer.style.display = "none";
 
-    // Cargar formularios pendientes con paginación
-    fetch(`load_drafts_by_seller.php?page=${pendingCurrentPage}&limit=${pendingItemsPerPage}`)
+    // Cargar formularios pendientes con paginación y búsqueda
+    const searchParam = pendingSearchQuery ? `&search=${encodeURIComponent(pendingSearchQuery)}` : '';
+    fetch(`load_drafts_by_seller.php?page=${pendingCurrentPage}&limit=${pendingItemsPerPage}${searchParam}`)
       .then(response => response.json())
       .then(data => {
         if (loadingIndicator) loadingIndicator.style.display = "none";
@@ -1945,6 +2020,35 @@ window.loadFormData = function(formId) {
       alert('❌ Error guardando el borrador');
     });
   });
+
+  // Search filter with debounce
+  const searchInput = document.getElementById('searchFormsInput');
+  const clearSearchBtn = document.getElementById('clearSearchBtn');
+  let searchDebounceTimer = null;
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      const value = this.value.trim();
+      clearSearchBtn.style.display = value ? 'block' : 'none';
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        pendingSearchQuery = value;
+        pendingCurrentPage = 1;
+        loadPendingForms();
+      }, 300);
+    });
+  }
+
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', function() {
+      searchInput.value = '';
+      clearSearchBtn.style.display = 'none';
+      pendingSearchQuery = '';
+      pendingCurrentPage = 1;
+      loadPendingForms();
+      searchInput.focus();
+    });
+  }
 
   // Load pending forms on page load
   loadPendingForms();

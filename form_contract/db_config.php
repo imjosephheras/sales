@@ -217,6 +217,18 @@ function addMissingColumnsToForms($pdo) {
                 $pdo->exec("ALTER TABLE `$table` ADD COLUMN `bundle_group` VARCHAR(50) DEFAULT NULL");
             }
         }
+
+        // Fix: Ensure description columns are TEXT (not VARCHAR) in service cost and calendar tables
+        $tablesWithDescription = ['janitorial_services_costs', 'kitchen_cleaning_costs', 'hood_vent_costs', 'calendar_events'];
+        foreach ($tablesWithDescription as $table) {
+            $stmt = $pdo->query("SHOW COLUMNS FROM `$table` LIKE 'description'");
+            if ($stmt->rowCount() > 0) {
+                $colInfo = $stmt->fetch();
+                if (stripos($colInfo['Type'], 'varchar') !== false) {
+                    $pdo->exec("ALTER TABLE `$table` MODIFY COLUMN `description` TEXT DEFAULT NULL");
+                }
+            }
+        }
     } catch (Exception $e) {
         error_log("Error adding missing columns to forms: " . $e->getMessage());
     }

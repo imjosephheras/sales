@@ -20,6 +20,10 @@
     let totalItems = 0;
     let totalPages = 1;
 
+    // Search state
+    let currentSearchQuery = '';
+    let searchDebounceTimer = null;
+
     // ========================================
     // INITIALIZATION
     // ========================================
@@ -27,10 +31,54 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('📥 Inbox module loaded - Pending Tasks & Generated Contracts Mode');
 
+        // Initialize search
+        initSearch();
+
         // Load both pending tasks and completed requests
         loadPendingTasks();
         loadCompletedRequests();
     });
+
+    // ========================================
+    // SEARCH FUNCTIONALITY
+    // ========================================
+
+    function initSearch() {
+        const searchInput = document.getElementById('client-search-input');
+        const clearBtn = document.getElementById('search-clear-btn');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+
+            // Show/hide clear button
+            if (clearBtn) {
+                clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+            }
+
+            // Debounce search
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(function() {
+                currentSearchQuery = query;
+                currentPage = 1;
+                loadPendingTasks();
+                loadCompletedRequests();
+            }, 300);
+        });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                currentSearchQuery = '';
+                clearBtn.style.display = 'none';
+                currentPage = 1;
+                loadPendingTasks();
+                loadCompletedRequests();
+                searchInput.focus();
+            });
+        }
+    }
 
     // ========================================
     // LOAD PENDING TASKS
@@ -61,8 +109,9 @@
                 });
         };
 
-        // Fetch pending requests with pagination
-        safeFetch(`controllers/get_pending_requests.php?page=${currentPage}&limit=${itemsPerPage}`)
+        // Fetch pending requests with pagination and search
+        const searchParam = currentSearchQuery ? `&search=${encodeURIComponent(currentSearchQuery)}` : '';
+        safeFetch(`controllers/get_pending_requests.php?page=${currentPage}&limit=${itemsPerPage}${searchParam}`)
         .then(requestsData => {
             let allItems = [];
 
@@ -113,7 +162,8 @@
             </div>
         `;
 
-        fetch('controllers/get_completed_requests.php')
+        const completedSearchParam = currentSearchQuery ? `?search=${encodeURIComponent(currentSearchQuery)}` : '';
+        fetch('controllers/get_completed_requests.php' + completedSearchParam)
             .then(response => {
                 console.log('📥 Completed requests response status:', response.status);
                 return response.json();

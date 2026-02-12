@@ -14,11 +14,26 @@ try {
     $limit = isset($_GET['limit']) ? max(1, min(100, intval($_GET['limit']))) : 20;
     $offset = ($page - 1) * $limit;
 
+    // Search parameter
+    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+    // Build search condition
+    $searchCondition = '';
+    $searchParams = [];
+    if ($search !== '') {
+        $searchCondition = " AND (r.client_name LIKE :search OR r.Company_Name LIKE :search2)";
+        $searchParams[':search'] = '%' . $search . '%';
+        $searchParams[':search2'] = '%' . $search . '%';
+    }
+
     // Get total count first
     $countSql = "SELECT COUNT(*) as total
                  FROM requests r
-                 WHERE r.status IN ('pending', 'in_progress', 'draft')";
+                 WHERE r.status IN ('pending', 'in_progress', 'draft')" . $searchCondition;
     $countStmt = $pdo->prepare($countSql);
+    foreach ($searchParams as $key => $val) {
+        $countStmt->bindValue($key, $val, PDO::PARAM_STR);
+    }
     $countStmt->execute();
     $totalCount = (int)$countStmt->fetch(PDO::FETCH_ASSOC)['total'];
     $totalPages = max(1, ceil($totalCount / $limit));
@@ -61,7 +76,7 @@ try {
                 f.total_cost
             FROM requests r
             LEFT JOIN forms f ON r.form_id = f.form_id OR (r.form_id IS NULL AND r.docnum = f.Order_Nomenclature)
-            WHERE r.status IN ('pending', 'in_progress', 'draft')
+            WHERE r.status IN ('pending', 'in_progress', 'draft')" . $searchCondition . "
             ORDER BY
                 FIELD(r.status, 'draft', 'pending', 'in_progress'),
                 FIELD(r.Priority, 'Urgent', 'High', 'Normal', 'Low'),
@@ -69,6 +84,9 @@ try {
             LIMIT :limit OFFSET :offset";
 
     $stmt = $pdo->prepare($sql);
+    foreach ($searchParams as $key => $val) {
+        $stmt->bindValue($key, $val, PDO::PARAM_STR);
+    }
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
