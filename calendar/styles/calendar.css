@@ -615,11 +615,12 @@ body {
 /* Calendar Grid */
 .calendar-grid {
     padding: 16px 24px 24px;
+    overflow-x: auto;
 }
 
 .weekday-header {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(140px, 1fr));
     gap: 4px;
     margin-bottom: 8px;
 }
@@ -636,7 +637,7 @@ body {
 
 .days-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(140px, 1fr));
     gap: 4px;
 }
 
@@ -1554,10 +1555,12 @@ body {
 
     .calendar-grid {
         padding: 0;
+        overflow-x: visible;
     }
 
     /* Weekday headers */
     .weekday-header {
+        grid-template-columns: repeat(7, 1fr);
         gap: 0;
         margin-bottom: 0;
     }
@@ -1573,6 +1576,7 @@ body {
 
     /* Grid layout - no gaps for tight fit */
     .days-grid {
+        grid-template-columns: repeat(7, 1fr);
         gap: 0;
     }
 
