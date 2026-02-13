@@ -1160,12 +1160,8 @@ $lang = $_SESSION["lang"] ?? "en";
 
     <!-- 📋 Botón principal -->
     <div class="form-actions">
-      <button type="button" id="btnSaveDraft" class="btn-draft">
+      <button type="button" id="btnSaveDraft" class="btn-draft btn-draft-lg">
         💾 <?= ($lang=='en') ? "Save as Draft" : "Guardar Borrador"; ?>
-      </button>
-      
-      <button type="button" id="btnPreview" class="btn-submit">
-        ✅ <?= ($lang=='en') ? "Complete" : "Completado"; ?>
       </button>
     </div>
 
