@@ -189,7 +189,7 @@ function addMissingColumnsToForms($pdo) {
         'state'               => 'VARCHAR(100) DEFAULT NULL',
         'submitted_by'        => 'VARCHAR(100) DEFAULT NULL',
         'include_staff'       => 'VARCHAR(10) DEFAULT NULL',
-        'service_status'      => "ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed') DEFAULT 'pending'",
+        'service_status'      => "ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled') DEFAULT 'pending'",
         'service_completed_at' => 'TIMESTAMP NULL DEFAULT NULL',
     ];
  
@@ -206,7 +206,7 @@ function addMissingColumnsToForms($pdo) {
         if ($stmt->rowCount() > 0) {
             $colInfo = $stmt->fetch();
             if (strpos($colInfo['Type'], 'scheduled') === false) {
-                $pdo->exec("ALTER TABLE `forms` MODIFY COLUMN `service_status` ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed') DEFAULT 'pending'");
+                $pdo->exec("ALTER TABLE `forms` MODIFY COLUMN `service_status` ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled') DEFAULT 'pending'");
             }
         }
         // Add bundle_group column to service cost tables if missing

@@ -27,5 +27,8 @@
     <option value="not_completed">
       <?= ($lang=='en') ? "Not Completed" : "No Completado"; ?>
     </option>
+    <option value="cancelled">
+      <?= ($lang=='en') ? "Cancelled" : "Cancelado"; ?>
+    </option>
   </select>
 </div>
