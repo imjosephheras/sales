@@ -37,6 +37,8 @@
     const viewerActiveState = document.getElementById('viewer-active-state');
     const viewerDocTitle = document.getElementById('viewer-doc-title');
     const viewerOrderNumber = document.getElementById('viewer-order-number');
+    const viewerClientName = document.getElementById('viewer-client-name');
+    const viewerServiceName = document.getElementById('viewer-service-name');
     const pdfViewer = document.getElementById('pdf-viewer');
     const btnMarkCompleted = document.getElementById('btn-mark-completed');
     const btnMarkPending = document.getElementById('btn-mark-pending');
@@ -180,6 +182,8 @@
 
         viewerDocTitle.textContent = doc.company_name || doc.client_name || 'Contract';
         viewerOrderNumber.textContent = doc.order_number || '';
+        viewerClientName.textContent = doc.client_name && doc.company_name ? doc.client_name : '';
+        viewerServiceName.textContent = doc.service_name || '';
 
         // Load PDF in iframe
         if (doc.pdf_path) {
