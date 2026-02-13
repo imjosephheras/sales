@@ -27,6 +27,9 @@
                 <button id="btn-mark-ready" class="btn btn-success">
                     <i class="fas fa-check"></i> Mark Ready
                 </button>
+                <button id="btn-mark-completed" class="btn btn-completed" style="display: none;">
+                    <i class="fas fa-check-double"></i> Mark Completed
+                </button>
                 <button id="btn-download-pdf" class="btn btn-primary">
                     <i class="fas fa-download"></i> Download PDF
                 </button>
