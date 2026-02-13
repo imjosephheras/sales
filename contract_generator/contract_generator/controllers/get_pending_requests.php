@@ -68,6 +68,7 @@ try {
                 r.startDateServices,
                 r.Site_Observation,
                 r.Scope_Of_Work,
+                r.service_status,
                 f.form_id,
                 f.Work_Date,
                 f.Document_Date,
@@ -159,7 +160,24 @@ try {
             $request['category_icon'] = '📋';
         }
 
-        // Status badge info
+        // Service status color and label mapping
+        $serviceStatus = $request['service_status'] ?? 'pending';
+        $statusMap = [
+            'pending'       => ['color' => '#d97706', 'label' => 'Pending',       'label_es' => 'Pendiente',     'icon' => 'fas fa-clock'],
+            'scheduled'     => ['color' => '#2563eb', 'label' => 'Scheduled',     'label_es' => 'Programado',    'icon' => 'fas fa-calendar-alt'],
+            'confirmed'     => ['color' => '#7c3aed', 'label' => 'Confirmed',     'label_es' => 'Confirmado',    'icon' => 'fas fa-check-circle'],
+            'in_progress'   => ['color' => '#0891b2', 'label' => 'In Progress',   'label_es' => 'En Progreso',   'icon' => 'fas fa-spinner'],
+            'completed'     => ['color' => '#16a34a', 'label' => 'Completed',     'label_es' => 'Completado',    'icon' => 'fas fa-check-double'],
+            'not_completed' => ['color' => '#dc2626', 'label' => 'Not Completed', 'label_es' => 'No Completado', 'icon' => 'fas fa-times-circle'],
+            'cancelled'     => ['color' => '#6b7280', 'label' => 'Cancelled',     'label_es' => 'Cancelado',     'icon' => 'fas fa-ban'],
+        ];
+        $statusInfo = $statusMap[$serviceStatus] ?? $statusMap['pending'];
+        $request['service_status_color'] = $statusInfo['color'];
+        $request['service_status_label'] = $statusInfo['label'];
+        $request['service_status_label_es'] = $statusInfo['label_es'];
+        $request['service_status_icon'] = $statusInfo['icon'];
+
+        // Status badge info (for task card header)
         if ($request['is_draft']) {
             $request['status_color'] = '#ffc107';
             $request['status_icon'] = '📝';

@@ -793,44 +793,24 @@ body {
   color: var(--primary-color);
 }
 
-/* Completion info / Progress bar */
-.completion-info {
+/* Service Status Chip */
+.service-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   margin: 0.5rem 0;
-  padding: 0.5rem;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 6px;
-}
-
-.completion-bar {
-  width: 100%;
-  height: 6px;
-  background: #e2e8f0;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 0.25rem;
-}
-
-.completion-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--warning-color) 0%, #ffc107 50%, var(--success-color) 100%);
-  border-radius: 3px;
-  transition: width 0.3s ease;
-}
-
-.completion-text {
-  font-size: 0.7rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--text-gray);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.missing-items {
-  display: block;
-  font-size: 0.65rem;
-  color: #dc3545;
-  margin-top: 0.25rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.service-status-chip i {
+  font-size: 0.68rem;
 }
 
 /* Calendar link */
