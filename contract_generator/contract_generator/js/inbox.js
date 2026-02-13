@@ -301,19 +301,13 @@
             }
         }
 
-        // Build completion progress bar for drafts
-        let completionBar = '';
-        if (task.is_draft && task.completion_info) {
-            const percentage = task.completion_info.percentage || 0;
-            const missingItems = task.completion_info.missing || [];
-            const missingText = missingItems.length > 0 ? `Missing: ${missingItems.join(', ')}` : '';
-            completionBar = `
-                <div class="completion-info">
-                    <div class="completion-bar">
-                        <div class="completion-fill" style="width: ${percentage}%"></div>
-                    </div>
-                    <span class="completion-text">${percentage}% complete</span>
-                    ${missingText ? `<span class="missing-items" title="${escapeHtml(missingText)}">${escapeHtml(missingText)}</span>` : ''}
+        // Build service status chip
+        let serviceStatusChip = '';
+        if (task.service_status_label) {
+            serviceStatusChip = `
+                <div class="service-status-chip" style="background-color: ${task.service_status_color || '#d97706'}">
+                    <i class="${task.service_status_icon || 'fas fa-clock'}"></i>
+                    <span>${escapeHtml(task.service_status_label)}</span>
                 </div>
             `;
         }
@@ -365,7 +359,7 @@
                 <h3 class="task-title">${escapeHtml(task.title)}</h3>
                 ${orderInfo}
                 <p class="task-description">${escapeHtml(task.description)}</p>
-                ${completionBar}
+                ${serviceStatusChip}
                 ${task.event_title ? `<p class="event-ref"><i class="fas fa-link"></i> ${escapeHtml(task.event_title)}</p>` : ''}
                 ${(task.client || task.client_name) ? `<p class="client-name"><i class="fas fa-user"></i> ${escapeHtml(task.client || task.client_name)}</p>` : ''}
                 ${task.Seller ? `<p class="seller-name"><i class="fas fa-user-tie"></i> ${escapeHtml(task.Seller)}</p>` : ''}
