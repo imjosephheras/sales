@@ -93,6 +93,12 @@ try {
         ':id' => $request_id
     ]);
 
+    // Sync service_status back to forms table (bidirectional sync)
+    if (!empty($request['form_id'])) {
+        $syncStmt = $pdo->prepare("UPDATE forms SET service_status = :status WHERE form_id = :form_id");
+        $syncStmt->execute([':status' => $new_status, ':form_id' => $request['form_id']]);
+    }
+
     $pdo->commit();
 
     // Build response message

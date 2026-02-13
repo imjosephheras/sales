@@ -154,6 +154,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressFill.classList.add('in-progress');
             }
 
+            // Service status badge (single source of truth)
+            const serviceStatus = service.service_status || 'pending';
+            const statusBadgeEl = card.querySelector('.service-status-badge');
+            if (statusBadgeEl) {
+                const statusConfig = getServiceStatusConfig(serviceStatus);
+                statusBadgeEl.textContent = statusConfig.label;
+                statusBadgeEl.className = 'service-status-badge badge-' + statusConfig.cssClass;
+            }
+
             // Click to select
             cardEl.addEventListener('click', function() {
                 selectService(service.id);
@@ -238,27 +247,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
             itemEl.dataset.id = record.id;
 
-            // Calculate progress for status
-            const tracking = parseTaskTracking(record.task_tracking);
-            const completedTasks = countCompletedTasks(tracking);
-            const progressPercent = (completedTasks / TASKS.length) * 100;
+            // Service status badge (single source of truth: service_status)
+            const serviceStatus = record.service_status || 'pending';
+            const statusConfig = getServiceStatusConfig(serviceStatus);
 
             const statusIcon = item.querySelector('.status-icon');
             const statusBadge = item.querySelector('.status-badge');
 
-            if (progressPercent === 100) {
-                statusIcon.className = 'status-icon fas fa-check-circle text-success';
-                statusBadge.textContent = 'Complete';
-                statusBadge.className = 'status-badge badge-success';
-            } else if (progressPercent > 0) {
-                statusIcon.className = 'status-icon fas fa-spinner text-warning';
-                statusBadge.textContent = `${completedTasks}/${TASKS.length}`;
-                statusBadge.className = 'status-badge badge-warning';
-            } else {
-                statusIcon.className = 'status-icon fas fa-circle text-muted';
-                statusBadge.textContent = 'Not Started';
-                statusBadge.className = 'status-badge badge-secondary';
-            }
+            const iconMap = {
+                'pending':       'fas fa-clock text-muted',
+                'scheduled':     'fas fa-calendar-check text-info',
+                'confirmed':     'fas fa-check-circle text-primary',
+                'in_progress':   'fas fa-spinner text-warning',
+                'completed':     'fas fa-check-double text-success',
+                'not_completed': 'fas fa-times-circle text-danger',
+                'cancelled':     'fas fa-ban text-muted'
+            };
+
+            statusIcon.className = 'status-icon ' + (iconMap[serviceStatus] || iconMap['pending']);
+            statusBadge.textContent = statusConfig.label;
+            statusBadge.className = 'status-badge badge-' + statusConfig.cssClass;
 
             item.querySelector('.nomenclature').textContent = record.Order_Nomenclature || `#${record.id}`;
             item.querySelector('.history-company').textContent = record.Company_Name || 'N/A';
@@ -285,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateStats(stats) {
         document.getElementById('stat-completed').textContent = stats.completed || 0;
         document.getElementById('stat-not-completed').textContent = stats.in_progress || 0;
-        document.getElementById('stat-pending').textContent = stats.not_started || 0;
+        document.getElementById('stat-pending').textContent = stats.pending || 0;
         document.getElementById('stat-invoice').textContent = stats.ready_to_invoice || 0;
         document.querySelector('.history-count').textContent = stats.total || 0;
     }
@@ -498,6 +506,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // ========================================
     // Utility Functions
     // ========================================
+    function getServiceStatusConfig(status) {
+        const configs = {
+            'pending':       { label: 'Pending',       cssClass: 'pending' },
+            'scheduled':     { label: 'Scheduled',     cssClass: 'scheduled' },
+            'confirmed':     { label: 'Confirmed',     cssClass: 'confirmed' },
+            'in_progress':   { label: 'In Progress',   cssClass: 'in-progress' },
+            'completed':     { label: 'Completed',     cssClass: 'completed' },
+            'not_completed': { label: 'Not Completed', cssClass: 'not-completed' },
+            'cancelled':     { label: 'Cancelled',     cssClass: 'cancelled' }
+        };
+        return configs[status] || configs['pending'];
+    }
+
     function parseTaskTracking(trackingData) {
         if (!trackingData) return {};
         if (typeof trackingData === 'string') {
