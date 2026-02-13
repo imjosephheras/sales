@@ -2290,7 +2290,7 @@ window.loadFormData = function(formId) {
   /* ===============================
      PREVIEW MODAL
   =============================== */
-  document.getElementById("btnPreview").addEventListener("click", () => {
+  document.getElementById("btnPreview")?.addEventListener("click", () => {
     const data = new FormData(form);
 
     let html = "<table style='width:100%; border-collapse:collapse; border:2px solid #e1e8ed; border-radius:8px; overflow:hidden;'>";
@@ -2315,7 +2315,7 @@ window.loadFormData = function(formId) {
     document.getElementById("previewModal").style.display = "flex";
   });
 
-  document.getElementById("cancelPreview").addEventListener("click", () => {
+  document.getElementById("cancelPreview")?.addEventListener("click", () => {
     document.getElementById("previewModal").style.display = "none";
   });
 
@@ -2323,7 +2323,7 @@ window.loadFormData = function(formId) {
      SUBMIT BUTTON HANDLER
      Expande secciones con campos inválidos antes de validar
   =============================== */
-  document.getElementById("btnSubmitForm").addEventListener("click", () => {
+  document.getElementById("btnSubmitForm")?.addEventListener("click", () => {
     // Limpia errores previos
     document.querySelectorAll(".section-title").forEach(t =>
       t.classList.remove("section-error")
