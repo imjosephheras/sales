@@ -54,7 +54,7 @@ function addServiceConfirmationColumns($pdo) {
         // Check and add service_status column
         $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'service_status'");
         if ($stmt->rowCount() == 0) {
-            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `service_status` ENUM('pending', 'completed', 'not_completed') DEFAULT 'pending'");
+            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `service_status` ENUM('pending', 'completed', 'not_completed', 'cancelled') DEFAULT 'pending'");
         }
 
         // Check and add service_completed_at column
