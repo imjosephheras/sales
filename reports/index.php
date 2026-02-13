@@ -39,6 +39,7 @@ $stmt = $pdo->query("
         Work_Date,
         order_number,
         Order_Nomenclature,
+        service_status,
         created_at
     FROM forms
     ORDER BY created_at DESC
@@ -69,7 +70,8 @@ $columns = [
     'Document Date' => 'Document_Date',
     'Work Date' => 'Work_Date',
     'Order #' => 'order_number',
-    'Nomenclature' => 'Order_Nomenclature'
+    'Nomenclature' => 'Order_Nomenclature',
+    'Service Status' => 'service_status'
 ];
 
 // Format currency
@@ -416,6 +418,24 @@ function formatCurrency($value) {
             font-style: italic;
         }
 
+        /* Service Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            white-space: nowrap;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-scheduled { background: #dbeafe; color: #1e40af; }
+        .status-confirmed { background: #e0e7ff; color: #3730a3; }
+        .status-in_progress { background: #fed7aa; color: #9a3412; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-not_completed { background: #fee2e2; color: #991b1b; }
+        .status-cancelled { background: #f3f4f6; color: #6b7280; }
+
         /* Resize handle */
         .resize-handle {
             position: absolute;
@@ -581,6 +601,7 @@ function formatCurrency($value) {
                                     $cellClass = '';
 
                                     // Apply specific cell types
+                                    $isStatusBadge = false;
                                     if ($field === 'total_cost') {
                                         $cellClass = 'cell-currency';
                                         if ($value) $value = formatCurrency(floatval(str_replace(['$', ','], '', $value)));
@@ -594,15 +615,32 @@ function formatCurrency($value) {
                                             $date = new DateTime($value);
                                             $value = $date->format('M d, Y');
                                         }
+                                    } elseif ($field === 'service_status') {
+                                        $isStatusBadge = true;
+                                        if (empty($value)) $value = 'pending';
                                     }
 
-                                    if (empty($value) || $value === '-') {
+                                    if (!$isStatusBadge && (empty($value) || $value === '-')) {
                                         $cellClass .= ' cell-empty';
                                         $value = '-';
                                     }
+
+                                    $statusLabels = [
+                                        'pending' => 'Pending',
+                                        'scheduled' => 'Scheduled',
+                                        'confirmed' => 'Confirmed',
+                                        'in_progress' => 'In Progress',
+                                        'completed' => 'Completed',
+                                        'not_completed' => 'Not Completed',
+                                        'cancelled' => 'Cancelled',
+                                    ];
                                     ?>
-                                    <td class="<?= trim($cellClass) ?>" title="<?= htmlspecialchars($value) ?>">
-                                        <?= htmlspecialchars($value) ?>
+                                    <td class="<?= trim($cellClass) ?>" title="<?= htmlspecialchars($isStatusBadge ? ($statusLabels[$value] ?? $value) : $value) ?>">
+                                        <?php if ($isStatusBadge): ?>
+                                            <span class="status-badge status-<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($statusLabels[$value] ?? ucfirst(str_replace('_', ' ', $value))) ?></span>
+                                        <?php else: ?>
+                                            <?= htmlspecialchars($value) ?>
+                                        <?php endif; ?>
                                     </td>
                                 <?php endforeach; ?>
                             </tr>
