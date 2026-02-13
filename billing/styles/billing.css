@@ -345,40 +345,25 @@ body {
     font-weight: 600;
 }
 
-/* Service cards from Module 10 */
-.doc-card.from-service {
-    border-left: 4px solid var(--info-color);
-}
-
-.doc-card.from-service:hover {
-    border-left-color: var(--info-color);
-}
-
-.doc-type-badge.service-badge {
-    background: #e0f7fa;
-    color: #00838f;
-}
-
-.service-info {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 0.5rem;
-    font-size: 0.75rem;
+/* Card detail fields */
+.doc-client,
+.doc-service {
+    font-size: 0.78rem;
     color: var(--text-gray);
-}
-
-.service-info span {
+    margin-bottom: 0.2rem;
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.35rem;
 }
 
-.service-type {
+.doc-client i,
+.doc-service i {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+.doc-service {
     color: var(--info-color);
-}
-
-.seller {
-    color: var(--primary-color);
 }
 
 /* ============================================
@@ -397,6 +382,13 @@ body {
     display: flex;
     flex-direction: column;
     height: 100%;
+}
+
+#viewer-active-state {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
 }
 
 .viewer-empty-state {
@@ -425,30 +417,92 @@ body {
     font-size: 1rem;
 }
 
-.document-header {
-    padding: 1rem 1.5rem;
-    background: rgba(0, 0, 0, 0.25);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+/* --- Top Row: Two cards side by side --- */
+
+.viewer-top-row {
     display: flex;
-    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    flex-shrink: 0;
+}
+
+/* Card 1: Contract info */
+.viewer-info-card {
+    flex: 1;
+    background: var(--bg-white);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex;
     align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.info-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.info-card-icon i {
+    font-size: 1.2rem;
     color: white;
 }
 
-.doc-info h2 {
-    font-size: 1.2rem;
+.info-card-details {
+    min-width: 0;
+}
+
+.info-card-details h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-dark);
     margin-bottom: 0.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .doc-number-badge {
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.7);
+    font-size: 0.78rem;
+    color: var(--primary-color);
     font-family: 'Courier New', monospace;
+    background: rgba(0, 31, 84, 0.08);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+    font-weight: 600;
 }
 
-.doc-actions {
+.info-card-client,
+.info-card-service {
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    margin-top: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.info-card-service {
+    color: var(--info-color);
+}
+
+/* Card 2: Action button */
+.viewer-action-card {
     display: flex;
-    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-white);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
 }
 
 .btn {
@@ -480,12 +534,12 @@ body {
     color: white;
 }
 
+/* --- PDF Viewer: Full width below cards --- */
+
 .pdf-viewer-container {
     flex: 1;
-    padding: 1rem;
+    padding: 0 1rem 1rem 1rem;
     display: flex;
-    justify-content: center;
-    align-items: stretch;
     min-height: 0;
 }
 
@@ -493,9 +547,47 @@ body {
     width: 100%;
     height: 100%;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     background: white;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Action button styles --- */
+
+.btn-action-completed {
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    white-space: nowrap;
+}
+
+.btn-action-completed:hover {
+    background: linear-gradient(135deg, #0d3d12 0%, #1b5e20 100%);
+}
+
+.btn-action-completed:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-action-pending {
+    background: linear-gradient(135deg, #e65100 0%, #ff9800 100%);
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    white-space: nowrap;
+}
+
+.btn-action-pending:hover {
+    background: linear-gradient(135deg, #bf360c 0%, #e65100 100%);
+}
+
+.btn-action-pending:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* ============================================
@@ -591,6 +683,26 @@ body {
     align-items: center;
     gap: 0.25rem;
     color: var(--success-color);
+}
+
+/* Audit trail info on history cards */
+.history-card-audit {
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.audit-info {
+    font-size: 0.7rem;
+    color: var(--text-gray);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.audit-info i {
+    color: var(--success-color);
+    font-size: 0.65rem;
 }
 
 /* ============================================
@@ -724,5 +836,8 @@ body {
         border-right: none;
         border-bottom: 2px solid var(--border-color);
         max-height: 40vh;
+    }
+    .viewer-top-row {
+        flex-direction: column;
     }
 }

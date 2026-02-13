@@ -34,11 +34,11 @@ try {
     }
 
     // Validate status value
-    $valid_statuses = ['pending', 'completed', 'not_completed'];
+    $valid_statuses = ['pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled'];
     if (!in_array($new_status, $valid_statuses)) {
         echo json_encode([
             'success' => false,
-            'message' => 'Invalid status. Must be: pending, completed, or not_completed'
+            'message' => 'Invalid status. Must be one of: pending, scheduled, confirmed, in_progress, completed, not_completed, cancelled'
         ]);
         exit;
     }
@@ -100,6 +100,10 @@ try {
         'completed' => 'Service marked as COMPLETED. PDF generated and ready for invoicing.',
         'not_completed' => 'Service marked as NOT COMPLETED. Saved to history.',
         'pending' => 'Service status reset to PENDING.',
+        'scheduled' => 'Service marked as SCHEDULED.',
+        'confirmed' => 'Service marked as CONFIRMED.',
+        'in_progress' => 'Service marked as IN PROGRESS.',
+        'cancelled' => 'Service marked as CANCELLED.',
     };
 
     echo json_encode([

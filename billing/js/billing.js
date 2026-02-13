@@ -1,17 +1,31 @@
 /**
- * BILLING MODULE - Main JavaScript
- * Handles pending list, document viewer, history, and completion flow
+ * BILLING / ACCOUNTING MODULE - Main JavaScript
+ *
+ * New flow:
+ * - Left panel: Pending contracts (auto-sent from Contract Generator when marked Completed)
+ * - Center panel: PDF viewer with Mark as Completed / Mark as Pending buttons
+ * - Right panel: Completed contracts by Accounting
+ *
+ * No forms, no editors. Only PDF review and status toggle.
+ * Tracks who marked and when.
  */
 
 (function () {
     'use strict';
 
-    // State
+    // ==========================================
+    // STATE
+    // ==========================================
+
     let selectedDocId = null;
+    let selectedDocSource = null; // 'pending' or 'history'
     let pendingDocs = [];
     let historyDocs = [];
 
-    // DOM Elements
+    // ==========================================
+    // DOM ELEMENTS
+    // ==========================================
+
     const pendingList = document.getElementById('pending-list');
     const historyList = document.getElementById('history-list');
     const pendingCount = document.getElementById('pending-count');
@@ -23,67 +37,46 @@
     const viewerActiveState = document.getElementById('viewer-active-state');
     const viewerDocTitle = document.getElementById('viewer-doc-title');
     const viewerOrderNumber = document.getElementById('viewer-order-number');
+    const viewerClientName = document.getElementById('viewer-client-name');
+    const viewerServiceName = document.getElementById('viewer-service-name');
     const pdfViewer = document.getElementById('pdf-viewer');
-    const btnComplete = document.getElementById('btn-complete');
-    const btnDownload = document.getElementById('btn-download');
+    const btnMarkCompleted = document.getElementById('btn-mark-completed');
+    const btnMarkPending = document.getElementById('btn-mark-pending');
 
     // ==========================================
     // LOAD DATA
     // ==========================================
 
     function loadPending(search) {
-        // Load from billing_documents table
-        const url1 = 'controllers/get_pending.php' + (search ? '?search=' + encodeURIComponent(search) : '');
-        // Load from requests table (services marked as ready to invoice from Module 10)
-        const url2 = 'controllers/get_ready_to_invoice.php' + (search ? '?search=' + encodeURIComponent(search) : '');
+        const url = 'controllers/get_pending.php' + (search ? '?search=' + encodeURIComponent(search) : '');
 
-        Promise.all([
-            fetch(url1).then(r => r.json()).catch(() => ({ success: false, data: [] })),
-            fetch(url2).then(r => r.json()).catch(() => ({ success: false, data: [] }))
-        ])
-        .then(([billingData, servicesData]) => {
-            pendingDocs = [];
-
-            // Add billing documents
-            if (billingData.success && billingData.data) {
-                billingData.data.forEach(doc => {
-                    doc.source = 'billing';
-                    pendingDocs.push(doc);
-                });
-            }
-
-            // Add completed services from Module 10 (ready to invoice)
-            if (servicesData.success && servicesData.data) {
-                servicesData.data.forEach(service => {
-                    service.source = 'service_confirmation';
-                    service.document_type = 'Service Completed';
-                    pendingDocs.push(service);
-                });
-            }
-
-            // Sort by date (newest first)
-            pendingDocs.sort((a, b) => {
-                const dateA = new Date(a.completed_at || a.created_at);
-                const dateB = new Date(b.completed_at || b.created_at);
-                return dateB - dateA;
-            });
-
-            renderPendingList();
-        })
-        .catch(() => {
-            pendingList.innerHTML = '<div class="error-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading documents</p></div>';
-        });
-    }
-
-    function loadHistory(search) {
-        const url = 'controllers/get_history.php' + (search ? '?search=' + encodeURIComponent(search) : '');
         fetch(url)
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    historyDocs = data.data;
-                    renderHistoryList();
+                    pendingDocs = data.data || [];
+                } else {
+                    pendingDocs = [];
                 }
+                renderPendingList();
+            })
+            .catch(() => {
+                pendingList.innerHTML = '<div class="error-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading contracts</p></div>';
+            });
+    }
+
+    function loadHistory(search) {
+        const url = 'controllers/get_history.php' + (search ? '?search=' + encodeURIComponent(search) : '');
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    historyDocs = data.data || [];
+                } else {
+                    historyDocs = [];
+                }
+                renderHistoryList();
             })
             .catch(() => {
                 historyList.innerHTML = '<div class="error-state"><i class="fas fa-exclamation-triangle"></i><p>Error loading history</p></div>';
@@ -91,76 +84,77 @@
     }
 
     // ==========================================
-    // RENDER LISTS
+    // RENDER PENDING LIST (Left Panel)
     // ==========================================
 
     function renderPendingList() {
         pendingCount.textContent = pendingDocs.length;
 
         if (pendingDocs.length === 0) {
-            pendingList.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No pending documents</p><small>Documents ready to invoice will appear here</small></div>';
+            pendingList.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No pending contracts</p><small>Contracts completed in the Generator will appear here automatically</small></div>';
             return;
         }
 
-        pendingList.innerHTML = pendingDocs.map(doc => {
-            const isFromService = doc.source === 'service_confirmation';
-            const badgeClass = isFromService ? 'service-badge' : '';
-            const badgeIcon = isFromService ? 'fa-clipboard-check' : 'fa-file-pdf';
-
-            return `
-            <div class="doc-card ${doc.id == selectedDocId ? 'active' : ''} ${isFromService ? 'from-service' : ''}"
+        pendingList.innerHTML = pendingDocs.map(doc => `
+            <div class="doc-card ${doc.id == selectedDocId && selectedDocSource === 'pending' ? 'active' : ''}"
                  data-id="${doc.id}"
-                 data-source="${doc.source || 'billing'}"
-                 onclick="BillingApp.selectDocument(${doc.id})">
+                 onclick="BillingApp.selectDocument(${doc.id}, 'pending')">
                 <div class="doc-card-header">
-                    <span class="doc-type-badge ${badgeClass}">${escapeHtml(doc.document_type || 'Invoice')}</span>
-                    <i class="fas ${badgeIcon} doc-pdf-icon"></i>
+                    <span class="doc-type-badge">${escapeHtml(doc.document_type || 'Contract')}</span>
+                    <i class="fas fa-file-pdf doc-pdf-icon"></i>
                 </div>
                 <div class="doc-card-body">
                     <div class="doc-order-number">
                         <i class="fas fa-hashtag"></i> ${escapeHtml(doc.order_number || 'N/A')}
                     </div>
-                    <h3>${escapeHtml(doc.client_name || doc.company_name || 'N/A')}</h3>
-                    <p>${escapeHtml(doc.company_name || '')}</p>
-                    ${isFromService ? `
-                    <div class="service-info">
-                        <span class="service-type"><i class="fas fa-tools"></i> ${escapeHtml(doc.service_type || '')}</span>
-                        <span class="seller"><i class="fas fa-user"></i> ${escapeHtml(doc.seller || '')}</span>
-                    </div>
-                    ` : ''}
+                    <h3>${escapeHtml(doc.company_name || doc.client_name || 'N/A')}</h3>
+                    ${doc.client_name && doc.company_name ? `<p class="doc-client"><i class="fas fa-user"></i> ${escapeHtml(doc.client_name)}</p>` : ''}
+                    ${doc.service_name ? `<p class="doc-service"><i class="fas fa-tools"></i> ${escapeHtml(doc.service_name)}</p>` : ''}
                 </div>
                 <div class="doc-card-meta">
-                    <span class="doc-date"><i class="fas fa-calendar-alt"></i> ${formatDate(doc.completed_at || doc.created_at)}</span>
-                    ${doc.price ? `<span class="doc-price"><i class="fas fa-dollar-sign"></i> ${escapeHtml(doc.price)}</span>` : ''}
+                    <span class="doc-date"><i class="fas fa-calendar-alt"></i> ${formatDate(doc.created_at)}</span>
+                    ${doc.total_amount ? `<span class="doc-price"><i class="fas fa-dollar-sign"></i> ${escapeHtml(doc.total_amount)}</span>` : ''}
                 </div>
             </div>
-        `}).join('');
+        `).join('');
     }
+
+    // ==========================================
+    // RENDER HISTORY LIST (Right Panel)
+    // ==========================================
 
     function renderHistoryList() {
         historyCount.textContent = historyDocs.length;
 
         if (historyDocs.length === 0) {
-            historyList.innerHTML = '<div class="empty-state"><i class="fas fa-archive"></i><p>No completed documents</p><small>Completed invoices will appear here</small></div>';
+            historyList.innerHTML = '<div class="empty-state"><i class="fas fa-archive"></i><p>No completed contracts</p><small>Contracts marked as completed will appear here</small></div>';
             return;
         }
 
         historyList.innerHTML = historyDocs.map(doc => `
-            <div class="history-card ${doc.id == selectedDocId ? 'active' : ''}" data-id="${doc.id}" onclick="BillingApp.selectDocument(${doc.id}, true)">
+            <div class="history-card ${doc.id == selectedDocId && selectedDocSource === 'history' ? 'active' : ''}"
+                 data-id="${doc.id}"
+                 onclick="BillingApp.selectDocument(${doc.id}, 'history')">
                 <div class="history-card-header">
                     <div class="doc-order-number">
-                        <i class="fas fa-hashtag"></i> ${escapeHtml(doc.order_number)}
+                        <i class="fas fa-hashtag"></i> ${escapeHtml(doc.order_number || 'N/A')}
                     </div>
-                    <span class="completed-badge"><i class="fas fa-check"></i> Done</span>
+                    <span class="completed-badge"><i class="fas fa-check"></i> Completed</span>
                 </div>
                 <div class="history-card-body">
-                    <h3>${escapeHtml(doc.client_name || doc.company_name || 'N/A')}</h3>
-                    <p>${escapeHtml(doc.company_name || '')}</p>
+                    <h3>${escapeHtml(doc.company_name || doc.client_name || 'N/A')}</h3>
+                    ${doc.client_name ? `<p class="doc-client"><i class="fas fa-user"></i> ${escapeHtml(doc.client_name)}</p>` : ''}
+                    ${doc.service_name ? `<p class="doc-service"><i class="fas fa-tools"></i> ${escapeHtml(doc.service_name)}</p>` : ''}
                 </div>
                 <div class="history-card-meta">
                     <span class="doc-date"><i class="fas fa-calendar-alt"></i> ${formatDate(doc.created_at)}</span>
                     <span class="completed-date"><i class="fas fa-check-circle"></i> ${formatDate(doc.completed_at)}</span>
                 </div>
+                ${doc.completed_by_name ? `
+                <div class="history-card-audit">
+                    <span class="audit-info"><i class="fas fa-user-check"></i> ${escapeHtml(doc.completed_by_name)}</span>
+                </div>
+                ` : ''}
             </div>
         `).join('');
     }
@@ -169,15 +163,16 @@
     // SELECT DOCUMENT
     // ==========================================
 
-    function selectDocument(id, isHistory) {
+    function selectDocument(id, source) {
         selectedDocId = id;
+        selectedDocSource = source;
 
-        const allDocs = isHistory ? historyDocs : pendingDocs;
+        const allDocs = source === 'history' ? historyDocs : pendingDocs;
         const doc = allDocs.find(d => d.id == id);
 
         if (!doc) return;
 
-        // Update active states
+        // Re-render lists to update active states
         renderPendingList();
         renderHistoryList();
 
@@ -185,116 +180,121 @@
         viewerEmptyState.style.display = 'none';
         viewerActiveState.style.display = 'flex';
 
-        viewerDocTitle.textContent = doc.client_name || doc.company_name || 'Document';
-        viewerOrderNumber.textContent = 'Order: ' + doc.order_number;
+        viewerDocTitle.textContent = doc.company_name || doc.client_name || 'Contract';
+        viewerOrderNumber.textContent = doc.order_number || '';
+        viewerClientName.textContent = doc.client_name && doc.company_name ? doc.client_name : '';
+        viewerServiceName.textContent = doc.service_name || '';
 
-        // Load PDF
+        // Load PDF in iframe
         if (doc.pdf_path) {
-            pdfViewer.src = doc.pdf_path;
+            // Build absolute URL to the PDF
+            const basePath = window.location.pathname.replace(/\/billing\/.*/i, '');
+            pdfViewer.src = basePath + '/' + doc.pdf_path;
         } else {
             pdfViewer.src = '';
         }
 
-        // Show/hide complete button based on status
-        btnComplete.style.display = isHistory ? 'none' : 'flex';
+        // Toggle buttons based on source
+        if (source === 'pending') {
+            btnMarkCompleted.style.display = 'flex';
+            btnMarkPending.style.display = 'none';
+        } else {
+            // From history: show Mark as Pending to allow reverting
+            btnMarkCompleted.style.display = 'none';
+            btnMarkPending.style.display = 'flex';
+        }
     }
 
     // ==========================================
-    // MARK COMPLETE
+    // MARK AS COMPLETED
     // ==========================================
 
-    function markComplete() {
+    function markAsCompleted() {
         if (!selectedDocId) return;
 
         const doc = pendingDocs.find(d => d.id == selectedDocId);
         if (!doc) return;
 
-        // Show confirmation modal
-        showConfirmModal(doc);
-    }
-
-    function showConfirmModal(doc) {
-        // Create modal if not exists
-        let modal = document.getElementById('confirm-modal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'confirm-modal';
-            modal.className = 'modal-overlay';
-            modal.innerHTML = `
-                <div class="modal-box">
-                    <i class="fas fa-check-circle modal-icon"></i>
-                    <h3>Mark as Completed?</h3>
-                    <p id="modal-message">This document will be moved to the history.</p>
-                    <div class="modal-actions">
-                        <button class="btn btn-cancel" onclick="BillingApp.closeModal()">Cancel</button>
-                        <button class="btn btn-success" id="modal-confirm-btn">
-                            <i class="fas fa-check"></i> Confirm
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-
-        document.getElementById('modal-message').textContent =
-            `"${doc.order_number}" will be moved to completed history.`;
-
-        modal.classList.add('active');
-
-        document.getElementById('modal-confirm-btn').onclick = function () {
-            confirmComplete(doc.id);
-        };
-    }
-
-    function closeModal() {
-        const modal = document.getElementById('confirm-modal');
-        if (modal) modal.classList.remove('active');
-    }
-
-    function confirmComplete(id) {
-        closeModal();
+        // Disable button during request
+        btnMarkCompleted.disabled = true;
+        btnMarkCompleted.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
         fetch('controllers/mark_complete.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: id })
+            body: JSON.stringify({ id: doc.id, action: 'complete' })
         })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    selectedDocId = null;
-                    viewerEmptyState.style.display = 'flex';
-                    viewerActiveState.style.display = 'none';
-                    pdfViewer.src = '';
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                // Reset viewer
+                selectedDocId = null;
+                selectedDocSource = null;
+                viewerEmptyState.style.display = 'flex';
+                viewerActiveState.style.display = 'none';
+                pdfViewer.src = '';
 
-                    // Reload both lists
-                    loadPending();
-                    loadHistory();
-                } else {
-                    alert('Error: ' + (data.error || 'Could not complete document'));
-                }
-            })
-            .catch(() => {
-                alert('Network error. Please try again.');
-            });
+                // Reload both panels
+                loadPending();
+                loadHistory();
+            } else {
+                alert('Error: ' + (data.error || 'Could not mark as completed'));
+            }
+
+            // Restore button
+            btnMarkCompleted.disabled = false;
+            btnMarkCompleted.innerHTML = '<i class="fas fa-check-circle"></i> Mark as Completed';
+        })
+        .catch(() => {
+            alert('Network error. Please try again.');
+            btnMarkCompleted.disabled = false;
+            btnMarkCompleted.innerHTML = '<i class="fas fa-check-circle"></i> Mark as Completed';
+        });
     }
 
     // ==========================================
-    // DOWNLOAD
+    // MARK AS PENDING (revert from completed)
     // ==========================================
 
-    function downloadPdf() {
+    function markAsPending() {
         if (!selectedDocId) return;
 
-        const doc = pendingDocs.find(d => d.id == selectedDocId) ||
-                    historyDocs.find(d => d.id == selectedDocId);
+        const doc = historyDocs.find(d => d.id == selectedDocId);
+        if (!doc) return;
 
-        if (doc && doc.pdf_path) {
-            const link = document.createElement('a');
-            link.href = doc.pdf_path;
-            link.download = doc.order_number + '.pdf';
-            link.click();
-        }
+        btnMarkPending.disabled = true;
+        btnMarkPending.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        fetch('controllers/mark_complete.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: doc.id, action: 'pending' })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                // Reset viewer
+                selectedDocId = null;
+                selectedDocSource = null;
+                viewerEmptyState.style.display = 'flex';
+                viewerActiveState.style.display = 'none';
+                pdfViewer.src = '';
+
+                // Reload both panels
+                loadPending();
+                loadHistory();
+            } else {
+                alert('Error: ' + (data.error || 'Could not mark as pending'));
+            }
+
+            btnMarkPending.disabled = false;
+            btnMarkPending.innerHTML = '<i class="fas fa-clock"></i> Mark as Pending';
+        })
+        .catch(() => {
+            alert('Network error. Please try again.');
+            btnMarkPending.disabled = false;
+            btnMarkPending.innerHTML = '<i class="fas fa-clock"></i> Mark as Pending';
+        });
     }
 
     // ==========================================
@@ -334,16 +334,15 @@
     // EVENT LISTENERS
     // ==========================================
 
-    btnComplete.addEventListener('click', markComplete);
-    btnDownload.addEventListener('click', downloadPdf);
+    btnMarkCompleted.addEventListener('click', markAsCompleted);
+    btnMarkPending.addEventListener('click', markAsPending);
 
     // ==========================================
     // PUBLIC API
     // ==========================================
 
     window.BillingApp = {
-        selectDocument: selectDocument,
-        closeModal: closeModal
+        selectDocument: selectDocument
     };
 
     // ==========================================

@@ -353,6 +353,13 @@
       box-shadow: 0 4px 16px rgba(108,117,125,0.3);
     }
 
+    .btn-draft-lg {
+      padding: 22px 80px;
+      font-size: 22px;
+      width: 100%;
+      max-width: 500px;
+    }
+
     button[type="submit"]::before,
     .btn-submit::before,
     .btn-draft::before {
