@@ -15,7 +15,7 @@ try {
     } catch (Exception $e) {
         $pdo->exec("ALTER TABLE requests ADD COLUMN ready_to_invoice TINYINT(1) DEFAULT 0");
         $pdo->exec("ALTER TABLE requests ADD COLUMN final_pdf_path VARCHAR(500) DEFAULT NULL");
-        $pdo->exec("ALTER TABLE requests ADD COLUMN service_status ENUM('pending', 'completed', 'not_completed') DEFAULT 'pending'");
+        $pdo->exec("ALTER TABLE requests ADD COLUMN service_status ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled') DEFAULT 'pending'");
         $pdo->exec("ALTER TABLE requests ADD COLUMN service_completed_at TIMESTAMP NULL DEFAULT NULL");
     }
 

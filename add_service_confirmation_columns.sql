@@ -8,7 +8,7 @@ USE `form`;
 
 -- ============================================================
 -- ADD service_status COLUMN TO requests TABLE
--- Estados: 'pending' (pendiente), 'completed' (realizado), 'not_completed' (no realizado)
+-- Estados: 'pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled'
 -- ============================================================
 
 -- Add service_status column if not exists
@@ -21,7 +21,7 @@ SET @col_exists = (
 );
 
 SET @sql = IF(@col_exists = 0,
-    'ALTER TABLE `requests` ADD COLUMN `service_status` ENUM("pending", "completed", "not_completed") DEFAULT "pending" COMMENT "Estado del servicio: pending=Pendiente, completed=Si realizado, not_completed=No realizado"',
+    'ALTER TABLE `requests` ADD COLUMN `service_status` ENUM("pending", "scheduled", "confirmed", "in_progress", "completed", "not_completed", "cancelled") DEFAULT "pending" COMMENT "Estado del servicio: pending=Pendiente, completed=Si realizado, not_completed=No realizado, cancelled=Cancelado"',
     'SELECT "Column service_status already exists"'
 );
 
@@ -133,7 +133,7 @@ SET @col_exists_forms = (
 );
 
 SET @sql_forms = IF(@col_exists_forms = 0,
-    'ALTER TABLE `forms` ADD COLUMN `service_status` ENUM("pending", "completed", "not_completed") DEFAULT "pending"',
+    'ALTER TABLE `forms` ADD COLUMN `service_status` ENUM("pending", "scheduled", "confirmed", "in_progress", "completed", "not_completed", "cancelled") DEFAULT "pending"',
     'SELECT "Column service_status already exists in forms"'
 );
 
@@ -147,8 +147,12 @@ DEALLOCATE PREPARE stmt_forms;
 --
 -- service_status values:
 --   'pending'       = Servicio pendiente (aun no se realiza)
+--   'scheduled'     = Servicio programado
+--   'confirmed'     = Servicio confirmado
+--   'in_progress'   = Servicio en progreso
 --   'completed'     = Servicio realizado (Si)
 --   'not_completed' = Servicio no realizado (No)
+--   'cancelled'     = Servicio cancelado
 --
 -- Workflow:
 --   1. Cuando se crea un Request Form -> service_status = 'pending'
