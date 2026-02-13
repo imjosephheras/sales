@@ -46,6 +46,13 @@ $adminFunctions = [
         'url'   => url('/service_confirmation/'),
         'color' => 'linear-gradient(135deg, #17a2b8, #138496)',
     ],
+    [
+        'name'  => 'Contract Status',
+        'desc'  => 'Vista informativa del estado de contratos y contabilidad (solo lectura)',
+        'icon'  => 'fas fa-eye',
+        'url'   => url('/modules/admin/contract_status.php'),
+        'color' => 'linear-gradient(135deg, #ff6f00, #ffca28)',
+    ],
 ];
 ?>
 <!DOCTYPE html>

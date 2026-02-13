@@ -1186,6 +1186,15 @@ body {
   color: white;
 }
 
+.btn-completed {
+  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+  color: white;
+}
+
+.btn-completed:hover {
+  background: linear-gradient(135deg, #0d3d12 0%, #1b5e20 100%);
+}
+
 .btn-secondary {
   background: var(--text-gray);
   color: white;

@@ -155,6 +155,12 @@ function addMissingColumns($pdo) {
     if ($stmt->rowCount() == 0) {
         $pdo->exec("ALTER TABLE `requests` ADD COLUMN `completed_at` TIMESTAMP NULL DEFAULT NULL");
     }
+
+    // Check and add final_pdf_path column
+    $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'final_pdf_path'");
+    if ($stmt->rowCount() == 0) {
+        $pdo->exec("ALTER TABLE `requests` ADD COLUMN `final_pdf_path` VARCHAR(500) DEFAULT NULL");
+    }
 }
 
 // Crear conexión PDO

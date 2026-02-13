@@ -22,6 +22,7 @@
         // Event listeners para botones
         document.getElementById('btn-save').addEventListener('click', saveRequest);
         document.getElementById('btn-mark-ready').addEventListener('click', markAsReady);
+        document.getElementById('btn-mark-completed').addEventListener('click', markAsCompleted);
         document.getElementById('btn-download-pdf').addEventListener('click', downloadPDF);
 
         // Event listener para botón de Vent Hood Report
@@ -286,6 +287,9 @@
 
         // Mostrar/ocultar campos de Contract
         toggleContractFields();
+
+        // Update button visibility based on status
+        updateButtonVisibility(data.status);
     }
 
     // ========================================
@@ -483,6 +487,90 @@
             console.error('❌ Error marking as ready:', error);
             showNotification('❌ Connection error: ' + error.message, 'error');
         });
+    }
+
+    // ========================================
+    // MARCAR COMO COMPLETED (Triggers billing flow)
+    // ========================================
+
+    function markAsCompleted() {
+        const requestId = document.getElementById('request_id').value;
+
+        if (!requestId || requestId.trim() === '') {
+            showNotification('Please save the request first.', 'error');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to mark this contract as COMPLETED?\n\nThis will:\n- Generate the final immutable PDF\n- Automatically send it to Accounting as Pending\n\nThis action cannot be undone.')) {
+            return;
+        }
+
+        console.log('Marking request as completed:', requestId);
+
+        // Show loading state on button
+        const btn = document.getElementById('btn-mark-completed');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        btn.disabled = true;
+
+        fetch('controllers/mark_completed.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ request_id: requestId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Contract completed! Final PDF generated and sent to Accounting.', 'success');
+                // Hide the completed button, show completed state
+                btn.style.display = 'none';
+                document.getElementById('btn-mark-ready').style.display = 'none';
+                document.getElementById('btn-save').style.display = 'none';
+                // Refresh inbox
+                window.InboxModule.refresh();
+            } else {
+                showNotification('Error: ' + data.error, 'error');
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error marking as completed:', error);
+            showNotification('Connection error: ' + error.message, 'error');
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        });
+    }
+
+    // ========================================
+    // UPDATE BUTTON VISIBILITY BASED ON STATUS
+    // ========================================
+
+    function updateButtonVisibility(status) {
+        const btnSave = document.getElementById('btn-save');
+        const btnMarkReady = document.getElementById('btn-mark-ready');
+        const btnMarkCompleted = document.getElementById('btn-mark-completed');
+        const btnDownloadPdf = document.getElementById('btn-download-pdf');
+
+        if (status === 'completed') {
+            // Completed: no edits allowed, only download
+            btnSave.style.display = 'none';
+            btnMarkReady.style.display = 'none';
+            btnMarkCompleted.style.display = 'none';
+            btnDownloadPdf.style.display = 'flex';
+        } else if (status === 'ready') {
+            // Ready: can mark completed or download
+            btnSave.style.display = 'flex';
+            btnMarkReady.style.display = 'none';
+            btnMarkCompleted.style.display = 'flex';
+            btnDownloadPdf.style.display = 'flex';
+        } else {
+            // Pending/draft/in_progress: can save, mark ready, download
+            btnSave.style.display = 'flex';
+            btnMarkReady.style.display = 'flex';
+            btnMarkCompleted.style.display = 'none';
+            btnDownloadPdf.style.display = 'flex';
+        }
     }
 
     // ========================================
