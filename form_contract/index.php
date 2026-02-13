@@ -1569,8 +1569,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const date = new Date(formData.created_at);
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-    // Determinar el estado del servicio
-    const serviceStatus = formData.service_status || formData.status || 'pending';
+    // Determinar el estado del servicio (single source of truth: service_status)
+    const serviceStatus = formData.service_status || 'pending';
     let statusClass = 'pending';
     let statusText = 'PENDING';
     let statusIcon = '⏳';
@@ -1687,13 +1687,12 @@ document.addEventListener("DOMContentLoaded", () => {
       // populatePhotos(additionalData.photos);
     }
 
-    // Handle service status (Section 10)
-    if (formData.service_status || formData.status) {
-      const serviceStatus = formData.service_status || formData.status || 'pending';
-      console.log('✅ Loading service status:', serviceStatus);
+    // Handle service status (Section 10) - single source of truth: service_status
+    if (formData.service_status) {
+      console.log('✅ Loading service status:', formData.service_status);
       const statusSelect = document.getElementById('service_status');
       if (statusSelect) {
-        statusSelect.value = serviceStatus;
+        statusSelect.value = formData.service_status;
       }
     }
 

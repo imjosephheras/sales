@@ -24,10 +24,12 @@ try {
     $whereConditions = [];
     $params = [];
 
-    // Filter by service status
+    // Filter by service status (single source of truth)
     if ($status !== 'all') {
         if ($status === 'pending') {
             $whereConditions[] = "(service_status = 'pending' OR service_status IS NULL)";
+        } elseif ($status === 'in_progress') {
+            $whereConditions[] = "service_status IN ('scheduled', 'confirmed', 'in_progress')";
         } else {
             $whereConditions[] = "service_status = :status";
             $params[':status'] = $status;
@@ -112,12 +114,12 @@ try {
     $stmt->execute();
     $records = $stmt->fetchAll();
 
-    // Get statistics
+    // Get statistics based on service_status (single source of truth)
     $statsSql = "
         SELECT
             COUNT(*) as total,
             SUM(CASE WHEN service_status = 'completed' THEN 1 ELSE 0 END) as completed,
-            SUM(CASE WHEN service_status = 'not_completed' THEN 1 ELSE 0 END) as not_completed,
+            SUM(CASE WHEN service_status IN ('scheduled', 'confirmed', 'in_progress') THEN 1 ELSE 0 END) as in_progress,
             SUM(CASE WHEN service_status = 'pending' OR service_status IS NULL THEN 1 ELSE 0 END) as pending,
             SUM(CASE WHEN ready_to_invoice = 1 THEN 1 ELSE 0 END) as ready_to_invoice
         FROM requests
@@ -142,7 +144,7 @@ try {
         'stats' => [
             'total' => (int)$stats['total'],
             'completed' => (int)$stats['completed'],
-            'not_completed' => (int)$stats['not_completed'],
+            'in_progress' => (int)$stats['in_progress'],
             'pending' => (int)$stats['pending'],
             'ready_to_invoice' => (int)$stats['ready_to_invoice']
         ],

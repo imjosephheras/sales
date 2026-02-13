@@ -688,6 +688,7 @@ function syncFormToRequests($pdo, $formId, $formData) {
                 docnum = :docnum,
                 form_id = :form_id,
                 status = :status,
+                service_status = :service_status,
                 updated_at = NOW()
             WHERE id = :id";
 
@@ -708,7 +709,7 @@ function syncFormToRequests($pdo, $formId, $formData) {
                 inflationAdjustment, totalArea, buildingsIncluded, startDateServices,
                 Site_Observation, Additional_Comments, Scope_Of_Work,
                 Work_Date, Document_Date,
-                status, docnum, form_id, created_at
+                status, service_status, docnum, form_id, created_at
             ) VALUES (
                 :service_type, :request_type, :priority, :requested_service,
                 :client_name, :client_title, :email, :number_phone, :company_name, :company_address, :city, :state, :is_new_client,
@@ -720,7 +721,7 @@ function syncFormToRequests($pdo, $formId, $formData) {
                 :inflation_adjustment, :total_area, :buildings_included, :start_date_services,
                 :site_observation, :additional_comments, :scope_of_work,
                 :work_date, :document_date,
-                :status, :docnum, :form_id, NOW()
+                :status, :service_status, :docnum, :form_id, NOW()
             )";
 
             $stmt = $pdo->prepare($sql);
@@ -784,6 +785,7 @@ function syncFormToRequests($pdo, $formId, $formData) {
         $stmt->bindValue(':work_date', !empty($formData['Work_Date']) ? $formData['Work_Date'] : null);
         $stmt->bindValue(':document_date', !empty($formData['Document_Date']) ? $formData['Document_Date'] : null);
         $stmt->bindValue(':status', $formData['status'] ?? 'pending');
+        $stmt->bindValue(':service_status', $formData['service_status'] ?? 'pending');
 
         $stmt->execute();
 
