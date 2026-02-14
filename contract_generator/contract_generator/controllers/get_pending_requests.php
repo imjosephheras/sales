@@ -161,7 +161,7 @@ try {
         }
 
         // Service status color and label mapping
-        $serviceStatus = $request['service_status'] ?? 'pending';
+        $serviceStatus = $request['service_status'] ?? null;
         $statusMap = [
             'pending'       => ['color' => '#d97706', 'label' => 'Pending',       'label_es' => 'Pendiente',     'icon' => 'fas fa-clock'],
             'scheduled'     => ['color' => '#2563eb', 'label' => 'Scheduled',     'label_es' => 'Programado',    'icon' => 'fas fa-calendar-alt'],
@@ -171,11 +171,18 @@ try {
             'not_completed' => ['color' => '#dc2626', 'label' => 'Not Completed', 'label_es' => 'No Completado', 'icon' => 'fas fa-times-circle'],
             'cancelled'     => ['color' => '#6b7280', 'label' => 'Cancelled',     'label_es' => 'Cancelado',     'icon' => 'fas fa-ban'],
         ];
-        $statusInfo = $statusMap[$serviceStatus] ?? $statusMap['pending'];
-        $request['service_status_color'] = $statusInfo['color'];
-        $request['service_status_label'] = $statusInfo['label'];
-        $request['service_status_label_es'] = $statusInfo['label_es'];
-        $request['service_status_icon'] = $statusInfo['icon'];
+
+        // Only show service status chip when it has a meaningful (non-default) value
+        // Items are already in the "Pending Tasks" section, so showing "Pending" is redundant
+        if ($serviceStatus && $serviceStatus !== 'pending') {
+            $statusInfo = $statusMap[$serviceStatus] ?? null;
+            if ($statusInfo) {
+                $request['service_status_color'] = $statusInfo['color'];
+                $request['service_status_label'] = $statusInfo['label'];
+                $request['service_status_label_es'] = $statusInfo['label_es'];
+                $request['service_status_icon'] = $statusInfo['icon'];
+            }
+        }
 
         // Status badge info (for task card header)
         if ($request['is_draft']) {
@@ -186,12 +193,15 @@ try {
             $request['status_color'] = '#17a2b8';
             $request['status_icon'] = '⏳';
             $request['status_label'] = 'In Progress';
-        } else {
-            // Use service_status for the header badge instead of hardcoding "Pending"
-            $request['status_color'] = $statusInfo['color'];
-            $request['status_icon'] = '<i class="' . $statusInfo['icon'] . '"></i>';
-            $request['status_label'] = $statusInfo['label'];
+        } elseif ($serviceStatus && $serviceStatus !== 'pending' && isset($statusMap[$serviceStatus])) {
+            // Show service_status in header badge only when it's a meaningful non-default status
+            $info = $statusMap[$serviceStatus];
+            $request['status_color'] = $info['color'];
+            $request['status_icon'] = '<i class="' . $info['icon'] . '"></i>';
+            $request['status_label'] = $info['label'];
         }
+        // else: status is 'pending' with default service_status — no badge needed
+        // (the item is already in the Pending Tasks section)
 
         // Determine available report types
         $request['available_reports'] = [];
