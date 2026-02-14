@@ -423,13 +423,22 @@ try {
     // PASO 6: SINCRONIZAR CON TABLA REQUESTS (Contract Generator)
     // ============================================================
     $requestId = null;
+    // Preserve existing requests.status if already 'completed' (don't downgrade to 'draft')
+    $requestStatus = $status;
+    $existingReqStmt = $pdo->prepare("SELECT status FROM requests WHERE form_id = ?");
+    $existingReqStmt->execute([$saved_form_id]);
+    $existingReqRow = $existingReqStmt->fetch();
+    if ($existingReqRow && $existingReqRow['status'] === 'completed') {
+        $requestStatus = 'completed';
+    }
+
     // Prepare complete form data for requests sync
     $requestFormData = array_merge($_POST, [
         'Order_Nomenclature' => $nomenclature_val,
         'order_number' => $order_number_val,
         'Document_Date' => $document_date_val,
         'Work_Date' => $work_date_val,
-        'status' => $status
+        'status' => $requestStatus
     ]);
 
     $requestId = syncFormToRequests($pdo, $saved_form_id, $requestFormData);

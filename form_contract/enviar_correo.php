@@ -159,6 +159,9 @@ $scope_of_work = isset($_POST['Scope_Of_Work'])
 $document_date = $_POST['Document_Date'] ?? '';
 $work_date     = $_POST['Work_Date']     ?? '';
 
+// SECTION 10 — SERVICE STATUS
+$service_status = $_POST['service_status'] ?? 'pending';
+
 // SECTION 8 — PHOTOS
 $photos = $_FILES['photos'] ?? null;
 
@@ -284,7 +287,7 @@ try {
             site_observation, additional_comments, email_information_sent,
             payment_terms,
             Document_Date, Work_Date, order_number, Order_Nomenclature,
-            status
+            status, service_status
         ) VALUES (
             :service_type, :request_type, :priority, :requested_service,
             :client_name, :contact_name, :email, :phone,
@@ -298,7 +301,7 @@ try {
             :site_observation, :additional_comments, :email_info_sent,
             :payment_terms,
             :document_date, :work_date, :order_number, :order_nomenclature,
-            'pending'
+            'pending', :service_status
         )
     ");
 
@@ -340,7 +343,8 @@ try {
         ':document_date' => $document_date_db,
         ':work_date' => $work_date_db,
         ':order_number' => $order_number,
-        ':order_nomenclature' => emptyToNull($nomenclature)
+        ':order_nomenclature' => emptyToNull($nomenclature),
+        ':service_status' => $service_status
     ]);
 
     $request_id = $pdo->lastInsertId();
@@ -407,7 +411,8 @@ try {
             'order_number' => $order_number,
             'Document_Date' => $document_date,
             'Work_Date' => $work_date,
-            'status' => 'pending'
+            'status' => 'pending',
+            'service_status' => $service_status
         ];
 
         $syncedRequestId = syncFormToRequests($pdo, $request_id, $requestFormData);
