@@ -187,9 +187,10 @@ try {
             $request['status_icon'] = '⏳';
             $request['status_label'] = 'In Progress';
         } else {
-            $request['status_color'] = '#007bff';
-            $request['status_icon'] = '📥';
-            $request['status_label'] = 'Pending';
+            // Use service_status for the header badge instead of hardcoding "Pending"
+            $request['status_color'] = $statusInfo['color'];
+            $request['status_icon'] = '<i class="' . $statusInfo['icon'] . '"></i>';
+            $request['status_label'] = $statusInfo['label'];
         }
 
         // Determine available report types
