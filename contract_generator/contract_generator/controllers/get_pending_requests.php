@@ -172,9 +172,8 @@ try {
             'cancelled'     => ['color' => '#6b7280', 'label' => 'Cancelled',     'label_es' => 'Cancelado',     'icon' => 'fas fa-ban'],
         ];
 
-        // Only show service status chip when it has a meaningful (non-default) value
-        // Items are already in the "Pending Tasks" section, so showing "Pending" is redundant
-        if ($serviceStatus && $serviceStatus !== 'pending') {
+        // Show service status chip for all valid service_status values
+        if ($serviceStatus) {
             $statusInfo = $statusMap[$serviceStatus] ?? null;
             if ($statusInfo) {
                 $request['service_status_color'] = $statusInfo['color'];
