@@ -53,6 +53,9 @@ class Calendar {
         this.selectedServiceTypes = new Set();
         this.allServiceTypes = [];
 
+        // Day companies sidebar state
+        this.selectedDay = null;
+
         // Drag state
         this.draggedEvent = null;
         this.draggedElement = null;
@@ -105,6 +108,7 @@ class Calendar {
         this.initSidebar();
         this.initServiceSidebar();
         this.initNavToggles();
+        this.initDayCompaniesSidebar();
 
         this.loadAndRender();
     }
@@ -274,6 +278,7 @@ class Calendar {
     }
 
     async loadAndRender() {
+        if (this.dayCompaniesSidebarEl) this.closeDayCompaniesSidebar();
         await this.fetchEvents();
         this.extractClients();
         await this.fetchServiceTypes();
@@ -339,6 +344,7 @@ class Calendar {
                         seller: ev.seller || '',
                         documentDate: ev.Document_Date || '',
                         serviceStatus: ev.service_status || 'pending',
+                        grandTotal: parseFloat(ev.grand_total) || 0,
                         serviceTypesList: serviceTypesList
                     });
                 });
@@ -705,14 +711,13 @@ class Calendar {
 
         this.gridEl.innerHTML = html;
 
-        // Attach click listeners for days with events
-        this.gridEl.querySelectorAll('.day-cell.has-events').forEach(cell => {
+        // Attach click listeners for all non-empty day cells (opens day companies sidebar)
+        this.gridEl.querySelectorAll('.day-cell:not(.empty)').forEach(cell => {
             cell.addEventListener('click', (e) => {
-                // Don't open detail if we clicked on a chip (that opens mini form)
                 if (e.target.closest('.event-chip')) return;
                 e.stopPropagation();
                 const day = parseInt(cell.dataset.day, 10);
-                this.showDayDetail(day, cell);
+                this.showDayCompanies(day);
             });
         });
 
@@ -948,6 +953,133 @@ class Calendar {
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
         }
+    }
+
+    // ===== DAY COMPANIES SIDEBAR =====
+
+    initDayCompaniesSidebar() {
+        this.dayCompaniesSidebarEl = document.getElementById('day-companies-sidebar');
+
+        document.getElementById('day-companies-close-btn').addEventListener('click', () => {
+            this.closeDayCompaniesSidebar();
+        });
+
+        // Company detail modal
+        document.getElementById('company-detail-overlay').addEventListener('click', () => {
+            this.closeCompanyDetail();
+        });
+        document.getElementById('company-detail-close').addEventListener('click', () => {
+            this.closeCompanyDetail();
+        });
+    }
+
+    showDayCompanies(day) {
+        this.selectedDay = day;
+        const eventsForDay = this.events[day] || [];
+        const dateStr = `${this.monthNames[this.currentMonth]} ${day}, ${this.currentYear}`;
+
+        // Update sidebar title
+        document.getElementById('day-companies-title').textContent = dateStr;
+
+        // Get unique companies
+        const companyMap = new Map();
+        eventsForDay.forEach(ev => {
+            if (!companyMap.has(ev.company)) {
+                companyMap.set(ev.company, []);
+            }
+            companyMap.get(ev.company).push(ev);
+        });
+
+        const listEl = document.getElementById('day-companies-list');
+
+        if (companyMap.size === 0) {
+            listEl.innerHTML = `
+                <div class="client-list-empty">
+                    <i class="fas fa-building"></i>
+                    <span>No companies on this day</span>
+                </div>`;
+        } else {
+            let html = '';
+            companyMap.forEach((events, company) => {
+                html += `
+                    <div class="day-company-item" data-company="${this.escapeHtml(company)}">
+                        <i class="fas fa-building"></i>
+                        <span class="day-company-name">${this.escapeHtml(company)}</span>
+                        <span class="client-count">${events.length}</span>
+                    </div>`;
+            });
+            listEl.innerHTML = html;
+
+            // Add click listeners for company items
+            listEl.querySelectorAll('.day-company-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const company = item.dataset.company;
+                    this.showCompanyDetail(company, day);
+                });
+            });
+        }
+
+        // Update count
+        const count = companyMap.size;
+        document.getElementById('day-companies-count').textContent = `${count} compan${count !== 1 ? 'ies' : 'y'}`;
+
+        // Show sidebar
+        this.dayCompaniesSidebarEl.classList.remove('collapsed');
+    }
+
+    closeDayCompaniesSidebar() {
+        if (this.dayCompaniesSidebarEl) {
+            this.dayCompaniesSidebarEl.classList.add('collapsed');
+        }
+        this.selectedDay = null;
+    }
+
+    showCompanyDetail(company, day) {
+        const eventsForDay = this.events[day] || [];
+        const companyEvents = eventsForDay.filter(ev => ev.company === company);
+
+        const bodyEl = document.getElementById('company-detail-body');
+        let html = '';
+
+        companyEvents.forEach(ev => {
+            const serviceTypes = ev.serviceTypesList.length > 0
+                ? ev.serviceTypesList.join(', ')
+                : (ev.serviceType || 'N/A');
+            const grandTotal = ev.grandTotal > 0
+                ? `$${ev.grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : 'N/A';
+
+            html += `
+                <div class="company-detail-card">
+                    <div class="company-detail-row">
+                        <span class="company-detail-label"><i class="fas fa-user"></i> Client Name</span>
+                        <span class="company-detail-value">${this.escapeHtml(ev.client)}</span>
+                    </div>
+                    <div class="company-detail-row">
+                        <span class="company-detail-label"><i class="fas fa-building"></i> Company Name</span>
+                        <span class="company-detail-value">${this.escapeHtml(ev.company)}</span>
+                    </div>
+                    <div class="company-detail-row">
+                        <span class="company-detail-label"><i class="fas fa-concierge-bell"></i> Type of Services</span>
+                        <span class="company-detail-value">${this.escapeHtml(serviceTypes)}</span>
+                    </div>
+                    <div class="company-detail-row">
+                        <span class="company-detail-label"><i class="fas fa-dollar-sign"></i> Grand Total</span>
+                        <span class="company-detail-value company-detail-total">${grandTotal}</span>
+                    </div>
+                </div>`;
+        });
+
+        bodyEl.innerHTML = html;
+
+        // Show modal
+        document.getElementById('company-detail-overlay').classList.add('visible');
+        document.getElementById('company-detail-modal').classList.add('visible');
+    }
+
+    closeCompanyDetail() {
+        document.getElementById('company-detail-overlay').classList.remove('visible');
+        document.getElementById('company-detail-modal').classList.remove('visible');
     }
 
     // ===== DAY DETAIL PANEL =====

@@ -109,6 +109,27 @@ Middleware::module('calendar');
             <i class="fas fa-concierge-bell"></i>
         </button>
 
+        <!-- Day Companies Sidebar (opens on day click) -->
+        <aside class="filter-sidebar day-companies-sidebar collapsed" id="day-companies-sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-building"></i> <span id="day-companies-title">Companies</span></h3>
+                <button class="sidebar-collapse-btn" id="day-companies-close-btn" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="client-list" id="day-companies-list">
+                <div class="client-list-empty">
+                    <i class="fas fa-building"></i>
+                    <span>Click a day to see companies</span>
+                </div>
+            </div>
+
+            <div class="sidebar-footer" id="day-companies-footer">
+                <span id="day-companies-count"></span>
+            </div>
+        </aside>
+
         <!-- Calendar -->
         <div class="calendar-wrapper">
             <div class="calendar-card">
@@ -254,6 +275,19 @@ Middleware::module('calendar');
             <button class="mini-form-btn mini-form-btn-save" id="mini-form-save">
                 <i class="fas fa-save"></i> Save
             </button>
+        </div>
+    </div>
+
+    <!-- Company Detail Modal -->
+    <div class="company-detail-overlay" id="company-detail-overlay"></div>
+    <div class="company-detail-modal" id="company-detail-modal">
+        <div class="company-detail-header">
+            <h3><i class="fas fa-info-circle"></i> Company Details</h3>
+            <button class="mini-form-close-btn" id="company-detail-close" title="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="company-detail-body" id="company-detail-body">
         </div>
     </div>
 

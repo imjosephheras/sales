@@ -64,7 +64,12 @@ try {
              FROM hood_vent_costs hvc
              WHERE hvc.form_id = ce.form_id
                AND hvc.service_type IS NOT NULL
-               AND hvc.service_type != '') AS hood_vent_services
+               AND hvc.service_type != '') AS hood_vent_services,
+            (
+                COALESCE((SELECT SUM(jsc2.subtotal) FROM janitorial_services_costs jsc2 WHERE jsc2.form_id = ce.form_id), 0) +
+                COALESCE((SELECT SUM(kcc2.subtotal) FROM kitchen_cleaning_costs kcc2 WHERE kcc2.form_id = ce.form_id), 0) +
+                COALESCE((SELECT SUM(hvc2.subtotal) FROM hood_vent_costs hvc2 WHERE hvc2.form_id = ce.form_id), 0)
+            ) AS grand_total
         FROM calendar_events ce
         JOIN forms f ON ce.form_id = f.form_id
         WHERE MONTH(ce.event_date) = :month

@@ -713,6 +713,10 @@ body {
     margin-bottom: 2px;
 }
 
+.day-cell:not(.empty) {
+    cursor: pointer;
+}
+
 .day-cell:not(.empty):hover {
     background: var(--bg-light);
 }
@@ -1528,6 +1532,166 @@ body {
     cursor: not-allowed;
 }
 
+/* ===== Day Companies Sidebar ===== */
+.day-companies-sidebar .sidebar-header {
+    background: linear-gradient(135deg, #117a65, #1abc9c);
+}
+
+.day-company-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+}
+
+.day-company-item:hover {
+    background: var(--bg-light);
+    transform: translateX(2px);
+}
+
+.day-company-item i {
+    color: #117a65;
+    font-size: 0.85rem;
+    min-width: 16px;
+}
+
+[data-theme="dark"] .day-company-item i {
+    color: #1abc9c;
+}
+
+.day-company-name {
+    flex: 1;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ===== Company Detail Modal ===== */
+.company-detail-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.company-detail-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.company-detail-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 440px;
+    max-width: 95vw;
+    max-height: 80vh;
+    background: var(--bg-card);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    z-index: 510;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.company-detail-modal.visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.company-detail-header {
+    background: linear-gradient(135deg, #117a65, #1abc9c);
+    color: white;
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.company-detail-header h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.company-detail-body {
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.company-detail-card {
+    background: var(--bg-light);
+    border-radius: 12px;
+    padding: 16px;
+    border-left: 4px solid #1abc9c;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.company-detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.company-detail-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.company-detail-label i {
+    font-size: 0.7rem;
+    color: #1abc9c;
+}
+
+.company-detail-value {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    padding-left: 22px;
+}
+
+.company-detail-total {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #117a65;
+}
+
+[data-theme="dark"] .company-detail-total {
+    color: #1abc9c;
+}
+
 /* ===== Print Styles ===== */
 @page {
     size: landscape;
@@ -1539,6 +1703,7 @@ body {
     .main-header,
     .filter-sidebar,
     .service-filter-sidebar,
+    .day-companies-sidebar,
     .sidebar-expand-btn,
     .nav-btn,
     .today-btn,
@@ -1547,7 +1712,9 @@ body {
     .calendar-nav-toggles,
     .event-detail-panel,
     .mini-form-overlay,
-    .mini-form-panel {
+    .mini-form-panel,
+    .company-detail-overlay,
+    .company-detail-modal {
         display: none !important;
     }
 
