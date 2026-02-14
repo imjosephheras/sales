@@ -154,15 +154,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressFill.classList.add('in-progress');
             }
 
-            // Service status badge (single source of truth)
-            const serviceStatus = service.service_status || 'pending';
-            const statusBadgeEl = card.querySelector('.service-status-badge');
-            if (statusBadgeEl) {
-                const statusConfig = getServiceStatusConfig(serviceStatus);
-                statusBadgeEl.textContent = statusConfig.label;
-                statusBadgeEl.className = 'service-status-badge badge-' + statusConfig.cssClass;
-            }
-
             // Click to select
             cardEl.addEventListener('click', function() {
                 selectService(service.id);

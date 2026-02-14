@@ -40,9 +40,8 @@
             </div>
             <div class="price"></div>
         </div>
-        <!-- Service status badge + Progress indicator -->
+        <!-- Progress indicator -->
         <div class="card-progress">
-            <span class="service-status-badge badge-pending">Pending</span>
             <div class="progress-mini">
                 <div class="progress-bar-mini">
                     <div class="progress-fill-mini" style="width: 0%"></div>
