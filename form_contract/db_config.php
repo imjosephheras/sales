@@ -1,13 +1,13 @@
 <?php
 // ============================================================
-// db_config.php - Configuración de Base de Datos
+// db_config.php - Form Contract Module
+// ============================================================
+// Usa la configuracion centralizada de base de datos.
+// Las funciones de inicializacion de tablas permanecen aqui
+// porque son especificas de este modulo.
 // ============================================================
 
-// Configuración de la base de datos
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'form');  // ← CAMBIAR SEGÚN TU BASE DE DATOS
-define('DB_USER', 'root');  // ← CAMBIAR SEGÚN TU USUARIO
-define('DB_PASS', '');      // ← CAMBIAR SEGÚN TU CONTRASEÑA
+require_once __DIR__ . '/../config/database.php';
 
 /**
  * Initialize the forms table and related tables used by form_contract module
@@ -393,44 +393,11 @@ function addMissingColumnsFormContract($pdo) {
     }
 }
 
-// Crear conexión PDO
-function getDBConnection() {
-    try {
-        $pdo = new PDO(
-            "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-            DB_USER,
-            DB_PASS,
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false
-            ]
-        );
-
-        // Initialize tables if they don't exist
-        initializeFormsTable($pdo);
-        initializeRequestsTable($pdo);
-
-        return $pdo;
-    } catch (PDOException $e) {
-        // Log error
-        error_log("Database connection error: " . $e->getMessage());
-
-        // Return error for JSON responses
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-            header('Content-Type: application/json');
-            echo json_encode([
-                'success' => false,
-                'message' => 'Database connection error: ' . $e->getMessage()
-            ]);
-            exit;
-        }
-
-        // For regular page loads, show error
-        die("Database connection failed. Please check your configuration in db_config.php");
-    }
-}
+// Inicializar tablas del modulo form_contract al obtener conexion
+// Se usa la funcion getDBConnection() del config centralizado
+$pdo = getDBConnection();
+initializeFormsTable($pdo);
+initializeRequestsTable($pdo);
 
 /**
  * Migrate existing forms with Work_Date to calendar_events (runs once)
