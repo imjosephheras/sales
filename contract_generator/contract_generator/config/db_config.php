@@ -1,23 +1,15 @@
 <?php
 /**
- * Database Configuration
- * Conexión a MySQL para Contract Generator
+ * Database Configuration - Contract Generator Module
+ * Usa la configuracion centralizada de base de datos.
  */
 
-// Configuración de la base de datos
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'form');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_CHARSET', 'utf8mb4');
-
-// Zona horaria
-date_default_timezone_set('America/Chicago');
+require_once __DIR__ . '/../../../config/database.php';
 
 /**
  * Initialize the requests table if it doesn't exist
  */
-function initializeRequestsTable($pdo) {
+function initializeRequestsTableContractGen($pdo) {
     $createTableSQL = "
     CREATE TABLE IF NOT EXISTS `requests` (
       `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -163,29 +155,9 @@ function addMissingColumns($pdo) {
     }
 }
 
-// Crear conexión PDO
-try {
-    $pdo = new PDO(
-        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET,
-        DB_USER,
-        DB_PASS,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false
-        ]
-    );
-
-    // Initialize requests table if it doesn't exist
-    initializeRequestsTable($pdo);
-
-    // Initialize docnum counter table
-    initializeDocnumCounter($pdo);
-
-    // Add missing columns to existing table
-    addMissingColumns($pdo);
-
-} catch (PDOException $e) {
-    die("Error de conexión: " . $e->getMessage());
-}
+// Inicializar tablas del modulo contract_generator
+$pdo = getDBConnection();
+initializeRequestsTableContractGen($pdo);
+initializeDocnumCounter($pdo);
+addMissingColumns($pdo);
 ?>

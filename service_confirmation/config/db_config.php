@@ -1,50 +1,11 @@
 <?php
 // ============================================================
 // db_config.php - Service Confirmation Module (Module 10)
-// Database Configuration
+// ============================================================
+// Usa la configuracion centralizada de base de datos.
 // ============================================================
 
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'form');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-
-/**
- * Get database connection
- */
-function getDBConnection() {
-    try {
-        $pdo = new PDO(
-            "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-            DB_USER,
-            DB_PASS,
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false
-            ]
-        );
-
-        // Ensure service confirmation columns exist
-        addServiceConfirmationColumns($pdo);
-
-        return $pdo;
-    } catch (PDOException $e) {
-        error_log("Database connection error: " . $e->getMessage());
-
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-            header('Content-Type: application/json');
-            echo json_encode([
-                'success' => false,
-                'message' => 'Database connection error: ' . $e->getMessage()
-            ]);
-            exit;
-        }
-
-        die("Database connection failed. Please check your configuration.");
-    }
-}
+require_once __DIR__ . '/../../config/database.php';
 
 /**
  * Add service confirmation columns to requests table if they don't exist
@@ -144,4 +105,8 @@ function addServiceConfirmationColumns($pdo) {
         error_log("Error adding service confirmation columns: " . $e->getMessage());
     }
 }
+
+// Inicializar columnas del modulo service_confirmation
+$pdo = getDBConnection();
+addServiceConfirmationColumns($pdo);
 ?>
