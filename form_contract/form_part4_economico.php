@@ -1898,23 +1898,23 @@ document.addEventListener("DOMContentLoaded", function () {
   function loadStaffSections() {
     container.innerHTML = `
       ${createCategory("<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", [
-        "<?= ($lang=='en') ? 'Housekeeper / GRA' : 'Camarista / GRA'; ?>",
-        "<?= ($lang=='en') ? 'Housekeeping Inspector / GRA Supervisor' : 'Inspector(a) / Supervisor(a) de Housekeeping'; ?>",
+        "<?= ($lang=='en') ? 'Housekeeper' : 'Camarista'; ?>",
+        "<?= ($lang=='en') ? 'Housekeeping' : 'Housekeeping'; ?>",
         "<?= ($lang=='en') ? 'Laundry Attendant' : 'Encargado de Lavandería'; ?>",
         "<?= ($lang=='en') ? 'Houseman' : 'Houseman / Auxiliar General'; ?>",
         "<?= ($lang=='en') ? 'Public Areas Attendant' : 'Encargado de Áreas Públicas'; ?>",
         "<?= ($lang=='en') ? 'Lobby Attendant' : 'Encargado de Lobby'; ?>",
-        "<?= ($lang=='en') ? 'Lobby Runner (AM/PM/Overnight)' : 'Lobby Runner (AM/PM/Noche)'; ?>",
+        "<?= ($lang=='en') ? 'Lobby Runner' : 'Lobby Runner'; ?>",
         "<?= ($lang=='en') ? 'Turndown Attendant' : 'Encargado de Turn Down'; ?>"
       ])}
 
       ${createCategory("<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", [
         "<?= ($lang=='en') ? 'Dishwasher' : 'Lavaplatos'; ?>",
-        "<?= ($lang=='en') ? 'Cook (Main Kitchen / Back Table / Cool Water)' : 'Cocinero (Cocina Principal / Back Table / Cool Water)'; ?>",
-        "<?= ($lang=='en') ? 'Prep Cook (Main Kitchen / Back Table / Cool Water)' : 'Cocinero de Preparación (Cocina Principal / Back Table / Cool Water)'; ?>",
-        "<?= ($lang=='en') ? 'Busser (Restaurant / Banquet)' : 'Ayudante de Mesero (Restaurante / Banquetes)'; ?>",
-        "<?= ($lang=='en') ? 'Runner (Food / Restaurant / Banquet)' : 'Runner (Alimentos / Restaurante / Banquetes)'; ?>",
-        "<?= ($lang=='en') ? 'Server (Restaurant / Banquet)' : 'Mesero (Restaurante / Banquetes)'; ?>",
+        "<?= ($lang=='en') ? 'Cook' : 'Cocinero'; ?>",
+        "<?= ($lang=='en') ? 'Prep Cook' : 'Cocinero de Preparación'; ?>",
+        "<?= ($lang=='en') ? 'Busser' : 'Ayudante de Mesero'; ?>",
+        "<?= ($lang=='en') ? 'Runner' : 'Runner'; ?>",
+        "<?= ($lang=='en') ? 'Server' : 'Mesero'; ?>",
         "<?= ($lang=='en') ? 'Host / Hostess' : 'Host / Hostess'; ?>",
         "<?= ($lang=='en') ? 'Barista' : 'Barista'; ?>",
         "<?= ($lang=='en') ? 'Bartender' : 'Bartender'; ?>",
@@ -1935,11 +1935,11 @@ document.addEventListener("DOMContentLoaded", function () {
       ])}
 
       ${createCategory("<?= ($lang=='en') ? 'SECURITY' : 'SEGURIDAD'; ?>", [
-        "<?= ($lang=='en') ? 'Security Guard (Noncommissioned)' : 'Guardia de Seguridad (No Armado)'; ?>"
+        "<?= ($lang=='en') ? 'Security Guard' : 'Guardia de Seguridad'; ?>"
       ])}
 
       ${createCategory("<?= ($lang=='en') ? 'VALET PARKING' : 'VALET PARKING'; ?>", [
-        "<?= ($lang=='en') ? 'Valet Attendant (AM/PM/Overnight)' : 'Valet Attendant (AM/PM/Noche)'; ?>"
+        "<?= ($lang=='en') ? 'Valet Attendant' : 'Valet Attendant'; ?>"
       ])}
 
       ${createCategory("<?= ($lang=='en') ? 'FRONT DESK' : 'RECEPCIÓN'; ?>", [
