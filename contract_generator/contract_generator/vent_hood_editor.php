@@ -248,6 +248,55 @@ if (file_exists($logo_path)) {
             text-align: center;
         }
 
+        .date-input-wrapper {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+        }
+
+        .date-input-wrapper input[type="date"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none;
+        }
+
+        .calendar-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #f5f5f5;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .calendar-btn:hover {
+            background: #e8f0fe;
+            border-color: #001f54;
+        }
+
+        .calendar-btn:active {
+            background: #d0e0fd;
+        }
+
+        .calendar-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: #555;
+        }
+
+        .calendar-btn:hover svg {
+            fill: #001f54;
+        }
+
         .editable-field.full-width {
             width: 100%;
         }
@@ -942,6 +991,11 @@ if (file_exists($logo_path)) {
                 background: transparent !important;
             }
 
+            .calendar-btn,
+            .date-input-wrapper input[type="date"] {
+                display: none !important;
+            }
+
             .notes-area {
                 border: none !important;
                 background: transparent !important;
@@ -1131,13 +1185,25 @@ if (file_exists($logo_path)) {
                             <div class="info-row">
                                 <div class="info-cell info-label">Service date:</div>
                                 <div class="info-cell info-value">
-                                    <input type="text" class="editable-field date-field" id="service_date" placeholder="MM/DD/YYYY" maxlength="10">
+                                    <div class="date-input-wrapper">
+                                        <input type="text" class="editable-field date-field" id="service_date" placeholder="MM/DD/YYYY" maxlength="10">
+                                        <input type="date" id="service_date_picker" tabindex="-1">
+                                        <button type="button" class="calendar-btn" data-picker="service_date_picker" data-target="service_date" title="Pick date">
+                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-cell info-label">Next recommended date:</div>
                                 <div class="info-cell info-value">
-                                    <input type="text" class="editable-field date-field" id="next_service_date" placeholder="MM/DD/YYYY" maxlength="10">
+                                    <div class="date-input-wrapper">
+                                        <input type="text" class="editable-field date-field" id="next_service_date" placeholder="MM/DD/YYYY" maxlength="10">
+                                        <input type="date" id="next_service_date_picker" tabindex="-1">
+                                        <button type="button" class="calendar-btn" data-picker="next_service_date_picker" data-target="next_service_date" title="Pick date">
+                                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1900,6 +1966,31 @@ if (file_exists($logo_path)) {
     }
 
     // =============================================
+    // CALENDAR BUTTON FUNCTIONALITY
+    // =============================================
+    function initCalendarButtons() {
+        document.querySelectorAll('.calendar-btn').forEach(function(btn) {
+            var pickerId = btn.getAttribute('data-picker');
+            var targetId = btn.getAttribute('data-target');
+            var picker = document.getElementById(pickerId);
+            var target = document.getElementById(targetId);
+
+            // Click calendar button -> open native date picker
+            btn.addEventListener('click', function() {
+                picker.showPicker ? picker.showPicker() : picker.click();
+            });
+
+            // When a date is selected from the picker, fill the text field
+            picker.addEventListener('change', function() {
+                if (this.value) {
+                    var parts = this.value.split('-'); // YYYY-MM-DD
+                    target.value = parts[1] + '/' + parts[2] + '/' + parts[0]; // MM/DD/YYYY
+                }
+            });
+        });
+    }
+
+    // =============================================
     // INITIALIZE
     // =============================================
     document.addEventListener('DOMContentLoaded', function() {
@@ -1909,6 +2000,9 @@ if (file_exists($logo_path)) {
 
         // Initialize date field auto-formatting
         initDateFields();
+
+        // Initialize calendar picker buttons
+        initCalendarButtons();
 
         // Initialize authorization checkbox
         initAuthorizationCheckbox();
