@@ -1493,7 +1493,13 @@ if (file_exists($logo_path)) {
                             </div>
                         </div>
                         <div style="font-size: 9px;">
-                            Date: <input type="text" class="editable-field date-field" id="tech_date" placeholder="MM/DD/YYYY" maxlength="10">
+                            Date: <div class="date-input-wrapper">
+                                <input type="text" class="editable-field date-field" id="tech_date" placeholder="MM/DD/YYYY" maxlength="10">
+                                <input type="date" id="tech_date_picker" tabindex="-1">
+                                <button type="button" class="calendar-btn" data-picker="tech_date_picker" data-target="tech_date" title="Pick date">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="signature-box">
@@ -1509,7 +1515,13 @@ if (file_exists($logo_path)) {
                             </div>
                         </div>
                         <div style="font-size: 9px;">
-                            Date: <input type="text" class="editable-field date-field" id="client_sig_date" placeholder="MM/DD/YYYY" maxlength="10">
+                            Date: <div class="date-input-wrapper">
+                                <input type="text" class="editable-field date-field" id="client_sig_date" placeholder="MM/DD/YYYY" maxlength="10">
+                                <input type="date" id="client_sig_date_picker" tabindex="-1">
+                                <button type="button" class="calendar-btn" data-picker="client_sig_date_picker" data-target="client_sig_date" title="Pick date">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1575,7 +1587,13 @@ if (file_exists($logo_path)) {
                         </div>
                         <div class="authorization-sig-box">
                             <label>Date:</label>
-                            <input type="text" class="editable-field date-field" id="auth_client_date" placeholder="MM/DD/YYYY" maxlength="10">
+                            <div class="date-input-wrapper">
+                                <input type="text" class="editable-field date-field" id="auth_client_date" placeholder="MM/DD/YYYY" maxlength="10">
+                                <input type="date" id="auth_client_date_picker" tabindex="-1">
+                                <button type="button" class="calendar-btn" data-picker="auth_client_date_picker" data-target="auth_client_date" title="Pick date">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
