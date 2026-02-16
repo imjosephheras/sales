@@ -313,6 +313,48 @@ const servicesCatalog = [
       "Follow applicable safety and sanitation procedures during the performance of the service.",
       "Leave restrooms clean, disinfected, and ready for normal use upon completion of the service."
     ]
+  },
+
+  // ===== HIGH CEILING CLEANING =====
+  {
+    id: "high_ceiling_cleaning",
+    name: "High Ceiling Cleaning",
+    category: "Ceiling Cleaning",
+    scope: [
+      "Perform full facility ceiling cleaning throughout all areas to remove dust, debris, cobwebs, and accumulated contaminants from accessible ceiling surfaces.",
+      "Clean accessible overhead structures including beams, vents, pipes, and light fixtures (where applicable).",
+      "Use appropriate equipment and methods to safely perform high-level cleaning.",
+      "Follow applicable safety procedures during the performance of the service.",
+      "Leave treated areas clean, safe, and ready for normal operations upon completion of the service."
+    ]
+  },
+
+  // ===== FOOD CART RELOCATION FOR CLEANING =====
+  {
+    id: "food_cart_relocation",
+    name: "Food Cart Relocation for Cleaning",
+    category: "Support Services",
+    scope: [
+      "Move food carts from the preparation area as necessary to allow proper cleaning of rooms and surrounding areas.",
+      "Coordinate movement to avoid damage to equipment, floors, and adjacent surfaces.",
+      "Return carts to their original designated locations upon completion of cleaning activities.",
+      "Follow applicable safety procedures during handling and relocation.",
+      "Leave areas organized and ready for normal operations upon completion of the service."
+    ]
+  },
+
+  // ===== TRASH RECEPTACLE DETAIL CLEANING =====
+  {
+    id: "trash_receptacle_detail_cleaning",
+    name: "Trash Receptacle Detail Cleaning",
+    category: "Sanitation",
+    scope: [
+      "Clean and detail all trash receptacles throughout the facility.",
+      "Clean interior and exterior surfaces to remove stains, residue, and buildup.",
+      "Disinfect trash receptacles using appropriate cleaning products.",
+      "Reinstall liners as needed.",
+      "Leave all receptacles clean, sanitized, and ready for normal use upon completion of the service."
+    ]
   }
 
 ];
