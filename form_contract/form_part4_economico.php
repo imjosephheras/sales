@@ -1811,8 +1811,80 @@ function applyBundleVisuals19() {
 </div>
 
 <style>
+  /* Staff Autocomplete Search */
+  .staff-search-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .staff-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+
+  .staff-search-input:focus {
+    outline: none;
+    border-color: #c00;
+  }
+
+  .staff-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 280px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    display: none;
+  }
+
+  .staff-dropdown.open {
+    display: block;
+  }
+
+  .staff-dropdown-category {
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #fff;
+    background-color: #c00;
+    position: sticky;
+    top: 0;
+  }
+
+  .staff-dropdown-item {
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.15s;
+  }
+
+  .staff-dropdown-item:hover {
+    background-color: #fff3f3;
+  }
+
+  .staff-dropdown-empty {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #999;
+    text-align: center;
+  }
+
+  /* Staff Category Tables */
   .staff-category {
-    margin-top: 20px;
+    margin-top: 15px;
     border-top: 3px solid #c00;
     border-radius: 8px;
     overflow: hidden;
@@ -1867,6 +1939,12 @@ function applyBundleVisuals19() {
     text-align: center;
   }
 
+  .staff-table td input[type="number"],
+  .staff-table td input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
   .readonly {
     background-color: #f9f9f9;
   }
@@ -1878,104 +1956,133 @@ function applyBundleVisuals19() {
   .expanded .toggle-icon {
     transform: rotate(180deg);
   }
+
+  .staff-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #c00;
+    font-size: 18px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .staff-delete-btn:hover {
+    background-color: #fee;
+    color: #900;
+  }
 </style>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const container = document.getElementById("staffTablesContainer");
 
-  window.toggleStaffTables = function () {
-    const select = document.getElementById("includeStaff");
-    if (select.value === "Yes") {
-      container.style.display = "block";
-      if (container.childElementCount === 0) loadStaffSections();
-    } else {
-      container.innerHTML = "";
-      container.style.display = "none";
-    }
-  };
+  // ── Central position catalog ──
+  const staffPositionsCatalog = [
+    { category: "<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", name: "<?= ($lang=='en') ? 'Housekeeper' : 'Camarista'; ?>" },
+    { category: "<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", name: "<?= ($lang=='en') ? 'Housekeeping' : 'Housekeeping'; ?>" },
+    { category: "<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", name: "<?= ($lang=='en') ? 'Laundry Attendant' : 'Encargado de Lavandería'; ?>" },
+    { category: "<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", name: "<?= ($lang=='en') ? 'Houseman' : 'Houseman / Auxiliar General'; ?>" },
+    { category: "<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", name: "<?= ($lang=='en') ? 'Public Areas Attendant' : 'Encargado de Áreas Públicas'; ?>" },
+    { category: "<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", name: "<?= ($lang=='en') ? 'Lobby Attendant' : 'Encargado de Lobby'; ?>" },
+    { category: "<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", name: "<?= ($lang=='en') ? 'Lobby Runner' : 'Lobby Runner'; ?>" },
+    { category: "<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", name: "<?= ($lang=='en') ? 'Turndown Attendant' : 'Encargado de Turn Down'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Dishwasher' : 'Lavaplatos'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Cook' : 'Cocinero'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Prep Cook' : 'Cocinero de Preparación'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Busser' : 'Ayudante de Mesero'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Runner' : 'Runner'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Server' : 'Mesero'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Host / Hostess' : 'Host / Hostess'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Barista' : 'Barista'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Bartender' : 'Bartender'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Barback' : 'Barback / Auxiliar de Barra'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Banquet Houseman' : 'Houseman de Banquetes'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", name: "<?= ($lang=='en') ? 'Cashier' : 'Cajero(a)'; ?>" },
+    { category: "<?= ($lang=='en') ? 'MAINTENANCE' : 'MANTENIMIENTO'; ?>", name: "<?= ($lang=='en') ? 'Maintenance Helper' : 'Auxiliar de Mantenimiento'; ?>" },
+    { category: "<?= ($lang=='en') ? 'MAINTENANCE' : 'MANTENIMIENTO'; ?>", name: "<?= ($lang=='en') ? 'Movers' : 'Mover / Mudanzas'; ?>" },
+    { category: "<?= ($lang=='en') ? 'RECREATION & POOL' : 'RECREACIÓN Y PISCINA'; ?>", name: "<?= ($lang=='en') ? 'Pool Attendant' : 'Encargado de Piscina'; ?>" },
+    { category: "<?= ($lang=='en') ? 'RECREATION & POOL' : 'RECREACIÓN Y PISCINA'; ?>", name: "<?= ($lang=='en') ? 'Recreation Slide Attendant' : 'Encargado de Tobogán'; ?>" },
+    { category: "<?= ($lang=='en') ? 'RECREATION & POOL' : 'RECREACIÓN Y PISCINA'; ?>", name: "<?= ($lang=='en') ? 'Recreation Supervisor' : 'Supervisor de Recreación'; ?>" },
+    { category: "<?= ($lang=='en') ? 'SECURITY' : 'SEGURIDAD'; ?>", name: "<?= ($lang=='en') ? 'Security Guard' : 'Guardia de Seguridad'; ?>" },
+    { category: "<?= ($lang=='en') ? 'VALET PARKING' : 'VALET PARKING'; ?>", name: "<?= ($lang=='en') ? 'Valet Attendant' : 'Valet Attendant'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FRONT DESK' : 'RECEPCIÓN'; ?>", name: "<?= ($lang=='en') ? 'Front Desk Attendant' : 'Recepcionista'; ?>" },
+    { category: "<?= ($lang=='en') ? 'FRONT DESK' : 'RECEPCIÓN'; ?>", name: "<?= ($lang=='en') ? 'Night Auditor' : 'Auditor Nocturno'; ?>" }
+  ];
 
-  function loadStaffSections() {
-    container.innerHTML = `
-      ${createCategory("<?= ($lang=='en') ? 'HOUSEKEEPING' : 'HOUSEKEEPING / AMA DE LLAVES'; ?>", [
-        "<?= ($lang=='en') ? 'Housekeeper' : 'Camarista'; ?>",
-        "<?= ($lang=='en') ? 'Housekeeping' : 'Housekeeping'; ?>",
-        "<?= ($lang=='en') ? 'Laundry Attendant' : 'Encargado de Lavandería'; ?>",
-        "<?= ($lang=='en') ? 'Houseman' : 'Houseman / Auxiliar General'; ?>",
-        "<?= ($lang=='en') ? 'Public Areas Attendant' : 'Encargado de Áreas Públicas'; ?>",
-        "<?= ($lang=='en') ? 'Lobby Attendant' : 'Encargado de Lobby'; ?>",
-        "<?= ($lang=='en') ? 'Lobby Runner' : 'Lobby Runner'; ?>",
-        "<?= ($lang=='en') ? 'Turndown Attendant' : 'Encargado de Turn Down'; ?>"
-      ])}
+  // Track selected positions by slug
+  const selectedSlugs = new Set();
 
-      ${createCategory("<?= ($lang=='en') ? 'FOOD & BEVERAGE' : 'ALIMENTOS Y BEBIDAS'; ?>", [
-        "<?= ($lang=='en') ? 'Dishwasher' : 'Lavaplatos'; ?>",
-        "<?= ($lang=='en') ? 'Cook' : 'Cocinero'; ?>",
-        "<?= ($lang=='en') ? 'Prep Cook' : 'Cocinero de Preparación'; ?>",
-        "<?= ($lang=='en') ? 'Busser' : 'Ayudante de Mesero'; ?>",
-        "<?= ($lang=='en') ? 'Runner' : 'Runner'; ?>",
-        "<?= ($lang=='en') ? 'Server' : 'Mesero'; ?>",
-        "<?= ($lang=='en') ? 'Host / Hostess' : 'Host / Hostess'; ?>",
-        "<?= ($lang=='en') ? 'Barista' : 'Barista'; ?>",
-        "<?= ($lang=='en') ? 'Bartender' : 'Bartender'; ?>",
-        "<?= ($lang=='en') ? 'Barback' : 'Barback / Auxiliar de Barra'; ?>",
-        "<?= ($lang=='en') ? 'Banquet Houseman' : 'Houseman de Banquetes'; ?>",
-        "<?= ($lang=='en') ? 'Cashier' : 'Cajero(a)'; ?>"
-      ])}
-
-      ${createCategory("<?= ($lang=='en') ? 'MAINTENANCE' : 'MANTENIMIENTO'; ?>", [
-        "<?= ($lang=='en') ? 'Maintenance Helper' : 'Auxiliar de Mantenimiento'; ?>",
-        "<?= ($lang=='en') ? 'Movers' : 'Mover / Mudanzas'; ?>"
-      ])}
-
-      ${createCategory("<?= ($lang=='en') ? 'RECREATION & POOL' : 'RECREACIÓN Y PISCINA'; ?>", [
-        "<?= ($lang=='en') ? 'Pool Attendant' : 'Encargado de Piscina'; ?>",
-        "<?= ($lang=='en') ? 'Recreation Slide Attendant' : 'Encargado de Tobogán'; ?>",
-        "<?= ($lang=='en') ? 'Recreation Supervisor' : 'Supervisor de Recreación'; ?>"
-      ])}
-
-      ${createCategory("<?= ($lang=='en') ? 'SECURITY' : 'SEGURIDAD'; ?>", [
-        "<?= ($lang=='en') ? 'Security Guard' : 'Guardia de Seguridad'; ?>"
-      ])}
-
-      ${createCategory("<?= ($lang=='en') ? 'VALET PARKING' : 'VALET PARKING'; ?>", [
-        "<?= ($lang=='en') ? 'Valet Attendant' : 'Valet Attendant'; ?>"
-      ])}
-
-      ${createCategory("<?= ($lang=='en') ? 'FRONT DESK' : 'RECEPCIÓN'; ?>", [
-        "<?= ($lang=='en') ? 'Front Desk Attendant' : 'Recepcionista'; ?>",
-        "<?= ($lang=='en') ? 'Night Auditor' : 'Auditor Nocturno'; ?>"
-      ])}
-    `;
+  // ── Slugify ──
+  function slugify(text) {
+    return text.toLowerCase().replace(/['']/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
   }
 
-  function createCategory(title, positions) {
-    const rows = positions
-      .map(pos => {
-        const slug = slugify(title + "_" + pos);
-        return `
-          <tr>
-            <td>${pos}</td>
-            <td><input type="number" name="base_${slug}" step="0.01"
-              placeholder="<?= ($lang=='en') ? '0.00' : '0.00'; ?>"
-              oninput="updateBillRate('${slug}')"></td>
+  // ── Get available (not yet selected) positions ──
+  function getAvailablePositions(filter) {
+    const term = (filter || "").toLowerCase();
+    return staffPositionsCatalog.filter(p => {
+      const slug = slugify(p.category + "_" + p.name);
+      if (selectedSlugs.has(slug)) return false;
+      if (!term) return true;
+      return p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term);
+    });
+  }
 
-            <td><input type="number" name="increase_${slug}" step="0.01"
-              placeholder="<?= ($lang=='en') ? '0%' : '0%'; ?>"
-              oninput="updateBillRate('${slug}')"></td>
+  // ── Render the dropdown list ──
+  function renderDropdown(filter) {
+    const dropdown = document.getElementById("staffDropdown");
+    const available = getAvailablePositions(filter);
 
-            <td><input type="text" name="bill_${slug}" class="readonly" readonly
-              placeholder="$0.00"></td>
-          </tr>
-        `;
-      })
-      .join("");
+    if (available.length === 0) {
+      dropdown.innerHTML = `<div class="staff-dropdown-empty"><?= ($lang=='en') ? 'No positions available' : 'No hay posiciones disponibles'; ?></div>`;
+      dropdown.classList.add("open");
+      return;
+    }
 
-    return `
-      <div class="staff-category">
+    let html = "";
+    let lastCat = "";
+    available.forEach(p => {
+      if (p.category !== lastCat) {
+        lastCat = p.category;
+        html += `<div class="staff-dropdown-category">${p.category}</div>`;
+      }
+      const slug = slugify(p.category + "_" + p.name);
+      html += `<div class="staff-dropdown-item" data-slug="${slug}" data-name="${p.name}" data-category="${p.category}">${p.name}</div>`;
+    });
+
+    dropdown.innerHTML = html;
+    dropdown.classList.add("open");
+
+    // Attach click handlers
+    dropdown.querySelectorAll(".staff-dropdown-item").forEach(item => {
+      item.addEventListener("click", function () {
+        const slug = this.dataset.slug;
+        const name = this.dataset.name;
+        const category = this.dataset.category;
+        selectPosition(slug, name, category);
+      });
+    });
+  }
+
+  // ── Select a position: add row to its category table ──
+  function selectPosition(slug, name, category) {
+    if (selectedSlugs.has(slug)) return;
+    selectedSlugs.add(slug);
+
+    // Find or create the category section
+    const catSlug = slugify(category);
+    let catSection = document.getElementById("staff-cat-" + catSlug);
+
+    if (!catSection) {
+      catSection = document.createElement("div");
+      catSection.className = "staff-category expanded";
+      catSection.id = "staff-cat-" + catSlug;
+      catSection.innerHTML = `
         <div class="staff-header" onclick="this.parentElement.classList.toggle('expanded')">
-          ${title}
-          <span class="toggle-icon">▼</span>
+          ${category}
+          <span class="toggle-icon">&#9660;</span>
         </div>
         <table class="staff-table">
           <thead>
@@ -1984,14 +2091,70 @@ document.addEventListener("DOMContentLoaded", function () {
               <th><?= ($lang=='en') ? 'Base Rate' : 'Tarifa Base'; ?></th>
               <th><?= ($lang=='en') ? '% Increase' : '% Incremento'; ?></th>
               <th><?= ($lang=='en') ? 'Bill Rate' : 'Tarifa Final'; ?></th>
+              <th style="width:50px;"></th>
             </tr>
           </thead>
-          <tbody>${rows}</tbody>
+          <tbody></tbody>
         </table>
-      </div>
+      `;
+      // Insert categories in catalog order
+      const catOrder = [...new Set(staffPositionsCatalog.map(p => slugify(p.category)))];
+      const currentIdx = catOrder.indexOf(catSlug);
+      let inserted = false;
+      const existingSections = container.querySelectorAll(".staff-category");
+      for (const sec of existingSections) {
+        const secCatSlug = sec.id.replace("staff-cat-", "");
+        const secIdx = catOrder.indexOf(secCatSlug);
+        if (secIdx > currentIdx) {
+          container.insertBefore(catSection, sec);
+          inserted = true;
+          break;
+        }
+      }
+      if (!inserted) container.appendChild(catSection);
+    }
+
+    // Add the row
+    const tbody = catSection.querySelector("tbody");
+    const tr = document.createElement("tr");
+    tr.id = "staff-row-" + slug;
+    tr.innerHTML = `
+      <td>${name}</td>
+      <td><input type="number" name="base_${slug}" step="0.01"
+        placeholder="0.00"
+        oninput="updateBillRate('${slug}')"></td>
+      <td><input type="number" name="increase_${slug}" step="0.01"
+        placeholder="0%"
+        oninput="updateBillRate('${slug}')"></td>
+      <td><input type="text" name="bill_${slug}" class="readonly" readonly
+        placeholder="$0.00"></td>
+      <td><button type="button" class="staff-delete-btn" onclick="removeStaffPosition('${slug}')" title="<?= ($lang=='en') ? 'Remove' : 'Eliminar'; ?>">&#128465;</button></td>
     `;
+    tbody.appendChild(tr);
+
+    // Clear and close the search
+    const searchInput = document.getElementById("staffSearchInput");
+    searchInput.value = "";
+    document.getElementById("staffDropdown").classList.remove("open");
   }
 
+  // ── Remove a position ──
+  window.removeStaffPosition = function (slug) {
+    const row = document.getElementById("staff-row-" + slug);
+    if (!row) return;
+
+    const tbody = row.closest("tbody");
+    const catSection = row.closest(".staff-category");
+    row.remove();
+    selectedSlugs.delete(slug);
+
+    // If no more rows in this category, remove the whole section
+    if (tbody && tbody.children.length === 0 && catSection) {
+      catSection.remove();
+    }
+  };
+
+  // ── Bill Rate calculation ──
   window.updateBillRate = function (slug) {
     const base = parseFloat(document.querySelector(`[name="base_${slug}"]`)?.value) || 0;
     const inc = parseFloat(document.querySelector(`[name="increase_${slug}"]`)?.value) || 0;
@@ -2000,8 +2163,53 @@ document.addEventListener("DOMContentLoaded", function () {
     bill.value = total > 0 ? `$${total.toFixed(2)}` : "$0.00";
   };
 
-  function slugify(text) {
-    return text.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  // ── Toggle staff section ──
+  window.toggleStaffTables = function () {
+    const select = document.getElementById("includeStaff");
+    if (select.value === "Yes") {
+      container.style.display = "block";
+      if (!document.getElementById("staffSearchWrapper")) {
+        loadStaffSearch();
+      }
+    } else {
+      container.innerHTML = "";
+      container.style.display = "none";
+      selectedSlugs.clear();
+    }
+  };
+
+  // ── Render the search bar ──
+  function loadStaffSearch() {
+    const wrapper = document.createElement("div");
+    wrapper.className = "staff-search-wrapper";
+    wrapper.id = "staffSearchWrapper";
+    wrapper.innerHTML = `
+      <input type="text" id="staffSearchInput" class="staff-search-input"
+        placeholder="<?= ($lang=='en') ? 'Search positions...' : 'Buscar posiciones...'; ?>"
+        autocomplete="off">
+      <div id="staffDropdown" class="staff-dropdown"></div>
+    `;
+    container.insertBefore(wrapper, container.firstChild);
+
+    const searchInput = document.getElementById("staffSearchInput");
+    const dropdown = document.getElementById("staffDropdown");
+
+    // Filter on input
+    searchInput.addEventListener("input", function () {
+      renderDropdown(this.value);
+    });
+
+    // Show dropdown on focus
+    searchInput.addEventListener("focus", function () {
+      renderDropdown(this.value);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function (e) {
+      if (!wrapper.contains(e.target)) {
+        dropdown.classList.remove("open");
+      }
+    });
   }
 });
 </script>
