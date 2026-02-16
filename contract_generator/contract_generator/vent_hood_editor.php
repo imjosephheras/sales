@@ -244,7 +244,8 @@ if (file_exists($logo_path)) {
         }
 
         .editable-field.date-field {
-            width: 100px;
+            width: 110px;
+            text-align: center;
         }
 
         .editable-field.full-width {
@@ -1130,13 +1131,13 @@ if (file_exists($logo_path)) {
                             <div class="info-row">
                                 <div class="info-cell info-label">Service date:</div>
                                 <div class="info-cell info-value">
-                                    <input type="date" class="editable-field date-field" id="service_date">
+                                    <input type="text" class="editable-field date-field" id="service_date" placeholder="MM/DD/YYYY" maxlength="10">
                                 </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-cell info-label">Next recommended date:</div>
                                 <div class="info-cell info-value">
-                                    <input type="date" class="editable-field date-field" id="next_service_date">
+                                    <input type="text" class="editable-field date-field" id="next_service_date" placeholder="MM/DD/YYYY" maxlength="10">
                                 </div>
                             </div>
                         </div>
@@ -1426,7 +1427,7 @@ if (file_exists($logo_path)) {
                             </div>
                         </div>
                         <div style="font-size: 9px;">
-                            Date: <input type="date" class="editable-field date-field" id="tech_date">
+                            Date: <input type="text" class="editable-field date-field" id="tech_date" placeholder="MM/DD/YYYY" maxlength="10">
                         </div>
                     </div>
                     <div class="signature-box">
@@ -1442,7 +1443,7 @@ if (file_exists($logo_path)) {
                             </div>
                         </div>
                         <div style="font-size: 9px;">
-                            Date: <input type="date" class="editable-field date-field" id="client_sig_date">
+                            Date: <input type="text" class="editable-field date-field" id="client_sig_date" placeholder="MM/DD/YYYY" maxlength="10">
                         </div>
                     </div>
                 </div>
@@ -1508,7 +1509,7 @@ if (file_exists($logo_path)) {
                         </div>
                         <div class="authorization-sig-box">
                             <label>Date:</label>
-                            <input type="date" class="editable-field date-field" id="auth_client_date">
+                            <input type="text" class="editable-field date-field" id="auth_client_date" placeholder="MM/DD/YYYY" maxlength="10">
                         </div>
                     </div>
                 </div>
@@ -1880,12 +1881,34 @@ if (file_exists($logo_path)) {
     }
 
     // =============================================
+    // DATE FIELD AUTO-FORMAT (MM/DD/YYYY)
+    // =============================================
+    function initDateFields() {
+        document.querySelectorAll('.date-field').forEach(function(field) {
+            field.addEventListener('input', function(e) {
+                var value = this.value.replace(/[^0-9]/g, '');
+                if (value.length > 8) value = value.substring(0, 8);
+                if (value.length >= 5) {
+                    this.value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4);
+                } else if (value.length >= 3) {
+                    this.value = value.substring(0, 2) + '/' + value.substring(2);
+                } else {
+                    this.value = value;
+                }
+            });
+        });
+    }
+
+    // =============================================
     // INITIALIZE
     // =============================================
     document.addEventListener('DOMContentLoaded', function() {
         initSignaturePad('sig-tech');
         initSignaturePad('sig-client');
         initSignaturePad('sig-auth-client');
+
+        // Initialize date field auto-formatting
+        initDateFields();
 
         // Initialize authorization checkbox
         initAuthorizationCheckbox();
