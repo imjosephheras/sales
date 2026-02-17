@@ -29,6 +29,7 @@ function initializeBillingDocuments($pdo) {
       `status` VARCHAR(50) DEFAULT 'pending',
       `completed_by` INT DEFAULT NULL,
       `completed_by_name` VARCHAR(200) DEFAULT NULL,
+      `completed_at` TIMESTAMP NULL DEFAULT NULL,
       `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       INDEX `idx_form_id` (`form_id`),
@@ -54,6 +55,7 @@ function initializeBillingDocuments($pdo) {
         'total_amount'       => 'VARCHAR(100) DEFAULT NULL',
         'completed_by'       => 'INT DEFAULT NULL',
         'completed_by_name'  => 'VARCHAR(200) DEFAULT NULL',
+        'completed_at'       => 'TIMESTAMP NULL DEFAULT NULL',
     ];
 
     foreach ($columnsToCheck as $col => $def) {
