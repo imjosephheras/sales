@@ -8,7 +8,7 @@
 <div class="appendix-content">
     <?php foreach ($scopeSections as $section): ?>
     <div class="no-break" style="margin-bottom: 18px;">
-        <div class="section-number" style="margin-top: 10px;">SCOPE OF WORK &ndash; <?php echo strtoupper(htmlspecialchars($section['title'] ?? '')); ?></div>
+        <div class="section-number" style="margin-top: 10px;"><?php echo strtoupper(htmlspecialchars($section['title'] ?? '')); ?></div>
         <div class="subsection">
             <p><span class="subsection-label">WORK TO BE PERFORMED:</span></p>
             <p><?php echo nl2br(htmlspecialchars($section['scope_content'] ?? '')); ?></p>
