@@ -631,6 +631,12 @@
                 if (currentRequestData.Scope_Of_Work) {
                     formData.Scope_Of_Work = currentRequestData.Scope_Of_Work;
                 }
+                if (currentRequestData.scope_sections) {
+                    formData.scope_sections = currentRequestData.scope_sections;
+                }
+                if (currentRequestData.Scope_Sections) {
+                    formData.Scope_Sections = currentRequestData.Scope_Sections;
+                }
                 // Carry over JSON array fields for fallback
                 ['type18','write18','time18','freq18','desc18','subtotal18',
                  'type19','time19','freq19','desc19','subtotal19',

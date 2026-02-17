@@ -149,6 +149,11 @@ try {
         $stmtS = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
         $stmtS->execute([$formId]);
         $request['scope_of_work_tasks'] = $stmtS->fetchAll(PDO::FETCH_COLUMN);
+
+        // Get scope sections (dynamic blocks) from detail table
+        $stmtSS = $pdo->prepare("SELECT title, scope_content FROM scope_sections WHERE form_id = ? ORDER BY section_order ASC");
+        $stmtSS->execute([$formId]);
+        $request['scope_sections'] = $stmtSS->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Formatear fechas

@@ -263,46 +263,9 @@
         });
 
         // ========================================
-        // BUILD SCOPE OF WORK
+        // BUILD SCOPE OF WORK (dynamic sections only)
         // ========================================
-        let scopeWorkHtml = '';
-        if (data.scope_of_work_tasks && Array.isArray(data.scope_of_work_tasks) && data.scope_of_work_tasks.length > 0) {
-            scopeWorkHtml = '<ul>' + data.scope_of_work_tasks.map(function(task) {
-                return '<li>' + escapeHtml(task) + '</li>';
-            }).join('') + '</ul>';
-        } else if (data.Scope_Of_Work && Array.isArray(data.Scope_Of_Work) && data.Scope_Of_Work.length > 0) {
-            scopeWorkHtml = '<ul>' + data.Scope_Of_Work.map(function(task) {
-                return '<li>' + escapeHtml(task) + '</li>';
-            }).join('') + '</ul>';
-        } else {
-            scopeWorkHtml = `
-                <ul>
-                    <li>Professional service as per client requirements</li>
-                    <li>All work performed to industry standards with quality assurance</li>
-                    <li>Final inspection to ensure satisfactory completion</li>
-                </ul>
-            `;
-        }
-
-        // Build scope header from actual Q19 service types
-        var scopeServiceNames = [];
-        if (data.hood_vent_services && Array.isArray(data.hood_vent_services)) {
-            data.hood_vent_services.forEach(function(svc) {
-                if (svc.service_type && scopeServiceNames.indexOf(svc.service_type) === -1) {
-                    scopeServiceNames.push(svc.service_type);
-                }
-            });
-        }
-        if (data.kitchen_services && Array.isArray(data.kitchen_services)) {
-            data.kitchen_services.forEach(function(svc) {
-                if (svc.service_type && scopeServiceNames.indexOf(svc.service_type) === -1) {
-                    scopeServiceNames.push(svc.service_type);
-                }
-            });
-        }
-        var scopeHeaderName = scopeServiceNames.length > 0
-            ? scopeServiceNames.join(' / ')
-            : requestedService;
+        var dynamicScopeSections = data.scope_sections || data.Scope_Sections || [];
 
         // Determine logo based on Service_Type (same as PDF)
         const deptLower = (data.Service_Type || '').toLowerCase();
@@ -658,21 +621,27 @@
                     </tr>
                 </table>
 
-                <!-- SCOPE OF WORK - Exact match to PDF -->
-                <div class="jwo-scope-exact">
-                    <div class="jwo-scope-header-exact">
-                        SCOPE OF WORK &ndash; ${escapeHtml(scopeHeaderName).toUpperCase()}
-                    </div>
-                    <div class="jwo-scope-content-exact">
-                        <h4>WORK TO BE PERFORMED:</h4>
-                        ${scopeWorkHtml}
+                <!-- SCOPE OF WORK - Dynamic sections only -->
+                ${dynamicScopeSections.length > 0 ? dynamicScopeSections.map(function(section) {
+                    return `
+                    <div class="jwo-scope-exact">
+                        <div class="jwo-scope-header-exact">
+                            ${escapeHtml(section.title || '').toUpperCase()}
+                        </div>
+                        <div class="jwo-scope-content-exact">
+                            <h4>WORK TO BE PERFORMED:</h4>
+                            <p>${escapeHtml(section.scope_content || section.content || '').replace(/\n/g, '<br>')}</p>
+                        </div>
+                    </div>`;
+                }).join('') : ''}
 
-                        ${data.Additional_Comments ? `
-                            <h4>ADDITIONAL NOTES:</h4>
-                            <p>${escapeHtml(data.Additional_Comments).replace(/\n/g, '<br>')}</p>
-                        ` : ''}
+                ${data.Additional_Comments ? `
+                <div class="jwo-scope-exact">
+                    <div class="jwo-scope-content-exact">
+                        <h4>ADDITIONAL NOTES:</h4>
+                        <p>${escapeHtml(data.Additional_Comments).replace(/\n/g, '<br>')}</p>
                     </div>
-                </div>
+                </div>` : ''}
 
                 <!-- PAGE SEPARATOR -->
                 <div class="jwo-footer-wrapper">
