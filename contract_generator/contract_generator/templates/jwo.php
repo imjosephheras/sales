@@ -390,7 +390,7 @@
     $company_address = htmlspecialchars($data['Company_Address'] ?? 'N/A');
 
     $seller = htmlspecialchars($data['Seller'] ?? 'N/A');
-    $work_date = date('m/d/Y');
+    $work_date = !empty($data['Work_Date']) ? date('m/d/Y', strtotime($data['Work_Date'])) : date('m/d/Y');
     $department = htmlspecialchars($data['Service_Type'] ?? 'N/A');
 
     // Payment terms mapping

@@ -52,6 +52,17 @@ try {
         }
     }
 
+    // Fetch Work_Date and Document_Date from forms table
+    if ($formId) {
+        $stmtFormDates = $pdo->prepare("SELECT Work_Date, Document_Date FROM forms WHERE form_id = ? LIMIT 1");
+        $stmtFormDates->execute([$formId]);
+        $formDates = $stmtFormDates->fetch(PDO::FETCH_ASSOC);
+        if ($formDates) {
+            $data['Work_Date'] = $formDates['Work_Date'];
+            $data['Document_Date'] = $formDates['Document_Date'];
+        }
+    }
+
     $janitorialServices = [];
     $kitchenServices = [];
     $hoodVentServices = [];
