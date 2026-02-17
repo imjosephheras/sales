@@ -1972,6 +1972,62 @@ function applyBundleVisuals19() {
     background-color: #fee;
     color: #900;
   }
+
+  /* + New Position option in dropdown */
+  .staff-dropdown-separator {
+    border-top: 1px solid #e0e0e0;
+    margin: 4px 0;
+  }
+
+  .staff-new-position {
+    color: #1a73e8;
+    font-weight: 600;
+  }
+
+  .staff-new-position:hover {
+    background-color: #e8f0fe;
+  }
+
+  /* New position input bar */
+  .new-position-input-wrapper {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    align-items: center;
+  }
+
+  .new-position-input-wrapper input[type="text"] {
+    flex: 1;
+  }
+
+  .btn-add-position {
+    background: #1a73e8;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .btn-add-position:hover {
+    background: #1558b0;
+  }
+
+  .btn-cancel-position {
+    background: #f1f1f1;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .btn-cancel-position:hover {
+    background: #e0e0e0;
+  }
 </style>
 
 <script>
@@ -2035,12 +2091,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const dropdown = document.getElementById("staffDropdown");
     const available = getAvailablePositions(filter);
 
-    if (available.length === 0) {
-      dropdown.innerHTML = `<div class="staff-dropdown-empty"><?= ($lang=='en') ? 'No positions available' : 'No hay posiciones disponibles'; ?></div>`;
-      dropdown.classList.add("open");
-      return;
-    }
-
     let html = "";
     let lastCat = "";
     available.forEach(p => {
@@ -2052,11 +2102,19 @@ document.addEventListener("DOMContentLoaded", function () {
       html += `<div class="staff-dropdown-item" data-slug="${slug}" data-name="${p.name}" data-category="${p.category}">${p.name}</div>`;
     });
 
+    if (available.length === 0) {
+      html += `<div class="staff-dropdown-empty"><?= ($lang=='en') ? 'No positions available' : 'No hay posiciones disponibles'; ?></div>`;
+    }
+
+    // Always show "+ New Position" at the end
+    html += `<div class="staff-dropdown-separator"></div>`;
+    html += `<div class="staff-dropdown-item staff-new-position" id="newPositionOption"><?= ($lang=='en') ? '+ New Position' : '+ Nueva Posición'; ?></div>`;
+
     dropdown.innerHTML = html;
     dropdown.classList.add("open");
 
-    // Attach click handlers
-    dropdown.querySelectorAll(".staff-dropdown-item").forEach(item => {
+    // Attach click handlers for catalog items
+    dropdown.querySelectorAll(".staff-dropdown-item:not(.staff-new-position)").forEach(item => {
       item.addEventListener("click", function () {
         const slug = this.dataset.slug;
         const name = this.dataset.name;
@@ -2064,6 +2122,14 @@ document.addEventListener("DOMContentLoaded", function () {
         selectPosition(slug, name, category);
       });
     });
+
+    // Attach click handler for "+ New Position"
+    const newPosOption = document.getElementById("newPositionOption");
+    if (newPosOption) {
+      newPosOption.addEventListener("click", function () {
+        showNewPositionInput();
+      });
+    }
   }
 
   // ── Select a position: add row to its category table ──
@@ -2097,18 +2163,20 @@ document.addEventListener("DOMContentLoaded", function () {
           <tbody></tbody>
         </table>
       `;
-      // Insert categories in catalog order
+      // Insert categories in catalog order (custom categories go at the end)
       const catOrder = [...new Set(staffPositionsCatalog.map(p => slugify(p.category)))];
       const currentIdx = catOrder.indexOf(catSlug);
       let inserted = false;
-      const existingSections = container.querySelectorAll(".staff-category");
-      for (const sec of existingSections) {
-        const secCatSlug = sec.id.replace("staff-cat-", "");
-        const secIdx = catOrder.indexOf(secCatSlug);
-        if (secIdx > currentIdx) {
-          container.insertBefore(catSection, sec);
-          inserted = true;
-          break;
+      if (currentIdx !== -1) {
+        const existingSections = container.querySelectorAll(".staff-category");
+        for (const sec of existingSections) {
+          const secCatSlug = sec.id.replace("staff-cat-", "");
+          const secIdx = catOrder.indexOf(secCatSlug);
+          if (secIdx > currentIdx) {
+            container.insertBefore(catSection, sec);
+            inserted = true;
+            break;
+          }
         }
       }
       if (!inserted) container.appendChild(catSection);
@@ -2210,6 +2278,62 @@ document.addEventListener("DOMContentLoaded", function () {
         dropdown.classList.remove("open");
       }
     });
+  }
+
+  // ── Show input bar for new custom position ──
+  function showNewPositionInput() {
+    const dropdown = document.getElementById("staffDropdown");
+    dropdown.classList.remove("open");
+
+    let newPosWrapper = document.getElementById("newPositionInputWrapper");
+    if (!newPosWrapper) {
+      const searchWrapper = document.getElementById("staffSearchWrapper");
+      newPosWrapper = document.createElement("div");
+      newPosWrapper.id = "newPositionInputWrapper";
+      newPosWrapper.className = "new-position-input-wrapper";
+      newPosWrapper.innerHTML = `
+        <input type="text" id="newPositionNameInput" class="staff-search-input"
+          placeholder="<?= ($lang=='en') ? 'Enter new position name...' : 'Escriba el nombre de la nueva posición...'; ?>"
+          autocomplete="off">
+        <button type="button" id="addNewPositionBtn" class="btn-add-position"><?= ($lang=='en') ? 'Add' : 'Agregar'; ?></button>
+        <button type="button" id="cancelNewPositionBtn" class="btn-cancel-position">&times;</button>
+      `;
+      searchWrapper.after(newPosWrapper);
+
+      document.getElementById("addNewPositionBtn").addEventListener("click", addCustomPosition);
+      document.getElementById("cancelNewPositionBtn").addEventListener("click", hideNewPositionInput);
+      document.getElementById("newPositionNameInput").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); addCustomPosition(); }
+      });
+    }
+
+    newPosWrapper.style.display = "flex";
+    document.getElementById("newPositionNameInput").value = "";
+    document.getElementById("newPositionNameInput").focus();
+  }
+
+  // ── Add the custom position ──
+  function addCustomPosition() {
+    const input = document.getElementById("newPositionNameInput");
+    const name = (input.value || "").trim();
+    if (!name) return;
+
+    const slug = slugify(name);
+    if (selectedSlugs.has(slug)) {
+      alert("<?= ($lang=='en') ? 'This position has already been added.' : 'Esta posición ya ha sido agregada.'; ?>");
+      return;
+    }
+
+    const category = "<?= ($lang=='en') ? 'OTHER' : 'OTROS'; ?>";
+    selectPosition(slug, name, category);
+    input.value = "";
+    hideNewPositionInput();
+  }
+
+  // ── Hide the new position input bar ──
+  function hideNewPositionInput() {
+    const wrapper = document.getElementById("newPositionInputWrapper");
+    if (wrapper) wrapper.style.display = "none";
   }
 });
 </script>
