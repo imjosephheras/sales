@@ -29,7 +29,7 @@ try {
     }
 
     // Get hood vent services from contract_items
-    $stmtItems = $pdo->prepare("SELECT * FROM contract_items WHERE form_id = ? AND service_category = 'hood_vent' ORDER BY service_number");
+    $stmtItems = $pdo->prepare("SELECT * FROM contract_items WHERE form_id = ? AND category = 'hood_vent' ORDER BY position");
     $stmtItems->execute([$id]);
     $hoodVentServices = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
@@ -52,7 +52,7 @@ try {
         'status' => $form['status'],
         'Invoice_Frequency' => $form['invoice_frequency'],
         'Contract_Duration' => $form['contract_duration'],
-        'grand_total' => $form['grand_total'],
+        'total_cost' => $form['total_cost'],
         'Order_Nomenclature' => $form['Order_Nomenclature'],
         'order_number' => $form['order_number'],
     ];

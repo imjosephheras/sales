@@ -45,7 +45,7 @@ function initializeFormsTable($pdo) {
 
       -- SECTION 4: Economic Information
       `seller` VARCHAR(100) DEFAULT NULL,
-      `grand_total` DECIMAL(12,2) DEFAULT NULL,
+      `total_cost` DECIMAL(10,2) DEFAULT NULL,
       `payment_terms` VARCHAR(100) DEFAULT NULL,
       `include_staff` VARCHAR(10) DEFAULT NULL,
 
@@ -99,16 +99,19 @@ function initializeFormsTable($pdo) {
     CREATE TABLE IF NOT EXISTS `contract_items` (
       `id` INT AUTO_INCREMENT PRIMARY KEY,
       `form_id` INT NOT NULL,
-      `service_category` VARCHAR(50) NOT NULL COMMENT 'janitorial, kitchen, hood_vent',
-      `service_number` INT DEFAULT NULL,
-      `service_type` VARCHAR(200) DEFAULT NULL,
+      `category` VARCHAR(50) NOT NULL COMMENT 'janitorial, kitchen, hood_vent',
+      `service_name` VARCHAR(255) DEFAULT NULL,
+      `service_type` VARCHAR(100) DEFAULT NULL,
       `service_time` VARCHAR(100) DEFAULT NULL,
       `frequency` VARCHAR(100) DEFAULT NULL,
       `description` TEXT DEFAULT NULL,
       `subtotal` DECIMAL(12,2) DEFAULT NULL,
-      `bundle_group` VARCHAR(50) DEFAULT NULL,
+      `bundle_group` VARCHAR(100) DEFAULT NULL,
+      `position` INT DEFAULT NULL,
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       INDEX `idx_form_id` (`form_id`),
-      INDEX `idx_category` (`service_category`)
+      INDEX `idx_category` (`category`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
@@ -157,6 +160,21 @@ function initializeFormsTable($pdo) {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
+    // Contract staff positions
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `contract_staff` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `form_id` INT NOT NULL,
+      `position` VARCHAR(150) DEFAULT NULL,
+      `base_rate` DECIMAL(12,2) DEFAULT NULL,
+      `percent_increase` DECIMAL(5,2) DEFAULT NULL,
+      `bill_rate` DECIMAL(12,2) DEFAULT NULL,
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX `idx_form_id` (`form_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
     // Form photos (Section 8)
     $pdo->exec("
     CREATE TABLE IF NOT EXISTS `form_photos` (
@@ -191,7 +209,7 @@ function addMissingColumnsToForms($pdo) {
         'include_staff'            => 'VARCHAR(10) DEFAULT NULL',
         'service_status'           => "ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled') DEFAULT 'pending'",
         'service_completed_at'     => 'TIMESTAMP NULL DEFAULT NULL',
-        'grand_total'              => 'DECIMAL(12,2) DEFAULT NULL',
+        'total_cost'               => 'DECIMAL(10,2) DEFAULT NULL',
         'ready_to_invoice'         => 'TINYINT(1) DEFAULT 0',
         'final_pdf_path'           => 'VARCHAR(500) DEFAULT NULL',
         'task_tracking'            => 'JSON DEFAULT NULL',
@@ -373,16 +391,16 @@ function generateRecurringAgendas($pdo, $baseEventId, $formId, $baseDate, $frequ
 }
 
 /**
- * Calculate and update the grand_total for a form based on its contract_items
+ * Calculate and update the total_cost for a form based on its contract_items
  */
-function recalculateGrandTotal($pdo, $formId) {
+function recalculateTotalCost($pdo, $formId) {
     $stmt = $pdo->prepare("SELECT COALESCE(SUM(subtotal), 0) as total FROM contract_items WHERE form_id = ?");
     $stmt->execute([$formId]);
     $total = $stmt->fetchColumn();
-    $grandTotal = $total > 0 ? $total : null;
+    $totalCost = $total > 0 ? $total : null;
 
-    $pdo->prepare("UPDATE forms SET grand_total = ? WHERE form_id = ?")->execute([$grandTotal, $formId]);
+    $pdo->prepare("UPDATE forms SET total_cost = ? WHERE form_id = ?")->execute([$totalCost, $formId]);
 
-    return $grandTotal;
+    return $totalCost;
 }
 ?>

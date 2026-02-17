@@ -43,7 +43,7 @@ $sql = "
         f.status AS contract_status,
         f.completed_at AS contract_completed_at,
         f.final_pdf_path,
-        f.grand_total AS PriceInput,
+        f.total_cost AS PriceInput,
         b.id AS billing_id,
         b.status AS billing_status,
         b.completed_at AS billing_completed_at,

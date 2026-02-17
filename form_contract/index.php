@@ -1686,6 +1686,12 @@ document.addEventListener("DOMContentLoaded", () => {
       populateKitchenCosts(additionalData.kitchen_costs || [], additionalData.hood_costs || []);
     }
 
+    // Handle contract_staff if present
+    if (additionalData.contract_staff && additionalData.contract_staff.length > 0) {
+      console.log('👥 Loading contract staff:', additionalData.contract_staff);
+      populateContractStaff(additionalData.contract_staff);
+    }
+
     // Handle photos if present
     if (additionalData.photos && additionalData.photos.length > 0) {
       console.log('📸 Loading photos:', additionalData.photos);
@@ -2014,6 +2020,92 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log('Kitchen/Hood costs populated successfully');
   };
 
+  /* ===============================
+     POPULATE CONTRACT STAFF (Q20)
+     Loads staff from contract_staff table
+     =============================== */
+  window.populateContractStaff = function(staffRows) {
+    if (!staffRows || staffRows.length === 0) return;
+
+    // Set includeStaff to "Yes" and trigger the UI
+    const includeStaff = document.getElementById('includeStaff');
+    if (includeStaff) {
+      includeStaff.value = 'Yes';
+      includeStaff.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Wait for staff search UI to render, then populate positions
+    setTimeout(() => {
+      staffRows.forEach(row => {
+        const positionName = row.position || '';
+        if (!positionName) return;
+
+        const slug = positionName.toLowerCase().replace(/['']/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        const baseRate = row.base_rate || '';
+        const percentIncrease = row.percent_increase || '';
+        const billRate = row.bill_rate || '';
+
+        // Check if a matching input already exists (position was added via catalog)
+        let baseInput = document.querySelector('[name="base_' + slug + '"]');
+
+        if (!baseInput) {
+          // Position not found in catalog; create a manual staff row in a generic category
+          const container = document.getElementById('staffTablesContainer');
+          if (!container) return;
+
+          let genericSection = document.getElementById('staff-cat-loaded');
+          if (!genericSection) {
+            genericSection = document.createElement('div');
+            genericSection.className = 'staff-category expanded';
+            genericSection.id = 'staff-cat-loaded';
+            genericSection.innerHTML = `
+              <div class="staff-header" onclick="this.parentElement.classList.toggle('expanded')">
+                STAFF POSITIONS
+                <span class="toggle-icon">&#9660;</span>
+              </div>
+              <table class="staff-table">
+                <thead>
+                  <tr>
+                    <th>Position</th>
+                    <th>Base Rate</th>
+                    <th>% Increase</th>
+                    <th>Bill Rate</th>
+                    <th style="width:50px;"></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            `;
+            container.appendChild(genericSection);
+          }
+
+          const tbody = genericSection.querySelector('tbody');
+          const tr = document.createElement('tr');
+          tr.id = 'staff-row-' + slug;
+          tr.innerHTML = `
+            <td>${positionName}</td>
+            <td><input type="number" name="base_${slug}" step="0.01" placeholder="0.00" oninput="updateBillRate('${slug}')"></td>
+            <td><input type="number" name="increase_${slug}" step="0.01" placeholder="0%" oninput="updateBillRate('${slug}')"></td>
+            <td><input type="text" name="bill_${slug}" class="readonly" readonly placeholder="$0.00"></td>
+            <td><button type="button" class="staff-delete-btn" onclick="removeStaffPosition('${slug}')">&#128465;</button></td>
+          `;
+          tbody.appendChild(tr);
+          baseInput = tr.querySelector('[name="base_' + slug + '"]');
+        }
+
+        // Set values
+        if (baseInput && baseRate) baseInput.value = baseRate;
+        const incInput = document.querySelector('[name="increase_' + slug + '"]');
+        if (incInput && percentIncrease) incInput.value = percentIncrease;
+
+        // Trigger bill rate recalculation
+        if (typeof updateBillRate === 'function') {
+          updateBillRate(slug);
+        }
+      });
+    }, 400);
+  };
+
 /* ===============================
    LOAD FORM DATA - VERSIÓN CORREGIDA
    ⚠️ ESTA ES LA VERSIÓN QUE DEBES USAR
@@ -2040,6 +2132,7 @@ window.loadFormData = function(formId) {
         janitorial_costs: data.janitorial_costs || [],
         kitchen_costs: data.kitchen_costs || [],
         hood_costs: data.hood_costs || [],
+        contract_staff: data.contract_staff || [],
         photos: data.photos || []
       });
 

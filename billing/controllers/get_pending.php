@@ -15,7 +15,7 @@ try {
                 f.client_name,
                 f.request_type,
                 f.requested_service,
-                f.grand_total,
+                f.total_cost,
                 f.docnum AS form_docnum
             FROM billing_documents bd
             LEFT JOIN forms f ON bd.form_id = f.form_id

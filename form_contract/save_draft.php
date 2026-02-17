@@ -3,7 +3,7 @@
 // save_draft.php - Contract Form Save
 // ============================================================
 // ARCHITECTURE: forms + contract_items as single source of truth
-// All services saved to contract_items. grand_total calculated
+// All services saved to contract_items. total_cost calculated
 // from SUM(contract_items.subtotal).
 // ============================================================
 
@@ -275,9 +275,9 @@ try {
 
     $stmtItem = $pdo->prepare("
         INSERT INTO contract_items (
-            form_id, service_category, service_number, service_type,
-            service_time, frequency, description, subtotal, bundle_group
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            form_id, category, service_name, service_type,
+            service_time, frequency, description, subtotal, bundle_group, position
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     // 3a: Save Janitorial Services (Q18) as contract_items
@@ -299,13 +299,14 @@ try {
                     $stmtItem->execute([
                         $saved_form_id,
                         'janitorial',
-                        $i + 1,
+                        $serviceType,
                         $serviceType,
                         $_POST['time18'][$i] ?? null,
                         $_POST['freq18'][$i] ?? null,
                         $_POST['desc18'][$i] ?? null,
                         $subtotal,
-                        $bundleGroup
+                        $bundleGroup,
+                        $i + 1
                     ]);
                 }
             }
@@ -338,13 +339,14 @@ try {
                     $stmtItem->execute([
                         $saved_form_id,
                         $category,
-                        $i + 1,
+                        $serviceType,
                         $serviceType,
                         $_POST['time19'][$i] ?? null,
                         $_POST['freq19'][$i] ?? null,
                         $_POST['desc19'][$i] ?? null,
                         $subtotal,
-                        $bundleGroup
+                        $bundleGroup,
+                        $i + 1
                     ]);
                 }
             }
@@ -352,9 +354,45 @@ try {
     }
 
     // ============================================================
-    // PASO 4: CALCULAR Y GUARDAR GRAND_TOTAL
+    // PASO 3b: GUARDAR CONTRACT STAFF
     // ============================================================
-    recalculateGrandTotal($pdo, $saved_form_id);
+    $pdo->prepare("DELETE FROM contract_staff WHERE form_id = ?")->execute([$saved_form_id]);
+
+    if (isset($_POST['includeStaff']) && $_POST['includeStaff'] === 'Yes') {
+        $stmtStaff = $pdo->prepare("
+            INSERT INTO contract_staff (form_id, position, base_rate, percent_increase, bill_rate)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+
+        // Collect staff positions from dynamic form fields (base_{slug}, increase_{slug}, bill_{slug})
+        $staffPositions = [];
+        foreach ($_POST as $key => $value) {
+            if (strpos($key, 'base_') === 0) {
+                $slug = substr($key, 5);
+                $baseRate = floatval($value);
+                $percentIncrease = floatval($_POST['increase_' . $slug] ?? 0);
+                $billRateRaw = $_POST['bill_' . $slug] ?? '0';
+                $billRate = floatval(str_replace(['$', ','], '', $billRateRaw));
+
+                if ($baseRate > 0 || $percentIncrease > 0 || $billRate > 0) {
+                    // Convert slug back to readable position name
+                    $positionName = ucwords(str_replace('_', ' ', $slug));
+                    $stmtStaff->execute([
+                        $saved_form_id,
+                        $positionName,
+                        $baseRate > 0 ? $baseRate : null,
+                        $percentIncrease > 0 ? $percentIncrease : null,
+                        $billRate > 0 ? $billRate : null
+                    ]);
+                }
+            }
+        }
+    }
+
+    // ============================================================
+    // PASO 4: CALCULAR Y GUARDAR TOTAL_COST
+    // ============================================================
+    recalculateTotalCost($pdo, $saved_form_id);
 
     // ============================================================
     // PASO 5: GUARDAR FOTOS (Q29)

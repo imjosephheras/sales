@@ -39,7 +39,7 @@ try {
         'Invoice_Frequency' => 'invoice_frequency',
         'Contract_Duration' => 'contract_duration',
         'Seller' => 'seller',
-        'PriceInput' => 'grand_total',
+        'PriceInput' => 'total_cost',
         'inflationAdjustment' => 'inflation_adjustment',
         'totalArea' => 'total_area',
         'buildingsIncluded' => 'buildings_included',

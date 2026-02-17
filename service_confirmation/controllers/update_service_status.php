@@ -71,7 +71,7 @@ try {
         'Email' => $form['email'],
         'Number_Phone' => $form['phone'],
         'Seller' => $form['seller'],
-        'PriceInput' => $form['grand_total'],
+        'PriceInput' => $form['total_cost'],
         'Work_Date' => $form['Work_Date'],
         'Document_Date' => $form['Document_Date'],
         'Order_Nomenclature' => $form['Order_Nomenclature'],

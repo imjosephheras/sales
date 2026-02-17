@@ -28,7 +28,7 @@ $stmt = $pdo->query("
         invoice_frequency,
         contract_duration,
         seller,
-        grand_total,
+        total_cost,
         inflation_adjustment,
         total_area,
         buildings_included,
@@ -60,7 +60,7 @@ $columns = [
     'Invoice Frequency' => 'invoice_frequency',
     'Contract Duration' => 'contract_duration',
     'Seller' => 'seller',
-    'Total Cost' => 'grand_total',
+    'Total Cost' => 'total_cost',
     'Inflation Adjustment' => 'inflation_adjustment',
     'Total Area (sq ft)' => 'total_area',
     'Buildings Included' => 'buildings_included',
@@ -602,7 +602,7 @@ function formatCurrency($value) {
 
                                     // Apply specific cell types
                                     $isStatusBadge = false;
-                                    if ($field === 'grand_total') {
+                                    if ($field === 'total_cost') {
                                         $cellClass = 'cell-currency';
                                         if ($value) $value = formatCurrency(floatval(str_replace(['$', ','], '', $value)));
                                     } elseif ($field === 'email') {

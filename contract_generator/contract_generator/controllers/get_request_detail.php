@@ -25,7 +25,7 @@ try {
     }
 
     // Get contract items
-    $stmtItems = $pdo->prepare("SELECT * FROM contract_items WHERE form_id = ? ORDER BY service_category, service_number");
+    $stmtItems = $pdo->prepare("SELECT * FROM contract_items WHERE form_id = ? ORDER BY category, position");
     $stmtItems->execute([$id]);
     $contractItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
@@ -60,7 +60,7 @@ try {
         'Invoice_Frequency' => $form['invoice_frequency'],
         'Contract_Duration' => $form['contract_duration'],
         'Seller' => $form['seller'],
-        'PriceInput' => $form['grand_total'],
+        'PriceInput' => $form['total_cost'],
         'includeStaff' => $form['include_staff'],
         'inflationAdjustment' => $form['inflation_adjustment'],
         'totalArea' => $form['total_area'],
@@ -76,7 +76,7 @@ try {
         'Order_Nomenclature' => $form['Order_Nomenclature'],
         'order_number' => $form['order_number'],
         'service_status' => $form['service_status'],
-        'grand_total' => $form['grand_total'],
+        'total_cost' => $form['total_cost'],
         'created_at' => $form['created_at'],
         'updated_at' => $form['updated_at'],
         'completed_at' => $form['completed_at'],

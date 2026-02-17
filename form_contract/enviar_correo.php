@@ -281,7 +281,7 @@ try {
             city, state,
             site_visit_conducted,
             invoice_frequency, contract_duration,
-            seller, grand_total,
+            seller, total_cost,
             include_staff,
             inflation_adjustment, total_area, buildings_included, start_date_services,
             site_observation, additional_comments, email_information_sent,
@@ -295,7 +295,7 @@ try {
             :city, :state,
             :site_visit_conducted,
             :invoice_frequency, :contract_duration,
-            :seller, :grand_total,
+            :seller, :total_cost,
             :include_staff,
             :inflation_adjustment, :total_area, :buildings_included, :start_date_services,
             :site_observation, :additional_comments, :email_info_sent,
@@ -324,7 +324,7 @@ try {
         ':invoice_frequency' => $invoice_frequency,
         ':contract_duration' => $contract_duration,
         ':seller' => $Seller,
-        ':grand_total' => (function() use ($PriceInput, $grand18, $grand19) {
+        ':total_cost' => (function() use ($PriceInput, $grand18, $grand19) {
             $p = floatval(str_replace(['$', ','], '', $PriceInput ?: '0'));
             $g18 = floatval(str_replace(['$', ','], '', $grand18 ?: '0'));
             $g19 = floatval(str_replace(['$', ','], '', $grand19 ?: '0'));
