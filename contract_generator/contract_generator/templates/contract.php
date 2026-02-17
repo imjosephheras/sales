@@ -310,6 +310,7 @@
     <?php include __DIR__ . '/contract/page7_emergency_and_insurance.php'; ?>
     <?php include __DIR__ . '/contract/page8_penalties_and_arbitration.php'; ?>
     <?php include __DIR__ . '/contract/page9_appendix_a_services.php'; ?>
+    <?php include __DIR__ . '/contract/page9b_scope_sections.php'; ?>
     <?php include __DIR__ . '/contract/page10_appendix_b_benefits_waiver.php'; ?>
     <?php include __DIR__ . '/contract/page11_appendix_c_confidentiality.php'; ?>
 

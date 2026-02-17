@@ -158,6 +158,18 @@ function initializeFormsTable($pdo) {
     // Migrate existing forms with Work_Date to calendar_events
     migrateExistingFormsToCalendarEvents($pdo);
 
+    // Scope sections (Section 7 - dynamic blocks)
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `scope_sections` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `form_id` INT NOT NULL,
+      `section_order` INT NOT NULL DEFAULT 0,
+      `title` VARCHAR(255) DEFAULT NULL,
+      `scope_content` TEXT DEFAULT NULL,
+      INDEX `idx_form_id` (`form_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
     // Form photos (Section 8)
     $pdo->exec("
     CREATE TABLE IF NOT EXISTS `form_photos` (
@@ -568,7 +580,7 @@ function syncFormToRequests($pdo, $formId, $formData) {
             $existingRequest = $stmt->fetch();
         }
 
-        // Prepare scope of work as JSON (combine Q28 manual + Q19 service scopes)
+        // Prepare scope of work as JSON (combine Q28 manual + Q19 service scopes + dynamic sections)
         $allScopeItems = [];
         if (isset($formData['Scope_Of_Work']) && is_array($formData['Scope_Of_Work'])) {
             $allScopeItems = array_merge($allScopeItems, $formData['Scope_Of_Work']);
@@ -583,7 +595,30 @@ function syncFormToRequests($pdo, $formId, $formData) {
                 }
             }
         }
-        $scopeOfWork = !empty($allScopeItems) ? json_encode($allScopeItems) : null;
+
+        // Include dynamic scope sections as structured data
+        $scopeSections = [];
+        if (isset($formData['Scope_Sections_Title']) && is_array($formData['Scope_Sections_Title'])) {
+            $titles = $formData['Scope_Sections_Title'];
+            $contents = $formData['Scope_Sections_Content'] ?? [];
+            for ($i = 0; $i < count($titles); $i++) {
+                $secTitle = trim($titles[$i] ?? '');
+                $secContent = trim($contents[$i] ?? '');
+                if (!empty($secTitle) || !empty($secContent)) {
+                    $scopeSections[] = ['title' => $secTitle, 'scope_content' => $secContent];
+                }
+            }
+        }
+
+        // Merge all scope data: items array + sections as JSON
+        $scopeData = [];
+        if (!empty($allScopeItems)) {
+            $scopeData['items'] = $allScopeItems;
+        }
+        if (!empty($scopeSections)) {
+            $scopeData['sections'] = $scopeSections;
+        }
+        $scopeOfWork = !empty($scopeData) ? json_encode($scopeData) : (!empty($allScopeItems) ? json_encode($allScopeItems) : null);
 
         // Prepare janitorial arrays as JSON
         $type18 = isset($formData['type18']) && is_array($formData['type18']) ? json_encode($formData['type18']) : null;

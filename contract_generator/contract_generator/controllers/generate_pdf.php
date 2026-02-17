@@ -56,6 +56,7 @@ try {
     $kitchenServices = [];
     $hoodVentServices = [];
     $scopeOfWorkTasks = [];
+    $scopeSections = [];
 
     if ($formId) {
         // Janitorial services from detail table
@@ -77,6 +78,11 @@ try {
         $stmtS = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
         $stmtS->execute([$formId]);
         $scopeOfWorkTasks = $stmtS->fetchAll(PDO::FETCH_COLUMN);
+
+        // Scope sections (dynamic blocks) from detail table
+        $stmtSS = $pdo->prepare("SELECT title, scope_content FROM scope_sections WHERE form_id = ? ORDER BY section_order ASC");
+        $stmtSS->execute([$formId]);
+        $scopeSections = $stmtSS->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // Decode JSON fields in data for fallback
