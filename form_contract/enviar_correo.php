@@ -281,7 +281,7 @@ try {
             city, state,
             site_visit_conducted,
             invoice_frequency, contract_duration,
-            seller, total_cost,
+            seller, grand_total,
             include_staff,
             inflation_adjustment, total_area, buildings_included, start_date_services,
             site_observation, additional_comments, email_information_sent,
@@ -295,7 +295,7 @@ try {
             :city, :state,
             :site_visit_conducted,
             :invoice_frequency, :contract_duration,
-            :seller, :total_cost,
+            :seller, :grand_total,
             :include_staff,
             :inflation_adjustment, :total_area, :buildings_included, :start_date_services,
             :site_observation, :additional_comments, :email_info_sent,
@@ -324,7 +324,7 @@ try {
         ':invoice_frequency' => $invoice_frequency,
         ':contract_duration' => $contract_duration,
         ':seller' => $Seller,
-        ':total_cost' => (function() use ($PriceInput, $grand18, $grand19) {
+        ':grand_total' => (function() use ($PriceInput, $grand18, $grand19) {
             $p = floatval(str_replace(['$', ','], '', $PriceInput ?: '0'));
             $g18 = floatval(str_replace(['$', ','], '', $grand18 ?: '0'));
             $g19 = floatval(str_replace(['$', ','], '', $grand19 ?: '0'));
@@ -373,51 +373,6 @@ try {
         $calendarEventId = syncFormToCalendar($request_id, $calendarFormData);
         if ($calendarEventId) {
             error_log("Form #$request_id synced to calendar event #$calendarEventId");
-        }
-    }
-
-    // ============================================================
-    // SINCRONIZAR CON TABLA REQUESTS (Contract Generator)
-    // ============================================================
-    $syncedRequestId = null;
-    if ($request_id) {
-        $requestFormData = [
-            'Service_Type' => $service_type,
-            'Request_Type' => $request_type,
-            'Priority' => $priority,
-            'Requested_Service' => $requested_service,
-            'client_name' => $client_name,
-            'Client_Title' => $client_title,
-            'Email' => $email,
-            'Number_Phone' => $number_phone,
-            'Company_Name' => $company_name,
-            'Company_Address' => $company_address,
-            'City' => $_POST['City'] ?? '',
-            'State' => $_POST['State'] ?? '',
-            'Is_New_Client' => $is_new_client,
-            'Site_Visit_Conducted' => $site_visit_conducted,
-            'Invoice_Frequency' => $invoice_frequency,
-            'Contract_Duration' => $contract_duration,
-            'Seller' => $Seller,
-            'PriceInput' => $PriceInput,
-            'Prime_Quoted_Price' => $prime_quoted_price,
-            'inflationAdjustment' => $inflation_adjustment,
-            'totalArea' => $total_area,
-            'buildingsIncluded' => $buildings_included,
-            'startDateServices' => $start_date_services,
-            'Site_Observation' => $site_observation,
-            'Additional_Comments' => $additional_comments,
-            'Order_Nomenclature' => $nomenclature,
-            'order_number' => $order_number,
-            'Document_Date' => $document_date,
-            'Work_Date' => $work_date,
-            'status' => 'pending',
-            'service_status' => $service_status
-        ];
-
-        $syncedRequestId = syncFormToRequests($pdo, $request_id, $requestFormData);
-        if ($syncedRequestId) {
-            error_log("Form #$request_id synced to requests table as request #$syncedRequestId");
         }
     }
 

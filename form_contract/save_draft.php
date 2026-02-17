@@ -1,13 +1,15 @@
 <?php
 // ============================================================
-// save_draft.php - VERSIÓN FINAL CORREGIDA (v2.1)
-// Fecha: 2026-01-05
-// Fix: Manejo correcto de valores DECIMAL vacíos
+// save_draft.php - Contract Form Save
+// ============================================================
+// ARCHITECTURE: forms + contract_items as single source of truth
+// All services saved to contract_items. grand_total calculated
+// from SUM(contract_items.subtotal).
 // ============================================================
 
 header('Content-Type: application/json');
 
-// Incluir configuración de base de datos y RBAC
+// Incluir configuracion de base de datos y RBAC
 require_once 'db_config.php';
 require_once 'order_access.php';
 
@@ -27,14 +29,14 @@ try {
     }
 
     $pdo->beginTransaction();
-    
+
     // ============================================================
-    // HELPER FUNCTION: Convertir string vacío a NULL
+    // HELPER FUNCTION: Convertir string vacio a NULL
     // ============================================================
     function emptyToNull($value) {
         return (isset($value) && $value !== '') ? $value : null;
     }
-    
+
     // ============================================================
     // PASO 1: GUARDAR/ACTUALIZAR FORMULARIO PRINCIPAL
     // ============================================================
@@ -57,7 +59,6 @@ try {
             site_visit_conducted = :site_visit_conducted,
             invoice_frequency = :invoice_frequency,
             contract_duration = :contract_duration,
-            total_cost = :total_cost,
             payment_terms = :payment_terms,
             inflation_adjustment = :inflation_adjustment,
             total_area = :total_area,
@@ -72,52 +73,53 @@ try {
             Work_Date = :work_date,
             order_number = :order_number,
             Order_Nomenclature = :order_nomenclature,
+            docnum = :docnum,
             status = :status,
             service_status = :service_status,
             updated_at = NOW()
         WHERE form_id = :form_id";
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':form_id', $form_id);
-        
+
     } else {
         // INSERT
         $sql = "INSERT INTO forms (
             service_type, request_type, priority, requested_service,
             client_name, company_name, contact_name, phone, email, address, city, state, is_new_client,
             site_visit_conducted, invoice_frequency, contract_duration,
-            total_cost, payment_terms,
+            payment_terms,
             inflation_adjustment, total_area, buildings_included, start_date_services,
             site_observation, additional_comments, email_information_sent,
             seller, include_staff,
-            Document_Date, Work_Date, order_number, Order_Nomenclature,
+            Document_Date, Work_Date, order_number, Order_Nomenclature, docnum,
             status, service_status, submitted_by, created_at
         ) VALUES (
             :service_type, :request_type, :priority, :requested_service,
             :client_name, :company_name, :contact_name, :phone, :email, :address, :city, :state, :is_new_client,
             :site_visit_conducted, :invoice_frequency, :contract_duration,
-            :total_cost, :payment_terms,
+            :payment_terms,
             :inflation_adjustment, :total_area, :buildings_included, :start_date_services,
             :site_observation, :additional_comments, :email_information_sent,
             :seller, :include_staff,
-            :document_date, :work_date, :order_number, :order_nomenclature,
+            :document_date, :work_date, :order_number, :order_nomenclature, :docnum,
             :status, :service_status, :submitted_by, NOW()
         )";
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':submitted_by', 'system');
     }
-    
+
     // ============================================================
-    // BIND PARAMETERS (CON MANEJO CORRECTO DE DECIMALES)
+    // BIND PARAMETERS
     // ============================================================
-    
+
     // Section 1: Request Information
     $stmt->bindValue(':service_type', emptyToNull($_POST['Service_Type'] ?? null));
     $stmt->bindValue(':request_type', emptyToNull($_POST['Request_Type'] ?? null));
     $stmt->bindValue(':priority', emptyToNull($_POST['Priority'] ?? null));
     $stmt->bindValue(':requested_service', emptyToNull($_POST['Requested_Service'] ?? null));
-    
+
     // Section 2: Client Information
     $stmt->bindValue(':client_name', emptyToNull($_POST['Client_Name'] ?? null));
     $stmt->bindValue(':company_name', emptyToNull($_POST['Company_Name'] ?? null));
@@ -128,35 +130,28 @@ try {
     $stmt->bindValue(':city', emptyToNull($_POST['City'] ?? null));
     $stmt->bindValue(':state', emptyToNull($_POST['State'] ?? null));
     $stmt->bindValue(':is_new_client', emptyToNull($_POST['Is_New_Client'] ?? null));
-    
+
     // Section 3: Operational Details
     $stmt->bindValue(':site_visit_conducted', emptyToNull($_POST['Site_Visit_Conducted'] ?? null));
     $stmt->bindValue(':invoice_frequency', emptyToNull($_POST['Invoice_Frequency'] ?? null));
     $stmt->bindValue(':contract_duration', emptyToNull($_POST['Contract_Duration'] ?? null));
-    
+
     // Section 4: Economic Information
-    // ⚠️ CRÍTICO: Campos DECIMAL deben ser NULL si están vacíos
-    // Calculate total_cost as sum of PriceInput + grand18 (Janitorial) + grand19 (Kitchen/Hood Vent)
-    $priceInput = floatval(str_replace(['$', ','], '', $_POST['PriceInput'] ?? '0'));
-    $grand18 = floatval(str_replace(['$', ','], '', $_POST['grand18'] ?? '0'));
-    $grand19 = floatval(str_replace(['$', ','], '', $_POST['grand19'] ?? '0'));
-    $calculatedTotalCost = $priceInput + $grand18 + $grand19;
-    $stmt->bindValue(':total_cost', $calculatedTotalCost > 0 ? $calculatedTotalCost : null);
     $stmt->bindValue(':payment_terms', emptyToNull($_POST['payment_terms'] ?? null));
     $stmt->bindValue(':seller', emptyToNull($_POST['Seller'] ?? null));
     $stmt->bindValue(':include_staff', emptyToNull($_POST['includeStaff'] ?? null));
-    
+
     // Section 5: Contract Information
     $stmt->bindValue(':inflation_adjustment', emptyToNull($_POST['inflationAdjustment'] ?? null));
     $stmt->bindValue(':total_area', emptyToNull($_POST['totalArea'] ?? null));
     $stmt->bindValue(':buildings_included', emptyToNull($_POST['buildingsIncluded'] ?? null));
     $stmt->bindValue(':start_date_services', emptyToNull($_POST['startDateServices'] ?? null));
-    
+
     // Section 6: Observations
     $stmt->bindValue(':site_observation', emptyToNull($_POST['Site_Observation'] ?? null));
     $stmt->bindValue(':additional_comments', emptyToNull($_POST['Additional_Comments'] ?? null));
     $stmt->bindValue(':email_information_sent', emptyToNull($_POST['Email_Information_Sent'] ?? null));
-    
+
     // Section 9: Document & Work Dates
     $document_date_val = emptyToNull($_POST['Document_Date'] ?? null);
     $work_date_val = emptyToNull($_POST['Work_Date'] ?? null);
@@ -209,6 +204,7 @@ try {
     $stmt->bindValue(':work_date', $work_date_val);
     $stmt->bindValue(':order_number', $order_number_val);
     $stmt->bindValue(':order_nomenclature', $nomenclature_val);
+    $stmt->bindValue(':docnum', $nomenclature_val);
 
     // Status
     $stmt->bindValue(':status', $status);
@@ -217,10 +213,10 @@ try {
     $stmt->bindValue(':service_status', emptyToNull($_POST['service_status'] ?? null));
 
     $stmt->execute();
-    
+
     // Get the form_id
     $saved_form_id = $form_id ?: $pdo->lastInsertId();
-    
+
     // ============================================================
     // PASO 2: GUARDAR SCOPE OF WORK (Q28 + Q19 service scopes)
     // ============================================================
@@ -251,7 +247,7 @@ try {
             }
         }
     }
-    
+
     // ============================================================
     // PASO 2b: GUARDAR SCOPE SECTIONS (dynamic blocks)
     // ============================================================
@@ -272,22 +268,23 @@ try {
     }
 
     // ============================================================
-    // PASO 3: GUARDAR JANITORIAL SERVICES (Q18)
+    // PASO 3: GUARDAR CONTRACT ITEMS (unified: Q18 + Q19)
     // ============================================================
+    // Delete all existing contract items for this form
+    $pdo->prepare("DELETE FROM contract_items WHERE form_id = ?")->execute([$saved_form_id]);
+
+    $stmtItem = $pdo->prepare("
+        INSERT INTO contract_items (
+            form_id, service_category, service_number, service_type,
+            service_time, frequency, description, subtotal, bundle_group
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+
+    // 3a: Save Janitorial Services (Q18) as contract_items
     if (isset($_POST['includeJanitorial']) && $_POST['includeJanitorial'] === 'Yes') {
-        $pdo->prepare("DELETE FROM janitorial_services_costs WHERE form_id = ?")->execute([$saved_form_id]);
-
         if (isset($_POST['type18']) && is_array($_POST['type18'])) {
-            $stmt = $pdo->prepare("
-                INSERT INTO janitorial_services_costs (
-                    form_id, service_number, service_type, service_time,
-                    frequency, description, subtotal, bundle_group
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-
             $count = count($_POST['type18']);
             for ($i = 0; $i < $count; $i++) {
-                // Obtener tipo de servicio
                 $serviceType = '';
                 if (isset($_POST['type18'][$i]) && $_POST['type18'][$i] !== '__write__' && !empty($_POST['type18'][$i])) {
                     $serviceType = $_POST['type18'][$i];
@@ -295,14 +292,13 @@ try {
                     $serviceType = $_POST['write18'][$i];
                 }
 
-                // Solo guardar si hay datos
                 if (!empty($serviceType)) {
-                    // ⚠️ Convertir subtotal vacío a NULL
                     $subtotal = !empty($_POST['subtotal18'][$i]) ? $_POST['subtotal18'][$i] : null;
                     $bundleGroup = !empty($_POST['bundleGroup18'][$i]) ? $_POST['bundleGroup18'][$i] : null;
 
-                    $stmt->execute([
+                    $stmtItem->execute([
                         $saved_form_id,
+                        'janitorial',
                         $i + 1,
                         $serviceType,
                         $_POST['time18'][$i] ?? null,
@@ -315,32 +311,12 @@ try {
             }
         }
     }
-    
-    // ============================================================
-    // PASO 4: GUARDAR KITCHEN/HOODVENT COSTS (Q19)
-    // ============================================================
+
+    // 3b: Save Kitchen/Hood Vent Services (Q19) as contract_items
     if (isset($_POST['includeKitchen']) && $_POST['includeKitchen'] === 'Yes') {
-        $pdo->prepare("DELETE FROM kitchen_cleaning_costs WHERE form_id = ?")->execute([$saved_form_id]);
-        $pdo->prepare("DELETE FROM hood_vent_costs WHERE form_id = ?")->execute([$saved_form_id]);
-
         if (isset($_POST['type19']) && is_array($_POST['type19'])) {
-            $stmt_kitchen = $pdo->prepare("
-                INSERT INTO kitchen_cleaning_costs (
-                    form_id, service_number, service_type, service_time,
-                    frequency, description, subtotal, bundle_group
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-
-            $stmt_hood = $pdo->prepare("
-                INSERT INTO hood_vent_costs (
-                    form_id, service_number, service_type, service_time,
-                    frequency, description, subtotal, bundle_group
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-
             $count = count($_POST['type19']);
             for ($i = 0; $i < $count; $i++) {
-                // Obtener tipo de servicio
                 $serviceType = '';
                 if (isset($_POST['type19'][$i]) && $_POST['type19'][$i] !== '__write__' && !empty($_POST['type19'][$i])) {
                     $serviceType = $_POST['type19'][$i];
@@ -349,64 +325,53 @@ try {
                 }
 
                 if (!empty($serviceType)) {
-                    $serviceTime = $_POST['time19'][$i] ?? null;
-                    $description = $_POST['desc19'][$i] ?? null;
-                    $frequency = $_POST['freq19'][$i] ?? null;
-
-                    // ⚠️ Convertir subtotal vacío a NULL
                     $subtotal = !empty($_POST['subtotal19'][$i]) ? $_POST['subtotal19'][$i] : null;
                     $bundleGroup = !empty($_POST['bundleGroup19'][$i]) ? $_POST['bundleGroup19'][$i] : null;
 
-                    // Determinar si es Kitchen o Hood Vent
+                    // Determine category: hood_vent or kitchen
                     $isHoodVent = (stripos($serviceType, 'hood') !== false ||
                                    stripos($serviceType, 'vent') !== false ||
                                    stripos($serviceType, 'campana') !== false ||
                                    stripos($serviceType, 'extractora') !== false);
+                    $category = $isHoodVent ? 'hood_vent' : 'kitchen';
 
-                    if ($isHoodVent) {
-                        $stmt_hood->execute([
-                            $saved_form_id,
-                            $i + 1,
-                            $serviceType,
-                            $serviceTime,
-                            $frequency,
-                            $description,
-                            $subtotal,
-                            $bundleGroup
-                        ]);
-                    } else {
-                        $stmt_kitchen->execute([
-                            $saved_form_id,
-                            $i + 1,
-                            $serviceType,
-                            $serviceTime,
-                            $frequency,
-                            $description,
-                            $subtotal,
-                            $bundleGroup
-                        ]);
-                    }
+                    $stmtItem->execute([
+                        $saved_form_id,
+                        $category,
+                        $i + 1,
+                        $serviceType,
+                        $_POST['time19'][$i] ?? null,
+                        $_POST['freq19'][$i] ?? null,
+                        $_POST['desc19'][$i] ?? null,
+                        $subtotal,
+                        $bundleGroup
+                    ]);
                 }
             }
         }
     }
-    
+
+    // ============================================================
+    // PASO 4: CALCULAR Y GUARDAR GRAND_TOTAL
+    // ============================================================
+    recalculateGrandTotal($pdo, $saved_form_id);
+
     // ============================================================
     // PASO 5: GUARDAR FOTOS (Q29)
     // ============================================================
     if (isset($_FILES['photos']) && !empty($_FILES['photos']['name'][0])) {
         $upload_dir = __DIR__ . '/Uploads/';
-        
+
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
-        
+
         $stmt = $pdo->prepare("
             INSERT INTO form_photos (
                 form_id, photo_filename, photo_path, photo_size, photo_type
             ) VALUES (?, ?, ?, ?, ?)
         ");
-        
+
         $total_files = count($_FILES['photos']['name']);
         for ($i = 0; $i < $total_files; $i++) {
             if ($_FILES['photos']['error'][$i] === UPLOAD_ERR_OK) {
@@ -414,12 +379,12 @@ try {
                 $file_size = $_FILES['photos']['size'][$i];
                 $file_type = $_FILES['photos']['type'][$i];
                 $tmp_name = $_FILES['photos']['tmp_name'][$i];
-                
+
                 $timestamp = time();
                 $safe_filename = preg_replace('/[^a-zA-Z0-9._-]/', '_', $original_name);
                 $new_filename = $timestamp . '_' . $safe_filename;
                 $destination = $upload_dir . $new_filename;
-                
+
                 if (move_uploaded_file($tmp_name, $destination)) {
                     $stmt->execute([
                         $saved_form_id,
@@ -432,41 +397,14 @@ try {
             }
         }
     }
-    
+
     // ============================================================
-    // CONFIRMAR TRANSACCIÓN
+    // CONFIRMAR TRANSACCION
     // ============================================================
     $pdo->commit();
 
     // ============================================================
-    // PASO 6: SINCRONIZAR CON TABLA REQUESTS (Contract Generator)
-    // ============================================================
-    $requestId = null;
-    // Preserve existing requests.status if already 'completed' (don't downgrade to 'draft')
-    $requestStatus = $status;
-    $existingReqStmt = $pdo->prepare("SELECT status FROM requests WHERE form_id = ?");
-    $existingReqStmt->execute([$saved_form_id]);
-    $existingReqRow = $existingReqStmt->fetch();
-    if ($existingReqRow && $existingReqRow['status'] === 'completed') {
-        $requestStatus = 'completed';
-    }
-
-    // Prepare complete form data for requests sync
-    $requestFormData = array_merge($_POST, [
-        'Order_Nomenclature' => $nomenclature_val,
-        'order_number' => $order_number_val,
-        'Document_Date' => $document_date_val,
-        'Work_Date' => $work_date_val,
-        'status' => $requestStatus
-    ]);
-
-    $requestId = syncFormToRequests($pdo, $saved_form_id, $requestFormData);
-    if ($requestId) {
-        error_log("Form #$saved_form_id synced to requests table as request #$requestId");
-    }
-
-    // ============================================================
-    // PASO 7: SYNC CALENDAR EVENT (if Work_Date is set)
+    // PASO 6: SYNC CALENDAR EVENT (if Work_Date is set)
     // ============================================================
     $calendarEventId = null;
     if (!empty($work_date_val)) {
@@ -489,28 +427,27 @@ try {
     echo json_encode([
         'success' => true,
         'form_id' => $saved_form_id,
-        'request_id' => $requestId,
         'calendar_event_id' => $calendarEventId,
         'message' => $form_id ? 'Form updated successfully' : 'Form saved successfully'
     ]);
-    
+
 } catch (PDOException $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    
+
     echo json_encode([
         'success' => false,
         'message' => 'Database error: ' . $e->getMessage(),
         'error_code' => $e->getCode(),
         'error_line' => $e->getLine()
     ]);
-    
+
 } catch (Exception $e) {
     if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
-    
+
     echo json_encode([
         'success' => false,
         'message' => 'Error: ' . $e->getMessage(),

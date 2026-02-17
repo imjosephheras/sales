@@ -56,15 +56,15 @@ try {
     \$pdo = new PDO('mysql:host=localhost;dbname=form', 'root', '');
     echo '✅ Conexión exitosa a la base de datos \"form\"' . PHP_EOL;
 
-    // Count requests
-    \$stmt = \$pdo->query('SELECT COUNT(*) as total FROM requests');
+    // Count forms
+    \$stmt = \$pdo->query('SELECT COUNT(*) as total FROM forms');
     \$total = \$stmt->fetch()['total'];
-    echo '📊 Total de solicitudes en BD: ' . \$total . PHP_EOL;
+    echo '📊 Total de formularios en BD: ' . \$total . PHP_EOL;
 
     // Count pending
-    \$stmt = \$pdo->query(\"SELECT COUNT(*) as count FROM requests WHERE status IN ('pending', 'in_progress')\");
+    \$stmt = \$pdo->query(\"SELECT COUNT(*) as count FROM forms WHERE status IN ('pending', 'in_progress', 'draft')\");
     \$pending = \$stmt->fetch()['count'];
-    echo '📥 Solicitudes pendientes: ' . \$pending . PHP_EOL;
+    echo '📥 Formularios pendientes: ' . \$pending . PHP_EOL;
 
 } catch (Exception \$e) {
     echo '❌ Error de conexión: ' . \$e->getMessage() . PHP_EOL;

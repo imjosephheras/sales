@@ -1,8 +1,9 @@
 <?php
 /**
  * get_service_history.php
- * Returns complete history of all Request Forms (never deleted)
- * Supports filtering and pagination
+ * Returns complete history of all forms (never deleted).
+ * Reads from forms table (single source of truth).
+ * Supports filtering and pagination.
  */
 
 header('Content-Type: application/json');
@@ -38,13 +39,13 @@ try {
 
     // Filter by seller
     if (!empty($seller)) {
-        $whereConditions[] = "Seller = :seller";
+        $whereConditions[] = "seller = :seller";
         $params[':seller'] = $seller;
     }
 
     // Search filter
     if (!empty($search)) {
-        $whereConditions[] = "(Company_Name LIKE :search OR client_name LIKE :search2 OR Order_Nomenclature LIKE :search3 OR Email LIKE :search4)";
+        $whereConditions[] = "(company_name LIKE :search OR client_name LIKE :search2 OR Order_Nomenclature LIKE :search3 OR email LIKE :search4)";
         $params[':search'] = "%$search%";
         $params[':search2'] = "%$search%";
         $params[':search3'] = "%$search%";
@@ -64,7 +65,7 @@ try {
     $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereConditions) : '';
 
     // Get total count for pagination
-    $countSql = "SELECT COUNT(*) FROM requests $whereClause";
+    $countSql = "SELECT COUNT(*) FROM forms $whereClause";
     $countStmt = $pdo->prepare($countSql);
     $countStmt->execute($params);
     $totalRecords = $countStmt->fetchColumn();
@@ -72,15 +73,15 @@ try {
     // Get records
     $sql = "
         SELECT
-            id,
-            Service_Type,
-            Request_Type,
-            Company_Name,
+            form_id AS id,
+            service_type AS Service_Type,
+            request_type AS Request_Type,
+            company_name AS Company_Name,
             client_name,
-            Email,
-            Number_Phone,
-            Seller,
-            PriceInput,
+            email AS Email,
+            phone AS Number_Phone,
+            seller AS Seller,
+            grand_total AS PriceInput,
             Work_Date,
             Document_Date,
             Order_Nomenclature,
@@ -92,11 +93,11 @@ try {
             service_completed_at,
             ready_to_invoice,
             final_pdf_path,
-            document_type,
+            request_type AS document_type,
             created_at,
             updated_at,
             completed_at
-        FROM requests
+        FROM forms
         $whereClause
         ORDER BY created_at DESC
         LIMIT :limit OFFSET :offset
@@ -122,13 +123,13 @@ try {
             SUM(CASE WHEN service_status IN ('scheduled', 'confirmed', 'in_progress') THEN 1 ELSE 0 END) as in_progress,
             SUM(CASE WHEN service_status = 'pending' OR service_status IS NULL THEN 1 ELSE 0 END) as pending,
             SUM(CASE WHEN ready_to_invoice = 1 THEN 1 ELSE 0 END) as ready_to_invoice
-        FROM requests
+        FROM forms
     ";
     $statsStmt = $pdo->query($statsSql);
     $stats = $statsStmt->fetch();
 
     // Get unique sellers for filter
-    $sellersSql = "SELECT DISTINCT Seller FROM requests WHERE Seller IS NOT NULL AND Seller != '' ORDER BY Seller";
+    $sellersSql = "SELECT DISTINCT seller FROM forms WHERE seller IS NOT NULL AND seller != '' ORDER BY seller";
     $sellersStmt = $pdo->query($sellersSql);
     $sellers = $sellersStmt->fetchAll(PDO::FETCH_COLUMN);
 

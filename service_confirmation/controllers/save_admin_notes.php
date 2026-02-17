@@ -1,7 +1,8 @@
 <?php
 /**
  * save_admin_notes.php
- * Saves internal admin notes for a request
+ * Saves internal admin notes for a form.
+ * Writes to forms table (single source of truth).
  */
 
 header('Content-Type: application/json');
@@ -32,11 +33,11 @@ try {
 
     $pdo = getDBConnection();
 
-    // Update the request with admin notes
+    // Update the form with admin notes (single source of truth)
     $stmt = $pdo->prepare("
-        UPDATE requests
+        UPDATE forms
         SET admin_notes = :notes
-        WHERE id = :id
+        WHERE form_id = :id
     ");
 
     $result = $stmt->execute([

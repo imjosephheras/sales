@@ -1,8 +1,8 @@
 <?php
 /**
  * get_pending_services.php
- * Returns all services for tracking in Admin Panel
- * Shows all completed documents with their task tracking progress
+ * Returns all services for tracking in Admin Panel.
+ * Reads from forms table (single source of truth).
  */
 
 header('Content-Type: application/json');
@@ -25,13 +25,13 @@ try {
 
     // Filter by seller if provided
     if (!empty($seller)) {
-        $whereConditions[] = "Seller = :seller";
+        $whereConditions[] = "seller = :seller";
         $params[':seller'] = $seller;
     }
 
     // Search filter
     if (!empty($search)) {
-        $whereConditions[] = "(Company_Name LIKE :search OR client_name LIKE :search2 OR Order_Nomenclature LIKE :search3)";
+        $whereConditions[] = "(company_name LIKE :search OR client_name LIKE :search2 OR Order_Nomenclature LIKE :search3)";
         $params[':search'] = "%$search%";
         $params[':search2'] = "%$search%";
         $params[':search3'] = "%$search%";
@@ -41,15 +41,15 @@ try {
 
     $sql = "
         SELECT
-            id,
-            Service_Type,
-            Request_Type,
-            Company_Name,
+            form_id AS id,
+            service_type AS Service_Type,
+            request_type AS Request_Type,
+            company_name AS Company_Name,
             client_name,
-            Email,
-            Number_Phone,
-            Seller,
-            PriceInput,
+            email AS Email,
+            phone AS Number_Phone,
+            seller AS Seller,
+            grand_total AS PriceInput,
             Work_Date,
             Document_Date,
             Order_Nomenclature,
@@ -58,10 +58,10 @@ try {
             service_status,
             task_tracking,
             admin_notes,
-            document_type,
+            request_type AS document_type,
             created_at,
             updated_at
-        FROM requests
+        FROM forms
         $whereClause
         ORDER BY Work_Date ASC, created_at DESC
     ";

@@ -6,8 +6,7 @@
  * 2. Generates final immutable PDF and saves it to disk
  * 3. Automatically creates a billing_documents record with status='pending'
  *
- * This is the ONLY trigger for the accounting flow.
- * No Admin Panel action is needed.
+ * Reads from forms + contract_items (single source of truth).
  */
 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
@@ -29,24 +28,25 @@ try {
     $id = $input['request_id'] ?? null;
 
     if (!$id) {
-        throw new Exception('Request ID is required');
+        throw new Exception('Form ID is required');
     }
 
-    // Get request data
-    $stmt = $pdo->prepare("SELECT * FROM requests WHERE id = :id");
+    // Get form data
+    $stmt = $pdo->prepare("SELECT * FROM forms WHERE form_id = :id");
     $stmt->execute([':id' => $id]);
-    $request = $stmt->fetch(PDO::FETCH_ASSOC);
+    $form = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$request) {
-        throw new Exception('Request not found');
+    if (!$form) {
+        throw new Exception('Form not found');
     }
 
     // Must be in 'ready' status to mark completed
-    if ($request['status'] !== 'ready') {
-        throw new Exception('Only requests with status "ready" can be marked as completed. Current status: ' . $request['status']);
+    if ($form['status'] !== 'ready') {
+        throw new Exception('Only forms with status "ready" can be marked as completed. Current status: ' . $form['status']);
     }
 
-    if (empty($request['docnum'])) {
+    $docnum = $form['docnum'] ?? $form['Order_Nomenclature'];
+    if (empty($docnum)) {
         throw new Exception('DOCNUM is required to mark as completed. Please mark as Ready first.');
     }
 
@@ -54,56 +54,68 @@ try {
     // 1. GENERATE FINAL IMMUTABLE PDF
     // ========================================
 
-    // Get form_id for service detail tables
-    $formId = $request['form_id'] ?? null;
-    if (!$formId && !empty($request['docnum'])) {
-        $stmtForm = $pdo->prepare("SELECT form_id FROM forms WHERE Order_Nomenclature = ? LIMIT 1");
-        $stmtForm->execute([$request['docnum']]);
-        $formRow = $stmtForm->fetch(PDO::FETCH_ASSOC);
-        if ($formRow) {
-            $formId = $formRow['form_id'];
-        }
-    }
+    // Get contract items (replaces janitorial_services_costs, kitchen_cleaning_costs, hood_vent_costs)
+    $stmtItems = $pdo->prepare("SELECT * FROM contract_items WHERE form_id = ? ORDER BY service_category, service_number");
+    $stmtItems->execute([$id]);
+    $allItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
-    // Query service detail tables
+    // Split by category for template compatibility
     $janitorialServices = [];
     $kitchenServices = [];
     $hoodVentServices = [];
-    $scopeOfWorkTasks = [];
-
-    if ($formId) {
-        $stmtJ = $pdo->prepare("SELECT * FROM janitorial_services_costs WHERE form_id = ? ORDER BY service_number");
-        $stmtJ->execute([$formId]);
-        $janitorialServices = $stmtJ->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmtK = $pdo->prepare("SELECT * FROM kitchen_cleaning_costs WHERE form_id = ? ORDER BY service_number");
-        $stmtK->execute([$formId]);
-        $kitchenServices = $stmtK->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmtH = $pdo->prepare("SELECT * FROM hood_vent_costs WHERE form_id = ? ORDER BY service_number");
-        $stmtH->execute([$formId]);
-        $hoodVentServices = $stmtH->fetchAll(PDO::FETCH_ASSOC);
-
-        $stmtS = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
-        $stmtS->execute([$formId]);
-        $scopeOfWorkTasks = $stmtS->fetchAll(PDO::FETCH_COLUMN);
-    }
-
-    // Decode JSON fields
-    $data = $request;
-    $jsonFields = [
-        'type18', 'write18', 'time18', 'freq18', 'desc18', 'subtotal18',
-        'type19', 'time19', 'freq19', 'desc19', 'subtotal19',
-        'base_staff', 'increase_staff', 'bill_staff', 'Scope_Of_Work'
-    ];
-    foreach ($jsonFields as $field) {
-        if (!empty($data[$field])) {
-            $decoded = json_decode($data[$field], true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $data[$field] = $decoded;
-            }
+    foreach ($allItems as $item) {
+        switch ($item['service_category']) {
+            case 'janitorial': $janitorialServices[] = $item; break;
+            case 'kitchen': $kitchenServices[] = $item; break;
+            case 'hood_vent': $hoodVentServices[] = $item; break;
         }
     }
+
+    // Get scope of work
+    $stmtS = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
+    $stmtS->execute([$id]);
+    $scopeOfWorkTasks = $stmtS->fetchAll(PDO::FETCH_COLUMN);
+
+    // Get scope sections
+    $stmtSS = $pdo->prepare("SELECT title, scope_content FROM scope_sections WHERE form_id = ? ORDER BY section_order ASC");
+    $stmtSS->execute([$id]);
+    $scopeSections = $stmtSS->fetchAll(PDO::FETCH_ASSOC);
+
+    // Build $data array compatible with templates (maps forms columns to expected field names)
+    $data = [
+        'id' => $form['form_id'],
+        'form_id' => $form['form_id'],
+        'Service_Type' => $form['service_type'],
+        'Request_Type' => $form['request_type'],
+        'Priority' => $form['priority'],
+        'Requested_Service' => $form['requested_service'],
+        'client_name' => $form['client_name'],
+        'Client_Title' => $form['contact_name'],
+        'Email' => $form['email'],
+        'Number_Phone' => $form['phone'],
+        'Company_Name' => $form['company_name'],
+        'Company_Address' => $form['address'],
+        'City' => $form['city'],
+        'State' => $form['state'],
+        'Seller' => $form['seller'],
+        'PriceInput' => $form['grand_total'],
+        'Invoice_Frequency' => $form['invoice_frequency'],
+        'Contract_Duration' => $form['contract_duration'],
+        'inflationAdjustment' => $form['inflation_adjustment'],
+        'totalArea' => $form['total_area'],
+        'buildingsIncluded' => $form['buildings_included'],
+        'startDateServices' => $form['start_date_services'],
+        'Site_Observation' => $form['site_observation'],
+        'Additional_Comments' => $form['additional_comments'],
+        'Scope_Of_Work' => $scopeOfWorkTasks,
+        'status' => $form['status'],
+        'docnum' => $docnum,
+        'Document_Date' => $form['Document_Date'],
+        'Work_Date' => $form['Work_Date'],
+        'Order_Nomenclature' => $form['Order_Nomenclature'],
+        'order_number' => $form['order_number'],
+        'grand_total' => $form['grand_total'],
+    ];
 
     // Determine template
     $request_type = strtolower($data['Request_Type'] ?? 'quote');
@@ -137,33 +149,31 @@ try {
         mkdir($pdfDir, 0755, true);
     }
 
-    $doc_number = $data['docnum'];
     $company_safe = preg_replace('/[^a-zA-Z0-9_-]/', '_', $data['Company_Name'] ?? 'Document');
-    $pdf_filename = strtoupper($request_type) . "_{$doc_number}_{$company_safe}_FINAL.pdf";
+    $pdf_filename = strtoupper($request_type) . "_{$docnum}_{$company_safe}_FINAL.pdf";
     $pdf_full_path = $pdfDir . '/' . $pdf_filename;
     $pdf_relative_path = 'storage/final_pdfs/' . $pdf_filename;
 
     file_put_contents($pdf_full_path, $pdfOutput);
 
     // ========================================
-    // 2. UPDATE REQUEST STATUS TO COMPLETED
+    // 2. UPDATE FORM STATUS TO COMPLETED
     // ========================================
 
     $pdo->beginTransaction();
 
-    // Get current user info from session
     session_start();
     $completed_by = $_SESSION['user_id'] ?? null;
     $completed_by_name = $_SESSION['full_name'] ?? 'System';
 
     $stmt = $pdo->prepare("
-        UPDATE requests
+        UPDATE forms
         SET
             status = 'completed',
             final_pdf_path = :pdf_path,
             completed_at = NOW(),
             updated_at = NOW()
-        WHERE id = :id
+        WHERE form_id = :id
     ");
 
     $stmt->execute([
@@ -175,50 +185,29 @@ try {
     // 3. AUTO-SEND TO BILLING AS PENDING
     // ========================================
 
-    // Ensure billing_documents table has required columns
-    try {
-        $pdo->query("SELECT completed_by FROM billing_documents LIMIT 1");
-    } catch (Exception $e) {
-        $pdo->exec("ALTER TABLE billing_documents ADD COLUMN completed_by INT DEFAULT NULL");
-        $pdo->exec("ALTER TABLE billing_documents ADD COLUMN completed_by_name VARCHAR(200) DEFAULT NULL");
-        $pdo->exec("ALTER TABLE billing_documents ADD COLUMN service_name VARCHAR(200) DEFAULT NULL");
-        $pdo->exec("ALTER TABLE billing_documents ADD COLUMN total_amount VARCHAR(100) DEFAULT NULL");
-    }
-
-    // Check if billing document already exists for this request
-    $checkStmt = $pdo->prepare("SELECT id FROM billing_documents WHERE request_id = :request_id LIMIT 1");
-    $checkStmt->execute([':request_id' => $id]);
+    // Check if billing document already exists for this form
+    $checkStmt = $pdo->prepare("SELECT id FROM billing_documents WHERE form_id = :form_id LIMIT 1");
+    $checkStmt->execute([':form_id' => $id]);
     $existingBilling = $checkStmt->fetch();
 
     if (!$existingBilling) {
-        // Calculate total amount
-        $totalAmount = $data['PriceInput'] ?? '';
-        if (empty($totalAmount)) {
-            $totalAmount = $data['grand18'] ?? '';
-            if (!empty($data['grand19'])) {
-                if (!empty($totalAmount)) {
-                    $totalAmount .= ' + ' . $data['grand19'];
-                } else {
-                    $totalAmount = $data['grand19'];
-                }
-            }
-        }
+        $totalAmount = $form['grand_total'] ?? '';
 
         $insertStmt = $pdo->prepare("
             INSERT INTO billing_documents
-                (request_id, order_number, client_name, company_name, document_type, pdf_path, service_name, total_amount, status, notes)
+                (form_id, order_number, client_name, company_name, document_type, pdf_path, service_name, total_amount, status, notes)
             VALUES
-                (:request_id, :order_number, :client_name, :company_name, :document_type, :pdf_path, :service_name, :total_amount, 'pending', :notes)
+                (:form_id, :order_number, :client_name, :company_name, :document_type, :pdf_path, :service_name, :total_amount, 'pending', :notes)
         ");
 
         $insertStmt->execute([
-            ':request_id' => $id,
-            ':order_number' => $data['docnum'],
-            ':client_name' => $data['client_name'] ?? $data['Client_Name'] ?? '',
-            ':company_name' => $data['Company_Name'] ?? '',
-            ':document_type' => $data['Request_Type'] ?? 'Contract',
+            ':form_id' => $id,
+            ':order_number' => $docnum,
+            ':client_name' => $form['client_name'] ?? '',
+            ':company_name' => $form['company_name'] ?? '',
+            ':document_type' => $form['request_type'] ?? 'Contract',
             ':pdf_path' => $pdf_relative_path,
-            ':service_name' => $data['Requested_Service'] ?? '',
+            ':service_name' => $form['requested_service'] ?? '',
             ':total_amount' => $totalAmount,
             ':notes' => 'Auto-generated from Contract Generator on ' . date('M d, Y g:i A')
         ]);
@@ -229,7 +218,7 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'Contract marked as completed. Final PDF generated and sent to Accounting.',
-        'docnum' => $data['docnum'],
+        'docnum' => $docnum,
         'request_id' => $id,
         'pdf_path' => $pdf_relative_path
     ]);

@@ -16,7 +16,7 @@ $stmt = $pdo->query("
         form_id,
         request_type,
         requested_service,
-        total_cost,
+        grand_total,
         seller,
         created_at,
         Work_Date,
@@ -36,7 +36,7 @@ function parseCurrency($value) {
 
 // Calculate totals for each request
 function getRequestTotal($row) {
-    return parseCurrency($row['total_cost']);
+    return parseCurrency($row['grand_total']);
 }
 
 // Prepare data for analytics

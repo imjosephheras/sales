@@ -1,7 +1,8 @@
 <?php
 /**
  * save_task_tracking.php
- * Saves task tracking checkboxes state for a request
+ * Saves task tracking checkboxes state for a form.
+ * Writes to forms table (single source of truth).
  */
 
 header('Content-Type: application/json');
@@ -35,12 +36,12 @@ try {
     // Encode task tracking as JSON
     $tracking_json = json_encode($task_tracking);
 
-    // Update the request with task tracking
+    // Update the form with task tracking (single source of truth)
     $stmt = $pdo->prepare("
-        UPDATE requests
+        UPDATE forms
         SET task_tracking = :tracking,
             task_tracking_updated_at = NOW()
-        WHERE id = :id
+        WHERE form_id = :id
     ");
 
     $result = $stmt->execute([
@@ -53,10 +54,10 @@ try {
         $all_complete = isset($task_tracking['invoice_ready']) && $task_tracking['invoice_ready'] === true;
 
         if ($all_complete) {
-            $stmt2 = $pdo->prepare("UPDATE requests SET ready_to_invoice = 1 WHERE id = :id");
+            $stmt2 = $pdo->prepare("UPDATE forms SET ready_to_invoice = 1 WHERE form_id = :id");
             $stmt2->execute([':id' => $request_id]);
         } else {
-            $stmt2 = $pdo->prepare("UPDATE requests SET ready_to_invoice = 0 WHERE id = :id");
+            $stmt2 = $pdo->prepare("UPDATE forms SET ready_to_invoice = 0 WHERE form_id = :id");
             $stmt2->execute([':id' => $request_id]);
         }
 
