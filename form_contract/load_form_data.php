@@ -63,6 +63,12 @@ try {
     $stmt_janitorial->execute([$form_id]);
     $janitorial_costs = $stmt_janitorial->fetchAll();
 
+    // Cargar scope sections (dynamic blocks)
+    $sql_scope_sections = "SELECT title, scope_content FROM scope_sections WHERE form_id = ? ORDER BY section_order ASC";
+    $stmt_scope_sections = $pdo->prepare($sql_scope_sections);
+    $stmt_scope_sections->execute([$form_id]);
+    $scope_sections = $stmt_scope_sections->fetchAll();
+
     // Cargar fotos
     $sql_photos = "SELECT * FROM form_photos WHERE form_id = ?";
     $stmt_photos = $pdo->prepare($sql_photos);
@@ -126,6 +132,7 @@ try {
         'success' => true,
         'form' => $formData,
         'scope_tasks' => $scope_tasks,
+        'scope_sections' => $scope_sections,
         'kitchen_costs' => $kitchen_costs,
         'hood_costs' => $hood_costs,
         'janitorial_costs' => $janitorial_costs,

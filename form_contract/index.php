@@ -1660,8 +1660,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Handle scope_tasks if present
     if (additionalData.scope_tasks && additionalData.scope_tasks.length > 0) {
-      console.log('📋 Loading scope tasks:', additionalData.scope_tasks);
+      console.log('Loading scope tasks:', additionalData.scope_tasks);
       populateScopeTasks(additionalData.scope_tasks);
+    }
+
+    // Handle scope_sections (dynamic blocks) if present
+    if (additionalData.scope_sections && additionalData.scope_sections.length > 0) {
+      console.log('Loading scope sections:', additionalData.scope_sections);
+      populateScopeSections(additionalData.scope_sections);
     }
 
     // Handle janitorial_costs if present
@@ -1744,8 +1750,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
 
-      console.log(`✅ Scope of Work populated: ${markedCount} of ${tasks.length} tasks marked`);
+      console.log(`Scope of Work populated: ${markedCount} of ${tasks.length} tasks marked`);
     }, 150); // Small delay to ensure checkboxes are generated
+  };
+
+  /* ===============================
+     POPULATE SCOPE SECTIONS (dynamic blocks)
+     =============================== */
+  window.populateScopeSections = function(sections) {
+    // Clear existing scope section blocks
+    const container = document.getElementById('scopeSectionsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    sections.forEach(function(section) {
+      addScopeSection(section.title || '', section.scope_content || '');
+    });
   };
 
   /* ===============================
@@ -2016,6 +2036,7 @@ window.loadFormData = function(formId) {
       // ✅ CRITICAL: Pasar datos como SEGUNDO parámetro
       populateForm(data.form, {
         scope_tasks: data.scope_tasks || [],
+        scope_sections: data.scope_sections || [],
         janitorial_costs: data.janitorial_costs || [],
         kitchen_costs: data.kitchen_costs || [],
         hood_costs: data.hood_costs || [],

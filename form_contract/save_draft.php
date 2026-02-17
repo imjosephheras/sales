@@ -253,6 +253,25 @@ try {
     }
     
     // ============================================================
+    // PASO 2b: GUARDAR SCOPE SECTIONS (dynamic blocks)
+    // ============================================================
+    $pdo->prepare("DELETE FROM scope_sections WHERE form_id = ?")->execute([$saved_form_id]);
+
+    if (isset($_POST['Scope_Sections_Title']) && is_array($_POST['Scope_Sections_Title'])) {
+        $stmtScopeSec = $pdo->prepare("INSERT INTO scope_sections (form_id, section_order, title, scope_content) VALUES (?, ?, ?, ?)");
+        $titles = $_POST['Scope_Sections_Title'];
+        $contents = $_POST['Scope_Sections_Content'] ?? [];
+
+        for ($i = 0; $i < count($titles); $i++) {
+            $secTitle = trim($titles[$i] ?? '');
+            $secContent = trim($contents[$i] ?? '');
+            if (!empty($secTitle) || !empty($secContent)) {
+                $stmtScopeSec->execute([$saved_form_id, $i, $secTitle, $secContent]);
+            }
+        }
+    }
+
+    // ============================================================
     // PASO 3: GUARDAR JANITORIAL SERVICES (Q18)
     // ============================================================
     if (isset($_POST['includeJanitorial']) && $_POST['includeJanitorial'] === 'Yes') {

@@ -765,6 +765,19 @@
         </div>
     <?php endif; ?>
 
+    <?php // Dynamic scope sections (manual/custom blocks) ?>
+    <?php if (!empty($scopeSections)): ?>
+        <?php foreach ($scopeSections as $section): ?>
+        <div class="scope-section">
+            <div class="scope-header">SCOPE OF WORK &ndash; <?php echo strtoupper(htmlspecialchars($section['title'] ?? '')); ?></div>
+            <div class="scope-content">
+                <h4>WORK TO BE PERFORMED:</h4>
+                <p><?php echo nl2br(htmlspecialchars($section['scope_content'] ?? '')); ?></p>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
     <?php // Additional comments shown once at the end ?>
     <?php if (!empty($data['Additional_Comments'])): ?>
     <div class="scope-section">
