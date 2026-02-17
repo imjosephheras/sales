@@ -16,7 +16,7 @@ try {
                 f.company_name AS Company_Name,
                 f.client_name,
                 f.requested_service AS Requested_Service,
-                f.grand_total,
+                f.total_cost,
                 f.docnum,
                 f.status,
                 f.service_status,

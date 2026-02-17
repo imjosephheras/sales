@@ -18,7 +18,7 @@ try {
                 request_type,
                 requested_service,
                 client_name,
-                grand_total,
+                total_cost,
                 status,
                 created_at,
                 updated_at

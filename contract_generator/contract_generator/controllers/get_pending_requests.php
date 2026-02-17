@@ -57,7 +57,7 @@ try {
                 f.created_at,
                 f.updated_at,
                 f.seller AS Seller,
-                f.grand_total AS PriceInput,
+                f.total_cost AS PriceInput,
                 f.invoice_frequency AS Invoice_Frequency,
                 f.contract_duration AS Contract_Duration,
                 f.include_staff AS includeStaff,
@@ -70,7 +70,7 @@ try {
                 f.Document_Date,
                 f.Order_Nomenclature,
                 f.order_number,
-                f.grand_total
+                f.total_cost
             FROM forms f
             WHERE f.status IN ('pending', 'in_progress', 'draft')" . $searchCondition . "
             ORDER BY
@@ -94,13 +94,13 @@ try {
     if (!empty($formIds)) {
         $placeholders = implode(',', array_fill(0, count($formIds), '?'));
         $stmtFlags = $pdo->prepare("
-            SELECT form_id, service_category FROM contract_items
+            SELECT form_id, category FROM contract_items
             WHERE form_id IN ($placeholders)
-            GROUP BY form_id, service_category
+            GROUP BY form_id, category
         ");
         $stmtFlags->execute($formIds);
         foreach ($stmtFlags->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            $includeFlags[$row['form_id']][$row['service_category']] = true;
+            $includeFlags[$row['form_id']][$row['category']] = true;
         }
     }
 
@@ -276,7 +276,7 @@ function calculateCompletionInfo($request) {
     // Section 4: Economic
     $total += 2;
     if (!empty($request['Seller'])) $completed++; else $missing[] = 'Seller';
-    if (!empty($request['PriceInput']) || !empty($request['grand_total'])) {
+    if (!empty($request['PriceInput']) || !empty($request['total_cost'])) {
         $completed++;
     } else {
         $missing[] = 'Pricing';

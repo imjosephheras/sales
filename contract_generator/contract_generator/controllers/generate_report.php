@@ -41,10 +41,10 @@ try {
     $request['Site_Observation'] = $request['site_observation'];
     $request['Additional_Comments'] = $request['additional_comments'];
     $request['docnum'] = $request['docnum'] ?? $request['Order_Nomenclature'];
-    $request['PriceInput'] = $request['grand_total'];
+    $request['PriceInput'] = $request['total_cost'];
 
     // Get contract items split by category
-    $stmtItems = $pdo->prepare("SELECT * FROM contract_items WHERE form_id = ? ORDER BY service_category, service_number");
+    $stmtItems = $pdo->prepare("SELECT * FROM contract_items WHERE form_id = ? ORDER BY category, position");
     $stmtItems->execute([$formId]);
     $allItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
@@ -52,7 +52,7 @@ try {
     $kitchenServices = [];
     $hoodVentServices = [];
     foreach ($allItems as $item) {
-        switch ($item['service_category']) {
+        switch ($item['category']) {
             case 'janitorial': $janitorialServices[] = $item; break;
             case 'kitchen': $kitchenServices[] = $item; break;
             case 'hood_vent': $hoodVentServices[] = $item; break;
@@ -241,7 +241,7 @@ function formatDate($date) {
                     <div class="summary-label">Contract Duration</div>
                 </div>
                 <div class="summary-item">
-                    <div class="summary-value"><?= formatCurrency($request['grand_total'] ?? 0) ?></div>
+                    <div class="summary-value"><?= formatCurrency($request['total_cost'] ?? 0) ?></div>
                     <div class="summary-label">Total Cost</div>
                 </div>
             </div>

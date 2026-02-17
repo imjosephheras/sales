@@ -49,7 +49,7 @@ try {
             email AS Email,
             phone AS Number_Phone,
             seller AS Seller,
-            grand_total AS PriceInput,
+            total_cost AS PriceInput,
             Work_Date,
             Document_Date,
             Order_Nomenclature,

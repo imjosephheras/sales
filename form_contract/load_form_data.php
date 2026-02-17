@@ -45,7 +45,7 @@ try {
     $scope_tasks = $stmt_scope->fetchAll(PDO::FETCH_COLUMN);
 
     // Cargar contract items (unified) and split by category for frontend compatibility
-    $sql_items = "SELECT * FROM contract_items WHERE form_id = ? ORDER BY service_category, service_number";
+    $sql_items = "SELECT * FROM contract_items WHERE form_id = ? ORDER BY category, position";
     $stmt_items = $pdo->prepare($sql_items);
     $stmt_items->execute([$form_id]);
     $all_items = $stmt_items->fetchAll();
@@ -55,7 +55,7 @@ try {
     $kitchen_costs = [];
     $hood_costs = [];
     foreach ($all_items as $item) {
-        switch ($item['service_category']) {
+        switch ($item['category']) {
             case 'janitorial':
                 $janitorial_costs[] = $item;
                 break;
@@ -73,6 +73,12 @@ try {
     $stmt_scope_sections = $pdo->prepare($sql_scope_sections);
     $stmt_scope_sections->execute([$form_id]);
     $scope_sections = $stmt_scope_sections->fetchAll();
+
+    // Cargar contract staff
+    $sql_staff = "SELECT * FROM contract_staff WHERE form_id = ? ORDER BY id";
+    $stmt_staff = $pdo->prepare($sql_staff);
+    $stmt_staff->execute([$form_id]);
+    $contract_staff = $stmt_staff->fetchAll();
 
     // Cargar fotos
     $sql_photos = "SELECT * FROM form_photos WHERE form_id = ?";
@@ -108,7 +114,7 @@ try {
 
         // Section 4: Economic Information
         'Seller' => $form['seller'],
-        'PriceInput' => $form['grand_total'],
+        'PriceInput' => $form['total_cost'],
         'payment_terms' => $form['payment_terms'],
         'includeStaff' => $form['include_staff'],
 
@@ -142,6 +148,7 @@ try {
         'kitchen_costs' => $kitchen_costs,
         'hood_costs' => $hood_costs,
         'janitorial_costs' => $janitorial_costs,
+        'contract_staff' => $contract_staff,
         'photos' => $photos
     ]);
 
