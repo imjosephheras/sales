@@ -76,7 +76,21 @@ try {
 
     // Decodificar campos JSON
     if (!empty($request['Scope_Of_Work'])) {
-        $request['Scope_Of_Work'] = json_decode($request['Scope_Of_Work'], true);
+        $decoded = json_decode($request['Scope_Of_Work'], true);
+        if (is_array($decoded)) {
+            // Handle nested structure: {"items": [...], "sections": [...]}
+            if (isset($decoded['items']) && is_array($decoded['items'])) {
+                $request['Scope_Of_Work'] = array_filter($decoded['items'], 'is_string');
+                if (!empty($decoded['sections']) && is_array($decoded['sections'])) {
+                    $request['Scope_Sections'] = $decoded['sections'];
+                }
+            } else {
+                // Flat array of strings — filter out any non-string elements
+                $request['Scope_Of_Work'] = array_filter($decoded, 'is_string');
+            }
+        } else {
+            $request['Scope_Of_Work'] = null;
+        }
     }
 
     // Decodificar arrays de servicios (si están almacenados como JSON)

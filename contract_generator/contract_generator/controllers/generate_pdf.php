@@ -89,13 +89,28 @@ try {
     $jsonFields = [
         'type18', 'write18', 'time18', 'freq18', 'desc18', 'subtotal18',
         'type19', 'time19', 'freq19', 'desc19', 'subtotal19',
-        'base_staff', 'increase_staff', 'bill_staff', 'Scope_Of_Work'
+        'base_staff', 'increase_staff', 'bill_staff'
     ];
     foreach ($jsonFields as $field) {
         if (!empty($data[$field])) {
             $decoded = json_decode($data[$field], true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 $data[$field] = $decoded;
+            }
+        }
+    }
+
+    // Decode Scope_Of_Work separately to handle nested structure
+    if (!empty($data['Scope_Of_Work']) && is_string($data['Scope_Of_Work'])) {
+        $decoded = json_decode($data['Scope_Of_Work'], true);
+        if (is_array($decoded)) {
+            if (isset($decoded['items']) && is_array($decoded['items'])) {
+                $data['Scope_Of_Work'] = array_filter($decoded['items'], 'is_string');
+                if (empty($scopeSections) && !empty($decoded['sections']) && is_array($decoded['sections'])) {
+                    $scopeSections = $decoded['sections'];
+                }
+            } else {
+                $data['Scope_Of_Work'] = array_filter($decoded, 'is_string');
             }
         }
     }
