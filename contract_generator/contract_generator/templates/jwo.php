@@ -663,6 +663,14 @@
     }
     $scopeServiceNames = array_unique($scopeServiceNames);
 
+    // Collect manual scope section titles to avoid duplicates
+    $manualScopeTitles = [];
+    if (!empty($scopeSections)) {
+        foreach ($scopeSections as $sec) {
+            $manualScopeTitles[] = strtoupper(trim($sec['title'] ?? ''));
+        }
+    }
+
     // Determine if we have specific services selected
     $hasServices = !empty($scopeServiceNames);
     ?>
@@ -670,6 +678,8 @@
     <?php if ($hasServices): ?>
         <?php // Show one scope section per service type ?>
         <?php foreach ($scopeServiceNames as $serviceName): ?>
+        <?php // Skip if a manual scope section with the same title exists ?>
+        <?php if (in_array(strtoupper(trim($serviceName)), $manualScopeTitles)) continue; ?>
         <div class="scope-section">
             <div class="scope-header">SCOPE OF WORK &ndash; <?php echo strtoupper(htmlspecialchars($serviceName)); ?></div>
             <div class="scope-content">
@@ -730,7 +740,8 @@
         <?php endif; ?>
 
     <?php else: ?>
-        <?php // No specific services — show generic scope section ?>
+        <?php // No specific services — show generic scope section (skip if manual scope sections exist) ?>
+        <?php if (empty($scopeSections)): ?>
         <div class="scope-section">
             <?php
             $scopeHeaderName = $data['Requested_Service'] ?? 'SERVICE DESCRIPTION';
@@ -763,6 +774,7 @@
                 <?php endif; ?>
             </div>
         </div>
+        <?php endif; ?>
     <?php endif; ?>
 
     <?php // Dynamic scope sections (manual/custom blocks) ?>
