@@ -28,6 +28,22 @@ try {
         denyOrderAccess();
     }
 
+    // RBAC: Completed contracts can only be edited by Admin or Leader
+    if ($form_id) {
+        $stmtStatus = $pdo->prepare("SELECT status FROM forms WHERE form_id = ?");
+        $stmtStatus->execute([$form_id]);
+        $currentStatus = $stmtStatus->fetchColumn();
+
+        if ($currentStatus === 'completed' && !in_array((int) $currentUser['role_id'], RBAC_FULL_ACCESS_ROLES, true)) {
+            http_response_code(403);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Completed contracts can only be edited by Admin or Leader roles.'
+            ]);
+            exit;
+        }
+    }
+
     $pdo->beginTransaction();
 
     // ============================================================
