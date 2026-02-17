@@ -1,112 +1,94 @@
 <?php
 /**
  * UPDATE REQUEST CONTROLLER
- * Guarda los cambios realizados en el editor
+ * Updates form fields from the contract generator editor panel.
+ * Writes to forms table (single source of truth).
  */
 
 header('Content-Type: application/json');
 require_once '../config/db_config.php';
 
 try {
-    // Verificar método POST
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        throw new Exception('Method not allowed');
-    }
-
-    // Obtener datos JSON
     $input = json_decode(file_get_contents('php://input'), true);
-    
-    if (!$input) {
-        throw new Exception('Invalid JSON data');
+
+    if (empty($input)) {
+        throw new Exception('No data received');
     }
 
-    $id = $input['request_id'] ?? null;
-
+    $id = $input['id'] ?? null;
     if (!$id) {
-        throw new Exception('Request ID is required');
+        throw new Exception('Form ID is required');
     }
 
-    // Map Client_Name to client_name for compatibility with form_contract
-    if (isset($input['Client_Name']) && !isset($input['client_name'])) {
-        $input['client_name'] = $input['Client_Name'];
-    }
-
-    // Campos a actualizar
-    $fields = [
-        // Section 1: Request Information
-        'Service_Type',
-        'Request_Type',
-        'Priority',
-        'Requested_Service',
-        'Seller',
-
-        // Section 2: Client Information
-        'client_name',
-        'Client_Title',
-        'Email',
-        'Number_Phone',
-        'Company_Name',
-        'Company_Address',
-        'Is_New_Client',
-
-        // Section 3: Operational Details
-        'Site_Visit_Conducted',
-        'Invoice_Frequency',
-        'Contract_Duration',
-
-        // Section 4: Economic Information
-        'PriceInput',
-        'Prime_Quoted_Price',
-        'Total_Price',
-        'Currency',
-        'includeJanitorial',
-        'includeKitchen',
-
-        // Section 5: Contract Information
-        'inflationAdjustment',
-        'totalArea',
-        'buildingsIncluded',
-        'startDateServices',
-
-        // Section 6: Observations
-        'Site_Observation',
-        'Additional_Comments'
+    // Build dynamic UPDATE query from received fields
+    $allowedFields = [
+        'Service_Type' => 'service_type',
+        'Request_Type' => 'request_type',
+        'Priority' => 'priority',
+        'Requested_Service' => 'requested_service',
+        'client_name' => 'client_name',
+        'Client_Title' => 'contact_name',
+        'Email' => 'email',
+        'Number_Phone' => 'phone',
+        'Company_Name' => 'company_name',
+        'Company_Address' => 'address',
+        'City' => 'city',
+        'State' => 'state',
+        'Is_New_Client' => 'is_new_client',
+        'Site_Visit_Conducted' => 'site_visit_conducted',
+        'Invoice_Frequency' => 'invoice_frequency',
+        'Contract_Duration' => 'contract_duration',
+        'Seller' => 'seller',
+        'PriceInput' => 'grand_total',
+        'inflationAdjustment' => 'inflation_adjustment',
+        'totalArea' => 'total_area',
+        'buildingsIncluded' => 'buildings_included',
+        'startDateServices' => 'start_date_services',
+        'Site_Observation' => 'site_observation',
+        'Additional_Comments' => 'additional_comments',
+        'includeStaff' => 'include_staff',
+        'Document_Date' => 'Document_Date',
+        'Work_Date' => 'Work_Date',
+        'status' => 'status',
+        'service_status' => 'service_status',
     ];
 
-    // Construir query dinámica
-    $updates = [];
+    $setClauses = [];
     $params = [':id' => $id];
 
-    foreach ($fields as $field) {
-        if (isset($input[$field])) {
-            $updates[] = "$field = :$field";
-            $params[":$field"] = $input[$field];
+    foreach ($input as $key => $value) {
+        if ($key === 'id') continue;
+        if (isset($allowedFields[$key])) {
+            $dbField = $allowedFields[$key];
+            $paramName = ':' . $dbField;
+            $setClauses[] = "`{$dbField}` = {$paramName}";
+            $params[$paramName] = $value;
         }
     }
 
-    if (empty($updates)) {
-        throw new Exception('No fields to update');
+    if (empty($setClauses)) {
+        throw new Exception('No valid fields to update');
     }
 
-    // Añadir timestamp de actualización
-    $updates[] = "updated_at = NOW()";
+    // Always update timestamp
+    $setClauses[] = "updated_at = NOW()";
 
-    // Ejecutar update
-    $sql = "UPDATE requests SET " . implode(', ', $updates) . " WHERE id = :id";
+    $sql = "UPDATE forms SET " . implode(', ', $setClauses) . " WHERE form_id = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
 
-    // Verificar si se actualizó
-    if ($stmt->rowCount() === 0) {
-        throw new Exception('No changes made or request not found');
-    }
-
     echo json_encode([
         'success' => true,
-        'message' => 'Request updated successfully',
-        'updated_fields' => count($updates) - 1 // -1 por el updated_at
+        'message' => 'Form updated successfully',
+        'updated_fields' => count($setClauses) - 1
     ]);
 
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Database error: ' . $e->getMessage()
+    ]);
 } catch (Exception $e) {
     http_response_code(400);
     echo json_encode([

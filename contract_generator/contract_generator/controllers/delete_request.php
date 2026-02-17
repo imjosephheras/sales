@@ -1,7 +1,8 @@
 <?php
 /**
  * DELETE REQUEST CONTROLLER
- * Deletes a request (pending task or generated contract) from the database
+ * Deletes a form and all associated data.
+ * Reads/writes from forms + contract_items (single source of truth).
  */
 
 header('Content-Type: application/json');
@@ -12,39 +13,31 @@ try {
     $id = isset($input['id']) ? (int)$input['id'] : 0;
 
     if (!$id) {
-        throw new Exception('Request ID is required');
+        throw new Exception('Form ID is required');
     }
 
-    // Verify the request exists
-    $stmt = $pdo->prepare("SELECT id, status, Company_Name FROM requests WHERE id = ?");
+    // Verify the form exists
+    $stmt = $pdo->prepare("SELECT form_id, status, company_name FROM forms WHERE form_id = ?");
     $stmt->execute([$id]);
-    $request = $stmt->fetch();
+    $form = $stmt->fetch();
 
-    if (!$request) {
-        throw new Exception('Request not found');
+    if (!$form) {
+        throw new Exception('Form not found');
     }
 
-    // Delete related form data if linked
-    $stmt = $pdo->prepare("SELECT form_id FROM requests WHERE id = ? AND form_id IS NOT NULL");
-    $stmt->execute([$id]);
-    $formLink = $stmt->fetch();
+    // Delete related records
+    $pdo->prepare("DELETE FROM scope_of_work WHERE form_id = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM scope_sections WHERE form_id = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM contract_items WHERE form_id = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM form_photos WHERE form_id = ?")->execute([$id]);
+    $pdo->prepare("DELETE FROM calendar_events WHERE form_id = ?")->execute([$id]);
 
-    if ($formLink && $formLink['form_id']) {
-        // Delete related form records (scope_of_work, costs, etc.)
-        $formId = (int)$formLink['form_id'];
-        $pdo->prepare("DELETE FROM scope_of_work WHERE form_id = ?")->execute([$formId]);
-        $pdo->prepare("DELETE FROM janitorial_services_costs WHERE form_id = ?")->execute([$formId]);
-        $pdo->prepare("DELETE FROM kitchen_cleaning_costs WHERE form_id = ?")->execute([$formId]);
-        $pdo->prepare("DELETE FROM hood_vent_costs WHERE form_id = ?")->execute([$formId]);
-    }
-
-    // Delete the request
-    $stmt = $pdo->prepare("DELETE FROM requests WHERE id = ?");
-    $stmt->execute([$id]);
+    // Delete the form
+    $pdo->prepare("DELETE FROM forms WHERE form_id = ?")->execute([$id]);
 
     echo json_encode([
         'success' => true,
-        'message' => 'Request deleted successfully'
+        'message' => 'Form deleted successfully'
     ]);
 
 } catch (PDOException $e) {

@@ -338,7 +338,7 @@
         // Build pricing info
         let pricingInfo = '';
         if (task.type === 'request') {
-            const totalCost = task.total_cost || task.PriceInput || '';
+            const totalCost = task.grand_total || task.PriceInput || '';
             const grand18 = task.grand18 || '';
             const grand19 = task.grand19 || '';
             if (totalCost || grand18 || grand19) {

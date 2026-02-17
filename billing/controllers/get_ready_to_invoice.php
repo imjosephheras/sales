@@ -1,75 +1,60 @@
 <?php
 /**
- * Get services ready to invoice from requests table
- * These are services marked as completed in Module 10 (Service Confirmation)
+ * GET READY TO INVOICE CONTROLLER
+ * Returns forms that are completed and ready to be invoiced.
+ * Reads from forms table (single source of truth).
  */
-require_once __DIR__ . '/../config/db_config.php';
+
 header('Content-Type: application/json');
+require_once __DIR__ . '/../config/db_config.php';
 
 try {
-    $search = $_GET['search'] ?? '';
-
-    // Add ready_to_invoice column if it doesn't exist
-    try {
-        $pdo->query("SELECT ready_to_invoice FROM requests LIMIT 1");
-    } catch (Exception $e) {
-        $pdo->exec("ALTER TABLE requests ADD COLUMN ready_to_invoice TINYINT(1) DEFAULT 0");
-        $pdo->exec("ALTER TABLE requests ADD COLUMN final_pdf_path VARCHAR(500) DEFAULT NULL");
-        $pdo->exec("ALTER TABLE requests ADD COLUMN service_status ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled') DEFAULT 'pending'");
-        $pdo->exec("ALTER TABLE requests ADD COLUMN service_completed_at TIMESTAMP NULL DEFAULT NULL");
-    }
-
     $sql = "SELECT
-                id,
-                Order_Nomenclature as order_number,
-                Company_Name as company_name,
-                client_name,
-                Service_Type as service_type,
-                Request_Type as request_type,
-                Seller as seller,
-                PriceInput as price,
-                Work_Date as work_date,
-                service_completed_at as completed_at,
-                final_pdf_path as pdf_path,
-                created_at
-            FROM requests
-            WHERE ready_to_invoice = 1
-            AND service_status = 'completed'";
-
-    $params = [];
-
-    if ($search) {
-        $sql .= " AND (
-            Order_Nomenclature LIKE :search
-            OR client_name LIKE :search2
-            OR Company_Name LIKE :search3
-        )";
-        $params['search'] = "%$search%";
-        $params['search2'] = "%$search%";
-        $params['search3'] = "%$search%";
-    }
-
-    $sql .= " ORDER BY service_completed_at DESC";
+                f.form_id AS id,
+                f.form_id,
+                f.request_type AS Request_Type,
+                f.company_name AS Company_Name,
+                f.client_name,
+                f.requested_service AS Requested_Service,
+                f.grand_total,
+                f.docnum,
+                f.status,
+                f.service_status,
+                f.final_pdf_path,
+                f.completed_at,
+                f.created_at
+            FROM forms f
+            WHERE f.status = 'completed'
+              AND f.ready_to_invoice = 1
+            ORDER BY f.completed_at DESC";
 
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $services = $stmt->fetchAll();
+    $stmt->execute();
+    $forms = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Get count
-    $countStmt = $pdo->query("SELECT COUNT(*) FROM requests WHERE ready_to_invoice = 1 AND service_status = 'completed'");
-    $count = $countStmt->fetchColumn();
+    foreach ($forms as &$form) {
+        $checkStmt = $pdo->prepare("SELECT id, status FROM billing_documents WHERE form_id = ? LIMIT 1");
+        $checkStmt->execute([$form['form_id']]);
+        $billingDoc = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        $form['has_billing_document'] = $billingDoc ? true : false;
+        $form['billing_status'] = $billingDoc ? $billingDoc['status'] : null;
+
+        if ($form['completed_at']) {
+            $form['completed_at_formatted'] = date('M d, Y g:i A', strtotime($form['completed_at']));
+        }
+    }
 
     echo json_encode([
         'success' => true,
-        'data' => $services,
-        'count' => (int)$count
+        'data' => $forms,
+        'count' => count($forms)
     ]);
 
-} catch (Exception $e) {
-    error_log("Error getting ready to invoice: " . $e->getMessage());
+} catch (PDOException $e) {
+    http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => $e->getMessage()
+        'error' => 'Database error: ' . $e->getMessage()
     ]);
 }
 ?>

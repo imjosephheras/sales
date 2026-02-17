@@ -1,8 +1,8 @@
 <?php
 /**
  * GET PENDING REQUESTS CONTROLLER
- * Returns pending requests from form_contract submissions
- * Includes drafts (pre-saved forms) for preview and completion
+ * Returns pending forms from form_contract submissions.
+ * Reads from forms table (single source of truth).
  */
 
 header('Content-Type: application/json');
@@ -21,15 +21,15 @@ try {
     $searchCondition = '';
     $searchParams = [];
     if ($search !== '') {
-        $searchCondition = " AND (r.client_name LIKE :search OR r.Company_Name LIKE :search2)";
+        $searchCondition = " AND (f.client_name LIKE :search OR f.company_name LIKE :search2)";
         $searchParams[':search'] = '%' . $search . '%';
         $searchParams[':search2'] = '%' . $search . '%';
     }
 
     // Get total count first
     $countSql = "SELECT COUNT(*) as total
-                 FROM requests r
-                 WHERE r.status IN ('pending', 'in_progress', 'draft')" . $searchCondition;
+                 FROM forms f
+                 WHERE f.status IN ('pending', 'in_progress', 'draft')" . $searchCondition;
     $countStmt = $pdo->prepare($countSql);
     foreach ($searchParams as $key => $val) {
         $countStmt->bindValue($key, $val, PDO::PARAM_STR);
@@ -38,50 +38,45 @@ try {
     $totalCount = (int)$countStmt->fetch(PDO::FETCH_ASSOC)['total'];
     $totalPages = max(1, ceil($totalCount / $limit));
 
-    // Get pending requests including drafts, ordered by priority and date
+    // Get pending forms ordered by priority and date
     $sql = "SELECT
-                r.id,
-                r.Service_Type,
-                r.Request_Type,
-                r.Priority,
-                r.Company_Name,
-                r.client_name,
-                r.Client_Title,
-                r.Email,
-                r.Number_Phone,
-                r.Company_Address,
-                r.Requested_Service,
-                r.status,
-                r.docnum,
-                r.created_at,
-                r.updated_at,
-                r.Seller,
-                r.PriceInput,
-                r.Invoice_Frequency,
-                r.Contract_Duration,
-                r.includeJanitorial,
-                r.includeKitchen,
-                r.includeStaff,
-                r.grand18,
-                r.grand19,
-                r.totalArea,
-                r.startDateServices,
-                r.Site_Observation,
-                r.Scope_Of_Work,
-                r.service_status,
                 f.form_id,
+                f.form_id AS id,
+                f.service_type AS Service_Type,
+                f.request_type AS Request_Type,
+                f.priority AS Priority,
+                f.company_name AS Company_Name,
+                f.client_name,
+                f.contact_name AS Client_Title,
+                f.email AS Email,
+                f.phone AS Number_Phone,
+                f.address AS Company_Address,
+                f.requested_service AS Requested_Service,
+                f.status,
+                f.docnum,
+                f.created_at,
+                f.updated_at,
+                f.seller AS Seller,
+                f.grand_total AS PriceInput,
+                f.invoice_frequency AS Invoice_Frequency,
+                f.contract_duration AS Contract_Duration,
+                f.include_staff AS includeStaff,
+                f.inflation_adjustment AS inflationAdjustment,
+                f.total_area AS totalArea,
+                f.start_date_services AS startDateServices,
+                f.site_observation AS Site_Observation,
+                f.service_status,
                 f.Work_Date,
                 f.Document_Date,
                 f.Order_Nomenclature,
                 f.order_number,
-                f.total_cost
-            FROM requests r
-            LEFT JOIN forms f ON r.form_id = f.form_id OR (r.form_id IS NULL AND r.docnum = f.Order_Nomenclature)
-            WHERE r.status IN ('pending', 'in_progress', 'draft')" . $searchCondition . "
+                f.grand_total
+            FROM forms f
+            WHERE f.status IN ('pending', 'in_progress', 'draft')" . $searchCondition . "
             ORDER BY
-                FIELD(r.status, 'draft', 'pending', 'in_progress'),
-                FIELD(r.Priority, 'Urgent', 'High', 'Normal', 'Low'),
-                r.created_at DESC
+                FIELD(f.status, 'draft', 'pending', 'in_progress'),
+                FIELD(f.priority, 'Urgent', 'High', 'Normal', 'Low'),
+                f.created_at DESC
             LIMIT :limit OFFSET :offset";
 
     $stmt = $pdo->prepare($sql);
@@ -93,8 +88,30 @@ try {
     $stmt->execute();
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Check which forms have janitorial/kitchen items in contract_items
+    $formIds = array_column($requests, 'form_id');
+    $includeFlags = [];
+    if (!empty($formIds)) {
+        $placeholders = implode(',', array_fill(0, count($formIds), '?'));
+        $stmtFlags = $pdo->prepare("
+            SELECT form_id, service_category FROM contract_items
+            WHERE form_id IN ($placeholders)
+            GROUP BY form_id, service_category
+        ");
+        $stmtFlags->execute($formIds);
+        foreach ($stmtFlags->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $includeFlags[$row['form_id']][$row['service_category']] = true;
+        }
+    }
+
     // Format data for display
     foreach ($requests as &$request) {
+        $fid = $request['form_id'];
+
+        // Set include flags based on contract_items
+        $request['includeJanitorial'] = isset($includeFlags[$fid]['janitorial']) ? 'Yes' : 'No';
+        $request['includeKitchen'] = (isset($includeFlags[$fid]['kitchen']) || isset($includeFlags[$fid]['hood_vent'])) ? 'Yes' : 'No';
+
         // Format dates
         if ($request['created_at']) {
             $request['created_at_formatted'] = date('M d, Y g:i A', strtotime($request['created_at']));
@@ -123,10 +140,10 @@ try {
         }
         $request['description'] = $request['Requested_Service'] ?? 'No description';
 
-        // Determine if this is a draft (incomplete form)
+        // Determine if this is a draft
         $request['is_draft'] = ($request['status'] === 'draft');
 
-        // Calculate completion percentage for drafts
+        // Calculate completion percentage
         $request['completion_info'] = calculateCompletionInfo($request);
 
         // Map priority to badge color
@@ -172,7 +189,6 @@ try {
             'cancelled'     => ['color' => '#6b7280', 'label' => 'Cancelled',     'label_es' => 'Cancelado',     'icon' => 'fas fa-ban'],
         ];
 
-        // Show service status chip for all valid service_status values
         if ($serviceStatus) {
             $statusInfo = $statusMap[$serviceStatus] ?? null;
             if ($statusInfo) {
@@ -183,7 +199,7 @@ try {
             }
         }
 
-        // Status badge info (for task card header)
+        // Status badge info
         if ($request['is_draft']) {
             $request['status_color'] = '#ffc107';
             $request['status_icon'] = '📝';
@@ -193,14 +209,11 @@ try {
             $request['status_icon'] = '⏳';
             $request['status_label'] = 'In Progress';
         } elseif ($serviceStatus && $serviceStatus !== 'pending' && isset($statusMap[$serviceStatus])) {
-            // Show service_status in header badge only when it's a meaningful non-default status
             $info = $statusMap[$serviceStatus];
             $request['status_color'] = $info['color'];
             $request['status_icon'] = '<i class="' . $info['icon'] . '"></i>';
             $request['status_label'] = $info['label'];
         }
-        // else: status is 'pending' with default service_status — no badge needed
-        // (the item is already in the Pending Tasks section)
 
         // Determine available report types
         $request['available_reports'] = [];
@@ -237,7 +250,7 @@ try {
 }
 
 /**
- * Calculate completion info for a request/draft
+ * Calculate completion info for a form/draft
  */
 function calculateCompletionInfo($request) {
     $completed = 0;
@@ -263,7 +276,7 @@ function calculateCompletionInfo($request) {
     // Section 4: Economic
     $total += 2;
     if (!empty($request['Seller'])) $completed++; else $missing[] = 'Seller';
-    if (!empty($request['PriceInput']) || !empty($request['total_cost']) || !empty($request['grand18']) || !empty($request['grand19'])) {
+    if (!empty($request['PriceInput']) || !empty($request['grand_total'])) {
         $completed++;
     } else {
         $missing[] = 'Pricing';
@@ -279,7 +292,7 @@ function calculateCompletionInfo($request) {
         'completed' => $completed,
         'total' => $total,
         'percentage' => $percentage,
-        'missing' => array_slice($missing, 0, 3) // Show first 3 missing items
+        'missing' => array_slice($missing, 0, 3)
     ];
 }
 ?>

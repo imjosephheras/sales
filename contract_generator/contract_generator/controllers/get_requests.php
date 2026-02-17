@@ -1,37 +1,38 @@
 <?php
 /**
  * GET REQUESTS CONTROLLER
- * Devuelve la lista de solicitudes para el inbox con filtros
+ * Returns the list of forms for the inbox with filters.
+ * Reads from forms table (single source of truth).
  */
 
 header('Content-Type: application/json');
 require_once '../config/db_config.php';
 
 try {
-    // Parámetros de filtro
+    // Filter parameters
     $filter_type = $_GET['type'] ?? '';
     $filter_status = $_GET['status'] ?? '';
     $filter_priority = $_GET['priority'] ?? '';
     $search = $_GET['search'] ?? '';
 
-    // Construir query base
+    // Build base query - reading from forms instead of requests
     $sql = "SELECT
-                id,
-                Request_Type,
-                Priority,
-                Company_Name,
-                Requested_Service,
+                form_id AS id,
+                request_type AS Request_Type,
+                priority AS Priority,
+                company_name AS Company_Name,
+                requested_service AS Requested_Service,
                 status,
                 created_at,
                 docnum
-            FROM requests
+            FROM forms
             WHERE 1=1";
 
     $params = [];
 
-    // Aplicar filtros
+    // Apply filters
     if (!empty($filter_type)) {
-        $sql .= " AND Request_Type = :type";
+        $sql .= " AND request_type = :type";
         $params[':type'] = $filter_type;
     }
 
@@ -41,24 +42,25 @@ try {
     }
 
     if (!empty($filter_priority)) {
-        $sql .= " AND Priority = :priority";
+        $sql .= " AND priority = :priority";
         $params[':priority'] = $filter_priority;
     }
 
     if (!empty($search)) {
-        $sql .= " AND (Company_Name LIKE :search OR Requested_Service LIKE :search)";
+        $sql .= " AND (company_name LIKE :search OR requested_service LIKE :search2)";
         $params[':search'] = '%' . $search . '%';
+        $params[':search2'] = '%' . $search . '%';
     }
 
-    // Ordenar por fecha (más recientes primero)
+    // Order by date (newest first)
     $sql .= " ORDER BY created_at DESC";
 
-    // Ejecutar query
+    // Execute query
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Formatear fechas
+    // Format dates
     foreach ($requests as &$request) {
         $request['created_at_formatted'] = date('M d, Y', strtotime($request['created_at']));
         $request['Company_Name'] = $request['Company_Name'] ?? 'No Company Name';

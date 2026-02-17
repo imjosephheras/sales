@@ -1,14 +1,13 @@
 <?php
 // ============================================================
-// load_form_data.php - VERSIÓN CORREGIDA (v2.0)
-// Fecha: 2026-01-05
-// Fix: Agregados campos nuevos y corregidos nombres de campos
-// RBAC: Vendedor solo accede a sus propias órdenes
+// load_form_data.php - Load Form Data
+// ============================================================
+// Reads from forms + contract_items (unified architecture)
 // ============================================================
 
 header('Content-Type: application/json');
 
-// Incluir configuración de base de datos y RBAC
+// Incluir configuracion de base de datos y RBAC
 require_once 'db_config.php';
 require_once 'order_access.php';
 
@@ -45,23 +44,29 @@ try {
     $stmt_scope->execute([$form_id]);
     $scope_tasks = $stmt_scope->fetchAll(PDO::FETCH_COLUMN);
 
-    // Cargar kitchen cleaning costs
-    $sql_kitchen = "SELECT * FROM kitchen_cleaning_costs WHERE form_id = ? ORDER BY service_number";
-    $stmt_kitchen = $pdo->prepare($sql_kitchen);
-    $stmt_kitchen->execute([$form_id]);
-    $kitchen_costs = $stmt_kitchen->fetchAll();
+    // Cargar contract items (unified) and split by category for frontend compatibility
+    $sql_items = "SELECT * FROM contract_items WHERE form_id = ? ORDER BY service_category, service_number";
+    $stmt_items = $pdo->prepare($sql_items);
+    $stmt_items->execute([$form_id]);
+    $all_items = $stmt_items->fetchAll();
 
-    // Cargar hood vent costs
-    $sql_hood = "SELECT * FROM hood_vent_costs WHERE form_id = ? ORDER BY service_number";
-    $stmt_hood = $pdo->prepare($sql_hood);
-    $stmt_hood->execute([$form_id]);
-    $hood_costs = $stmt_hood->fetchAll();
-
-    // Cargar janitorial services costs (Q18)
-    $sql_janitorial = "SELECT * FROM janitorial_services_costs WHERE form_id = ? ORDER BY service_number";
-    $stmt_janitorial = $pdo->prepare($sql_janitorial);
-    $stmt_janitorial->execute([$form_id]);
-    $janitorial_costs = $stmt_janitorial->fetchAll();
+    // Split items by category for backward compatibility with frontend
+    $janitorial_costs = [];
+    $kitchen_costs = [];
+    $hood_costs = [];
+    foreach ($all_items as $item) {
+        switch ($item['service_category']) {
+            case 'janitorial':
+                $janitorial_costs[] = $item;
+                break;
+            case 'kitchen':
+                $kitchen_costs[] = $item;
+                break;
+            case 'hood_vent':
+                $hood_costs[] = $item;
+                break;
+        }
+    }
 
     // Cargar scope sections (dynamic blocks)
     $sql_scope_sections = "SELECT title, scope_content FROM scope_sections WHERE form_id = ? ORDER BY section_order ASC";
@@ -76,7 +81,7 @@ try {
     $photos = $stmt_photos->fetchAll();
 
     // ============================================================
-    // Map database fields to form field names (NOMBRES CORREGIDOS)
+    // Map database fields to form field names
     // ============================================================
     $formData = [
         // Section 1: Request Information
@@ -103,7 +108,7 @@ try {
 
         // Section 4: Economic Information
         'Seller' => $form['seller'],
-        'PriceInput' => $form['total_cost'],
+        'PriceInput' => $form['grand_total'],
         'payment_terms' => $form['payment_terms'],
         'includeStaff' => $form['include_staff'],
 
@@ -133,6 +138,7 @@ try {
         'form' => $formData,
         'scope_tasks' => $scope_tasks,
         'scope_sections' => $scope_sections,
+        'contract_items' => $all_items,
         'kitchen_costs' => $kitchen_costs,
         'hood_costs' => $hood_costs,
         'janitorial_costs' => $janitorial_costs,

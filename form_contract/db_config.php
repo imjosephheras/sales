@@ -6,6 +6,9 @@
 // Las funciones de inicializacion de tablas permanecen aqui
 // porque son especificas de este modulo.
 // ============================================================
+// ARCHITECTURE: forms + contract_items as single source of truth
+// No requests table. No separate service cost tables.
+// ============================================================
 
 require_once __DIR__ . '/../config/database.php';
 
@@ -42,7 +45,7 @@ function initializeFormsTable($pdo) {
 
       -- SECTION 4: Economic Information
       `seller` VARCHAR(100) DEFAULT NULL,
-      `total_cost` DECIMAL(12,2) DEFAULT NULL,
+      `grand_total` DECIMAL(12,2) DEFAULT NULL,
       `payment_terms` VARCHAR(100) DEFAULT NULL,
       `include_staff` VARCHAR(10) DEFAULT NULL,
 
@@ -62,18 +65,50 @@ function initializeFormsTable($pdo) {
       `Work_Date` DATE DEFAULT NULL,
       `order_number` INT DEFAULT NULL,
       `Order_Nomenclature` VARCHAR(100) DEFAULT NULL,
+      `docnum` VARCHAR(100) DEFAULT NULL,
+
+      -- Service Tracking
+      `service_status` ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled') DEFAULT 'pending',
+      `service_completed_at` TIMESTAMP NULL DEFAULT NULL,
+      `ready_to_invoice` TINYINT(1) DEFAULT 0,
+      `final_pdf_path` VARCHAR(500) DEFAULT NULL,
+      `task_tracking` JSON DEFAULT NULL,
+      `task_tracking_updated_at` TIMESTAMP NULL DEFAULT NULL,
+      `admin_notes` TEXT DEFAULT NULL,
 
       -- Status & Metadata
       `status` VARCHAR(50) DEFAULT 'pending',
       `submitted_by` VARCHAR(100) DEFAULT NULL,
+      `completed_at` TIMESTAMP NULL DEFAULT NULL,
       `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
       INDEX `idx_status` (`status`),
       INDEX `idx_company` (`company_name`),
       INDEX `idx_order_number` (`order_number`),
-      INDEX `idx_created` (`created_at`)
+      INDEX `idx_created` (`created_at`),
+      INDEX `idx_service_status` (`service_status`),
+      INDEX `idx_ready_to_invoice` (`ready_to_invoice`),
+      INDEX `idx_docnum` (`docnum`)
 
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // Unified contract items table (replaces janitorial_services_costs, kitchen_cleaning_costs, hood_vent_costs)
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `contract_items` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `form_id` INT NOT NULL,
+      `service_category` VARCHAR(50) NOT NULL COMMENT 'janitorial, kitchen, hood_vent',
+      `service_number` INT DEFAULT NULL,
+      `service_type` VARCHAR(200) DEFAULT NULL,
+      `service_time` VARCHAR(100) DEFAULT NULL,
+      `frequency` VARCHAR(100) DEFAULT NULL,
+      `description` TEXT DEFAULT NULL,
+      `subtotal` DECIMAL(12,2) DEFAULT NULL,
+      `bundle_group` VARCHAR(50) DEFAULT NULL,
+      INDEX `idx_form_id` (`form_id`),
+      INDEX `idx_category` (`service_category`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
 
@@ -83,54 +118,6 @@ function initializeFormsTable($pdo) {
       `id` INT AUTO_INCREMENT PRIMARY KEY,
       `form_id` INT NOT NULL,
       `task_name` VARCHAR(255) DEFAULT NULL,
-      INDEX `idx_form_id` (`form_id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    ");
-
-    // Janitorial services costs (Section 18)
-    $pdo->exec("
-    CREATE TABLE IF NOT EXISTS `janitorial_services_costs` (
-      `id` INT AUTO_INCREMENT PRIMARY KEY,
-      `form_id` INT NOT NULL,
-      `service_number` INT DEFAULT NULL,
-      `service_type` VARCHAR(200) DEFAULT NULL,
-      `service_time` VARCHAR(100) DEFAULT NULL,
-      `frequency` VARCHAR(100) DEFAULT NULL,
-      `description` TEXT DEFAULT NULL,
-      `subtotal` DECIMAL(12,2) DEFAULT NULL,
-      `bundle_group` VARCHAR(50) DEFAULT NULL,
-      INDEX `idx_form_id` (`form_id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    ");
-
-    // Kitchen cleaning costs (Section 19)
-    $pdo->exec("
-    CREATE TABLE IF NOT EXISTS `kitchen_cleaning_costs` (
-      `id` INT AUTO_INCREMENT PRIMARY KEY,
-      `form_id` INT NOT NULL,
-      `service_number` INT DEFAULT NULL,
-      `service_type` VARCHAR(200) DEFAULT NULL,
-      `service_time` VARCHAR(100) DEFAULT NULL,
-      `frequency` VARCHAR(100) DEFAULT NULL,
-      `description` TEXT DEFAULT NULL,
-      `subtotal` DECIMAL(12,2) DEFAULT NULL,
-      `bundle_group` VARCHAR(50) DEFAULT NULL,
-      INDEX `idx_form_id` (`form_id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    ");
-
-    // Hood vent costs (Section 19)
-    $pdo->exec("
-    CREATE TABLE IF NOT EXISTS `hood_vent_costs` (
-      `id` INT AUTO_INCREMENT PRIMARY KEY,
-      `form_id` INT NOT NULL,
-      `service_number` INT DEFAULT NULL,
-      `service_type` VARCHAR(200) DEFAULT NULL,
-      `service_time` VARCHAR(100) DEFAULT NULL,
-      `frequency` VARCHAR(100) DEFAULT NULL,
-      `description` TEXT DEFAULT NULL,
-      `subtotal` DECIMAL(12,2) DEFAULT NULL,
-      `bundle_group` VARCHAR(50) DEFAULT NULL,
       INDEX `idx_form_id` (`form_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
@@ -182,29 +169,38 @@ function initializeFormsTable($pdo) {
       INDEX `idx_form_id` (`form_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
-        // Add missing columns to existing forms table
+
+    // Add missing columns to existing forms table
     addMissingColumnsToForms($pdo);
 }
- 
+
 /**
  * Add missing columns to existing forms table (handles upgrades)
  */
 function addMissingColumnsToForms($pdo) {
     $columnsToAdd = [
-        'Document_Date'       => 'DATE DEFAULT NULL',
-        'Work_Date'           => 'DATE DEFAULT NULL',
-        'order_number'        => 'INT DEFAULT NULL',
-        'Order_Nomenclature'  => 'VARCHAR(100) DEFAULT NULL',
-        'payment_terms'       => 'VARCHAR(100) DEFAULT NULL',
-        'contact_name'        => 'VARCHAR(100) DEFAULT NULL',
-        'city'                => 'VARCHAR(100) DEFAULT NULL',
-        'state'               => 'VARCHAR(100) DEFAULT NULL',
-        'submitted_by'        => 'VARCHAR(100) DEFAULT NULL',
-        'include_staff'       => 'VARCHAR(10) DEFAULT NULL',
-        'service_status'      => "ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled') DEFAULT 'pending'",
-        'service_completed_at' => 'TIMESTAMP NULL DEFAULT NULL',
+        'Document_Date'            => 'DATE DEFAULT NULL',
+        'Work_Date'                => 'DATE DEFAULT NULL',
+        'order_number'             => 'INT DEFAULT NULL',
+        'Order_Nomenclature'       => 'VARCHAR(100) DEFAULT NULL',
+        'payment_terms'            => 'VARCHAR(100) DEFAULT NULL',
+        'contact_name'             => 'VARCHAR(100) DEFAULT NULL',
+        'city'                     => 'VARCHAR(100) DEFAULT NULL',
+        'state'                    => 'VARCHAR(100) DEFAULT NULL',
+        'submitted_by'             => 'VARCHAR(100) DEFAULT NULL',
+        'include_staff'            => 'VARCHAR(10) DEFAULT NULL',
+        'service_status'           => "ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled') DEFAULT 'pending'",
+        'service_completed_at'     => 'TIMESTAMP NULL DEFAULT NULL',
+        'grand_total'              => 'DECIMAL(12,2) DEFAULT NULL',
+        'ready_to_invoice'         => 'TINYINT(1) DEFAULT 0',
+        'final_pdf_path'           => 'VARCHAR(500) DEFAULT NULL',
+        'task_tracking'            => 'JSON DEFAULT NULL',
+        'task_tracking_updated_at' => 'TIMESTAMP NULL DEFAULT NULL',
+        'admin_notes'              => 'TEXT DEFAULT NULL',
+        'completed_at'             => 'TIMESTAMP NULL DEFAULT NULL',
+        'docnum'                   => 'VARCHAR(100) DEFAULT NULL',
     ];
- 
+
     try {
         foreach ($columnsToAdd as $col => $definition) {
             $stmt = $pdo->query("SHOW COLUMNS FROM `forms` LIKE '$col'");
@@ -221,23 +217,20 @@ function addMissingColumnsToForms($pdo) {
                 $pdo->exec("ALTER TABLE `forms` MODIFY COLUMN `service_status` ENUM('pending', 'scheduled', 'confirmed', 'in_progress', 'completed', 'not_completed', 'cancelled') DEFAULT 'pending'");
             }
         }
-        // Add bundle_group column to service cost tables if missing
-        $serviceTables = ['janitorial_services_costs', 'kitchen_cleaning_costs', 'hood_vent_costs'];
-        foreach ($serviceTables as $table) {
-            $stmt = $pdo->query("SHOW COLUMNS FROM `$table` LIKE 'bundle_group'");
-            if ($stmt->rowCount() == 0) {
-                $pdo->exec("ALTER TABLE `$table` ADD COLUMN `bundle_group` VARCHAR(50) DEFAULT NULL");
-            }
-        }
 
-        // Fix: Ensure description columns are TEXT (not VARCHAR) in service cost and calendar tables
-        $tablesWithDescription = ['janitorial_services_costs', 'kitchen_cleaning_costs', 'hood_vent_costs', 'calendar_events'];
-        foreach ($tablesWithDescription as $table) {
-            $stmt = $pdo->query("SHOW COLUMNS FROM `$table` LIKE 'description'");
-            if ($stmt->rowCount() > 0) {
-                $colInfo = $stmt->fetch();
-                if (stripos($colInfo['Type'], 'varchar') !== false) {
-                    $pdo->exec("ALTER TABLE `$table` MODIFY COLUMN `description` TEXT DEFAULT NULL");
+        // Add indexes if missing
+        $indexesToAdd = [
+            'idx_service_status'   => 'service_status',
+            'idx_ready_to_invoice' => 'ready_to_invoice',
+            'idx_docnum'           => 'docnum',
+        ];
+        foreach ($indexesToAdd as $idxName => $idxCol) {
+            $stmt = $pdo->query("SHOW INDEX FROM `forms` WHERE Key_name = '$idxName'");
+            if ($stmt->rowCount() == 0) {
+                try {
+                    $pdo->exec("ALTER TABLE `forms` ADD INDEX `$idxName` (`$idxCol`)");
+                } catch (Exception $e) {
+                    // Ignore if column doesn't exist yet
                 }
             }
         }
@@ -246,170 +239,10 @@ function addMissingColumnsToForms($pdo) {
     }
 }
 
-/**
- * Initialize the requests table if it doesn't exist
- */
-function initializeRequestsTable($pdo) {
-    $createTableSQL = "
-    CREATE TABLE IF NOT EXISTS `requests` (
-      `id` INT AUTO_INCREMENT PRIMARY KEY,
-
-      -- SECTION 1: Request Information
-      `Service_Type` VARCHAR(100) DEFAULT NULL,
-      `Request_Type` VARCHAR(100) DEFAULT NULL,
-      `Priority` VARCHAR(50) DEFAULT NULL,
-      `Requested_Service` VARCHAR(200) DEFAULT NULL,
-
-      -- SECTION 2: Client Information
-      `client_name` VARCHAR(200) DEFAULT NULL,
-      `Client_Title` VARCHAR(100) DEFAULT NULL,
-      `Email` VARCHAR(200) DEFAULT NULL,
-      `Number_Phone` VARCHAR(50) DEFAULT NULL,
-      `Company_Name` VARCHAR(200) DEFAULT NULL,
-      `Company_Address` TEXT DEFAULT NULL,
-      `Is_New_Client` VARCHAR(10) DEFAULT NULL,
-
-      -- SECTION 3: Operational Details
-      `Site_Visit_Conducted` VARCHAR(10) DEFAULT NULL,
-      `frequency_period` VARCHAR(50) DEFAULT NULL,
-      `week_days` TEXT DEFAULT NULL,
-      `one_time` VARCHAR(100) DEFAULT NULL,
-      `Invoice_Frequency` VARCHAR(50) DEFAULT NULL,
-      `Contract_Duration` VARCHAR(100) DEFAULT NULL,
-
-      -- SECTION 4: Economic Information
-      `Seller` VARCHAR(100) DEFAULT NULL,
-      `PriceInput` VARCHAR(100) DEFAULT NULL,
-      `Prime_Quoted_Price` VARCHAR(100) DEFAULT NULL,
-
-      -- Janitorial Services (Section 18)
-      `includeJanitorial` VARCHAR(10) DEFAULT NULL,
-      `type18` TEXT DEFAULT NULL,
-      `write18` TEXT DEFAULT NULL,
-      `time18` TEXT DEFAULT NULL,
-      `freq18` TEXT DEFAULT NULL,
-      `desc18` TEXT DEFAULT NULL,
-      `subtotal18` TEXT DEFAULT NULL,
-      `total18` VARCHAR(50) DEFAULT NULL,
-      `taxes18` VARCHAR(50) DEFAULT NULL,
-      `grand18` VARCHAR(50) DEFAULT NULL,
-
-      -- Hoodvent & Kitchen Cleaning (Section 19)
-      `includeKitchen` VARCHAR(10) DEFAULT NULL,
-      `type19` TEXT DEFAULT NULL,
-      `time19` TEXT DEFAULT NULL,
-      `freq19` TEXT DEFAULT NULL,
-      `desc19` TEXT DEFAULT NULL,
-      `subtotal19` TEXT DEFAULT NULL,
-      `total19` VARCHAR(50) DEFAULT NULL,
-      `taxes19` VARCHAR(50) DEFAULT NULL,
-      `grand19` VARCHAR(50) DEFAULT NULL,
-
-      -- Staff (Section 20)
-      `includeStaff` VARCHAR(10) DEFAULT NULL,
-      `base_staff` TEXT DEFAULT NULL,
-      `increase_staff` TEXT DEFAULT NULL,
-      `bill_staff` TEXT DEFAULT NULL,
-
-      -- SECTION 5: Contract Information
-      `inflationAdjustment` VARCHAR(50) DEFAULT NULL,
-      `totalArea` VARCHAR(100) DEFAULT NULL,
-      `buildingsIncluded` TEXT DEFAULT NULL,
-      `startDateServices` DATE DEFAULT NULL,
-
-      -- SECTION 6: Observations
-      `Site_Observation` TEXT DEFAULT NULL,
-      `Additional_Comments` TEXT DEFAULT NULL,
-      `Email_Information_Sent` TEXT DEFAULT NULL,
-
-      -- SECTION 7: Scope of Work
-      `Scope_Of_Work` TEXT DEFAULT NULL,
-
-      -- SECTION 8: Photos
-      `photos` TEXT DEFAULT NULL,
-
-      -- Status & Metadata
-      `status` VARCHAR(50) DEFAULT 'pending',
-      `document_type` VARCHAR(50) DEFAULT NULL,
-      `document_number` VARCHAR(50) DEFAULT NULL,
-      `docnum` VARCHAR(100) DEFAULT NULL,
-      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      `completed_at` TIMESTAMP NULL DEFAULT NULL,
-
-      INDEX `idx_status` (`status`),
-      INDEX `idx_company` (`Company_Name`),
-      INDEX `idx_service_type` (`Service_Type`),
-      INDEX `idx_created` (`created_at`),
-      INDEX `idx_docnum` (`docnum`)
-
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    ";
-
-    $pdo->exec($createTableSQL);
-
-    // Add missing columns to existing table
-    addMissingColumnsFormContract($pdo);
-}
-
-/**
- * Add missing columns to existing requests table
- */
-function addMissingColumnsFormContract($pdo) {
-    try {
-        // Check and add docnum column
-        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'docnum'");
-        if ($stmt->rowCount() == 0) {
-            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `docnum` VARCHAR(100) DEFAULT NULL");
-            $pdo->exec("ALTER TABLE `requests` ADD INDEX `idx_docnum` (`docnum`)");
-        }
-
-        // Check and add completed_at column
-        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'completed_at'");
-        if ($stmt->rowCount() == 0) {
-            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `completed_at` TIMESTAMP NULL DEFAULT NULL");
-        }
-
-        // Check and add form_id column for linking with forms table
-        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'form_id'");
-        if ($stmt->rowCount() == 0) {
-            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `form_id` INT DEFAULT NULL");
-            $pdo->exec("ALTER TABLE `requests` ADD INDEX `idx_form_id` (`form_id`)");
-        }
-
-        // Check and add Work_Date column
-        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'Work_Date'");
-        if ($stmt->rowCount() == 0) {
-            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `Work_Date` DATE DEFAULT NULL");
-        }
-
-        // Check and add Document_Date column
-        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'Document_Date'");
-        if ($stmt->rowCount() == 0) {
-            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `Document_Date` DATE DEFAULT NULL");
-        }
-
-        // Check and add City column
-        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'City'");
-        if ($stmt->rowCount() == 0) {
-            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `City` VARCHAR(100) DEFAULT NULL");
-        }
-
-        // Check and add State column
-        $stmt = $pdo->query("SHOW COLUMNS FROM `requests` LIKE 'State'");
-        if ($stmt->rowCount() == 0) {
-            $pdo->exec("ALTER TABLE `requests` ADD COLUMN `State` VARCHAR(100) DEFAULT NULL");
-        }
-    } catch (Exception $e) {
-        error_log("Error adding missing columns: " . $e->getMessage());
-    }
-}
-
 // Inicializar tablas del modulo form_contract al obtener conexion
 // Se usa la funcion getDBConnection() del config centralizado
 $pdo = getDBConnection();
 initializeFormsTable($pdo);
-initializeRequestsTable($pdo);
 
 /**
  * Migrate existing forms with Work_Date to calendar_events (runs once)
@@ -447,14 +280,6 @@ function migrateExistingFormsToCalendarEvents($pdo) {
 
 /**
  * Create or update base calendar event for a form, and generate recurring agendas
- *
- * @param PDO $pdo
- * @param int $formId
- * @param string $workDate - The form's Work_Date (YYYY-MM-DD)
- * @param int $frequencyMonths - 0-6
- * @param int $frequencyYears - 0-5
- * @param string|null $description - Notes
- * @return int|false - base event_id on success
  */
 function syncCalendarEvent($pdo, $formId, $workDate, $frequencyMonths = 0, $frequencyYears = 0, $description = null) {
     if (empty($workDate)) return false;
@@ -521,9 +346,6 @@ function syncCalendarEvent($pdo, $formId, $workDate, $frequencyMonths = 0, $freq
  * Generate recurring agendas from a base event
  */
 function generateRecurringAgendas($pdo, $baseEventId, $formId, $baseDate, $frequencyMonths, $frequencyYears) {
-    // Total range in months = frequency_years * 12
-    // Number of agendas = (totalMonths / frequencyMonths)
-    // Example: freq_months=1, freq_years=1 => 12 months total, 12/1 = 12 agendas (1 base + 11 recurring)
     $totalMonths = $frequencyYears * 12;
     $step = $frequencyMonths;
 
@@ -536,7 +358,6 @@ function generateRecurringAgendas($pdo, $baseEventId, $formId, $baseDate, $frequ
 
     $baseDateObj = new DateTime($baseDate);
 
-    // Start from step (skip 0 since that's the base event)
     for ($m = $step; $m < $totalMonths; $m += $step) {
         $nextDate = clone $baseDateObj;
         $nextDate->modify("+{$m} months");
@@ -552,254 +373,16 @@ function generateRecurringAgendas($pdo, $baseEventId, $formId, $baseDate, $frequ
 }
 
 /**
- * Sync form data to requests table (for Contract Generator)
- * Maps fields from forms table format to requests table format
- *
- * @param PDO $pdo - Database connection
- * @param int $formId - The form_id from forms table
- * @param array $formData - Form data from POST
- * @return int|false - Returns request_id on success, false on failure
+ * Calculate and update the grand_total for a form based on its contract_items
  */
-function syncFormToRequests($pdo, $formId, $formData) {
-    try {
-        // Check if request already exists for this form (using form_id or docnum)
-        $docnum = $formData['Order_Nomenclature'] ?? null;
-        $existingRequest = null;
+function recalculateGrandTotal($pdo, $formId) {
+    $stmt = $pdo->prepare("SELECT COALESCE(SUM(subtotal), 0) as total FROM contract_items WHERE form_id = ?");
+    $stmt->execute([$formId]);
+    $total = $stmt->fetchColumn();
+    $grandTotal = $total > 0 ? $total : null;
 
-        // First try to find by form_id (more reliable)
-        if ($formId) {
-            $stmt = $pdo->prepare("SELECT id FROM requests WHERE form_id = ?");
-            $stmt->execute([$formId]);
-            $existingRequest = $stmt->fetch();
-        }
+    $pdo->prepare("UPDATE forms SET grand_total = ? WHERE form_id = ?")->execute([$grandTotal, $formId]);
 
-        // If not found by form_id, try by docnum
-        if (!$existingRequest && $docnum) {
-            $stmt = $pdo->prepare("SELECT id FROM requests WHERE docnum = ?");
-            $stmt->execute([$docnum]);
-            $existingRequest = $stmt->fetch();
-        }
-
-        // Prepare scope of work as JSON (combine Q28 manual + Q19 service scopes + dynamic sections)
-        $allScopeItems = [];
-        if (isset($formData['Scope_Of_Work']) && is_array($formData['Scope_Of_Work'])) {
-            $allScopeItems = array_merge($allScopeItems, $formData['Scope_Of_Work']);
-        }
-        if (isset($formData['scope19']) && is_array($formData['scope19'])) {
-            foreach ($formData['scope19'] as $scopeJson) {
-                if (!empty($scopeJson)) {
-                    $decoded = json_decode($scopeJson, true);
-                    if (is_array($decoded)) {
-                        $allScopeItems = array_merge($allScopeItems, $decoded);
-                    }
-                }
-            }
-        }
-
-        // Include dynamic scope sections as structured data
-        $scopeSections = [];
-        if (isset($formData['Scope_Sections_Title']) && is_array($formData['Scope_Sections_Title'])) {
-            $titles = $formData['Scope_Sections_Title'];
-            $contents = $formData['Scope_Sections_Content'] ?? [];
-            for ($i = 0; $i < count($titles); $i++) {
-                $secTitle = trim($titles[$i] ?? '');
-                $secContent = trim($contents[$i] ?? '');
-                if (!empty($secTitle) || !empty($secContent)) {
-                    $scopeSections[] = ['title' => $secTitle, 'scope_content' => $secContent];
-                }
-            }
-        }
-
-        // Merge all scope data: items array + sections as JSON
-        $scopeData = [];
-        if (!empty($allScopeItems)) {
-            $scopeData['items'] = $allScopeItems;
-        }
-        if (!empty($scopeSections)) {
-            $scopeData['sections'] = $scopeSections;
-        }
-        $scopeOfWork = !empty($scopeData) ? json_encode($scopeData) : (!empty($allScopeItems) ? json_encode($allScopeItems) : null);
-
-        // Prepare janitorial arrays as JSON
-        $type18 = isset($formData['type18']) && is_array($formData['type18']) ? json_encode($formData['type18']) : null;
-        $write18 = isset($formData['write18']) && is_array($formData['write18']) ? json_encode($formData['write18']) : null;
-        $time18 = isset($formData['time18']) && is_array($formData['time18']) ? json_encode($formData['time18']) : null;
-        $freq18 = isset($formData['freq18']) && is_array($formData['freq18']) ? json_encode($formData['freq18']) : null;
-        $desc18 = isset($formData['desc18']) && is_array($formData['desc18']) ? json_encode($formData['desc18']) : null;
-        $subtotal18 = isset($formData['subtotal18']) && is_array($formData['subtotal18']) ? json_encode($formData['subtotal18']) : null;
-
-        // Prepare kitchen/hoodvent arrays as JSON
-        $type19 = isset($formData['type19']) && is_array($formData['type19']) ? json_encode($formData['type19']) : null;
-        $time19 = isset($formData['time19']) && is_array($formData['time19']) ? json_encode($formData['time19']) : null;
-        $freq19 = isset($formData['freq19']) && is_array($formData['freq19']) ? json_encode($formData['freq19']) : null;
-        $desc19 = isset($formData['desc19']) && is_array($formData['desc19']) ? json_encode($formData['desc19']) : null;
-        $subtotal19 = isset($formData['subtotal19']) && is_array($formData['subtotal19']) ? json_encode($formData['subtotal19']) : null;
-
-        // Prepare staff arrays as JSON
-        $baseStaff = isset($formData['base_staff']) && is_array($formData['base_staff']) ? json_encode($formData['base_staff']) : null;
-        $increaseStaff = isset($formData['increase_staff']) && is_array($formData['increase_staff']) ? json_encode($formData['increase_staff']) : null;
-        $billStaff = isset($formData['bill_staff']) && is_array($formData['bill_staff']) ? json_encode($formData['bill_staff']) : null;
-
-        // Prepare week_days as JSON if it's an array
-        $weekDays = isset($formData['week_days']) && is_array($formData['week_days']) ? json_encode($formData['week_days']) : ($formData['week_days'] ?? null);
-
-        if ($existingRequest) {
-            // UPDATE existing request
-            $sql = "UPDATE requests SET
-                Service_Type = :service_type,
-                Request_Type = :request_type,
-                Priority = :priority,
-                Requested_Service = :requested_service,
-                client_name = :client_name,
-                Client_Title = :client_title,
-                Email = :email,
-                Number_Phone = :number_phone,
-                Company_Name = :company_name,
-                Company_Address = :company_address,
-                City = :city,
-                State = :state,
-                Is_New_Client = :is_new_client,
-                Site_Visit_Conducted = :site_visit_conducted,
-                frequency_period = :frequency_period,
-                week_days = :week_days,
-                one_time = :one_time,
-                Invoice_Frequency = :invoice_frequency,
-                Contract_Duration = :contract_duration,
-                Seller = :seller,
-                PriceInput = :price_input,
-                Prime_Quoted_Price = :prime_quoted_price,
-                includeJanitorial = :include_janitorial,
-                type18 = :type18, write18 = :write18, time18 = :time18,
-                freq18 = :freq18, desc18 = :desc18, subtotal18 = :subtotal18,
-                total18 = :total18, taxes18 = :taxes18, grand18 = :grand18,
-                includeKitchen = :include_kitchen,
-                type19 = :type19, time19 = :time19,
-                freq19 = :freq19, desc19 = :desc19, subtotal19 = :subtotal19,
-                total19 = :total19, taxes19 = :taxes19, grand19 = :grand19,
-                includeStaff = :include_staff,
-                base_staff = :base_staff, increase_staff = :increase_staff, bill_staff = :bill_staff,
-                inflationAdjustment = :inflation_adjustment,
-                totalArea = :total_area,
-                buildingsIncluded = :buildings_included,
-                startDateServices = :start_date_services,
-                Site_Observation = :site_observation,
-                Additional_Comments = :additional_comments,
-                Scope_Of_Work = :scope_of_work,
-                Work_Date = :work_date,
-                Document_Date = :document_date,
-                docnum = :docnum,
-                form_id = :form_id,
-                status = :status,
-                service_status = :service_status,
-                updated_at = NOW()
-            WHERE id = :id";
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindValue(':id', $existingRequest['id']);
-            $stmt->bindValue(':docnum', $docnum);
-            $stmt->bindValue(':form_id', $formId);
-        } else {
-            // INSERT new request
-            $sql = "INSERT INTO requests (
-                Service_Type, Request_Type, Priority, Requested_Service,
-                client_name, Client_Title, Email, Number_Phone, Company_Name, Company_Address, City, State, Is_New_Client,
-                Site_Visit_Conducted, frequency_period, week_days, one_time, Invoice_Frequency, Contract_Duration,
-                Seller, PriceInput, Prime_Quoted_Price,
-                includeJanitorial, type18, write18, time18, freq18, desc18, subtotal18, total18, taxes18, grand18,
-                includeKitchen, type19, time19, freq19, desc19, subtotal19, total19, taxes19, grand19,
-                includeStaff, base_staff, increase_staff, bill_staff,
-                inflationAdjustment, totalArea, buildingsIncluded, startDateServices,
-                Site_Observation, Additional_Comments, Scope_Of_Work,
-                Work_Date, Document_Date,
-                status, service_status, docnum, form_id, created_at
-            ) VALUES (
-                :service_type, :request_type, :priority, :requested_service,
-                :client_name, :client_title, :email, :number_phone, :company_name, :company_address, :city, :state, :is_new_client,
-                :site_visit_conducted, :frequency_period, :week_days, :one_time, :invoice_frequency, :contract_duration,
-                :seller, :price_input, :prime_quoted_price,
-                :include_janitorial, :type18, :write18, :time18, :freq18, :desc18, :subtotal18, :total18, :taxes18, :grand18,
-                :include_kitchen, :type19, :time19, :freq19, :desc19, :subtotal19, :total19, :taxes19, :grand19,
-                :include_staff, :base_staff, :increase_staff, :bill_staff,
-                :inflation_adjustment, :total_area, :buildings_included, :start_date_services,
-                :site_observation, :additional_comments, :scope_of_work,
-                :work_date, :document_date,
-                :status, :service_status, :docnum, :form_id, NOW()
-            )";
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindValue(':docnum', $docnum);
-            $stmt->bindValue(':form_id', $formId);
-        }
-
-        // Bind common parameters
-        $stmt->bindValue(':service_type', $formData['Service_Type'] ?? null);
-        $stmt->bindValue(':request_type', $formData['Request_Type'] ?? null);
-        $stmt->bindValue(':priority', $formData['Priority'] ?? 'Normal');
-        $stmt->bindValue(':requested_service', $formData['Requested_Service'] ?? null);
-        $stmt->bindValue(':client_name', $formData['Client_Name'] ?? null);
-        $stmt->bindValue(':client_title', $formData['Client_Title'] ?? null);
-        $stmt->bindValue(':email', $formData['Email'] ?? null);
-        $stmt->bindValue(':number_phone', $formData['Number_Phone'] ?? null);
-        $stmt->bindValue(':company_name', $formData['Company_Name'] ?? null);
-        $stmt->bindValue(':company_address', $formData['Company_Address'] ?? null);
-        $stmt->bindValue(':city', $formData['City'] ?? null);
-        $stmt->bindValue(':state', $formData['State'] ?? null);
-        $stmt->bindValue(':is_new_client', $formData['Is_New_Client'] ?? null);
-        $stmt->bindValue(':site_visit_conducted', $formData['Site_Visit_Conducted'] ?? null);
-        $stmt->bindValue(':frequency_period', $formData['frequency_period'] ?? null);
-        $stmt->bindValue(':week_days', $weekDays);
-        $stmt->bindValue(':one_time', $formData['one_time'] ?? null);
-        $stmt->bindValue(':invoice_frequency', $formData['Invoice_Frequency'] ?? null);
-        $stmt->bindValue(':contract_duration', $formData['Contract_Duration'] ?? null);
-        $stmt->bindValue(':seller', $formData['Seller'] ?? null);
-        $stmt->bindValue(':price_input', $formData['PriceInput'] ?? null);
-        $stmt->bindValue(':prime_quoted_price', $formData['Prime_Quoted_Price'] ?? null);
-        $stmt->bindValue(':include_janitorial', $formData['includeJanitorial'] ?? null);
-        $stmt->bindValue(':type18', $type18);
-        $stmt->bindValue(':write18', $write18);
-        $stmt->bindValue(':time18', $time18);
-        $stmt->bindValue(':freq18', $freq18);
-        $stmt->bindValue(':desc18', $desc18);
-        $stmt->bindValue(':subtotal18', $subtotal18);
-        $stmt->bindValue(':total18', $formData['total18'] ?? null);
-        $stmt->bindValue(':taxes18', $formData['taxes18'] ?? null);
-        $stmt->bindValue(':grand18', $formData['grand18'] ?? null);
-        $stmt->bindValue(':include_kitchen', $formData['includeKitchen'] ?? null);
-        $stmt->bindValue(':type19', $type19);
-        $stmt->bindValue(':time19', $time19);
-        $stmt->bindValue(':freq19', $freq19);
-        $stmt->bindValue(':desc19', $desc19);
-        $stmt->bindValue(':subtotal19', $subtotal19);
-        $stmt->bindValue(':total19', $formData['total19'] ?? null);
-        $stmt->bindValue(':taxes19', $formData['taxes19'] ?? null);
-        $stmt->bindValue(':grand19', $formData['grand19'] ?? null);
-        $stmt->bindValue(':include_staff', $formData['includeStaff'] ?? null);
-        $stmt->bindValue(':base_staff', $baseStaff);
-        $stmt->bindValue(':increase_staff', $increaseStaff);
-        $stmt->bindValue(':bill_staff', $billStaff);
-        $stmt->bindValue(':inflation_adjustment', $formData['inflationAdjustment'] ?? null);
-        $stmt->bindValue(':total_area', $formData['totalArea'] ?? null);
-        $stmt->bindValue(':buildings_included', $formData['buildingsIncluded'] ?? null);
-        $stmt->bindValue(':start_date_services', !empty($formData['startDateServices']) ? $formData['startDateServices'] : null);
-        $stmt->bindValue(':site_observation', $formData['Site_Observation'] ?? null);
-        $stmt->bindValue(':additional_comments', $formData['Additional_Comments'] ?? null);
-        $stmt->bindValue(':scope_of_work', $scopeOfWork);
-        $stmt->bindValue(':work_date', !empty($formData['Work_Date']) ? $formData['Work_Date'] : null);
-        $stmt->bindValue(':document_date', !empty($formData['Document_Date']) ? $formData['Document_Date'] : null);
-        $stmt->bindValue(':status', $formData['status'] ?? 'pending');
-        $stmt->bindValue(':service_status', $formData['service_status'] ?? 'pending');
-
-        $stmt->execute();
-
-        if ($existingRequest) {
-            return $existingRequest['id'];
-        } else {
-            return $pdo->lastInsertId();
-        }
-
-    } catch (Exception $e) {
-        error_log("Error syncing form to requests: " . $e->getMessage());
-        return false;
-    }
+    return $grandTotal;
 }
 ?>

@@ -1,7 +1,8 @@
 <?php
 /**
  * update_service_status.php
- * Updates the service_status of a request
+ * Updates the service_status of a form.
+ * Writes directly to forms table (single source of truth).
  *
  * When marked as 'completed':
  *   - Sets service_completed_at timestamp
@@ -46,19 +47,35 @@ try {
     $pdo = getDBConnection();
     $pdo->beginTransaction();
 
-    // Get current request data
-    $stmt = $pdo->prepare("SELECT * FROM requests WHERE id = :id");
+    // Get current form data (single source of truth)
+    $stmt = $pdo->prepare("SELECT * FROM forms WHERE form_id = :id");
     $stmt->execute([':id' => $request_id]);
-    $request = $stmt->fetch();
+    $form = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$request) {
+    if (!$form) {
         $pdo->rollBack();
         echo json_encode([
             'success' => false,
-            'message' => 'Request not found'
+            'message' => 'Form not found'
         ]);
         exit;
     }
+
+    // Build aliased request data for PDF generation compatibility
+    $request = [
+        'id' => $form['form_id'],
+        'Service_Type' => $form['service_type'],
+        'Request_Type' => $form['request_type'],
+        'Company_Name' => $form['company_name'],
+        'client_name' => $form['client_name'],
+        'Email' => $form['email'],
+        'Number_Phone' => $form['phone'],
+        'Seller' => $form['seller'],
+        'PriceInput' => $form['grand_total'],
+        'Work_Date' => $form['Work_Date'],
+        'Document_Date' => $form['Document_Date'],
+        'Order_Nomenclature' => $form['Order_Nomenclature'],
+    ];
 
     $pdf_path = null;
     $ready_to_invoice = 0;
@@ -73,15 +90,15 @@ try {
         $pdf_path = generateFinalPDF($request, $pdo);
     }
 
-    // Update the request
+    // Update the form directly (single source of truth)
     $updateSql = "
-        UPDATE requests SET
+        UPDATE forms SET
             service_status = :status,
             service_completed_at = :completed_at,
             ready_to_invoice = :ready_to_invoice,
             final_pdf_path = :pdf_path,
             updated_at = NOW()
-        WHERE id = :id
+        WHERE form_id = :id
     ";
 
     $updateStmt = $pdo->prepare($updateSql);
@@ -92,12 +109,6 @@ try {
         ':pdf_path' => $pdf_path,
         ':id' => $request_id
     ]);
-
-    // Sync service_status back to forms table (bidirectional sync)
-    if (!empty($request['form_id'])) {
-        $syncStmt = $pdo->prepare("UPDATE forms SET service_status = :status WHERE form_id = :form_id");
-        $syncStmt->execute([':status' => $new_status, ':form_id' => $request['form_id']]);
-    }
 
     $pdo->commit();
 

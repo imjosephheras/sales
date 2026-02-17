@@ -33,26 +33,26 @@ try {
 // Get all completed contracts with their billing status
 $sql = "
     SELECT
-        r.id,
-        r.docnum,
-        r.Company_Name,
-        r.client_name AS Client_Name,
-        r.Requested_Service,
-        r.Request_Type,
-        r.Service_Type,
-        r.status AS contract_status,
-        r.completed_at AS contract_completed_at,
-        r.final_pdf_path,
-        r.PriceInput,
+        f.form_id AS id,
+        f.docnum,
+        f.company_name AS Company_Name,
+        f.client_name AS Client_Name,
+        f.requested_service AS Requested_Service,
+        f.request_type AS Request_Type,
+        f.service_type AS Service_Type,
+        f.status AS contract_status,
+        f.completed_at AS contract_completed_at,
+        f.final_pdf_path,
+        f.grand_total AS PriceInput,
         b.id AS billing_id,
         b.status AS billing_status,
         b.completed_at AS billing_completed_at,
         b.completed_by_name AS billing_completed_by,
         b.created_at AS billing_created_at
-    FROM requests r
-    LEFT JOIN billing_documents b ON b.request_id = r.id
-    WHERE r.status IN ('ready', 'completed')
-    ORDER BY r.completed_at DESC, r.updated_at DESC
+    FROM forms f
+    LEFT JOIN billing_documents b ON b.form_id = f.form_id
+    WHERE f.status IN ('ready', 'completed')
+    ORDER BY f.completed_at DESC, f.updated_at DESC
 ";
 
 $stmt = $pdo->query($sql);

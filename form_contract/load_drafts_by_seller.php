@@ -68,7 +68,7 @@ try {
                 client_name,
                 company_name,
                 order_number,
-                total_cost,
+                grand_total,
                 seller,
                 status,
                 service_status,

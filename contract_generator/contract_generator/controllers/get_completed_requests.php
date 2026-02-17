@@ -1,7 +1,8 @@
 <?php
 /**
  * GET COMPLETED REQUESTS CONTROLLER
- * Returns completed/ready requests (Contratos Generados)
+ * Returns completed/ready forms (Contratos Generados).
+ * Reads from forms table (single source of truth).
  */
 
 header('Content-Type: application/json');
@@ -15,27 +16,27 @@ try {
     $searchCondition = '';
     $searchParams = [];
     if ($search !== '') {
-        $searchCondition = " AND (client_name LIKE :search OR Company_Name LIKE :search2)";
+        $searchCondition = " AND (client_name LIKE :search OR company_name LIKE :search2)";
         $searchParams[':search'] = '%' . $search . '%';
         $searchParams[':search2'] = '%' . $search . '%';
     }
 
-    // Get completed requests ordered by completion date (newest first)
+    // Get completed forms ordered by completion date (newest first)
     $sql = "SELECT
-                id,
-                Service_Type,
-                Request_Type,
-                Priority,
-                Company_Name,
+                form_id AS id,
+                service_type AS Service_Type,
+                request_type AS Request_Type,
+                priority AS Priority,
+                company_name AS Company_Name,
                 client_name,
-                Email,
-                Requested_Service,
+                email AS Email,
+                requested_service AS Requested_Service,
                 status,
                 docnum,
                 created_at,
                 updated_at,
                 completed_at
-            FROM requests
+            FROM forms
             WHERE status IN ('ready', 'completed')" . $searchCondition . "
             ORDER BY completed_at DESC, updated_at DESC";
 
@@ -48,7 +49,6 @@ try {
 
     // Format data for display
     foreach ($requests as &$request) {
-        // Format dates
         if ($request['completed_at']) {
             $request['completed_at_formatted'] = date('M d, Y g:i A', strtotime($request['completed_at']));
         }
@@ -56,15 +56,10 @@ try {
             $request['created_at_formatted'] = date('M d, Y g:i A', strtotime($request['created_at']));
         }
 
-        // Use Company_Name
         $company = $request['Company_Name'] ?? 'No company';
-
-        // Ensure fields are not null
         $request['client_name'] = $request['client_name'] ?? 'No client';
         $request['Priority'] = $request['Priority'] ?? 'Normal';
         $request['Service_Type'] = $request['Service_Type'] ?? 'N/A';
-
-        // Add display title
         $request['title'] = $company . ' - ' . $request['Service_Type'];
         $request['description'] = $request['Requested_Service'] ?? 'No description';
 

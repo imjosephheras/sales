@@ -12,7 +12,7 @@ $data = [];
 $request_id = $_GET['id'] ?? null;
 
 if ($request_id) {
-    $sql = "SELECT * FROM requests WHERE id = :id";
+    $sql = "SELECT *, form_id AS id, company_name AS Company_Name, address AS Company_Address, client_name AS Client_Name, email AS Email, service_type AS Service_Type FROM forms WHERE form_id = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':id' => $request_id]);
     $data = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];

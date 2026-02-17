@@ -1,179 +1,100 @@
 <?php
 /**
  * GET REQUEST DETAIL CONTROLLER
- * Devuelve todos los datos de una solicitud específica
- * Excluye: Priority (Q3), Email_Information_Sent (Q27), photos (Q29)
+ * Returns full data for a single form (contract) with its contract_items.
+ * Reads from forms + contract_items (single source of truth).
  */
 
 header('Content-Type: application/json');
 require_once '../config/db_config.php';
 
 try {
-    $id = $_GET['id'] ?? null;
+    $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
     if (!$id) {
-        throw new Exception('Request ID is required');
+        throw new Exception('ID is required');
     }
 
-    // Obtener datos completos - seleccionando campos específicos
-    // Excluimos: Priority, Email_Information_Sent, photos
-    $stmt = $pdo->prepare("
-        SELECT
-            id, status, docnum, created_at, updated_at, completed_at,
-            form_id,
-
-            -- Section 1: Request Information
-            Service_Type, Request_Type, Priority, Requested_Service,
-
-            -- Section 2: Client Information
-            client_name, Client_Title, Email, Number_Phone,
-            Company_Name, Company_Address, Is_New_Client,
-
-            -- Section 3: Operational Details
-            Site_Visit_Conducted, frequency_period, week_days, one_time,
-            Invoice_Frequency, Contract_Duration,
-
-            -- Section 4: Economic Information
-            Seller, PriceInput, Prime_Quoted_Price,
-
-            -- Janitorial Services (Q18)
-            includeJanitorial, type18, write18, time18, freq18, desc18,
-            subtotal18, total18, taxes18, grand18,
-
-            -- Kitchen/Hood Services (Q19)
-            includeKitchen, type19, time19, freq19, desc19,
-            subtotal19, total19, taxes19, grand19,
-
-            -- Staff (Q20)
-            includeStaff, base_staff, increase_staff, bill_staff,
-
-            -- Section 5: Contract Information
-            inflationAdjustment, totalArea, buildingsIncluded, startDateServices,
-
-            -- Section 6: Observations (excluding Email_Information_Sent Q27)
-            Site_Observation, Additional_Comments,
-
-            -- Section 7: Scope of Work
-            Scope_Of_Work,
-
-            -- Document metadata
-            document_type, document_number
-
-        FROM requests
-        WHERE id = :id
-    ");
+    // Get form data
+    $stmt = $pdo->prepare("SELECT * FROM forms WHERE form_id = :id");
     $stmt->execute([':id' => $id]);
-    $request = $stmt->fetch(PDO::FETCH_ASSOC);
+    $form = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$request) {
-        throw new Exception('Request not found');
+    if (!$form) {
+        throw new Exception('Form not found');
     }
 
-    // Add Client_Name alias for compatibility with form_contract
-    if (isset($request['client_name'])) {
-        $request['Client_Name'] = $request['client_name'];
-    }
+    // Get contract items
+    $stmtItems = $pdo->prepare("SELECT * FROM contract_items WHERE form_id = ? ORDER BY service_category, service_number");
+    $stmtItems->execute([$id]);
+    $contractItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
-    // Decodificar campos JSON
-    if (!empty($request['Scope_Of_Work'])) {
-        $decoded = json_decode($request['Scope_Of_Work'], true);
-        if (is_array($decoded)) {
-            // Handle nested structure: {"items": [...], "sections": [...]}
-            if (isset($decoded['items']) && is_array($decoded['items'])) {
-                $request['Scope_Of_Work'] = array_filter($decoded['items'], 'is_string');
-                if (!empty($decoded['sections']) && is_array($decoded['sections'])) {
-                    $request['Scope_Sections'] = $decoded['sections'];
-                }
-            } else {
-                // Flat array of strings — filter out any non-string elements
-                $request['Scope_Of_Work'] = array_filter($decoded, 'is_string');
-            }
-        } else {
-            $request['Scope_Of_Work'] = null;
-        }
-    }
+    // Get scope of work
+    $stmtScope = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
+    $stmtScope->execute([$id]);
+    $scopeOfWork = $stmtScope->fetchAll(PDO::FETCH_COLUMN);
 
-    // Decodificar arrays de servicios (si están almacenados como JSON)
-    $jsonFields = [
-        'type18', 'write18', 'time18', 'freq18', 'desc18', 'subtotal18',
-        'type19', 'time19', 'freq19', 'desc19', 'subtotal19',
-        'base_staff', 'increase_staff', 'bill_staff', 'week_days'
+    // Get scope sections
+    $stmtSections = $pdo->prepare("SELECT title, scope_content FROM scope_sections WHERE form_id = ? ORDER BY section_order ASC");
+    $stmtSections->execute([$id]);
+    $scopeSections = $stmtSections->fetchAll(PDO::FETCH_ASSOC);
+
+    // Map form fields to the response format expected by the contract generator frontend
+    $data = [
+        'id' => $form['form_id'],
+        'form_id' => $form['form_id'],
+        'Service_Type' => $form['service_type'],
+        'Request_Type' => $form['request_type'],
+        'Priority' => $form['priority'],
+        'Requested_Service' => $form['requested_service'],
+        'client_name' => $form['client_name'],
+        'Client_Title' => $form['contact_name'],
+        'Email' => $form['email'],
+        'Number_Phone' => $form['phone'],
+        'Company_Name' => $form['company_name'],
+        'Company_Address' => $form['address'],
+        'City' => $form['city'],
+        'State' => $form['state'],
+        'Is_New_Client' => $form['is_new_client'],
+        'Site_Visit_Conducted' => $form['site_visit_conducted'],
+        'Invoice_Frequency' => $form['invoice_frequency'],
+        'Contract_Duration' => $form['contract_duration'],
+        'Seller' => $form['seller'],
+        'PriceInput' => $form['grand_total'],
+        'includeStaff' => $form['include_staff'],
+        'inflationAdjustment' => $form['inflation_adjustment'],
+        'totalArea' => $form['total_area'],
+        'buildingsIncluded' => $form['buildings_included'],
+        'startDateServices' => $form['start_date_services'],
+        'Site_Observation' => $form['site_observation'],
+        'Additional_Comments' => $form['additional_comments'],
+        'Scope_Of_Work' => $scopeOfWork,
+        'status' => $form['status'],
+        'docnum' => $form['docnum'] ?? $form['Order_Nomenclature'],
+        'Document_Date' => $form['Document_Date'],
+        'Work_Date' => $form['Work_Date'],
+        'Order_Nomenclature' => $form['Order_Nomenclature'],
+        'order_number' => $form['order_number'],
+        'service_status' => $form['service_status'],
+        'grand_total' => $form['grand_total'],
+        'created_at' => $form['created_at'],
+        'updated_at' => $form['updated_at'],
+        'completed_at' => $form['completed_at'],
+        'contract_items' => $contractItems,
+        'scope_sections' => $scopeSections,
     ];
-
-    foreach ($jsonFields as $field) {
-        if (!empty($request[$field])) {
-            $decoded = json_decode($request[$field], true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $request[$field] = $decoded;
-            }
-        }
-    }
-
-    // Query service detail tables from form database if form_id exists
-    $formId = $request['form_id'] ?? null;
-
-    // Also try to find form_id by docnum if not directly set
-    if (!$formId && !empty($request['docnum'])) {
-        $stmtForm = $pdo->prepare("SELECT form_id FROM forms WHERE Order_Nomenclature = ? LIMIT 1");
-        $stmtForm->execute([$request['docnum']]);
-        $formRow = $stmtForm->fetch(PDO::FETCH_ASSOC);
-        if ($formRow) {
-            $formId = $formRow['form_id'];
-        }
-    }
-
-    $request['janitorial_services'] = [];
-    $request['kitchen_services'] = [];
-    $request['hood_vent_services'] = [];
-    $request['scope_of_work_tasks'] = [];
-
-    if ($formId) {
-        $request['form_id'] = $formId;
-
-        // Get janitorial services from detail table
-        $stmtJ = $pdo->prepare("SELECT * FROM janitorial_services_costs WHERE form_id = ? ORDER BY service_number");
-        $stmtJ->execute([$formId]);
-        $request['janitorial_services'] = $stmtJ->fetchAll(PDO::FETCH_ASSOC);
-
-        // Get kitchen cleaning services from detail table
-        $stmtK = $pdo->prepare("SELECT * FROM kitchen_cleaning_costs WHERE form_id = ? ORDER BY service_number");
-        $stmtK->execute([$formId]);
-        $request['kitchen_services'] = $stmtK->fetchAll(PDO::FETCH_ASSOC);
-
-        // Get hood vent services from detail table
-        $stmtH = $pdo->prepare("SELECT * FROM hood_vent_costs WHERE form_id = ? ORDER BY service_number");
-        $stmtH->execute([$formId]);
-        $request['hood_vent_services'] = $stmtH->fetchAll(PDO::FETCH_ASSOC);
-
-        // Get scope of work tasks from detail table
-        $stmtS = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
-        $stmtS->execute([$formId]);
-        $request['scope_of_work_tasks'] = $stmtS->fetchAll(PDO::FETCH_COLUMN);
-
-        // Get scope sections (dynamic blocks) from detail table
-        $stmtSS = $pdo->prepare("SELECT title, scope_content FROM scope_sections WHERE form_id = ? ORDER BY section_order ASC");
-        $stmtSS->execute([$formId]);
-        $request['scope_sections'] = $stmtSS->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Formatear fechas
-    if (!empty($request['created_at'])) {
-        $request['created_at_formatted'] = date('M d, Y g:i A', strtotime($request['created_at']));
-    }
-
-    if (!empty($request['startDateServices'])) {
-        $request['startDateServices_formatted'] = date('Y-m-d', strtotime($request['startDateServices']));
-    }
-
-    if (!empty($request['completed_at'])) {
-        $request['completed_at_formatted'] = date('M d, Y g:i A', strtotime($request['completed_at']));
-    }
 
     echo json_encode([
         'success' => true,
-        'data' => $request
+        'data' => $data
     ]);
 
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Database error: ' . $e->getMessage()
+    ]);
 } catch (Exception $e) {
     http_response_code(400);
     echo json_encode([
