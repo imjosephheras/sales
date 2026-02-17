@@ -137,11 +137,22 @@ try {
 
         // Section 10: Service Status
         'service_status' => $form['service_status'],
+
+        // Contract workflow status (draft, pending, completed, etc.)
+        'form_status' => $form['status'],
     ];
+
+    // Determine if the current user can edit this form
+    // Completed contracts can only be edited by Admin (1) or Leader (2)
+    $canEdit = true;
+    if ($form['status'] === 'completed') {
+        $canEdit = in_array((int) $currentUser['role_id'], RBAC_FULL_ACCESS_ROLES, true);
+    }
 
     echo json_encode([
         'success' => true,
         'form' => $formData,
+        'can_edit' => $canEdit,
         'scope_tasks' => $scope_tasks,
         'scope_sections' => $scope_sections,
         'contract_items' => $all_items,

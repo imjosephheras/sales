@@ -537,6 +537,52 @@ $lang = $_SESSION["lang"] ?? "en";
     color: #991b1b;
 }
 
+.form-card-contract-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-card-contract-badge.contract-completed {
+    background: #065f46;
+    color: #ffffff;
+}
+
+.form-card.completed-contract {
+    border-left: 4px solid #065f46;
+}
+
+.form-card-btn.view-only {
+    background: #e2e8f0;
+    color: #475569;
+    cursor: pointer;
+}
+
+.form-card-btn.view-only:hover {
+    background: #cbd5e1;
+}
+
+/* Read-only banner for completed contracts */
+.form-readonly-banner {
+    display: none;
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(6, 95, 70, 0.3);
+}
+
+.form-readonly-banner.visible {
+    display: block;
+}
+
 .form-card-actions {
     display: flex;
     gap: 6px;
@@ -1075,6 +1121,13 @@ $lang = $_SESSION["lang"] ?? "en";
   <!-- 📋 FORM with enctype for photos -->
   <form id="main_form" action="enviar_correo.php" method="POST" enctype="multipart/form-data">
 
+    <!-- Read-only banner for completed contracts (shown for non-Admin/Leader) -->
+    <div id="completedReadonlyBanner" class="form-readonly-banner">
+      <?= ($lang=='en')
+        ? "This contract is completed. View only — editing is restricted to Admin and Leader roles."
+        : "Este contrato está completado. Solo lectura — la edición está restringida a roles Admin y Leader."; ?>
+    </div>
+
     <div class="section-title collapsible" data-section="1">
       <?= ($lang=='en') ? "Section 1: Request Information" : "Sección 1: Información de Solicitud"; ?>
       <span class="toggle-icon">▼</span>
@@ -1354,6 +1407,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("main_form");
   let currentFormId = null; // Track if we're editing an existing form
 
+  // Current user role from PHP session (used for completed-contract edit restrictions)
+  const currentUserRoleId = <?= (int)($_SESSION['role_id'] ?? 0) ?>;
+  let currentFormIsCompleted = false; // Track if the loaded form has status=completed
+  let currentFormCanEdit = true; // Track if the user can edit the loaded form
+
   /* ===============================
      SIDEBAR TOGGLE
   =============================== */
@@ -1566,6 +1624,13 @@ document.addEventListener("DOMContentLoaded", () => {
     card.className = "form-card";
     card.dataset.formId = formData.form_id;
 
+    const isContractCompleted = formData.status === 'completed';
+    const canEditCompleted = (currentUserRoleId === 1 || currentUserRoleId === 2);
+
+    if (isContractCompleted) {
+      card.classList.add('completed-contract');
+    }
+
     const date = new Date(formData.created_at);
     const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
@@ -1597,11 +1662,32 @@ document.addEventListener("DOMContentLoaded", () => {
       statusIcon = '❌';
     }
 
+    // Contract-level completed badge
+    const contractBadgeHtml = isContractCompleted
+      ? '<span class="form-card-contract-badge contract-completed">CONTRACT COMPLETED</span>'
+      : '';
+
+    // Action buttons: completed contracts are view-only for non-Admin/Leader, no delete for completed
+    let actionsHtml = '';
+    if (isContractCompleted) {
+      if (canEditCompleted) {
+        actionsHtml = `<button class="form-card-btn edit" title="Edit" onclick="loadFormData(${formData.form_id})">✏️</button>`;
+      } else {
+        actionsHtml = `<button class="form-card-btn view-only" title="View (Read Only)" onclick="loadFormData(${formData.form_id})">👁️</button>`;
+      }
+    } else {
+      actionsHtml = `
+        <button class="form-card-btn edit" title="Edit" onclick="loadFormData(${formData.form_id})">✏️</button>
+        <button class="form-card-btn delete" title="Delete" onclick="deleteDraft(${formData.form_id})">🗑️</button>
+      `;
+    }
+
     card.innerHTML = `
       <div class="form-card-header">
         <div class="form-card-business">${formData.company_name || 'No Business'}</div>
         <div class="form-card-date">${formattedDate}</div>
       </div>
+      ${contractBadgeHtml}
       <div class="form-card-wo">WO #${formData.order_number || '---'}</div>
       <div class="form-card-client">${formData.client_name || 'No Client'}</div>
       <div class="form-card-service">${formData.requested_service || 'No Service'}</div>
@@ -1610,8 +1696,7 @@ document.addEventListener("DOMContentLoaded", () => {
           ${statusIcon} ${statusText}
         </span>
         <div class="form-card-actions">
-          <button class="form-card-btn edit" title="Edit" onclick="loadFormData(${formData.form_id})">✏️</button>
-          <button class="form-card-btn delete" title="Delete" onclick="deleteDraft(${formData.form_id})">🗑️</button>
+          ${actionsHtml}
         </div>
       </div>
     `;
@@ -2107,23 +2192,67 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
 /* ===============================
+   COMPLETED CONTRACT - READ-ONLY MODE
+   Disables all form inputs when a completed contract
+   is loaded by a non-Admin/Leader user.
+=============================== */
+function applyCompletedReadonly(isReadOnly) {
+  const banner = document.getElementById('completedReadonlyBanner');
+  const saveDraftBtn = document.getElementById('btnSaveDraft');
+
+  if (isReadOnly) {
+    // Show read-only banner
+    if (banner) banner.classList.add('visible');
+
+    // Disable all form inputs, selects, textareas, and buttons inside the form
+    form.querySelectorAll('input, select, textarea').forEach(el => {
+      el.dataset.prevDisabled = el.disabled ? '1' : '0';
+      el.disabled = true;
+    });
+
+    // Hide Save as Draft button
+    if (saveDraftBtn) saveDraftBtn.style.display = 'none';
+  } else {
+    // Hide read-only banner
+    if (banner) banner.classList.remove('visible');
+
+    // Re-enable form inputs (restore previous disabled state)
+    form.querySelectorAll('input, select, textarea').forEach(el => {
+      if (el.dataset.prevDisabled === '1') {
+        el.disabled = true;
+      } else {
+        el.disabled = false;
+      }
+      delete el.dataset.prevDisabled;
+    });
+
+    // Show Save as Draft button
+    if (saveDraftBtn) saveDraftBtn.style.display = '';
+  }
+}
+
+/* ===============================
    LOAD FORM DATA - VERSIÓN CORREGIDA
    ⚠️ ESTA ES LA VERSIÓN QUE DEBES USAR
 =============================== */
 window.loadFormData = function(formId) {
   console.log('🔄 Loading form ID:', formId);
-  
+
   fetch(`load_form_data.php?form_id=${formId}`)
     .then(response => response.json())
     .then(data => {
       console.log('📦 Data received from server:', data);
-      
+
       if (!data.success) {
         alert('Error loading form: ' + (data.message || 'Unknown error'));
         return;
       }
 
       currentFormId = formId;
+
+      // Track completed status and edit permission
+      currentFormIsCompleted = (data.form.form_status === 'completed');
+      currentFormCanEdit = data.can_edit !== false;
 
       // ✅ CRITICAL: Pasar datos como SEGUNDO parámetro
       populateForm(data.form, {
@@ -2135,6 +2264,9 @@ window.loadFormData = function(formId) {
         contract_staff: data.contract_staff || [],
         photos: data.photos || []
       });
+
+      // Apply read-only mode for completed contracts when user cannot edit
+      applyCompletedReadonly(currentFormIsCompleted && !currentFormCanEdit);
 
       // Mark card as active
       document.querySelectorAll('.form-card').forEach(card =>
@@ -2189,11 +2321,17 @@ window.loadFormData = function(formId) {
      SAVE AS DRAFT
   =============================== */
   document.getElementById("btnSaveDraft")?.addEventListener("click", () => {
+    // Block saving if this is a completed contract and user cannot edit
+    if (currentFormIsCompleted && !currentFormCanEdit) {
+      alert('This contract is completed. Only Admin or Leader roles can edit it.');
+      return;
+    }
+
     const formData = new FormData(form);
     if (currentFormId) {
       formData.append('form_id', currentFormId);
     }
-    formData.append('status', 'draft');
+    formData.append('status', currentFormIsCompleted ? 'completed' : 'draft');
     
     fetch("save_draft.php", {
       method: "POST",
@@ -2437,6 +2575,12 @@ window.loadFormData = function(formId) {
      Expande secciones con campos inválidos antes de validar
   =============================== */
   document.getElementById("btnSubmitForm")?.addEventListener("click", () => {
+    // Block submission if this is a completed contract and user cannot edit
+    if (currentFormIsCompleted && !currentFormCanEdit) {
+      alert('This contract is completed. Only Admin or Leader roles can edit it.');
+      return;
+    }
+
     // Limpia errores previos
     document.querySelectorAll(".section-title").forEach(t =>
       t.classList.remove("section-error")
@@ -2542,6 +2686,11 @@ window.loadFormData = function(formId) {
     // Reset HTML form
     form.reset();
     currentFormId = null;
+    currentFormIsCompleted = false;
+    currentFormCanEdit = true;
+
+    // Clear read-only mode if it was active
+    applyCompletedReadonly(false);
 
     // Hide janitorial section and reset table
     const section18 = document.getElementById('section18Container');

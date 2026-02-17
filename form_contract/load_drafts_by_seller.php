@@ -21,7 +21,7 @@ try {
     // ── TEMPORARY DEBUG: Log seller matching details ──
     // TODO: Remove this debug block once the Kenny Howe issue is confirmed resolved
     $debugSellerName = trim($currentUser['full_name']);
-    $debugStmt = $pdo->prepare("SELECT DISTINCT seller, HEX(seller) as seller_hex, LENGTH(seller) as seller_len FROM forms WHERE status IN ('draft','pending') AND seller IS NOT NULL");
+    $debugStmt = $pdo->prepare("SELECT DISTINCT seller, HEX(seller) as seller_hex, LENGTH(seller) as seller_len FROM forms WHERE status IN ('draft','pending','completed') AND seller IS NOT NULL");
     $debugStmt->execute();
     $debugSellers = $debugStmt->fetchAll(PDO::FETCH_ASSOC);
     error_log("[SELLER-DEBUG] Authenticated user: '{$debugSellerName}' (length=" . strlen($debugSellerName) . ", hex=" . bin2hex($debugSellerName) . ", role_id={$currentUser['role_id']})");
@@ -47,7 +47,7 @@ try {
     }
 
     // Get total count for pagination (with RBAC filter + search)
-    $countSql = "SELECT COUNT(*) as total FROM forms WHERE status IN ('draft', 'pending') " . $rbac['sql'] . $searchSql;
+    $countSql = "SELECT COUNT(*) as total FROM forms WHERE status IN ('draft', 'pending', 'completed') " . $rbac['sql'] . $searchSql;
     $countStmt = $pdo->prepare($countSql);
     foreach ($rbac['params'] as $key => $value) {
         $countStmt->bindValue($key, $value);
@@ -75,7 +75,7 @@ try {
                 created_at,
                 updated_at
             FROM forms
-            WHERE status IN ('draft', 'pending') " . $rbac['sql'] . $searchSql . "
+            WHERE status IN ('draft', 'pending', 'completed') " . $rbac['sql'] . $searchSql . "
             ORDER BY updated_at DESC, created_at DESC
             LIMIT :limit OFFSET :offset";
 
