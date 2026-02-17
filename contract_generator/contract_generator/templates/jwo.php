@@ -781,7 +781,7 @@
     <?php if (!empty($scopeSections)): ?>
         <?php foreach ($scopeSections as $section): ?>
         <div class="scope-section">
-            <div class="scope-header">SCOPE OF WORK &ndash; <?php echo strtoupper(htmlspecialchars($section['title'] ?? '')); ?></div>
+            <div class="scope-header"><?php echo strtoupper(htmlspecialchars($section['title'] ?? '')); ?></div>
             <div class="scope-content">
                 <h4>WORK TO BE PERFORMED:</h4>
                 <p><?php echo nl2br(htmlspecialchars($section['scope_content'] ?? '')); ?></p>
