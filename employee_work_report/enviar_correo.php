@@ -24,9 +24,11 @@ $after  = $_FILES['after']  ?? null;
 // =====================================
 //  CREAR RUTA DE UPLOADS
 // =====================================
-$upload_dir = rtrim(__DIR__, "/\\") . DIRECTORY_SEPARATOR . "Uploads" . DIRECTORY_SEPARATOR;
+require_once __DIR__ . '/../app/Core/FileStorageService.php';
+$storage = new FileStorageService();
+$upload_dir = $storage->getStoragePath('work_report_photos') . DIRECTORY_SEPARATOR;
 
-if (!file_exists($upload_dir)) mkdir($upload_dir, 0777, true);
+if (!file_exists($upload_dir)) mkdir($upload_dir, 0755, true);
 
 // =====================================
 //  FUNCION PARA COMPRIMIR IMAGENES
@@ -469,7 +471,7 @@ foreach ($bulk_photos as $photo) {
 // =====================================
 if ($action === 'print_only') {
     // Redirect to PDF for printing
-    header('Location: Uploads/' . $pdf_filename);
+    header('Location: /storage/uploads/work_report_photos/' . $pdf_filename);
     exit;
 }
 
@@ -548,7 +550,7 @@ body { background:#f0f0f0; text-align:center; padding:40px; font-family:Arial; }
 <h2 style="color:#2e7d32;">✓ Service Completion Photo Report Submitted Successfully</h2>
 <p>JWO #: <?= htmlspecialchars($jwo_number) ?></p>
 <div style="margin-top:20px;">
-    <a href="Uploads/<?= htmlspecialchars($pdf_filename) ?>" target="_blank" class="btn btn-print">Print Report</a>
+    <a href="/storage/uploads/work_report_photos/<?= htmlspecialchars($pdf_filename) ?>" target="_blank" class="btn btn-print">Print Report</a>
     <a href="index.php" class="btn btn-back">Back</a>
 </div>
 </div>

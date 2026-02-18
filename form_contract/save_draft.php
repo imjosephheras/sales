@@ -414,40 +414,29 @@ try {
     // PASO 5: GUARDAR FOTOS (Q29)
     // ============================================================
     if (isset($_FILES['photos']) && !empty($_FILES['photos']['name'][0])) {
-        $upload_dir = __DIR__ . '/Uploads/';
+        $storage = new FileStorageService();
+        $uploadResults = $storage->uploadMultiple(
+            $_FILES['photos'],
+            'form_photos',
+            'images',
+            'form_' . $saved_form_id
+        );
 
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
-        }
+        if (!empty($uploadResults['uploaded'])) {
+            $stmt = $pdo->prepare("
+                INSERT INTO form_photos (
+                    form_id, photo_filename, photo_path, photo_size, photo_type
+                ) VALUES (?, ?, ?, ?, ?)
+            ");
 
-        $stmt = $pdo->prepare("
-            INSERT INTO form_photos (
-                form_id, photo_filename, photo_path, photo_size, photo_type
-            ) VALUES (?, ?, ?, ?, ?)
-        ");
-
-        $total_files = count($_FILES['photos']['name']);
-        for ($i = 0; $i < $total_files; $i++) {
-            if ($_FILES['photos']['error'][$i] === UPLOAD_ERR_OK) {
-                $original_name = $_FILES['photos']['name'][$i];
-                $file_size = $_FILES['photos']['size'][$i];
-                $file_type = $_FILES['photos']['type'][$i];
-                $tmp_name = $_FILES['photos']['tmp_name'][$i];
-
-                $timestamp = time();
-                $safe_filename = preg_replace('/[^a-zA-Z0-9._-]/', '_', $original_name);
-                $new_filename = $timestamp . '_' . $safe_filename;
-                $destination = $upload_dir . $new_filename;
-
-                if (move_uploaded_file($tmp_name, $destination)) {
-                    $stmt->execute([
-                        $saved_form_id,
-                        $new_filename,
-                        'Uploads/' . $new_filename,
-                        $file_size,
-                        $file_type
-                    ]);
-                }
+            foreach ($uploadResults['uploaded'] as $photo) {
+                $stmt->execute([
+                    $saved_form_id,
+                    $photo['filename'],
+                    $photo['path'],
+                    $photo['size'],
+                    $photo['type'],
+                ]);
             }
         }
     }

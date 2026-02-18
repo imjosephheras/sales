@@ -66,6 +66,7 @@ require_once __DIR__ . '/Core/Auth.php';
 require_once __DIR__ . '/Core/Csrf.php';
 require_once __DIR__ . '/Core/Gate.php';
 require_once __DIR__ . '/Core/Middleware.php';
+require_once __DIR__ . '/Core/FileStorageService.php';
 require_once __DIR__ . '/Controllers/AuthController.php';
 
 // ─── Database connection (centralizada) ────────────────────

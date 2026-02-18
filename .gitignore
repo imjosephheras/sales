@@ -1,0 +1,24 @@
+# Uploaded files (keep directory structure via .gitkeep)
+storage/uploads/form_photos/*
+storage/uploads/work_report_photos/*
+storage/uploads/profile_photos/*
+storage/uploads/documents/*
+storage/final_pdfs/*
+!storage/**/.gitkeep
+
+# Legacy upload directories
+form_contract/Uploads/*
+employee_work_report/Uploads/*
+calculator/Uploads/*
+
+# Vendor (managed by composer)
+/vendor/
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

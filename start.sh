@@ -60,4 +60,21 @@ echo "  Press Ctrl+C to stop the server."
 echo ""
 
 cd /home/user/sales
-php -S localhost:$PORT
+
+# 4. Ensure storage directories exist with proper permissions
+echo "[*] Checking storage directories..."
+mkdir -p storage/uploads/form_photos
+mkdir -p storage/uploads/work_report_photos
+mkdir -p storage/uploads/profile_photos
+mkdir -p storage/uploads/documents
+mkdir -p storage/final_pdfs
+chmod -R 755 storage/
+echo "[OK] Storage directories ready."
+
+php -d upload_max_filesize=20M \
+    -d post_max_size=200M \
+    -d max_file_uploads=100 \
+    -d max_execution_time=300 \
+    -d max_input_time=300 \
+    -d memory_limit=256M \
+    -S localhost:$PORT

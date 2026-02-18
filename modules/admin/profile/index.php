@@ -51,32 +51,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Photo upload
         $photoPath = $profile['photo'];
         if (!empty($_FILES['photo']['name']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-            $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mimeType = finfo_file($finfo, $_FILES['photo']['tmp_name']);
-            finfo_close($finfo);
+            $storage = new FileStorageService();
+            $result = $storage->uploadFile(
+                $_FILES['photo'],
+                'profile_photos',
+                'images',
+                'user_' . $userId
+            );
 
-            if (!in_array($mimeType, $allowed, true)) {
-                $errors[] = 'Formato de imagen no permitido. Usa JPG, PNG, GIF o WEBP.';
-            } elseif ($_FILES['photo']['size'] > 2 * 1024 * 1024) {
-                $errors[] = 'La imagen no puede superar 2 MB.';
+            if ($result['success']) {
+                // Delete old photo from storage
+                if ($profile['photo']) {
+                    $storage->deleteFile('uploads/profile_photos/' . $profile['photo']);
+                }
+                $photoPath = $result['filename'];
             } else {
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
-                $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
-                $filename = 'user_' . $userId . '_' . time() . '.' . $ext;
-                $dest = $uploadDir . $filename;
-
-                if (move_uploaded_file($_FILES['photo']['tmp_name'], $dest)) {
-                    // Delete old photo
-                    if ($profile['photo'] && file_exists($uploadDir . $profile['photo'])) {
-                        unlink($uploadDir . $profile['photo']);
-                    }
-                    $photoPath = $filename;
-                } else {
-                    $errors[] = 'Error al subir la imagen.';
-                }
+                $errors[] = $result['error'];
             }
         }
 
@@ -128,7 +118,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $photoUrl = null;
 if ($profile['photo']) {
-    $photoUrl = url('/modules/admin/uploads/photos/' . $profile['photo']);
+    // Support both old path (modules/admin/uploads/photos/) and new centralized storage
+    if (file_exists(__DIR__ . '/../uploads/photos/' . $profile['photo'])) {
+        $photoUrl = url('/modules/admin/uploads/photos/' . $profile['photo']);
+    } else {
+        $photoUrl = url('/storage/uploads/profile_photos/' . $profile['photo']);
+    }
 }
 ?>
 <!DOCTYPE html>
