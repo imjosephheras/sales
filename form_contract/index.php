@@ -1676,9 +1676,10 @@ document.addEventListener("DOMContentLoaded", () => {
         actionsHtml = `<button class="form-card-btn view-only" title="View (Read Only)" onclick="loadFormData(${formData.form_id})">👁️</button>`;
       }
     } else {
+      const canDelete = (currentUserRoleId === 1 || currentUserRoleId === 2);
       actionsHtml = `
         <button class="form-card-btn edit" title="Edit" onclick="loadFormData(${formData.form_id})">✏️</button>
-        <button class="form-card-btn delete" title="Delete" onclick="deleteDraft(${formData.form_id})">🗑️</button>
+        ${canDelete ? `<button class="form-card-btn delete" title="Delete" onclick="deleteDraft(${formData.form_id})">🗑️</button>` : ''}
       `;
     }
 

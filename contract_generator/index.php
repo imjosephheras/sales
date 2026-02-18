@@ -75,6 +75,11 @@ $current_user = $_SESSION['full_name'] ?? 'Admin';
 
     </div>
 
+    <!-- User role for RBAC in JS -->
+    <script>
+        window.__userRoleId = <?= (int)($_SESSION['role_id'] ?? 0) ?>;
+    </script>
+
     <!-- Scripts -->
     <script src="js/inbox.js?v=<?php echo time(); ?>"></script>
     <script src="js/editor.js?v=<?php echo time(); ?>"></script>

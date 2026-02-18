@@ -14,6 +14,9 @@
     let completedTasks = [];
     let selectedTaskId = null;
 
+    // RBAC: only Admin (1) and Leader (2) can delete
+    const canDelete = (window.__userRoleId === 1 || window.__userRoleId === 2);
+
     // Pagination state
     let currentPage = 1;
     const itemsPerPage = 20;
@@ -372,9 +375,9 @@
                 </div>
                 ${reportButtons}
             </div>
-            <button class="delete-btn" data-id="${task.id}" title="Delete this task">
+            ${canDelete ? `<button class="delete-btn" data-id="${task.id}" title="Delete this task">
                 <i class="fas fa-trash-alt"></i>
-            </button>
+            </button>` : ''}
         `;
 
         // Event listener to select and open form
@@ -396,13 +399,16 @@
             });
         });
 
-        // Add event listener for delete button
-        div.querySelector('.delete-btn').addEventListener('click', function(e) {
-            e.stopPropagation();
-            const requestId = this.dataset.id;
-            const taskTitle = task.title || task.Company_Name || 'this task';
-            deleteRequest(requestId, taskTitle);
-        });
+        // Add event listener for delete button (only if rendered)
+        const deleteBtn = div.querySelector('.delete-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const requestId = this.dataset.id;
+                const taskTitle = task.title || task.Company_Name || 'this task';
+                deleteRequest(requestId, taskTitle);
+            });
+        }
 
         return div;
     }
@@ -480,9 +486,9 @@
                     </span>
                 </div>
             </div>
-            <button class="delete-btn" data-id="${task.id}" title="Delete this contract">
+            ${canDelete ? `<button class="delete-btn" data-id="${task.id}" title="Delete this contract">
                 <i class="fas fa-trash-alt"></i>
-            </button>
+            </button>` : ''}
         `;
 
         // Event listener to select and view completed contract
@@ -493,13 +499,16 @@
             selectCompletedTask(task);
         });
 
-        // Add event listener for delete button
-        div.querySelector('.delete-btn').addEventListener('click', function(e) {
-            e.stopPropagation();
-            const requestId = this.dataset.id;
-            const taskTitle = companyName || 'this contract';
-            deleteRequest(requestId, taskTitle);
-        });
+        // Add event listener for delete button (only if rendered)
+        const deleteBtn = div.querySelector('.delete-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const requestId = this.dataset.id;
+                const taskTitle = companyName || 'this contract';
+                deleteRequest(requestId, taskTitle);
+            });
+        }
 
         return div;
     }
