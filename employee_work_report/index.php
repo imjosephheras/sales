@@ -18,17 +18,12 @@ if (isset($_GET["lang"])) {
 }
 
 $lang = $_SESSION["lang"] ?? "en";
+$page_lang = $lang;
 include 'lang.php';
 $t = $translations[$lang];
 
 ob_start();
 ?>
-
-<!-- LANGUAGE SWITCH -->
-<div style="display:flex;gap:10px;margin-bottom:16px;justify-content:flex-end;">
-    <a href="?lang=en" style="padding:6px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.85rem;background:<?= $lang == 'en' ? '#a30000;color:white;' : '#f3f4f6;color:#333;' ?>">EN</a>
-    <a href="?lang=es" style="padding:6px 14px;border-radius:8px;text-decoration:none;font-weight:600;font-size:0.85rem;background:<?= $lang == 'es' ? '#a30000;color:white;' : '#f3f4f6;color:#333;' ?>">ES</a>
-</div>
 
 <div class="container">
 

@@ -14,6 +14,7 @@
 
 $_topbar_title = $page_title ?? 'Dashboard';
 $_topbar_icon  = $page_icon ?? '';
+$_topbar_lang  = $page_lang ?? null; // Current language code ('en', 'es') or null to hide selector
 
 // User data for topbar
 $_topbar_user    = Auth::user();
@@ -50,6 +51,12 @@ if (count($_topbar_name_parts) > 1) {
     </div>
     <div class="db-topbar-right">
         <span class="db-topbar-date"><?= date('M d, Y') ?></span>
+        <?php if ($_topbar_lang): ?>
+        <div class="db-topbar-lang">
+            <a href="?lang=en" class="db-topbar-lang-btn <?= $_topbar_lang === 'en' ? 'active' : '' ?>">EN</a>
+            <a href="?lang=es" class="db-topbar-lang-btn <?= $_topbar_lang === 'es' ? 'active' : '' ?>">ES</a>
+        </div>
+        <?php endif; ?>
         <div class="db-topbar-user">
             <div class="db-topbar-user-avatar">
                 <?= htmlspecialchars($_topbar_initials, ENT_QUOTES, 'UTF-8') ?>

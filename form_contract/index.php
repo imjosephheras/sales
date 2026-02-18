@@ -19,6 +19,7 @@ if (isset($_GET["lang"])) {
 }
 
 $lang = $_SESSION["lang"] ?? "en";
+$page_lang = $lang;
 
 ob_start();
 ?>
@@ -179,11 +180,6 @@ ob_start();
 }
 </style>
 
-<!-- 🌍 LANGUAGE SWITCH -->
-<div class="lang-switch">
-    <a href="?lang=en" class="<?= $lang == 'en' ? 'active' : '' ?>">🇺🇸 EN</a>
-    <a href="?lang=es" class="<?= $lang == 'es' ? 'active' : '' ?>">🇪🇸 ES</a>
-</div>
 
 <style>
 .home-btn {
@@ -238,42 +234,6 @@ ob_start();
 .calculator-btn.active {
     background: #28a745;
     color: white;
-}
-
-.lang-switch {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    gap: 12px;
-    z-index: 99999;
-}
-
-.lang-switch a {
-    background: white;
-    padding: 10px 18px;
-    border-radius: 50px;
-    text-decoration: none;
-    color: #001f54;
-    font-size: 0.9rem;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
-}
-
-.lang-switch a:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    background: #f0f4f8;
-}
-
-.lang-switch .active {
-    background: #c70734;
-    color: white;
-}
-
-.lang-switch .active:hover {
-    background: #a30000;
 }
 
 /* ========================================= */
