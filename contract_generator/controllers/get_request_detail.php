@@ -29,6 +29,18 @@ try {
     $stmtItems->execute([$id]);
     $contractItems = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
+    // Split contract items by category (same logic as generate_pdf.php)
+    $janitorialServices = [];
+    $kitchenServices = [];
+    $hoodVentServices = [];
+    foreach ($contractItems as $item) {
+        switch ($item['category']) {
+            case 'janitorial': $janitorialServices[] = $item; break;
+            case 'kitchen': $kitchenServices[] = $item; break;
+            case 'hood_vent': $hoodVentServices[] = $item; break;
+        }
+    }
+
     // Get scope of work
     $stmtScope = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
     $stmtScope->execute([$id]);
@@ -81,6 +93,9 @@ try {
         'updated_at' => $form['updated_at'],
         'completed_at' => $form['completed_at'],
         'contract_items' => $contractItems,
+        'janitorial_services' => $janitorialServices,
+        'kitchen_services' => $kitchenServices,
+        'hood_vent_services' => $hoodVentServices,
         'scope_sections' => $scopeSections,
     ];
 
