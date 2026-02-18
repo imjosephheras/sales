@@ -1,10 +1,7 @@
 <?php
 /**
  * GET SERVICE TYPES API
- * Returns all distinct service_type values from the three cost tables:
- *   - hood_vent_costs
- *   - janitorial_services_costs
- *   - kitchen_cleaning_costs
+ * Returns all distinct service_type values from the contract_items table.
  */
 header('Content-Type: application/json');
 
@@ -17,16 +14,9 @@ try {
     $pdo = getDBConnection();
 
     $sql = "
-        SELECT DISTINCT service_type FROM (
-            SELECT service_type FROM hood_vent_costs
-            WHERE service_type IS NOT NULL AND service_type != ''
-            UNION
-            SELECT service_type FROM janitorial_services_costs
-            WHERE service_type IS NOT NULL AND service_type != ''
-            UNION
-            SELECT service_type FROM kitchen_cleaning_costs
-            WHERE service_type IS NOT NULL AND service_type != ''
-        ) AS all_services
+        SELECT DISTINCT service_type
+        FROM contract_items
+        WHERE service_type IS NOT NULL AND service_type != ''
         ORDER BY service_type ASC
     ";
 
