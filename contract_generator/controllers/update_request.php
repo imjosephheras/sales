@@ -66,7 +66,12 @@ try {
             $dbField = $allowedFields[$key];
             $paramName = ':' . $dbField;
             $setClauses[] = "`{$dbField}` = {$paramName}";
-            $params[$paramName] = $value;
+            // Convert empty strings to NULL to avoid database type errors
+            if ($value === '' || $value === null) {
+                $params[$paramName] = null;
+            } else {
+                $params[$paramName] = $value;
+            }
         }
     }
 
