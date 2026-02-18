@@ -621,8 +621,9 @@
             // Merge form field values with service detail arrays from loaded request data
             const formData = getFormData();
 
-            // Carry over service detail arrays from the loaded request (not in form fields)
+            // Carry over non-form-field data from the loaded request
             if (currentRequestData) {
+                // Service detail arrays (from contract_items split by category)
                 if (currentRequestData.janitorial_services) {
                     formData.janitorial_services = currentRequestData.janitorial_services;
                 }
@@ -632,6 +633,24 @@
                 if (currentRequestData.hood_vent_services) {
                     formData.hood_vent_services = currentRequestData.hood_vent_services;
                 }
+
+                // Fallback: if separate arrays aren't available, split contract_items
+                if (!formData.janitorial_services && !formData.kitchen_services && !formData.hood_vent_services
+                    && currentRequestData.contract_items && Array.isArray(currentRequestData.contract_items)) {
+                    var janItems = [], kitItems = [], hvItems = [];
+                    currentRequestData.contract_items.forEach(function(item) {
+                        switch (item.category) {
+                            case 'janitorial': janItems.push(item); break;
+                            case 'kitchen': kitItems.push(item); break;
+                            case 'hood_vent': hvItems.push(item); break;
+                        }
+                    });
+                    if (janItems.length) formData.janitorial_services = janItems;
+                    if (kitItems.length) formData.kitchen_services = kitItems;
+                    if (hvItems.length) formData.hood_vent_services = hvItems;
+                }
+
+                // Scope data
                 if (currentRequestData.scope_of_work_tasks) {
                     formData.scope_of_work_tasks = currentRequestData.scope_of_work_tasks;
                 }
@@ -644,7 +663,21 @@
                 if (currentRequestData.Scope_Sections) {
                     formData.Scope_Sections = currentRequestData.Scope_Sections;
                 }
-                // Carry over JSON array fields for fallback
+
+                // Pricing fields not present in form HTML but needed by preview
+                if (currentRequestData.PriceInput && !formData.PriceInput) {
+                    formData.PriceInput = currentRequestData.PriceInput;
+                }
+                if (currentRequestData.total_cost && !formData.total_cost) {
+                    formData.total_cost = currentRequestData.total_cost;
+                }
+
+                // Document number
+                if (currentRequestData.docnum && !formData.docnum) {
+                    formData.docnum = currentRequestData.docnum;
+                }
+
+                // Carry over JSON array fields for legacy fallback
                 ['type18','write18','time18','freq18','desc18','subtotal18',
                  'type19','time19','freq19','desc19','subtotal19',
                  'base_staff','increase_staff','bill_staff'].forEach(function(field) {
