@@ -309,7 +309,7 @@ try {
                 }
 
                 if (!empty($serviceType)) {
-                    $subtotal = !empty($_POST['subtotal18'][$i]) ? $_POST['subtotal18'][$i] : null;
+                    $subtotal = !empty($_POST['subtotal18'][$i]) ? $_POST['subtotal18'][$i] : 0;
                     $bundleGroup = !empty($_POST['bundleGroup18'][$i]) ? $_POST['bundleGroup18'][$i] : null;
 
                     $stmtItem->execute([
@@ -342,7 +342,7 @@ try {
                 }
 
                 if (!empty($serviceType)) {
-                    $subtotal = !empty($_POST['subtotal19'][$i]) ? $_POST['subtotal19'][$i] : null;
+                    $subtotal = !empty($_POST['subtotal19'][$i]) ? $_POST['subtotal19'][$i] : 0;
                     $bundleGroup = !empty($_POST['bundleGroup19'][$i]) ? $_POST['bundleGroup19'][$i] : null;
 
                     // Determine category: hood_vent or kitchen
