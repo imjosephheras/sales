@@ -305,22 +305,58 @@ body.dashboard-body {
 .db-topbar-right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 .db-topbar-date {
     color: #9ca3af;
     font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* --- Topbar Language Selector --- */
+.db-topbar-lang {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-left: 12px;
+    border-left: 1px solid #e5e7eb;
+}
+
+.db-topbar-lang-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    background: #f3f4f6;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.db-topbar-lang-btn:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.db-topbar-lang-btn.active {
+    background: #001f54;
+    color: #fff;
 }
 
 /* --- Topbar User Section --- */
 .db-topbar-user {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     padding: 6px 8px 6px 12px;
     border-left: 1px solid #e5e7eb;
-    margin-left: 4px;
+    flex-shrink: 0;
 }
 
 .db-topbar-user-avatar {
@@ -934,21 +970,9 @@ body.dashboard-body {
     }
 }
 
-@media (max-width: 640px) {
-    .db-content {
-        padding: 16px;
-    }
-
-    .db-topbar {
-        padding: 0 16px;
-    }
-
-    .db-home-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .db-admin-cards {
-        grid-template-columns: 1fr;
+@media (max-width: 768px) {
+    .db-topbar-right {
+        gap: 8px;
     }
 
     .db-topbar-date {
@@ -959,10 +983,37 @@ body.dashboard-body {
         display: none;
     }
 
+    .db-topbar-lang {
+        border-left: none;
+        padding-left: 0;
+    }
+
     .db-topbar-user {
         border-left: none;
-        margin-left: 0;
         padding-left: 0;
         gap: 8px;
+    }
+}
+
+@media (max-width: 640px) {
+    .db-content {
+        padding: 16px;
+    }
+
+    .db-topbar {
+        padding: 0 12px;
+    }
+
+    .db-home-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .db-admin-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .db-topbar-lang-btn {
+        padding: 4px 8px;
+        font-size: 0.7rem;
     }
 }
