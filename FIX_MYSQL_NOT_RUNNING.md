@@ -77,7 +77,7 @@ sudo mysql_secure_installation
 
 ### SOLUCIÓN 4: Verificar configuración PHP
 
-El archivo `/home/user/sales/contract_generator/contract_generator/config/db_config.php` tiene:
+El archivo `/home/user/sales/contract_generator/config/db_config.php` tiene:
 ```php
 define('DB_HOST', 'localhost');  // Puede ser '127.0.0.1' o 'mysql' en Docker
 define('DB_NAME', 'form');
@@ -158,7 +158,7 @@ php test_db.php
 
 ### 7. Probar en el navegador
 
-Abre: `http://localhost/sales/contract_generator/contract_generator/index.php`
+Abre: `http://localhost/sales/contract_generator/index.php`
 
 - **Si MySQL está corriendo:** Verás las solicitudes en el panel izquierdo "Pending Tasks"
 - **Si MySQL NO está corriendo:** Verás "No pending tasks" aunque hayas enviado solicitudes

@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `requests` (
   - ✅ Updated confirmation page with link to Contract Generator
   - ✅ Includes request_id in redirect URL
 
-### 2. Contract Generator (`/contract_generator/contract_generator/`)
+### 2. Contract Generator (`/contract_generator/`)
 
 #### Created Files:
 - **`controllers/get_pending_requests.php`**
@@ -237,7 +237,7 @@ sudo systemctl start mysql
 
 3. **Open Contract Generator**
    - Click "Go to Contract Generator" button on confirmation page
-   - OR navigate to: `http://localhost/sales/contract_generator/contract_generator/`
+   - OR navigate to: `http://localhost/sales/contract_generator/`
    - Verify request appears in left sidebar (Inbox)
 
 4. **Edit & Generate Contract**

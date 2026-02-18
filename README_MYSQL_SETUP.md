@@ -26,7 +26,7 @@ This script will:
 Once MySQL is running, you can access:
 
 - **Form Submission**: http://localhost/sales/form_contract/
-- **Contract Generator**: http://localhost/sales/contract_generator/contract_generator/
+- **Contract Generator**: http://localhost/sales/contract_generator/
 
 ## Database Schema
 
@@ -154,7 +154,7 @@ php -r "\$pdo = new PDO('mysql:host=localhost;dbname=form', 'root', ''); echo 'O
                   ▼
 ┌─────────────────────────────────────────────┐
 │ 4. User goes to Contract Generator          │
-│    /contract_generator/contract_generator/  │
+│    /contract_generator/  │
 └─────────────────┬───────────────────────────┘
                   │
                   ▼
@@ -185,7 +185,7 @@ php -r "\$pdo = new PDO('mysql:host=localhost;dbname=form', 'root', ''); echo 'O
 Configuration files:
 
 1. **Form Submission**: `/home/user/sales/form_contract/db_config.php`
-2. **Contract Generator**: `/home/user/sales/contract_generator/contract_generator/config/db_config.php`
+2. **Contract Generator**: `/home/user/sales/contract_generator/config/db_config.php`
 
 Both use:
 ```php

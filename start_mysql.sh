@@ -79,5 +79,5 @@ try {
 
 echo ""
 echo "🌐 Puedes acceder al Contract Generator en:"
-echo "   http://localhost/sales/contract_generator/contract_generator/index.php"
+echo "   http://localhost/sales/contract_generator/index.php"
 echo ""
