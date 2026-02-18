@@ -50,21 +50,24 @@ try {
             f.Order_Nomenclature,
             f.seller,
             f.Document_Date,
-            (SELECT GROUP_CONCAT(DISTINCT jsc.service_type SEPARATOR '||')
-             FROM janitorial_services_costs jsc
-             WHERE jsc.form_id = ce.form_id
-               AND jsc.service_type IS NOT NULL
-               AND jsc.service_type != '') AS janitorial_services,
-            (SELECT GROUP_CONCAT(DISTINCT kcc.service_type SEPARATOR '||')
-             FROM kitchen_cleaning_costs kcc
-             WHERE kcc.form_id = ce.form_id
-               AND kcc.service_type IS NOT NULL
-               AND kcc.service_type != '') AS kitchen_services,
-            (SELECT GROUP_CONCAT(DISTINCT hvc.service_type SEPARATOR '||')
-             FROM hood_vent_costs hvc
-             WHERE hvc.form_id = ce.form_id
-               AND hvc.service_type IS NOT NULL
-               AND hvc.service_type != '') AS hood_vent_services
+            (SELECT GROUP_CONCAT(DISTINCT ci.service_type SEPARATOR '||')
+             FROM contract_items ci
+             WHERE ci.form_id = ce.form_id
+               AND ci.category = 'janitorial'
+               AND ci.service_type IS NOT NULL
+               AND ci.service_type != '') AS janitorial_services,
+            (SELECT GROUP_CONCAT(DISTINCT ci.service_type SEPARATOR '||')
+             FROM contract_items ci
+             WHERE ci.form_id = ce.form_id
+               AND ci.category = 'kitchen'
+               AND ci.service_type IS NOT NULL
+               AND ci.service_type != '') AS kitchen_services,
+            (SELECT GROUP_CONCAT(DISTINCT ci.service_type SEPARATOR '||')
+             FROM contract_items ci
+             WHERE ci.form_id = ce.form_id
+               AND ci.category = 'hood_vent'
+               AND ci.service_type IS NOT NULL
+               AND ci.service_type != '') AS hood_vent_services
         FROM calendar_events ce
         JOIN forms f ON ce.form_id = f.form_id
         WHERE MONTH(ce.event_date) = :month
