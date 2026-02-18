@@ -171,6 +171,18 @@ if ((int)$modulesCount === 0) {
     ");
 }
 
+// ─── Fix contract_generator URL if it was seeded with duplicate path ──
+try {
+    $pdo->exec("
+        UPDATE `modules`
+        SET `url` = 'contract_generator/'
+        WHERE `slug` = 'generator'
+          AND `url` = 'contract_generator/contract_generator/'
+    ");
+} catch (PDOException $e) {
+    // skip if table not ready
+}
+
 // ─── Seed role_module permissions ──────────────────────────
 $rmCount = $pdo->query("SELECT COUNT(*) FROM role_module")->fetchColumn();
 if ((int)$rmCount === 0) {
