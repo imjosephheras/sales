@@ -1053,7 +1053,7 @@ body {
 
 <div class="btn-group">
   <?php if (isset($request_id) && $request_id): ?>
-  <a href="../contract_generator/contract_generator/index.php?request_id=<?= $request_id ?>" class="btn btn-primary">
+  <a href="../contract_generator/index.php?request_id=<?= $request_id ?>" class="btn btn-primary">
     📋 Go to Contract Generator
   </a>
   <?php endif; ?>
