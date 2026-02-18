@@ -5,10 +5,10 @@
  * No requests table - reads directly from forms + contract_items.
  */
 
-require_once __DIR__ . '/../../../config/database.php';
+require_once __DIR__ . '/../../config/database.php';
 
 // Ensure form_contract db_config is loaded for table initialization
-require_once __DIR__ . '/../../../form_contract/db_config.php';
+require_once __DIR__ . '/../../form_contract/db_config.php';
 
 /**
  * Initialize the docnum_counter table for document number generation

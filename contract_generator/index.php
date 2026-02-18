@@ -7,7 +7,7 @@
  * - Derecha: Preview en tiempo real del contrato
  */
 
-require_once __DIR__ . '/../../app/bootstrap.php';
+require_once __DIR__ . '/../app/bootstrap.php';
 Middleware::module('generator');
 
 require_once 'config/db_config.php';
