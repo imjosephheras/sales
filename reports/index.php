@@ -79,88 +79,14 @@ function formatCurrency($value) {
     if ($value == 0) return '-';
     return '$' . number_format($value, 2);
 }
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports - Prime Facility Services</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f7fa;
-            min-height: 100vh;
-        }
+// Dashboard layout variables
+$page_title = 'Reports';
+$page_icon  = 'fas fa-chart-bar';
+$page_slug  = 'reports';
 
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #001f54 0%, #003080 100%);
-            color: white;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .header-stats {
-            display: flex;
-            gap: 30px;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            opacity: 0.8;
-            text-transform: uppercase;
-        }
-
-        .btn-back {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
-        }
-
-        .btn-back:hover {
-            background: rgba(255,255,255,0.25);
-        }
-
+$page_head = <<<'STYLES'
+<style>
         /* Toolbar */
         .toolbar {
             background: white;
@@ -215,6 +141,7 @@ function formatCurrency($value) {
             gap: 8px;
             transition: all 0.2s;
             border: none;
+            text-decoration: none;
         }
 
         .btn-primary {
@@ -247,7 +174,7 @@ function formatCurrency($value) {
 
         .table-wrapper {
             overflow: auto;
-            max-height: calc(100vh - 220px);
+            max-height: calc(100vh - 280px);
         }
 
         /* Modern Spreadsheet Table */
@@ -482,11 +409,6 @@ function formatCurrency($value) {
 
         /* Responsive */
         @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                gap: 15px;
-            }
-
             .toolbar {
                 flex-direction: column;
                 gap: 15px;
@@ -499,7 +421,7 @@ function formatCurrency($value) {
 
         /* Print styles */
         @media print {
-            .header, .toolbar {
+            .toolbar {
                 display: none;
             }
 
@@ -512,28 +434,11 @@ function formatCurrency($value) {
                 white-space: normal;
             }
         }
-    </style>
-</head>
-<body>
-    <header class="header">
-        <div class="header-left">
-            <a href="../" class="btn-back">
-                <i class="fas fa-arrow-left"></i>
-                Back
-            </a>
-            <h1><i class="fas fa-table"></i> Reports</h1>
-        </div>
-        <div class="header-stats">
-            <div class="stat-item">
-                <div class="stat-value"><?= count($requests) ?></div>
-                <div class="stat-label">Total Records</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value"><?= count($columns) ?></div>
-                <div class="stat-label">Columns</div>
-            </div>
-        </div>
-    </header>
+</style>
+STYLES;
+
+ob_start();
+?>
 
     <div class="toolbar">
         <div class="search-box">
@@ -903,5 +808,8 @@ function formatCurrency($value) {
         updateFilterRowOffset();
         window.addEventListener('resize', updateFilterRowOffset);
     </script>
-</body>
-</html>
+
+<?php
+$page_content = ob_get_clean();
+include __DIR__ . '/../app/Views/layouts/dashboard.php';
+?>

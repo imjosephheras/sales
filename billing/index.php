@@ -12,34 +12,28 @@ Middleware::module('billing');
 require_once 'config/db_config.php';
 
 $current_user = $_SESSION['full_name'] ?? 'Admin';
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Billing / Accounting</title>
-    <link rel="stylesheet" href="styles/billing.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
 
-    <!-- Header -->
-    <header class="main-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <a href="<?= url('/') ?>" class="home-btn" title="Back to Home">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <i class="fas fa-file-invoice-dollar"></i>
-                <h1>Billing / Accounting</h1>
-            </div>
-            <div class="user-section">
-                <i class="fas fa-user-circle"></i>
-                <span><?php echo htmlspecialchars($current_user); ?></span>
-            </div>
-        </div>
-    </header>
+// Dashboard layout variables
+$page_title = 'Billing / Accounting';
+$page_icon  = 'fas fa-file-invoice-dollar';
+$page_slug  = 'billing';
+
+$page_head = '<link rel="stylesheet" href="' . url('/billing/styles/billing.css') . '?v=' . time() . '">'
+    . '<style>
+    /* Adjust for dashboard content area */
+    .dashboard-body .container {
+        max-width: 100%;
+        height: calc(100vh - 60px);
+    }
+    .dashboard-body .main-header {
+        display: none;
+    }
+    .dashboard-body .db-main { padding: 0; }
+    .dashboard-body .db-content { padding: 0; }
+    </style>';
+
+ob_start();
+?>
 
     <!-- Main 3-Column Layout -->
     <div class="container">
@@ -61,6 +55,9 @@ $current_user = $_SESSION['full_name'] ?? 'Admin';
 
     </div>
 
-    <script src="js/billing.js?v=<?php echo time(); ?>"></script>
-</body>
-</html>
+    <script src="<?= url('/billing/js/billing.js') ?>?v=<?php echo time(); ?>"></script>
+
+<?php
+$page_content = ob_get_clean();
+include __DIR__ . '/../app/Views/layouts/dashboard.php';
+?>

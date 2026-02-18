@@ -1,144 +1,80 @@
 <?php
 /**
- * Main index - Protected entry point
- * Redirects to auth system. All access requires login.
+ * Main Dashboard - Home page (post-login)
+ * Shows module quick-access cards inside the dashboard layout.
  */
 require_once __DIR__ . '/app/bootstrap.php';
 Middleware::auth();
 
-$user = Auth::user();
+$user    = Auth::user();
 $modules = Gate::modules();
 
-$page_title = 'Main Menu';
-$page_icon  = 'fas fa-home';
-$back_url   = '';
-$back_label = '';
+$page_title = 'Dashboard';
+$page_icon  = 'fas fa-th-large';
+$page_slug  = 'home';
 
-// Style map per module slug (preserves original look & feel)
-$styleMap = [
-    'contracts'    => 'background: linear-gradient(135deg, #a30000, #c70734); box-shadow: 0 4px 15px rgba(163,0,0,0.35);',
-    'generator'    => 'background: linear-gradient(135deg, #a30000, #c70734); box-shadow: 0 4px 15px rgba(163,0,0,0.35);',
-    'work_report'  => 'background: linear-gradient(135deg, #001f54, #003080); box-shadow: 0 4px 15px rgba(0,31,84,0.35);',
-    'reports'      => 'background: linear-gradient(135deg, #1a5f1a, #2d8a2d); box-shadow: 0 4px 15px rgba(26,95,26,0.35);',
-    'billing'      => 'background: linear-gradient(135deg, #6f42c1, #8257d8); box-shadow: 0 4px 15px rgba(111,66,193,0.35);',
-    'admin_panel'  => 'background: linear-gradient(135deg, #17a2b8, #138496); box-shadow: 0 4px 15px rgba(23,162,184,0.35);',
-    'calendar'     => 'background: linear-gradient(135deg, #e67e22, #d35400); box-shadow: 0 4px 15px rgba(230,126,34,0.35);',
+// Gradient map per module slug for the cards
+$gradientMap = [
+    'contracts'   => 'linear-gradient(135deg, #a30000, #c70734)',
+    'generator'   => 'linear-gradient(135deg, #c70734, #e53935)',
+    'work_report' => 'linear-gradient(135deg, #001f54, #003080)',
+    'reports'     => 'linear-gradient(135deg, #1a5f1a, #2d8a2d)',
+    'billing'     => 'linear-gradient(135deg, #6f42c1, #8257d8)',
+    'admin_panel' => 'linear-gradient(135deg, #17a2b8, #138496)',
+    'calendar'    => 'linear-gradient(135deg, #e67e22, #d35400)',
 ];
+
+// Font Awesome icon map
+$iconMap = [
+    'contracts'   => 'fas fa-file-contract',
+    'generator'   => 'fas fa-file-signature',
+    'work_report' => 'fas fa-clipboard-list',
+    'reports'     => 'fas fa-chart-bar',
+    'billing'     => 'fas fa-file-invoice-dollar',
+    'admin_panel' => 'fas fa-cogs',
+    'calendar'    => 'fas fa-calendar-alt',
+];
+
+// Short descriptions for each module
+$descMap = [
+    'contracts'   => 'Create and manage contract request forms',
+    'generator'   => 'Generate contracts, proposals and quotes',
+    'work_report' => 'Submit employee work reports',
+    'reports'     => 'View data reports and analytics',
+    'billing'     => 'Manage invoices and accounting',
+    'admin_panel' => 'User, role and permission management',
+    'calendar'    => 'Schedule and track events',
+];
+
+ob_start();
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Menu - Sales & Form Management</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<div class="db-home-welcome">
+    <h2>Welcome, <?= htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8') ?></h2>
+    <p>Select a module to get started</p>
+</div>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #001f54 0%, #a30000 100%);
-            min-height: 100vh;
-        }
+<div class="db-home-grid">
+    <?php foreach ($modules as $mod): ?>
+        <?php
+            $slug     = $mod['slug'];
+            $icon     = $iconMap[$slug] ?? 'fas fa-cube';
+            $gradient = $gradientMap[$slug] ?? 'linear-gradient(135deg, #667eea, #764ba2)';
+            $desc     = $descMap[$slug] ?? '';
+        ?>
+        <a href="<?= url('/' . ltrim($mod['url'], '/')) ?>" class="db-home-card">
+            <div class="db-home-card-icon" style="background: <?= $gradient ?>">
+                <i class="<?= $icon ?>"></i>
+            </div>
+            <div class="db-home-card-body">
+                <h3><?= htmlspecialchars($mod['name'], ENT_QUOTES, 'UTF-8') ?></h3>
+                <p><?= htmlspecialchars($desc, ENT_QUOTES, 'UTF-8') ?></p>
+            </div>
+        </a>
+    <?php endforeach; ?>
+</div>
 
-        .content {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 50px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .logo-container img {
-            max-width: 180px;
-            margin-bottom: 25px;
-        }
-
-        h1 {
-            font-size: 2.4rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: white;
-            text-align: center;
-        }
-
-        .subtitle {
-            color: rgba(255,255,255,0.75);
-            margin-bottom: 40px;
-            font-size: 1.1rem;
-            text-align: center;
-        }
-
-        .buttons-container {
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
-            width: 100%;
-        }
-
-        .btn {
-            padding: 18px 38px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 12px;
-            transition: all 0.3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.35);
-        }
-
-        .footer {
-            margin-top: 40px;
-            color: rgba(255,255,255,0.5);
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
-</head>
-
-<body>
-    <?php include __DIR__ . '/modules/admin/includes/header.php'; ?>
-
-    <div class="content">
-
-        <div class="logo-container">
-            <img src="<?= url('/form_contract/Images/Facility.png') ?>" alt="Prime Facility Logo">
-        </div>
-
-        <h1>Welcome, <?= htmlspecialchars($user['full_name'], ENT_QUOTES, 'UTF-8') ?></h1>
-        <p class="subtitle">Select the application you want to access</p>
-
-        <div class="buttons-container">
-            <?php foreach ($modules as $mod): ?>
-                <a href="<?= url('/' . ltrim($mod['url'], '/')) ?>"
-                   class="btn"
-                   style="<?= $styleMap[$mod['slug']] ?? 'background:#333;' ?>">
-                    <span><?= $mod['icon'] ?></span>
-                    <?= htmlspecialchars($mod['name'], ENT_QUOTES, 'UTF-8') ?>
-                </a>
-            <?php endforeach; ?>
-        </div>
-
-        <div class="footer">
-            &copy; <?= date('Y'); ?> — Prime Facility Services Group
-        </div>
-
-    </div>
-</body>
-</html>
+<?php
+$page_content = ob_get_clean();
+include __DIR__ . '/app/Views/layouts/dashboard.php';
+?>

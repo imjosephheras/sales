@@ -13,62 +13,43 @@ Middleware::module('generator');
 require_once 'config/db_config.php';
 
 $current_user = $_SESSION['full_name'] ?? 'Admin';
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contract Generator</title>
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="styles/generator.css?v=<?php echo time(); ?>">
-    
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    
-    <!-- 🎯 Header -->
-    <header class="main-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <a href="<?= url('/') ?>" class="home-btn" title="Back to Home">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <i class="fas fa-file-contract"></i>
-                <h1>Contract Generator</h1>
-            </div>
-            <div class="user-section">
-                <button id="btn-vent-hood-report" class="btn btn-vent-hood" title="Generar Reporte Vent Hoods">
-                    <i class="fas fa-file-pdf"></i> Reporte Vent Hoods
-                </button>
-                <i class="fas fa-user-circle"></i>
-                <span><?php echo htmlspecialchars($current_user); ?></span>
-            </div>
-        </div>
-    </header>
 
-    <!-- 🏗️ Main Layout: 3 Columnas -->
+// Dashboard layout variables
+$page_title = 'Contract Generator';
+$page_icon  = 'fas fa-file-signature';
+$page_slug  = 'generator';
+
+$page_head = '<link rel="stylesheet" href="' . url('/contract_generator/styles/generator.css') . '?v=' . time() . '">'
+    . '<style>
+    /* Adjust for dashboard content area */
+    .dashboard-body .container {
+        max-width: 100%;
+        height: calc(100vh - 60px);
+    }
+    .dashboard-body .main-header {
+        display: none;
+    }
+    .dashboard-body .db-main { padding: 0; }
+    .dashboard-body .db-content { padding: 0; }
+    </style>';
+
+ob_start();
+?>
+
+    <!-- Main Layout: 3 Columnas -->
     <div class="container">
 
-        <!-- ========================================= -->
-        <!-- 📥 COLUMNA IZQUIERDA: INBOX -->
-        <!-- ========================================= -->
+        <!-- COLUMNA IZQUIERDA: INBOX -->
         <aside class="inbox-panel">
             <?php include 'includes/inbox_panel.php'; ?>
         </aside>
 
-        <!-- ========================================= -->
-        <!-- ✏️ COLUMNA CENTRO: EDITOR -->
-        <!-- ========================================= -->
+        <!-- COLUMNA CENTRO: EDITOR -->
         <main class="editor-panel">
             <?php include 'includes/editor_panel.php'; ?>
         </main>
 
-        <!-- ========================================= -->
-        <!-- 👁️ COLUMNA DERECHA: PREVIEW EN TIEMPO REAL -->
-        <!-- ========================================= -->
+        <!-- COLUMNA DERECHA: PREVIEW EN TIEMPO REAL -->
         <aside class="preview-panel">
             <?php include 'includes/preview_panel.php'; ?>
         </aside>
@@ -81,9 +62,9 @@ $current_user = $_SESSION['full_name'] ?? 'Admin';
     </script>
 
     <!-- Scripts -->
-    <script src="js/inbox.js?v=<?php echo time(); ?>"></script>
-    <script src="js/editor.js?v=<?php echo time(); ?>"></script>
-    <script src="js/preview.js?v=<?php echo time(); ?>"></script>
+    <script src="<?= url('/contract_generator/js/inbox.js') ?>?v=<?php echo time(); ?>"></script>
+    <script src="<?= url('/contract_generator/js/editor.js') ?>?v=<?php echo time(); ?>"></script>
+    <script src="<?= url('/contract_generator/js/preview.js') ?>?v=<?php echo time(); ?>"></script>
 
     <!-- Auto-load request if request_id is in URL -->
     <script>
@@ -93,7 +74,7 @@ $current_user = $_SESSION['full_name'] ?? 'Admin';
         const requestId = urlParams.get('request_id');
 
         if (requestId) {
-            console.log('📋 Auto-loading request ID:', requestId);
+            console.log('Auto-loading request ID:', requestId);
 
             // Wait for the page to fully load
             window.addEventListener('load', function() {
@@ -110,5 +91,7 @@ $current_user = $_SESSION['full_name'] ?? 'Admin';
     })();
     </script>
 
-</body>
-</html>
+<?php
+$page_content = ob_get_clean();
+include __DIR__ . '/../app/Views/layouts/dashboard.php';
+?>

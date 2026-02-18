@@ -5,12 +5,20 @@
 require_once __DIR__ . '/../../../app/bootstrap.php';
 Middleware::role(1);
 
-$page_title = 'Gestión de Permisos';
+$page_title = 'Gestion de Permisos';
+$page_icon  = 'fas fa-key';
+$page_slug  = 'admin_panel';
 $back_url   = url('/modules/admin/');
 $back_label = 'Admin Panel';
 
+$canDelete = in_array((int)($_SESSION['role_id'] ?? 0), [1, 2], true);
+
 // Handle delete
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
+    if (!$canDelete) {
+        http_response_code(403);
+        die('403 Forbidden - Only Admin or Leader can delete.');
+    }
     Csrf::validateOrFail();
     $permId = (int)($_POST['permission_id'] ?? 0);
     if ($permId > 0) {
@@ -32,107 +40,64 @@ $permissions = $pdo->query("
 $success = $_SESSION['flash_success'] ?? null;
 $error   = $_SESSION['flash_error'] ?? null;
 unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+
+ob_start();
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Permisos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #001f54 0%, #a30000 100%);
-            min-height: 100vh;
-        }
-        .content { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .toolbar h2 { color: white; font-size: 1.4rem; }
-        .btn-create {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: #28a745; color: white; text-decoration: none;
-            padding: 10px 22px; border-radius: 8px; font-weight: 600;
-            font-size: 0.95rem; transition: background 0.2s, transform 0.2s;
-        }
-        .btn-create:hover { background: #218838; transform: translateY(-2px); }
-        .alert { padding: 14px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; }
-        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-error   { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .table-wrapper { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        table { width: 100%; border-collapse: collapse; }
-        thead { background: #f8f9fa; }
-        th { padding: 14px 20px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: #666; font-weight: 600; letter-spacing: 0.5px; }
-        td { padding: 14px 20px; border-top: 1px solid #eee; font-size: 0.95rem; color: #333; }
-        tr:hover td { background: #f8f9fa; }
-        .perm-key { font-family: 'Courier New', monospace; background: #e9ecef; padding: 3px 8px; border-radius: 4px; font-size: 0.85rem; }
-        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; color: white; background: #6c757d; }
-        .actions { display: flex; gap: 8px; }
-        .btn-sm {
-            padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 500;
-            text-decoration: none; transition: background 0.2s; border: none; cursor: pointer; font-family: inherit;
-        }
-        .btn-edit { background: #ffc107; color: #333; }
-        .btn-edit:hover { background: #e0a800; }
-        .btn-delete { background: #dc3545; color: white; }
-        .btn-delete:hover { background: #c82333; }
-    </style>
-</head>
-<body>
-    <?php include __DIR__ . '/../includes/header.php'; ?>
 
-    <div class="content">
-        <?php if ($success): ?>
-            <div class="alert alert-success"><i class="fas fa-check-circle"></i> <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></div>
-        <?php endif; ?>
-        <?php if ($error): ?>
-            <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
-        <?php endif; ?>
+<?php if ($success): ?>
+    <div class="alert alert-success"><i class="fas fa-check-circle"></i> <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?></div>
+<?php endif; ?>
+<?php if ($error): ?>
+    <div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+<?php endif; ?>
 
-        <div class="toolbar">
-            <h2>Permisos (<?= count($permissions) ?>)</h2>
-            <a href="<?= url('/modules/admin/permissions/create.php') ?>" class="btn-create">
-                <i class="fas fa-plus"></i> Crear Permiso
-            </a>
-        </div>
+<div class="toolbar">
+    <h2>Permisos (<?= count($permissions) ?>)</h2>
+    <a href="<?= url('/modules/admin/permissions/create.php') ?>" class="btn-create">
+        <i class="fas fa-plus"></i> Crear Permiso
+    </a>
+</div>
 
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nombre</th>
-                        <th>Clave (perm_key)</th>
-                        <th>Descripción</th>
-                        <th>Roles</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($permissions as $p): ?>
-                        <tr>
-                            <td><?= (int)$p['permission_id'] ?></td>
-                            <td><strong><?= htmlspecialchars($p['name'], ENT_QUOTES, 'UTF-8') ?></strong></td>
-                            <td><code class="perm-key"><?= htmlspecialchars($p['perm_key'], ENT_QUOTES, 'UTF-8') ?></code></td>
-                            <td><?= htmlspecialchars($p['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><span class="badge"><?= (int)$p['role_count'] ?></span></td>
-                            <td>
-                                <div class="actions">
-                                    <a href="<?= url('/modules/admin/permissions/edit.php?id=' . (int)$p['permission_id']) ?>" class="btn-sm btn-edit"><i class="fas fa-edit"></i> Editar</a>
-                                    <form method="POST" style="display:inline" onsubmit="return confirm('¿Eliminar este permiso?')">
-                                        <?= Csrf::field() ?>
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="permission_id" value="<?= (int)$p['permission_id'] ?>">
-                                        <button type="submit" class="btn-sm btn-delete"><i class="fas fa-trash"></i></button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</body>
-</html>
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Clave (perm_key)</th>
+                <th>Descripcion</th>
+                <th>Roles</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($permissions as $p): ?>
+                <tr>
+                    <td><?= (int)$p['permission_id'] ?></td>
+                    <td><strong><?= htmlspecialchars($p['name'], ENT_QUOTES, 'UTF-8') ?></strong></td>
+                    <td><code class="perm-key"><?= htmlspecialchars($p['perm_key'], ENT_QUOTES, 'UTF-8') ?></code></td>
+                    <td><?= htmlspecialchars($p['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><span class="badge"><?= (int)$p['role_count'] ?></span></td>
+                    <td>
+                        <div class="actions">
+                            <a href="<?= url('/modules/admin/permissions/edit.php?id=' . (int)$p['permission_id']) ?>" class="btn-sm btn-edit"><i class="fas fa-edit"></i> Editar</a>
+                            <?php if ($canDelete): ?>
+                                <form method="POST" style="display:inline" onsubmit="return confirm('Eliminar este permiso?')">
+                                    <?= Csrf::field() ?>
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="permission_id" value="<?= (int)$p['permission_id'] ?>">
+                                    <button type="submit" class="btn-sm btn-delete"><i class="fas fa-trash"></i></button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
+<?php
+$page_content = ob_get_clean();
+include __DIR__ . '/../../../app/Views/layouts/dashboard.php';
+?>
