@@ -13,7 +13,7 @@ error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
 
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../config/db_config.php';
 
 use Dompdf\Dompdf;
