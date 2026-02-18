@@ -7,8 +7,19 @@
 
 header('Content-Type: application/json');
 require_once '../config/db_config.php';
+require_once __DIR__ . '/../../form_contract/order_access.php';
 
 try {
+    // Enforce authentication + module access
+    $currentUser = requireOrderAccess();
+
+    // RBAC: Only Admin (1) and Leader (2) can delete
+    if (!in_array((int) $currentUser['role_id'], RBAC_FULL_ACCESS_ROLES, true)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Access denied: only Admin and Leader can delete records.']);
+        exit;
+    }
+
     $input = json_decode(file_get_contents('php://input'), true);
     $id = isset($input['id']) ? (int)$input['id'] : 0;
 

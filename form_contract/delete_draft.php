@@ -14,6 +14,13 @@ try {
     // Enforce authentication + module access
     $currentUser = requireOrderAccess();
 
+    // RBAC: Only Admin (1) and Leader (2) can delete
+    if (!in_array((int) $currentUser['role_id'], RBAC_FULL_ACCESS_ROLES, true)) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Access denied: only Admin and Leader can delete records.']);
+        exit;
+    }
+
     $input = json_decode(file_get_contents('php://input'), true);
     $form_id = isset($input['form_id']) ? (int)$input['form_id'] : 0;
 
