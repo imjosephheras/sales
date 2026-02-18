@@ -197,47 +197,105 @@
                         </div>
                     </div>
 
-                    <!-- 🔹 SECTION: Janitorial Services (if applicable) -->
+                    <!-- 🔹 SECTION 18: Janitorial Services (conditionally shown based on Work Order) -->
                     <div class="form-section" id="janitorial-section" style="display: none;">
-                        <h3><i class="fas fa-broom"></i> Janitorial Services</h3>
-                        <div id="janitorial-services-display" class="services-display">
-                            <!-- Dynamic content loaded from database -->
+                        <h3><i class="fas fa-broom"></i> 18. Janitorial Services</h3>
+                        <div class="editor-services-table-wrapper">
+                            <table class="editor-services-table" id="janitorial-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type of Service</th>
+                                        <th>Service Time</th>
+                                        <th>Frequency</th>
+                                        <th>Description</th>
+                                        <th>Subtotal</th>
+                                        <th style="width:40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="janitorial-table-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn-add-service-row" id="btn-add-janitorial" title="Add row">
+                                <i class="fas fa-plus"></i> Add Service
+                            </button>
                         </div>
-                        <div class="form-row">
+                        <div class="form-row" style="margin-top: 1rem;">
                             <div class="form-group">
-                                <label>Janitorial Total</label>
-                                <input type="text" name="total18" id="total18" readonly>
+                                <label>Total</label>
+                                <input type="text" name="total18" id="total18" class="totals-field" readonly>
                             </div>
                             <div class="form-group">
-                                <label>Taxes</label>
-                                <input type="text" name="taxes18" id="taxes18" readonly>
+                                <label>Taxes (8.25%)</label>
+                                <input type="text" name="taxes18" id="taxes18" class="totals-field" readonly>
                             </div>
                             <div class="form-group">
                                 <label>Grand Total</label>
-                                <input type="text" name="grand18" id="grand18" readonly>
+                                <input type="text" name="grand18" id="grand18" class="totals-field grand-total-field" readonly>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 🔹 SECTION: Kitchen/Hood Services (if applicable) -->
+                    <!-- 🔹 SECTION 19: Hoodvent & Kitchen Cleaning (conditionally shown based on Work Order) -->
                     <div class="form-section" id="kitchen-section" style="display: none;">
-                        <h3><i class="fas fa-utensils"></i> Kitchen & Hood Services</h3>
-                        <div id="kitchen-services-display" class="services-display">
-                            <!-- Dynamic content loaded from database -->
+                        <h3><i class="fas fa-utensils"></i> 19. Hoodvent & Kitchen Cleaning</h3>
+                        <div class="editor-services-table-wrapper">
+                            <table class="editor-services-table" id="kitchen-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type of Service</th>
+                                        <th>Service Time</th>
+                                        <th>Frequency</th>
+                                        <th>Description</th>
+                                        <th>Subtotal</th>
+                                        <th style="width:40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kitchen-table-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn-add-service-row" id="btn-add-kitchen" title="Add row">
+                                <i class="fas fa-plus"></i> Add Service
+                            </button>
                         </div>
-                        <div class="form-row">
+                        <div class="form-row" style="margin-top: 1rem;">
                             <div class="form-group">
-                                <label>Kitchen Total</label>
-                                <input type="text" name="total19" id="total19" readonly>
+                                <label>Total</label>
+                                <input type="text" name="total19" id="total19" class="totals-field" readonly>
                             </div>
                             <div class="form-group">
-                                <label>Taxes</label>
-                                <input type="text" name="taxes19" id="taxes19" readonly>
+                                <label>Taxes (8.25%)</label>
+                                <input type="text" name="taxes19" id="taxes19" class="totals-field" readonly>
                             </div>
                             <div class="form-group">
                                 <label>Grand Total</label>
-                                <input type="text" name="grand19" id="grand19" readonly>
+                                <input type="text" name="grand19" id="grand19" class="totals-field grand-total-field" readonly>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- 🔹 SECTION 20: Include Staff? (conditionally shown based on Work Order) -->
+                    <div class="form-section" id="staff-section" style="display: none;">
+                        <h3><i class="fas fa-users"></i> 20. Include Staff?</h3>
+                        <div class="editor-services-table-wrapper">
+                            <table class="editor-services-table" id="staff-table">
+                                <thead>
+                                    <tr>
+                                        <th>Position</th>
+                                        <th>Base Rate ($)</th>
+                                        <th>% Increase</th>
+                                        <th>Bill Rate ($)</th>
+                                        <th style="width:40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="staff-table-body">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn-add-service-row" id="btn-add-staff" title="Add position">
+                                <i class="fas fa-plus"></i> Add Position
+                            </button>
                         </div>
                     </div>
 

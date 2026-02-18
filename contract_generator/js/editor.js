@@ -1,6 +1,12 @@
 /**
  * EDITOR.JS
  * Maneja el panel de edición: carga de datos, guardado, tabs
+ *
+ * Section 4 blocks (18, 19, 20) are conditionally rendered based on
+ * which services are active in the Work Order. Each block is fully
+ * editable - the Contract Generator is the final control point before
+ * printing, so users can modify services, prices, frequencies, and
+ * staff without returning to the Request Form.
  */
 
 (function() {
@@ -9,7 +15,7 @@
     // ========================================
     // VARIABLES GLOBALES
     // ========================================
-    
+
     let currentRequestData = null;
 
     // ========================================
@@ -17,7 +23,7 @@
     // ========================================
 
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('✏️ Editor module loaded');
+        console.log('Editor module loaded');
 
         // Event listeners para botones
         document.getElementById('btn-save').addEventListener('click', saveRequest);
@@ -49,13 +55,13 @@
 
         // Event listener para task selected (for logging/debugging)
         document.addEventListener('taskSelected', function(e) {
-            console.log('📋 Task selected:', e.detail);
+            console.log('Task selected:', e.detail);
         });
 
         // Mostrar/ocultar campos específicos de Contract
         document.getElementById('Request_Type').addEventListener('change', function() {
             toggleContractFields();
-            updatePreview(); // Update preview when request type changes
+            updatePreview();
         });
 
         // Auto-actualizar preview cuando cambian los datos del formulario
@@ -64,6 +70,14 @@
             form.addEventListener('input', debounce(updatePreview, 500));
             form.addEventListener('change', updatePreview);
         }
+
+        // Add service row buttons
+        var btnAddJan = document.getElementById('btn-add-janitorial');
+        if (btnAddJan) btnAddJan.addEventListener('click', function() { addServiceRow('janitorial'); });
+        var btnAddKit = document.getElementById('btn-add-kitchen');
+        if (btnAddKit) btnAddKit.addEventListener('click', function() { addServiceRow('kitchen'); });
+        var btnAddStaff = document.getElementById('btn-add-staff');
+        if (btnAddStaff) btnAddStaff.addEventListener('click', function() { addStaffRow(); });
     });
 
     // ========================================
@@ -84,9 +98,9 @@
         if (previewActive) previewActive.style.display = 'flex';
 
         // Fetch datos
-        fetch(`controllers/get_request_detail.php?id=${id}`)
-            .then(response => response.json())
-            .then(data => {
+        fetch('controllers/get_request_detail.php?id=' + id)
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
                 if (data.success) {
                     currentRequestData = data.data;
                     populateForm(data.data);
@@ -95,7 +109,7 @@
                     alert('Error loading request: ' + data.error);
                 }
             })
-            .catch(error => {
+            .catch(function(error) {
                 console.error('Error:', error);
                 alert('Connection error. Please try again.');
             });
@@ -160,7 +174,7 @@
         // Update preview
         updatePreview();
 
-        console.log('✅ New request form created from task');
+        console.log('New request form created from task');
     }
 
     // ========================================
@@ -169,24 +183,23 @@
 
     function determineRequestType(categoryName, eventTitle) {
         if (!categoryName) {
-            // Try to determine from event title
             if (eventTitle) {
-                const title = eventTitle.toUpperCase();
+                var title = eventTitle.toUpperCase();
                 if (title.includes('JWO') || title.startsWith('JWO-')) return 'JWO';
                 if (title.includes('CONTRACT') || title.startsWith('C-')) return 'Contract';
                 if (title.includes('PROPOSAL') || title.startsWith('P-')) return 'Proposal';
                 if (title.includes('QUOTE') || title.startsWith('Q-')) return 'Quote';
             }
-            return 'JWO'; // Default
+            return 'JWO';
         }
 
-        const category = categoryName.toUpperCase();
+        var category = categoryName.toUpperCase();
         if (category.includes('JWO')) return 'JWO';
         if (category.includes('CONTRACT')) return 'Contract';
         if (category.includes('PROPOSAL')) return 'Proposal';
         if (category.includes('QUOTE')) return 'Quote';
 
-        return 'JWO'; // Default
+        return 'JWO';
     }
 
     // ========================================
@@ -194,25 +207,25 @@
     // ========================================
 
     function clearForm() {
-        const form = document.getElementById('editor-form');
+        var form = document.getElementById('editor-form');
         if (form) {
             form.reset();
         }
 
         // Clear specific fields that might not reset properly
-        const fields = [
+        var fields = [
             'Service_Type', 'Request_Type', 'Priority', 'Requested_Service', 'Seller',
             'Company_Name', 'Is_New_Client', 'client_name', 'Client_Name', 'Client_Title',
             'Email', 'Number_Phone', 'Company_Address',
             'Site_Visit_Conducted', 'Invoice_Frequency', 'Contract_Duration',
             'total18', 'taxes18', 'grand18',
-            'includeKitchen', 'total19', 'taxes19', 'grand19',
+            'total19', 'taxes19', 'grand19',
             'inflationAdjustment', 'totalArea', 'buildingsIncluded',
             'startDateServices', 'Site_Observation', 'Additional_Comments'
         ];
 
-        fields.forEach(fieldName => {
-            const field = document.getElementById(fieldName);
+        fields.forEach(function(fieldName) {
+            var field = document.getElementById(fieldName);
             if (field) {
                 if (field.type === 'checkbox') {
                     field.checked = false;
@@ -222,11 +235,20 @@
             }
         });
 
-        // Hide services sections
-        const janitorialSection = document.getElementById('janitorial-section');
-        const kitchenSection = document.getElementById('kitchen-section');
+        // Hide all Section 4 blocks and clear table bodies
+        var janitorialSection = document.getElementById('janitorial-section');
+        var kitchenSection = document.getElementById('kitchen-section');
+        var staffSection = document.getElementById('staff-section');
         if (janitorialSection) janitorialSection.style.display = 'none';
         if (kitchenSection) kitchenSection.style.display = 'none';
+        if (staffSection) staffSection.style.display = 'none';
+
+        var janBody = document.getElementById('janitorial-table-body');
+        var kitBody = document.getElementById('kitchen-table-body');
+        var staffBody = document.getElementById('staff-table-body');
+        if (janBody) janBody.innerHTML = '';
+        if (kitBody) kitBody.innerHTML = '';
+        if (staffBody) staffBody.innerHTML = '';
     }
 
     // ========================================
@@ -244,10 +266,9 @@
         setValue('Requested_Service', data.Requested_Service);
         setValue('Seller', data.Seller);
 
-        // Section 2: Client Info (expanded)
+        // Section 2: Client Info
         setValue('Company_Name', data.Company_Name);
         setValue('Is_New_Client', data.Is_New_Client);
-        // Support both Client_Name and client_name for backwards compatibility
         setValue('client_name', data.Client_Name || data.client_name);
         setValue('Client_Title', data.Client_Title);
         setValue('Email', data.Email);
@@ -259,11 +280,11 @@
         setValue('Invoice_Frequency', data.Invoice_Frequency);
         setValue('Contract_Duration', data.Contract_Duration);
 
-        // Display Janitorial Services if available
+        // Section 4: Conditional pricing blocks
+        // Only show blocks that are active in the Work Order
         displayJanitorialServices(data);
-
-        // Display Kitchen Services if available
         displayKitchenServices(data);
+        displayStaffSection(data);
 
         // Section 5: Contract Specific
         setValue('inflationAdjustment', data.inflationAdjustment);
@@ -275,12 +296,12 @@
         setValue('Site_Observation', data.Site_Observation);
         setValue('Additional_Comments', data.Additional_Comments);
 
-        // Actualizar header
+        // Update header
         document.getElementById('doc-title').textContent = data.Company_Name || 'Untitled Request';
         document.getElementById('doc-number').textContent = data.docnum || 'Not generated yet';
 
-        // Actualizar badge de tipo de documento en preview panel
-        const previewDocType = document.getElementById('preview-doc-type');
+        // Update badge de tipo de documento en preview panel
+        var previewDocType = document.getElementById('preview-doc-type');
         if (previewDocType) {
             previewDocType.textContent = data.Request_Type || 'Document';
         }
@@ -293,103 +314,296 @@
     }
 
     // ========================================
-    // DISPLAY JANITORIAL SERVICES
+    // SECTION 18: JANITORIAL SERVICES
+    // Only shown if active in Work Order
     // ========================================
 
     function displayJanitorialServices(data) {
-        const section = document.getElementById('janitorial-section');
-        const display = document.getElementById('janitorial-services-display');
+        var section = document.getElementById('janitorial-section');
+        var tbody = document.getElementById('janitorial-table-body');
+        if (!section || !tbody) return;
 
-        if (!section || !display) return;
+        // Determine if this block is active based on actual data
+        var services = data.janitorial_services || [];
+        var hasData = services.length > 0;
 
-        // Check if janitorial services are included
-        if (data.includeJanitorial !== 'Yes' || !data.type18) {
+        if (!hasData) {
             section.style.display = 'none';
+            tbody.innerHTML = '';
             return;
         }
 
         section.style.display = 'block';
+        tbody.innerHTML = '';
 
-        // Parse JSON arrays
-        const types = parseJSONSafe(data.type18);
-        const times = parseJSONSafe(data.time18);
-        const freqs = parseJSONSafe(data.freq18);
-        const descs = parseJSONSafe(data.desc18);
-        const subtotals = parseJSONSafe(data.subtotal18);
+        services.forEach(function(item) {
+            var tr = createServiceRow('janitorial', item);
+            tbody.appendChild(tr);
+        });
 
-        let html = '';
-        if (Array.isArray(types) && types.length > 0) {
-            types.forEach((type, i) => {
-                if (type) {
-                    html += `
-                        <div class="service-item">
-                            <span class="service-type">${escapeHtml(type)}</span>
-                            <span class="service-detail">${escapeHtml(times[i] || '')}</span>
-                            <span class="service-detail">${escapeHtml(freqs[i] || '')}</span>
-                            <span class="service-desc">${escapeHtml(descs[i] || '')}</span>
-                            <span class="service-price">$${subtotals[i] || '0.00'}</span>
-                        </div>
-                    `;
-                }
-            });
-        }
-
-        display.innerHTML = html || '<p style="color: var(--text-gray);">No services defined</p>';
-
-        // Set totals
-        setValue('total18', data.total18);
-        setValue('taxes18', data.taxes18);
-        setValue('grand18', data.grand18);
+        recalcServiceTotals('janitorial');
     }
 
     // ========================================
-    // DISPLAY KITCHEN SERVICES
+    // SECTION 19: HOODVENT & KITCHEN CLEANING
+    // Only shown if active in Work Order
     // ========================================
 
     function displayKitchenServices(data) {
-        const section = document.getElementById('kitchen-section');
-        const display = document.getElementById('kitchen-services-display');
+        var section = document.getElementById('kitchen-section');
+        var tbody = document.getElementById('kitchen-table-body');
+        if (!section || !tbody) return;
 
-        if (!section || !display) return;
+        // Combine kitchen + hood_vent items (both fall under Section 19)
+        var kitchenItems = data.kitchen_services || [];
+        var hoodVentItems = data.hood_vent_services || [];
+        var services = kitchenItems.concat(hoodVentItems);
+        var hasData = services.length > 0;
 
-        // Check if kitchen services are included
-        if (data.includeKitchen !== 'Yes' || !data.type19) {
+        if (!hasData) {
             section.style.display = 'none';
+            tbody.innerHTML = '';
             return;
         }
 
         section.style.display = 'block';
+        tbody.innerHTML = '';
 
-        // Parse JSON arrays
-        const types = parseJSONSafe(data.type19);
-        const times = parseJSONSafe(data.time19);
-        const freqs = parseJSONSafe(data.freq19);
-        const descs = parseJSONSafe(data.desc19);
-        const subtotals = parseJSONSafe(data.subtotal19);
+        services.forEach(function(item) {
+            var tr = createServiceRow('kitchen', item);
+            tbody.appendChild(tr);
+        });
 
-        let html = '';
-        if (Array.isArray(types) && types.length > 0) {
-            types.forEach((type, i) => {
-                if (type) {
-                    html += `
-                        <div class="service-item">
-                            <span class="service-type">${escapeHtml(type)}</span>
-                            <span class="service-detail">${escapeHtml(times[i] || '')}</span>
-                            <span class="service-detail">${escapeHtml(freqs[i] || '')}</span>
-                            <span class="service-desc">${escapeHtml(descs[i] || '')}</span>
-                            <span class="service-price">$${subtotals[i] || '0.00'}</span>
-                        </div>
-                    `;
-                }
-            });
+        recalcServiceTotals('kitchen');
+    }
+
+    // ========================================
+    // SECTION 20: INCLUDE STAFF?
+    // Only shown if active in Work Order
+    // ========================================
+
+    function displayStaffSection(data) {
+        var section = document.getElementById('staff-section');
+        var tbody = document.getElementById('staff-table-body');
+        if (!section || !tbody) return;
+
+        var staffItems = data.contract_staff || [];
+        var isActive = data.includeStaff === 'Yes' || staffItems.length > 0;
+
+        if (!isActive) {
+            section.style.display = 'none';
+            tbody.innerHTML = '';
+            return;
         }
 
-        display.innerHTML = html || '<p style="color: var(--text-gray);">No services defined</p>';
+        section.style.display = 'block';
+        tbody.innerHTML = '';
 
-        // Set totals
-        setValue('total19', data.total19);
-        setValue('taxes19', data.taxes19);
-        setValue('grand19', data.grand19);
+        staffItems.forEach(function(item) {
+            var tr = createStaffRow(item);
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ========================================
+    // CREATE EDITABLE SERVICE ROW
+    // ========================================
+
+    function createServiceRow(sectionType, item) {
+        var tr = document.createElement('tr');
+        tr.className = 'editor-service-row';
+        // Store original category for hood_vent vs kitchen distinction
+        tr.dataset.originalCategory = (item && item.category) ? item.category : sectionType;
+
+        var serviceType = (item && (item.service_type || item.service_name)) || '';
+        var serviceTime = (item && item.service_time) || '';
+        var frequency = (item && item.frequency) || '';
+        var description = (item && item.description) || '';
+        var subtotal = (item && item.subtotal) ? parseFloat(item.subtotal).toFixed(2) : '';
+
+        tr.innerHTML =
+            '<td><input type="text" class="svc-input svc-type" value="' + escapeAttr(serviceType) + '" placeholder="Service type"></td>' +
+            '<td><input type="text" class="svc-input svc-time" value="' + escapeAttr(serviceTime) + '" placeholder="Time"></td>' +
+            '<td><input type="text" class="svc-input svc-freq" value="' + escapeAttr(frequency) + '" placeholder="Frequency"></td>' +
+            '<td><input type="text" class="svc-input svc-desc" value="' + escapeAttr(description) + '" placeholder="Description"></td>' +
+            '<td><input type="number" class="svc-input svc-subtotal" value="' + escapeAttr(subtotal) + '" placeholder="0.00" step="0.01" min="0"></td>' +
+            '<td><button type="button" class="btn-remove-row" title="Remove">&times;</button></td>';
+
+        // Event: recalculate on subtotal change
+        var subtotalInput = tr.querySelector('.svc-subtotal');
+        subtotalInput.addEventListener('input', function() {
+            recalcServiceTotals(sectionType);
+        });
+
+        // Event: remove row
+        tr.querySelector('.btn-remove-row').addEventListener('click', function() {
+            tr.remove();
+            recalcServiceTotals(sectionType);
+        });
+
+        return tr;
+    }
+
+    // ========================================
+    // ADD EMPTY SERVICE ROW
+    // ========================================
+
+    function addServiceRow(sectionType) {
+        var tbodyId = sectionType === 'janitorial' ? 'janitorial-table-body' : 'kitchen-table-body';
+        var tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+
+        var tr = createServiceRow(sectionType, null);
+        tbody.appendChild(tr);
+
+        // Focus the first input of the new row
+        var firstInput = tr.querySelector('input');
+        if (firstInput) firstInput.focus();
+    }
+
+    // ========================================
+    // CREATE EDITABLE STAFF ROW
+    // ========================================
+
+    function createStaffRow(item) {
+        var tr = document.createElement('tr');
+        tr.className = 'editor-service-row';
+
+        var position = (item && item.position) || '';
+        var baseRate = (item && item.base_rate) ? parseFloat(item.base_rate).toFixed(2) : '';
+        var pctIncrease = (item && item.percent_increase) ? parseFloat(item.percent_increase).toFixed(2) : '';
+        var billRate = (item && item.bill_rate) ? parseFloat(item.bill_rate).toFixed(2) : '';
+
+        tr.innerHTML =
+            '<td><input type="text" class="svc-input staff-position" value="' + escapeAttr(position) + '" placeholder="Position name"></td>' +
+            '<td><input type="number" class="svc-input staff-base" value="' + escapeAttr(baseRate) + '" placeholder="0.00" step="0.01" min="0"></td>' +
+            '<td><input type="number" class="svc-input staff-increase" value="' + escapeAttr(pctIncrease) + '" placeholder="0" step="0.01" min="0"></td>' +
+            '<td><input type="number" class="svc-input staff-bill" value="' + escapeAttr(billRate) + '" readonly tabindex="-1"></td>' +
+            '<td><button type="button" class="btn-remove-row" title="Remove">&times;</button></td>';
+
+        // Recalculate bill rate when base or increase changes
+        var baseInput = tr.querySelector('.staff-base');
+        var increaseInput = tr.querySelector('.staff-increase');
+        var billInput = tr.querySelector('.staff-bill');
+
+        function recalcBill() {
+            var base = parseFloat(baseInput.value) || 0;
+            var inc = parseFloat(increaseInput.value) || 0;
+            var bill = base + (base * inc / 100);
+            billInput.value = bill > 0 ? bill.toFixed(2) : '';
+        }
+
+        baseInput.addEventListener('input', recalcBill);
+        increaseInput.addEventListener('input', recalcBill);
+
+        // Remove row
+        tr.querySelector('.btn-remove-row').addEventListener('click', function() {
+            tr.remove();
+        });
+
+        return tr;
+    }
+
+    // ========================================
+    // ADD EMPTY STAFF ROW
+    // ========================================
+
+    function addStaffRow() {
+        var tbody = document.getElementById('staff-table-body');
+        if (!tbody) return;
+
+        var tr = createStaffRow(null);
+        tbody.appendChild(tr);
+
+        var firstInput = tr.querySelector('input');
+        if (firstInput) firstInput.focus();
+    }
+
+    // ========================================
+    // RECALCULATE SERVICE TOTALS (8.25% tax)
+    // ========================================
+
+    function recalcServiceTotals(sectionType) {
+        var tbodyId = sectionType === 'janitorial' ? 'janitorial-table-body' : 'kitchen-table-body';
+        var suffix = sectionType === 'janitorial' ? '18' : '19';
+        var tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+
+        var total = 0;
+        var subtotalInputs = tbody.querySelectorAll('.svc-subtotal');
+        subtotalInputs.forEach(function(input) {
+            var val = parseFloat(input.value);
+            if (!isNaN(val)) total += val;
+        });
+
+        var taxes = total * 0.0825;
+        var grand = total + taxes;
+
+        setValue('total' + suffix, total > 0 ? total.toFixed(2) : '');
+        setValue('taxes' + suffix, taxes > 0 ? taxes.toFixed(2) : '');
+        setValue('grand' + suffix, grand > 0 ? grand.toFixed(2) : '');
+    }
+
+    // ========================================
+    // COLLECT SERVICE TABLE DATA
+    // ========================================
+
+    function collectServiceTableData(sectionType) {
+        var tbodyId = sectionType === 'janitorial' ? 'janitorial-table-body' : 'kitchen-table-body';
+        var tbody = document.getElementById(tbodyId);
+        if (!tbody) return [];
+
+        var items = [];
+        var rows = tbody.querySelectorAll('tr.editor-service-row');
+        rows.forEach(function(tr) {
+            var serviceType = tr.querySelector('.svc-type').value.trim();
+            var serviceTime = tr.querySelector('.svc-time').value.trim();
+            var frequency = tr.querySelector('.svc-freq').value.trim();
+            var description = tr.querySelector('.svc-desc').value.trim();
+            var subtotal = tr.querySelector('.svc-subtotal').value.trim();
+            var originalCategory = tr.dataset.originalCategory || sectionType;
+
+            // Only include rows that have at least a service type or subtotal
+            if (serviceType || subtotal) {
+                items.push({
+                    category: originalCategory,
+                    service_type: serviceType,
+                    service_time: serviceTime,
+                    frequency: frequency,
+                    description: description,
+                    subtotal: subtotal || '0.00'
+                });
+            }
+        });
+        return items;
+    }
+
+    // ========================================
+    // COLLECT STAFF TABLE DATA
+    // ========================================
+
+    function collectStaffTableData() {
+        var tbody = document.getElementById('staff-table-body');
+        if (!tbody) return [];
+
+        var items = [];
+        var rows = tbody.querySelectorAll('tr.editor-service-row');
+        rows.forEach(function(tr) {
+            var position = tr.querySelector('.staff-position').value.trim();
+            var baseRate = tr.querySelector('.staff-base').value.trim();
+            var pctIncrease = tr.querySelector('.staff-increase').value.trim();
+            var billRate = tr.querySelector('.staff-bill').value.trim();
+
+            if (position || baseRate) {
+                items.push({
+                    position: position,
+                    base_rate: baseRate || '0.00',
+                    percent_increase: pctIncrease || '0.00',
+                    bill_rate: billRate || '0.00'
+                });
+            }
+        });
+        return items;
     }
 
     // ========================================
@@ -413,14 +627,25 @@
     function saveRequest() {
         console.log('Saving request...');
 
-        const requestId = document.getElementById('request_id').value;
+        var requestId = document.getElementById('request_id').value;
         if (!requestId || requestId.trim() === '') {
-            showNotification('❌ No active request selected. Please select a task before saving.', 'error');
+            showNotification('No active request selected. Please select a task before saving.', 'error');
             return;
         }
 
-        const formData = getFormData();
+        var formData = getFormData();
         formData.id = requestId;
+
+        // Collect editable service data from tables
+        formData.contract_items_janitorial = collectServiceTableData('janitorial');
+        formData.contract_items_kitchen = collectServiceTableData('kitchen');
+        formData.contract_staff = collectStaffTableData();
+
+        // Include staff flag based on staff section visibility
+        var staffSection = document.getElementById('staff-section');
+        if (staffSection && staffSection.style.display !== 'none') {
+            formData.includeStaff = 'Yes';
+        }
 
         fetch('controllers/update_request.php', {
             method: 'POST',
@@ -429,21 +654,37 @@
             },
             body: JSON.stringify(formData)
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
-                showNotification('✅ Saved successfully', 'success');
-                // Actualizar preview
+                showNotification('Saved successfully', 'success');
+                // Update currentRequestData with the latest from tables
+                // so preview stays in sync
+                if (currentRequestData) {
+                    currentRequestData.janitorial_services = collectServiceTableData('janitorial');
+                    var kitchenData = collectServiceTableData('kitchen');
+                    var kitItems = [];
+                    var hvItems = [];
+                    kitchenData.forEach(function(item) {
+                        if (item.category === 'hood_vent') {
+                            hvItems.push(item);
+                        } else {
+                            kitItems.push(item);
+                        }
+                    });
+                    currentRequestData.kitchen_services = kitItems;
+                    currentRequestData.hood_vent_services = hvItems;
+                    currentRequestData.contract_staff = collectStaffTableData();
+                }
                 updatePreview();
-                // Refrescar inbox
                 window.InboxModule.refresh();
             } else {
-                showNotification('❌ Error: ' + data.error, 'error');
+                showNotification('Error: ' + data.error, 'error');
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Error:', error);
-            showNotification('❌ Connection error', 'error');
+            showNotification('Connection error', 'error');
         });
     }
 
@@ -452,11 +693,10 @@
     // ========================================
 
     function markAsReady() {
-        const requestId = document.getElementById('request_id').value;
+        var requestId = document.getElementById('request_id').value;
 
-        // Check if request has been saved first
         if (!requestId || requestId.trim() === '') {
-            showNotification('❌ Please save the request first before marking it as ready.', 'error');
+            showNotification('Please save the request first before marking it as ready.', 'error');
             return;
         }
 
@@ -464,7 +704,7 @@
             return;
         }
 
-        console.log('📤 Marking request as ready:', requestId);
+        console.log('Marking request as ready:', requestId);
 
         fetch('controllers/mark_ready.php', {
             method: 'POST',
@@ -473,26 +713,24 @@
             },
             body: JSON.stringify({ request_id: requestId })
         })
-        .then(response => {
-            console.log('📥 Mark ready response status:', response.status);
+        .then(function(response) {
+            console.log('Mark ready response status:', response.status);
             return response.json();
         })
-        .then(data => {
-            console.log('📥 Mark ready response data:', data);
+        .then(function(data) {
+            console.log('Mark ready response data:', data);
             if (data.success) {
-                showNotification('✅ Marked as ready! DOCNUM: ' + data.docnum, 'success');
-                // Actualizar docnum en pantalla
+                showNotification('Marked as ready! DOCNUM: ' + data.docnum, 'success');
                 document.getElementById('doc-number').textContent = data.docnum;
-                // Refrescar inbox para mover el item a Generated Contracts
-                console.log('🔄 Refreshing inbox...');
+                console.log('Refreshing inbox...');
                 window.InboxModule.refresh();
             } else {
-                showNotification('❌ Error: ' + data.error, 'error');
+                showNotification('Error: ' + data.error, 'error');
             }
         })
-        .catch(error => {
-            console.error('❌ Error marking as ready:', error);
-            showNotification('❌ Connection error: ' + error.message, 'error');
+        .catch(function(error) {
+            console.error('Error marking as ready:', error);
+            showNotification('Connection error: ' + error.message, 'error');
         });
     }
 
@@ -501,7 +739,7 @@
     // ========================================
 
     function markAsCompleted() {
-        const requestId = document.getElementById('request_id').value;
+        var requestId = document.getElementById('request_id').value;
 
         if (!requestId || requestId.trim() === '') {
             showNotification('Please save the request first.', 'error');
@@ -514,9 +752,8 @@
 
         console.log('Marking request as completed:', requestId);
 
-        // Show loading state on button
-        const btn = document.getElementById('btn-mark-completed');
-        const originalHtml = btn.innerHTML;
+        var btn = document.getElementById('btn-mark-completed');
+        var originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
         btn.disabled = true;
 
@@ -525,15 +762,13 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ request_id: requestId })
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(function(response) { return response.json(); })
+        .then(function(data) {
             if (data.success) {
                 showNotification('Contract completed! Final PDF generated and sent to Accounting.', 'success');
-                // Hide the completed button, show completed state
                 btn.style.display = 'none';
                 document.getElementById('btn-mark-ready').style.display = 'none';
                 document.getElementById('btn-save').style.display = 'none';
-                // Refresh inbox
                 window.InboxModule.refresh();
             } else {
                 showNotification('Error: ' + data.error, 'error');
@@ -541,7 +776,7 @@
                 btn.disabled = false;
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Error marking as completed:', error);
             showNotification('Connection error: ' + error.message, 'error');
             btn.innerHTML = originalHtml;
@@ -554,25 +789,22 @@
     // ========================================
 
     function updateButtonVisibility(status) {
-        const btnSave = document.getElementById('btn-save');
-        const btnMarkReady = document.getElementById('btn-mark-ready');
-        const btnMarkCompleted = document.getElementById('btn-mark-completed');
-        const btnDownloadPdf = document.getElementById('btn-download-pdf');
+        var btnSave = document.getElementById('btn-save');
+        var btnMarkReady = document.getElementById('btn-mark-ready');
+        var btnMarkCompleted = document.getElementById('btn-mark-completed');
+        var btnDownloadPdf = document.getElementById('btn-download-pdf');
 
         if (status === 'completed') {
-            // Completed: no edits allowed, only download
             btnSave.style.display = 'none';
             btnMarkReady.style.display = 'none';
             btnMarkCompleted.style.display = 'none';
             btnDownloadPdf.style.display = 'flex';
         } else if (status === 'ready') {
-            // Ready: can mark completed or download
             btnSave.style.display = 'flex';
             btnMarkReady.style.display = 'none';
             btnMarkCompleted.style.display = 'flex';
             btnDownloadPdf.style.display = 'flex';
         } else {
-            // Pending/draft/in_progress: can save, mark ready, download
             btnSave.style.display = 'flex';
             btnMarkReady.style.display = 'flex';
             btnMarkCompleted.style.display = 'none';
@@ -585,15 +817,14 @@
     // ========================================
 
     function downloadPDF() {
-        const requestId = document.getElementById('request_id').value;
+        var requestId = document.getElementById('request_id').value;
 
         if (!requestId) {
             alert('No request selected');
             return;
         }
 
-        // Abrir en nueva ventana
-        window.open(`controllers/generate_pdf.php?id=${requestId}`, '_blank');
+        window.open('controllers/generate_pdf.php?id=' + requestId, '_blank');
     }
 
     // ========================================
@@ -601,15 +832,14 @@
     // ========================================
 
     function downloadVentHoodReport() {
-        const requestId = document.getElementById('request_id').value;
+        var requestId = document.getElementById('request_id').value;
 
         if (!requestId) {
             alert('Please select a request first to generate the Vent Hood Report');
             return;
         }
 
-        // Open the interactive vent hood report editor/previewer
-        window.open(`vent_hood_editor.php?id=${requestId}`, '_blank');
+        window.open('vent_hood_editor.php?id=' + requestId, '_blank');
     }
 
     // ========================================
@@ -618,36 +848,57 @@
 
     function updatePreview() {
         if (window.PreviewModule) {
-            // Merge form field values with service detail arrays from loaded request data
-            const formData = getFormData();
+            var formData = getFormData();
 
-            // Carry over non-form-field data from the loaded request
+            // Build live service data from editor tables
+            var janItems = collectServiceTableData('janitorial');
+            if (janItems.length) formData.janitorial_services = janItems;
+
+            var kitchenAllItems = collectServiceTableData('kitchen');
+            if (kitchenAllItems.length) {
+                var kitItems = [];
+                var hvItems = [];
+                kitchenAllItems.forEach(function(item) {
+                    if (item.category === 'hood_vent') {
+                        hvItems.push(item);
+                    } else {
+                        kitItems.push(item);
+                    }
+                });
+                if (kitItems.length) formData.kitchen_services = kitItems;
+                if (hvItems.length) formData.hood_vent_services = hvItems;
+            }
+
+            var staffItems = collectStaffTableData();
+            if (staffItems.length) formData.contract_staff = staffItems;
+
+            // Carry over non-editable data from loaded request
             if (currentRequestData) {
-                // Service detail arrays (from contract_items split by category)
-                if (currentRequestData.janitorial_services) {
+                // Fallback service data if tables are empty (shouldn't happen normally)
+                if (!formData.janitorial_services && currentRequestData.janitorial_services) {
                     formData.janitorial_services = currentRequestData.janitorial_services;
                 }
-                if (currentRequestData.kitchen_services) {
+                if (!formData.kitchen_services && currentRequestData.kitchen_services) {
                     formData.kitchen_services = currentRequestData.kitchen_services;
                 }
-                if (currentRequestData.hood_vent_services) {
+                if (!formData.hood_vent_services && currentRequestData.hood_vent_services) {
                     formData.hood_vent_services = currentRequestData.hood_vent_services;
                 }
 
-                // Fallback: if separate arrays aren't available, split contract_items
+                // Fallback: split contract_items if separate arrays aren't available
                 if (!formData.janitorial_services && !formData.kitchen_services && !formData.hood_vent_services
                     && currentRequestData.contract_items && Array.isArray(currentRequestData.contract_items)) {
-                    var janItems = [], kitItems = [], hvItems = [];
+                    var jItems = [], kItems = [], hItems = [];
                     currentRequestData.contract_items.forEach(function(item) {
                         switch (item.category) {
-                            case 'janitorial': janItems.push(item); break;
-                            case 'kitchen': kitItems.push(item); break;
-                            case 'hood_vent': hvItems.push(item); break;
+                            case 'janitorial': jItems.push(item); break;
+                            case 'kitchen': kItems.push(item); break;
+                            case 'hood_vent': hItems.push(item); break;
                         }
                     });
-                    if (janItems.length) formData.janitorial_services = janItems;
-                    if (kitItems.length) formData.kitchen_services = kitItems;
-                    if (hvItems.length) formData.hood_vent_services = hvItems;
+                    if (jItems.length) formData.janitorial_services = jItems;
+                    if (kItems.length) formData.kitchen_services = kItems;
+                    if (hItems.length) formData.hood_vent_services = hItems;
                 }
 
                 // Scope data
@@ -664,7 +915,7 @@
                     formData.Scope_Sections = currentRequestData.Scope_Sections;
                 }
 
-                // Pricing fields not present in form HTML but needed by preview
+                // Pricing fields not in form HTML but needed by preview
                 if (currentRequestData.PriceInput && !formData.PriceInput) {
                     formData.PriceInput = currentRequestData.PriceInput;
                 }
@@ -677,7 +928,12 @@
                     formData.docnum = currentRequestData.docnum;
                 }
 
-                // Carry over JSON array fields for legacy fallback
+                // Include staff flag
+                if (currentRequestData.includeStaff) {
+                    formData.includeStaff = currentRequestData.includeStaff;
+                }
+
+                // Legacy JSON array fields for backwards compatibility
                 ['type18','write18','time18','freq18','desc18','subtotal18',
                  'type19','time19','freq19','desc19','subtotal19',
                  'base_staff','increase_staff','bill_staff'].forEach(function(field) {
@@ -696,18 +952,18 @@
     // ========================================
 
     function setValue(fieldId, value) {
-        const field = document.getElementById(fieldId);
+        var field = document.getElementById(fieldId);
         if (field) {
             field.value = value || '';
         }
     }
 
     function getFormData() {
-        const form = document.getElementById('editor-form');
-        const formData = new FormData(form);
-        const data = {};
-        
-        formData.forEach((value, key) => {
+        var form = document.getElementById('editor-form');
+        var formData = new FormData(form);
+        var data = {};
+
+        formData.forEach(function(value, key) {
             data[key] = value;
         });
 
@@ -715,9 +971,9 @@
     }
 
     function toggleContractFields() {
-        const requestType = document.getElementById('Request_Type').value;
-        const contractSection = document.getElementById('contract-specific-section');
-        
+        var requestType = document.getElementById('Request_Type').value;
+        var contractSection = document.getElementById('contract-specific-section');
+
         if (requestType === 'Contract') {
             contractSection.style.display = 'block';
         } else {
@@ -726,41 +982,42 @@
     }
 
     function displayScope(scopeArray) {
-        const scopeDisplay = document.getElementById('scope-display');
-        
+        var scopeDisplay = document.getElementById('scope-display');
+
         if (!scopeArray || scopeArray.length === 0) {
             scopeDisplay.innerHTML = '<p style="color: var(--text-gray);">No scope of work defined</p>';
             return;
         }
 
-        scopeDisplay.innerHTML = scopeArray.map(item => `
-            <div class="scope-item">
-                <i class="fas fa-check-circle"></i>
-                <span>${escapeHtml(item)}</span>
-            </div>
-        `).join('');
+        scopeDisplay.innerHTML = scopeArray.map(function(item) {
+            return '<div class="scope-item"><i class="fas fa-check-circle"></i><span>' + escapeHtml(item) + '</span></div>';
+        }).join('');
     }
 
     function showNotification(message, type) {
-        // Simple alert por ahora (puedes mejorar con toast notifications)
         alert(message);
     }
 
     function escapeHtml(text) {
-        const div = document.createElement('div');
+        var div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
+    function escapeAttr(text) {
+        if (!text) return '';
+        return String(text).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
     function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
+        var timeout;
+        return function() {
+            var args = arguments;
+            var context = this;
             clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
+            timeout = setTimeout(function() {
+                func.apply(context, args);
+            }, wait);
         };
     }
 
