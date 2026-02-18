@@ -323,7 +323,7 @@ class AuthController
 
         <div class="buttons-container">
             <a href="<?= url('/form_contract/') ?>" class="btn btn-contract">Form for Contract</a>
-            <a href="<?= url('/contract_generator/contract_generator/') ?>" class="btn btn-contract">Contract Generator</a>
+            <a href="<?= url('/contract_generator/') ?>" class="btn btn-contract">Contract Generator</a>
             <a href="<?= url('/employee_work_report/') ?>" class="btn btn-sales">Employee Work Report</a>
             <a href="<?= url('/reports/') ?>" class="btn btn-reports">Reports</a>
             <a href="<?= url('/billing/') ?>" class="btn btn-billing">Billing / Accounting</a>

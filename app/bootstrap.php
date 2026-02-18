@@ -162,7 +162,7 @@ if ((int)$modulesCount === 0) {
     $pdo->exec("
         INSERT INTO `modules` (`module_id`, `name`, `slug`, `icon`, `url`) VALUES
         (1, 'Form for Contract',     'contracts',     '&#x1F4BC;', 'form_contract/'),
-        (2, 'Contract Generator',    'generator',     '&#x1F4DD;', 'contract_generator/contract_generator/'),
+        (2, 'Contract Generator',    'generator',     '&#x1F4DD;', 'contract_generator/'),
         (3, 'Employee Work Report',  'work_report',   '&#x1F9F9;', 'employee_work_report/'),
         (4, 'Reports',              'reports',        '&#x1F4CB;', 'reports/'),
         (5, 'Billing / Accounting', 'billing',        '&#x1F4B0;', 'billing/'),

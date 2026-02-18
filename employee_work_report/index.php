@@ -386,7 +386,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const ventHoodBtn = document.getElementById("btnVentHoodReport");
     if (ventHoodBtn) {
         ventHoodBtn.addEventListener("click", () => {
-            window.open("../contract_generator/contract_generator/vent_hood_editor.php", "_blank");
+            window.open("../contract_generator/vent_hood_editor.php", "_blank");
         });
     }
 
