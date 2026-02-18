@@ -1,14 +1,14 @@
 <?php
 /**
- * Database Configuration - Contract Generator Module
- * Uses centralized database configuration.
+ * Contract Generator Module Initialization
+ * Uses centralized Database class for connection.
  * No requests table - reads directly from forms + contract_items.
  */
 
 require_once __DIR__ . '/../../config/database.php';
 
-// Ensure form_contract db_config is loaded for table initialization
-require_once __DIR__ . '/../../form_contract/db_config.php';
+// Ensure form_contract init is loaded for table initialization
+require_once __DIR__ . '/../../form_contract/init.php';
 
 /**
  * Initialize the docnum_counter table for document number generation
@@ -33,6 +33,5 @@ function initializeDocnumCounter($pdo) {
 }
 
 // Initialize module tables
-$pdo = getDBConnection();
+$pdo = Database::getConnection();
 initializeDocnumCounter($pdo);
-?>

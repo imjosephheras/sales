@@ -5,12 +5,12 @@
 // Descripción: Ajusta las tablas de servicios para que coincidan con el formulario
 // ============================================================
 
-require_once 'db_config.php';
+require_once __DIR__ . '/init.php';
 
 echo "🚀 Starting database migration...\n\n";
 
 try {
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // ============================================================

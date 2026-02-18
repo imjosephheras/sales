@@ -12,7 +12,7 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../form_contract/order_access.php';
-require_once __DIR__ . '/../form_contract/db_config.php';
+require_once __DIR__ . '/../form_contract/init.php';
 
 // Enforce authentication and calendar module access
 Middleware::module('calendar');
@@ -22,7 +22,7 @@ $user = Auth::user();
 $rbac = getOrderRbacFilter($user);
 
 try {
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('n');
     $year  = isset($_GET['year'])  ? (int)$_GET['year']  : (int)date('Y');

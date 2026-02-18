@@ -3,7 +3,8 @@
  * Add a new billing document
  * Uses form_id to reference the forms table (single source of truth).
  */
-require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../config/init.php';
+$pdo = Database::getConnection();
 header('Content-Type: application/json');
 
 try {

@@ -6,10 +6,10 @@
  */
 
 header('Content-Type: application/json');
-require_once 'db_config.php';
+require_once __DIR__ . '/init.php';
 
 try {
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     // Get all currently used order numbers
     $stmt = $pdo->query("SELECT order_number FROM forms WHERE order_number IS NOT NULL ORDER BY order_number ASC");

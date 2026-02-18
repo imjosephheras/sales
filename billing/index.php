@@ -9,7 +9,7 @@
 require_once __DIR__ . '/../app/bootstrap.php';
 Middleware::module('billing');
 
-require_once 'config/db_config.php';
+require_once __DIR__ . '/config/init.php';
 
 $current_user = $_SESSION['full_name'] ?? 'Admin';
 ?>

@@ -6,10 +6,10 @@
 header('Content-Type: application/json');
 
 // Incluir configuración de base de datos
-require_once 'db_config.php';
+require_once __DIR__ . '/init.php';
 
 try {
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
     
     // Cargar formularios con status 'draft' o 'pending'
     $sql = "SELECT 

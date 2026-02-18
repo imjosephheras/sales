@@ -21,7 +21,8 @@
 require_once __DIR__ . '/../app/bootstrap.php';
 Middleware::module('admin_panel');
 
-require_once 'config/db_config.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../form_contract/init.php';
 
 ?>
 <!DOCTYPE html>

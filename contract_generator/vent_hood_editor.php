@@ -5,7 +5,8 @@
  * Template is fixed; only fields are editable.
  */
 
-require_once 'config/db_config.php';
+require_once __DIR__ . '/config/init.php';
+$pdo = Database::getConnection();
 
 // Get request data if ID is provided
 $data = [];

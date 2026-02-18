@@ -15,10 +15,10 @@
  */
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../form_contract/db_config.php';
+require_once __DIR__ . '/../form_contract/init.php';
 
 try {
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     $eventId = isset($_POST['event_id']) ? (int)$_POST['event_id'] : 0;
     if ($eventId <= 0) {

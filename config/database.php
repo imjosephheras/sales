@@ -3,8 +3,8 @@
 // database.php - Configuracion centralizada de Base de Datos
 // ============================================================
 // Este es el UNICO archivo donde se configuran las credenciales
-// de la base de datos. Todos los modulos deben incluir este archivo
-// en lugar de definir sus propias conexiones.
+// de la base de datos. Todos los modulos deben usar la clase
+// Database::getConnection() para obtener la conexion PDO.
 // ============================================================
 
 // Zona horaria
@@ -17,45 +17,15 @@ if (!defined('DB_USER'))    define('DB_USER', 'root');
 if (!defined('DB_PASS'))    define('DB_PASS', '');
 if (!defined('DB_CHARSET')) define('DB_CHARSET', 'utf8mb4');
 
+// Cargar la clase Database (singleton)
+require_once __DIR__ . '/../app/Core/Database.php';
+
 /**
  * Obtener conexion PDO (singleton).
- * Retorna siempre la misma instancia de PDO.
+ * Wrapper de compatibilidad que delega a Database::getConnection().
  *
  * @return PDO
  */
 function getDBConnection() {
-    static $pdo = null;
-
-    if ($pdo !== null) {
-        return $pdo;
-    }
-
-    try {
-        $pdo = new PDO(
-            "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET,
-            DB_USER,
-            DB_PASS,
-            [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false,
-            ]
-        );
-
-        return $pdo;
-    } catch (PDOException $e) {
-        error_log("Database connection error: " . $e->getMessage());
-
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-            header('Content-Type: application/json');
-            echo json_encode([
-                'success' => false,
-                'message' => 'Database connection error: ' . $e->getMessage()
-            ]);
-            exit;
-        }
-
-        die("Database connection failed. Please check your configuration.");
-    }
+    return Database::getConnection();
 }

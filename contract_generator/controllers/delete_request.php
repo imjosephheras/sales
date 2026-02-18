@@ -6,7 +6,8 @@
  */
 
 header('Content-Type: application/json');
-require_once '../config/db_config.php';
+require_once __DIR__ . '/../config/init.php';
+$pdo = Database::getConnection();
 
 try {
     $input = json_decode(file_get_contents('php://input'), true);

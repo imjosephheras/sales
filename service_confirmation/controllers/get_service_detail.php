@@ -6,7 +6,8 @@
  */
 
 header('Content-Type: application/json');
-require_once '../config/db_config.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../form_contract/init.php';
 
 try {
     $request_id = $_GET['id'] ?? null;
@@ -19,7 +20,7 @@ try {
         exit;
     }
 
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     // Get form data (single source of truth)
     $stmt = $pdo->prepare("SELECT * FROM forms WHERE form_id = :id");

@@ -5,10 +5,10 @@
  */
 
 // Include database configuration
-require_once __DIR__ . '/../form_contract/db_config.php';
+require_once __DIR__ . '/../form_contract/init.php';
 
 // Get database connection
-$pdo = getDBConnection();
+$pdo = Database::getConnection();
 
 // Fetch all requests for analytics
 $stmt = $pdo->query("

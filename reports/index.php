@@ -8,10 +8,10 @@ require_once __DIR__ . '/../app/bootstrap.php';
 Middleware::module('reports');
 
 // Include database configuration
-require_once __DIR__ . '/../form_contract/db_config.php';
+require_once __DIR__ . '/../form_contract/init.php';
 
 // Get database connection
-$pdo = getDBConnection();
+$pdo = Database::getConnection();
 
 // Fetch all requests
 $stmt = $pdo->query("

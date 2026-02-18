@@ -5,7 +5,8 @@
  * Records who performed the action and when.
  */
 require_once __DIR__ . '/../../app/bootstrap.php';
-require_once __DIR__ . '/../config/db_config.php';
+require_once __DIR__ . '/../config/init.php';
+$pdo = Database::getConnection();
 header('Content-Type: application/json');
 
 try {

@@ -5,7 +5,8 @@
  * Reads from forms + contract_items (single source of truth).
  */
 
-require_once '../config/db_config.php';
+require_once __DIR__ . '/../config/init.php';
+$pdo = Database::getConnection();
 
 // Get parameters
 $reportType = $_GET['type'] ?? '';

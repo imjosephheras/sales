@@ -6,7 +6,8 @@
  */
 
 header('Content-Type: application/json');
-require_once '../config/db_config.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../form_contract/init.php';
 
 try {
     // Get JSON input
@@ -31,7 +32,7 @@ try {
         exit;
     }
 
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     // Update the form with admin notes (single source of truth)
     $stmt = $pdo->prepare("

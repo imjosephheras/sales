@@ -6,12 +6,12 @@
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../form_contract/order_access.php';
-require_once __DIR__ . '/../form_contract/db_config.php';
+require_once __DIR__ . '/../form_contract/init.php';
 
 Middleware::module('calendar');
 
 try {
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     $sql = "
         SELECT DISTINCT service_type

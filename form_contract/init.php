@@ -1,9 +1,9 @@
 <?php
 // ============================================================
-// db_config.php - Form Contract Module
+// init.php - Form Contract Module Initialization
 // ============================================================
-// Usa la configuracion centralizada de base de datos.
-// Las funciones de inicializacion de tablas permanecen aqui
+// Inicializa las tablas del modulo form_contract.
+// Las funciones de inicializacion y utilidades permanecen aqui
 // porque son especificas de este modulo.
 // ============================================================
 // ARCHITECTURE: forms + contract_items as single source of truth
@@ -257,9 +257,8 @@ function addMissingColumnsToForms($pdo) {
     }
 }
 
-// Inicializar tablas del modulo form_contract al obtener conexion
-// Se usa la funcion getDBConnection() del config centralizado
-$pdo = getDBConnection();
+// Inicializar tablas del modulo form_contract
+$pdo = Database::getConnection();
 initializeFormsTable($pdo);
 
 /**
@@ -403,4 +402,3 @@ function recalculateTotalCost($pdo, $formId) {
 
     return $totalCost;
 }
-?>

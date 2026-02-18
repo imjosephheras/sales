@@ -7,10 +7,11 @@
  */
 
 header('Content-Type: application/json');
-require_once '../config/db_config.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../form_contract/init.php';
 
 try {
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     // Get filter parameters
     $status = $_GET['status'] ?? 'all'; // all, completed, not_completed, pending

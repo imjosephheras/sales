@@ -6,7 +6,8 @@
  */
 
 header('Content-Type: application/json');
-require_once '../config/db_config.php';
+require_once __DIR__ . '/../config/init.php';
+$pdo = Database::getConnection();
 
 try {
     $id = isset($_GET['id']) ? intval($_GET['id']) : 0;

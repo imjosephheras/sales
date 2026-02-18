@@ -1,14 +1,14 @@
 <?php
 /**
- * Database Configuration - Billing Module
- * Uses centralized database configuration.
+ * Billing Module Initialization
+ * Uses centralized Database class for connection.
  * Reads from forms + contract_items (single source of truth).
  */
 
 require_once __DIR__ . '/../../config/database.php';
 
-// Ensure form_contract db_config is loaded for table initialization
-require_once __DIR__ . '/../../form_contract/db_config.php';
+// Ensure form_contract init is loaded for table initialization
+require_once __DIR__ . '/../../form_contract/init.php';
 
 /**
  * Initialize billing_documents table
@@ -70,6 +70,5 @@ function initializeBillingDocuments($pdo) {
     }
 }
 
-$pdo = getDBConnection();
+$pdo = Database::getConnection();
 initializeBillingDocuments($pdo);
-?>

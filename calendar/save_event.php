@@ -12,10 +12,10 @@
  */
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../form_contract/db_config.php';
+require_once __DIR__ . '/../form_contract/init.php';
 
 try {
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     $formId = isset($_POST['form_id']) ? (int)$_POST['form_id'] : 0;
     if ($formId <= 0) {

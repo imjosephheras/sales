@@ -12,8 +12,9 @@
  */
 
 header('Content-Type: application/json');
-require_once '../config/db_config.php';
-require_once '../../vendor/autoload.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../form_contract/init.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -44,7 +45,7 @@ try {
         exit;
     }
 
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
     $pdo->beginTransaction();
 
     // Get current form data (single source of truth)

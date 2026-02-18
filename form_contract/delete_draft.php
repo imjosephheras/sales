@@ -7,8 +7,8 @@
 header('Content-Type: application/json');
 
 // Incluir configuración de base de datos y RBAC
-require_once 'db_config.php';
-require_once 'order_access.php';
+require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/order_access.php';
 
 try {
     // Enforce authentication + module access
@@ -21,7 +21,7 @@ try {
         throw new Exception('Form ID is required');
     }
 
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     // RBAC: Verify the user has access to this order before deleting
     if (!canAccessOrder($pdo, $form_id, $currentUser)) {

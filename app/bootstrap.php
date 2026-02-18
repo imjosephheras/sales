@@ -70,7 +70,7 @@ require_once __DIR__ . '/Controllers/AuthController.php';
 
 // ─── Database connection (centralizada) ────────────────────
 require_once __DIR__ . '/../config/database.php';
-$pdo = getDBConnection();
+$pdo = Database::getConnection();
 
 // ─── Initialize Auth & Gate ────────────────────────────────
 Auth::init($pdo);

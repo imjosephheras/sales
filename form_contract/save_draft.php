@@ -10,14 +10,14 @@
 header('Content-Type: application/json');
 
 // Incluir configuracion de base de datos y RBAC
-require_once 'db_config.php';
-require_once 'order_access.php';
+require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/order_access.php';
 
 try {
     // Enforce authentication + module access
     $currentUser = requireOrderAccess();
 
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     // Obtener datos del formulario
     $form_id = isset($_POST['form_id']) ? (int)$_POST['form_id'] : null;

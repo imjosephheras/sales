@@ -8,15 +8,15 @@
 header('Content-Type: application/json');
 
 // Incluir configuración de base de datos y RBAC
-require_once 'db_config.php';
-require_once 'order_access.php';
+require_once __DIR__ . '/init.php';
+require_once __DIR__ . '/order_access.php';
 
 try {
     // Enforce authentication + module access; get current user
     $currentUser = requireOrderAccess();
     $rbac = getOrderRbacFilter($currentUser);
 
-    $pdo = getDBConnection();
+    $pdo = Database::getConnection();
 
     // ── TEMPORARY DEBUG: Log seller matching details ──
     // TODO: Remove this debug block once the Kenny Howe issue is confirmed resolved

@@ -202,8 +202,8 @@ if (!empty($photos) && isset($photos['tmp_name'])) {
 //
 
 try {
-    require_once 'db_config.php';
-    $pdo = getDBConnection();
+    require_once __DIR__ . '/init.php';
+    $pdo = Database::getConnection();
 
     // Helper function to convert empty strings to null
     function emptyToNull($value) {
