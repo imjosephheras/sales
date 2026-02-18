@@ -187,9 +187,10 @@
 
         // Load PDF in iframe
         if (doc.pdf_path) {
-            // Build absolute URL to the PDF
+            // Build absolute URL to the PDF, encoding each path segment for special characters/spaces
             const basePath = window.location.pathname.replace(/\/billing\/.*/i, '');
-            pdfViewer.src = basePath + '/' + doc.pdf_path;
+            const encodedPath = doc.pdf_path.split('/').map(segment => encodeURIComponent(segment)).join('/');
+            pdfViewer.src = basePath + '/' + encodedPath;
         } else {
             pdfViewer.src = '';
         }

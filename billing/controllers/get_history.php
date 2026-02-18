@@ -6,9 +6,10 @@
  */
 
 header('Content-Type: application/json');
-require_once __DIR__ . '/../config/db_config.php';
 
 try {
+    require_once __DIR__ . '/../config/db_config.php';
+
     $sql = "SELECT
                 bd.*,
                 f.company_name,
@@ -43,11 +44,11 @@ try {
         'count' => count($documents)
     ]);
 
-} catch (PDOException $e) {
+} catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'error' => 'Database error: ' . $e->getMessage()
+        'error' => 'Server error: ' . $e->getMessage()
     ]);
 }
 ?>
