@@ -5,34 +5,28 @@
  */
 require_once __DIR__ . '/../app/bootstrap.php';
 Middleware::module('calendar');
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calendar</title>
-    <link rel="stylesheet" href="styles/calendar.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
 
-    <!-- Header -->
-    <header class="main-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <a href="<?= url('/') ?>" class="home-btn" title="Back to Home">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <i class="fas fa-calendar-alt"></i>
-                <h1>Calendar</h1>
-            </div>
-            <button class="theme-toggle" id="theme-toggle" title="Toggle dark/light mode">
-                <i class="fas fa-moon"></i>
-            </button>
-        </div>
-    </header>
+// Dashboard layout variables
+$page_title = 'Calendar';
+$page_icon  = 'fas fa-calendar-alt';
+$page_slug  = 'calendar';
+
+$page_head = '<link rel="stylesheet" href="' . url('/calendar/styles/calendar.css') . '">'
+    . '<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">'
+    . '<style>
+    /* Adjust for dashboard content area */
+    .dashboard-body .calendar-layout {
+        height: calc(100vh - 60px);
+    }
+    .dashboard-body .main-header {
+        display: none;
+    }
+    .dashboard-body .db-main { padding: 0; }
+    .dashboard-body .db-content { padding: 0; }
+    </style>';
+
+ob_start();
+?>
 
     <!-- Calendar Layout -->
     <div class="calendar-layout">
@@ -257,6 +251,9 @@ Middleware::module('calendar');
         </div>
     </div>
 
-    <script src="js/calendar.js"></script>
-</body>
-</html>
+    <script src="<?= url('/calendar/js/calendar.js') ?>"></script>
+
+<?php
+$page_content = ob_get_clean();
+include __DIR__ . '/../app/Views/layouts/dashboard.php';
+?>

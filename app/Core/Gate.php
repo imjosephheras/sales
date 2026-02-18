@@ -146,6 +146,20 @@ class Gate
     }
 
     /**
+     * Check if the current user's role allows deleting records.
+     * Only Admin (role_id=1) and Leader (role_id=2) can delete.
+     */
+    public static function canDelete(): bool
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return false;
+        }
+
+        return in_array((int)$user['role_id'], [1, 2], true);
+    }
+
+    /**
      * Clear all cached permissions (call after role/permission change)
      */
     public static function clearCache(): void

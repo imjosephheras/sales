@@ -1,27 +1,31 @@
 <?php
 require_once __DIR__ . '/../app/bootstrap.php';
 Middleware::module('contracts');
-?>
-<!DOCTYPE html>
-<html lang="es">
-<?php include 'header.php'; ?>
 
-<?php
+$page_title = 'Form for Contract';
+$page_icon  = 'fas fa-file-contract';
+$page_slug  = 'contracts';
+
+// Capture header.php CSS content (it outputs <head>...</head>)
+ob_start();
+include 'header.php';
+$_headerRaw = ob_get_clean();
+// Strip <head> and </head> tags, keep inner content
+$page_head = preg_replace('/<\/?head>/i', '', $_headerRaw);
+
 // LANGUAGE CONTROLLER
 if (isset($_GET["lang"])) {
     $_SESSION["lang"] = $_GET["lang"];
 }
 
 $lang = $_SESSION["lang"] ?? "en";
-?>
-<body>
 
-<!-- 🎯 FIXED TOP NAVIGATION BAR -->
+ob_start();
+?>
+
+<!-- 🎯 FIXED TOP NAVIGATION BAR (inside dashboard) -->
 <div class="top-navbar">
     <div class="nav-left">
-        <a href="<?= url('/') ?>" class="nav-btn nav-home">
-            🏠 <span>Home</span>
-        </a>
         <button id="togglePendingPanel" class="nav-btn nav-pending">
             📋 <span><?= ($lang=='en') ? "Pending" : "Pendientes"; ?></span>
         </button>
@@ -51,19 +55,21 @@ $lang = $_SESSION["lang"] ?? "en";
 /* TOP NAVIGATION BAR - FIXED */
 /* ========================================= */
 .top-navbar {
-    position: fixed;
+    position: sticky;
     top: 0;
     left: 0;
     right: 0;
-    height: 70px;
+    height: 56px;
     background: linear-gradient(135deg, #001f54 0%, #003080 100%);
     color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 30px;
+    padding: 0 20px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 100000;
+    z-index: 50;
+    border-radius: 10px;
+    margin-bottom: 16px;
 }
 
 .nav-left,
@@ -3132,5 +3138,7 @@ document.addEventListener("DOMContentLoaded", () => {
 })();
 </script>
 
-</body>
-</html>
+<?php
+$page_content = ob_get_clean();
+include __DIR__ . '/../app/Views/layouts/dashboard.php';
+?>

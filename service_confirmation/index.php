@@ -23,33 +23,23 @@ Middleware::module('admin_panel');
 
 require_once 'config/db_config.php';
 
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Module 10</title>
+$page_title = 'Task Tracking';
+$page_icon  = 'fas fa-tasks';
+$page_slug  = 'admin_panel';
+
+$page_head = '
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles/service_confirmation.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
+    <link rel="stylesheet" href="' . url('/service_confirmation/styles/service_confirmation.css') . '">
+    <style>
+        .dashboard-body .container {
+            height: calc(100vh - var(--topbar-height) - 48px);
+        }
+    </style>';
 
-    <!-- Header -->
-    <header class="main-header">
-        <div class="header-content">
-            <div class="logo-section">
-                <a href="<?= url('/') ?>" class="home-btn" title="Back to Home">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <i class="fas fa-cogs"></i>
-                <h1>Admin Panel</h1>
-            </div>
-        </div>
-    </header>
+ob_start();
+?>
 
     <!-- Main 3-Column Layout -->
     <div class="container">
@@ -71,6 +61,9 @@ require_once 'config/db_config.php';
 
     </div>
 
-    <script src="js/service_confirmation.js"></script>
-</body>
-</html>
+    <script src="<?= url('/service_confirmation/js/service_confirmation.js') ?>"></script>
+
+<?php
+$page_content = ob_get_clean();
+include __DIR__ . '/../app/Views/layouts/dashboard.php';
+?>
