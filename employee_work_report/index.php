@@ -10,7 +10,17 @@ $page_slug  = 'work_report';
 ob_start();
 include 'header.php';
 $_headerRaw = ob_get_clean();
-$page_head = preg_replace('/<\/?head>/i', '', $_headerRaw);
+// Strip <head> and </head> tags, keep inner content
+$_headerRaw = preg_replace('/<head[^>]*>/i', '', $_headerRaw);
+$_headerRaw = preg_replace('/<\/head>/i', '', $_headerRaw);
+// Remove <meta> and <title> tags (dashboard layout provides those)
+$_headerRaw = preg_replace('/<meta[^>]*>/i', '', $_headerRaw);
+$_headerRaw = preg_replace('/<title>.*?<\/title>/i', '', $_headerRaw);
+$page_head = $_headerRaw . '<style>
+    /* Adjust for dashboard content area */
+    .dashboard-body .db-main { padding: 0; }
+    .dashboard-body .db-content { padding: 15px 20px; }
+</style>';
 
 // LANGUAGE CONTROLLER
 if (isset($_GET["lang"])) {

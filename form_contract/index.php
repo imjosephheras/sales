@@ -2,16 +2,8 @@
 require_once __DIR__ . '/../app/bootstrap.php';
 Middleware::module('contracts');
 
-$page_title = 'Form for Contract';
 $page_icon  = 'fas fa-file-contract';
 $page_slug  = 'contracts';
-
-// Capture header.php CSS content (it outputs <head>...</head>)
-ob_start();
-include 'header.php';
-$_headerRaw = ob_get_clean();
-// Strip <head> and </head> tags, keep inner content
-$page_head = preg_replace('/<\/?head>/i', '', $_headerRaw);
 
 // LANGUAGE CONTROLLER
 if (isset($_GET["lang"])) {
@@ -19,6 +11,29 @@ if (isset($_GET["lang"])) {
 }
 
 $lang = $_SESSION["lang"] ?? "en";
+
+$page_title = ($lang=='en') ? 'Registration Form' : 'Formulario de Registro';
+
+// Capture header.php CSS content (it outputs <head>...</head>)
+ob_start();
+include 'header.php';
+$_headerRaw = ob_get_clean();
+// Strip <head> and </head> tags, keep inner content
+$_headerRaw = preg_replace('/<head[^>]*>/i', '', $_headerRaw);
+$_headerRaw = preg_replace('/<\/head>/i', '', $_headerRaw);
+// Remove <meta> and <title> tags (dashboard layout provides those)
+$_headerRaw = preg_replace('/<meta[^>]*>/i', '', $_headerRaw);
+$_headerRaw = preg_replace('/<title>.*?<\/title>/i', '', $_headerRaw);
+$page_head = $_headerRaw . '<style>
+    /* Adjust for dashboard content area */
+    .dashboard-body .top-navbar { position: sticky; top: 0; }
+    .dashboard-body .split-screen-wrapper { height: calc(100vh - 70px); }
+    .dashboard-body .form-side { height: calc(100vh - 70px); }
+    .dashboard-body .pending-forms-sidebar { height: calc(100vh - 70px); }
+    .dashboard-body .calculator-side { height: calc(100vh - 70px); }
+    .dashboard-body .db-main { padding: 0; }
+    .dashboard-body .db-content { padding: 0; }
+</style>';
 
 ob_start();
 ?>
@@ -179,103 +194,7 @@ ob_start();
 }
 </style>
 
-<!-- 🌍 LANGUAGE SWITCH -->
-<div class="lang-switch">
-    <a href="?lang=en" class="<?= $lang == 'en' ? 'active' : '' ?>">🇺🇸 EN</a>
-    <a href="?lang=es" class="<?= $lang == 'es' ? 'active' : '' ?>">🇪🇸 ES</a>
-</div>
-
 <style>
-.home-btn {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    background: white;
-    padding: 10px 18px;
-    border-radius: 50px;
-    text-decoration: none;
-    color: #001f54;
-    font-size: 0.9rem;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
-    z-index: 99999;
-}
-
-.home-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    background: #f0f4f8;
-}
-
-.calculator-btn {
-    position: fixed;
-    top: 20px;
-    right: 180px;
-    background: white;
-    padding: 10px 14px;
-    border-radius: 50px;
-    border: none;
-    color: #001f54;
-    font-size: 0.9rem;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
-    z-index: 99999;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.calculator-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    background: #28a745;
-    color: white;
-}
-
-.calculator-btn.active {
-    background: #28a745;
-    color: white;
-}
-
-.lang-switch {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    gap: 12px;
-    z-index: 99999;
-}
-
-.lang-switch a {
-    background: white;
-    padding: 10px 18px;
-    border-radius: 50px;
-    text-decoration: none;
-    color: #001f54;
-    font-size: 0.9rem;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
-}
-
-.lang-switch a:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    background: #f0f4f8;
-}
-
-.lang-switch .active {
-    background: #c70734;
-    color: white;
-}
-
-.lang-switch .active:hover {
-    background: #a30000;
-}
-
 /* ========================================= */
 /* PENDING FORMS SIDEBAR */
 /* ========================================= */
