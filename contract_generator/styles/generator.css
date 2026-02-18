@@ -1376,6 +1376,153 @@ body {
 }
 
 /* ============================================
+   EDITABLE SERVICE TABLES (Sections 18, 19, 20)
+   ============================================ */
+
+.editor-services-table-wrapper {
+  background: var(--bg-light);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.editor-services-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.editor-services-table-wrapper::-webkit-scrollbar-track {
+  background: var(--bg-white);
+  border-radius: 4px;
+}
+
+.editor-services-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.editor-services-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.editor-services-table thead th {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.5rem 0.4rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.editor-services-table thead th:first-child {
+  border-radius: 6px 0 0 0;
+}
+
+.editor-services-table thead th:last-child {
+  border-radius: 0 6px 0 0;
+}
+
+.editor-services-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.15s;
+}
+
+.editor-services-table tbody tr:hover {
+  background-color: #f0f4ff;
+}
+
+.editor-services-table tbody td {
+  padding: 0.3rem 0.25rem;
+}
+
+.svc-input {
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  background: white;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.svc-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 31, 84, 0.1);
+}
+
+.svc-input[readonly] {
+  background: var(--bg-light);
+  color: var(--text-gray);
+  cursor: default;
+}
+
+.svc-subtotal,
+.staff-base,
+.staff-increase,
+.staff-bill {
+  text-align: right;
+}
+
+.btn-remove-row {
+  background: none;
+  border: none;
+  color: var(--danger-color);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  line-height: 1;
+}
+
+.btn-remove-row:hover {
+  background: rgba(220, 53, 69, 0.1);
+}
+
+.btn-add-service-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: transparent;
+  border: 1px dashed var(--primary-color);
+  color: var(--primary-color);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-add-service-row:hover {
+  background: rgba(0, 31, 84, 0.05);
+  border-style: solid;
+}
+
+.btn-add-service-row i {
+  font-size: 0.75rem;
+}
+
+/* Totals fields styling */
+.totals-field {
+  font-weight: 600;
+  background: var(--bg-light) !important;
+}
+
+.grand-total-field {
+  color: var(--primary-color) !important;
+  font-size: 1rem !important;
+}
+
+/* ============================================
    PREVIEW PANEL (COLUMNA DERECHA)
    ============================================ */
 

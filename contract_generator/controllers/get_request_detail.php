@@ -51,6 +51,16 @@ try {
     $stmtSections->execute([$id]);
     $scopeSections = $stmtSections->fetchAll(PDO::FETCH_ASSOC);
 
+    // Get contract staff positions
+    $stmtStaff = $pdo->prepare("SELECT * FROM contract_staff WHERE form_id = ? ORDER BY id ASC");
+    $stmtStaff->execute([$id]);
+    $contractStaff = $stmtStaff->fetchAll(PDO::FETCH_ASSOC);
+
+    // Derive active section flags from actual data presence
+    $includeJanitorial = count($janitorialServices) > 0 ? 'Yes' : 'No';
+    $includeKitchen = (count($kitchenServices) > 0 || count($hoodVentServices) > 0) ? 'Yes' : 'No';
+    $includeStaff = ($form['include_staff'] === 'Yes' || count($contractStaff) > 0) ? 'Yes' : 'No';
+
     // Map form fields to the response format expected by the contract generator frontend
     $data = [
         'id' => $form['form_id'],
@@ -73,7 +83,9 @@ try {
         'Contract_Duration' => $form['contract_duration'],
         'Seller' => $form['seller'],
         'PriceInput' => $form['total_cost'],
-        'includeStaff' => $form['include_staff'],
+        'includeJanitorial' => $includeJanitorial,
+        'includeKitchen' => $includeKitchen,
+        'includeStaff' => $includeStaff,
         'inflationAdjustment' => $form['inflation_adjustment'],
         'totalArea' => $form['total_area'],
         'buildingsIncluded' => $form['buildings_included'],
@@ -96,6 +108,7 @@ try {
         'janitorial_services' => $janitorialServices,
         'kitchen_services' => $kitchenServices,
         'hood_vent_services' => $hoodVentServices,
+        'contract_staff' => $contractStaff,
         'scope_sections' => $scopeSections,
     ];
 
