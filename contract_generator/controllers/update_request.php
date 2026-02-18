@@ -101,13 +101,15 @@ try {
 
         // Insert updated rows
         $insertStmt = $pdo->prepare("
-            INSERT INTO contract_items (form_id, category, service_type, service_time, frequency, description, subtotal, position)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO contract_items (form_id, category, service_name, service_type, service_time, frequency, description, subtotal, position)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         foreach ($janitorialItems as $pos => $item) {
+            $serviceName = $item['service_name'] ?? $item['service_type'] ?? null;
             $insertStmt->execute([
                 $id,
                 'janitorial',
+                $serviceName,
                 $item['service_type'] ?? null,
                 $item['service_time'] ?? null,
                 $item['frequency'] ?? null,
@@ -125,14 +127,16 @@ try {
 
         // Insert updated rows (preserving original category)
         $insertStmt = $pdo->prepare("
-            INSERT INTO contract_items (form_id, category, service_type, service_time, frequency, description, subtotal, position)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO contract_items (form_id, category, service_name, service_type, service_time, frequency, description, subtotal, position)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         foreach ($kitchenItems as $pos => $item) {
             $category = isset($item['category']) && $item['category'] === 'hood_vent' ? 'hood_vent' : 'kitchen';
+            $serviceName = $item['service_name'] ?? $item['service_type'] ?? null;
             $insertStmt->execute([
                 $id,
                 $category,
+                $serviceName,
                 $item['service_type'] ?? null,
                 $item['service_time'] ?? null,
                 $item['frequency'] ?? null,
