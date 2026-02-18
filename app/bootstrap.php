@@ -171,14 +171,20 @@ if ((int)$modulesCount === 0) {
     ");
 }
 
-// ─── Fix contract_generator URL if it was seeded with duplicate path ──
+// ─── Ensure contract_generator URL is always correct ─────────────────
 try {
     $pdo->exec("
         UPDATE `modules`
         SET `url` = 'contract_generator/'
         WHERE `slug` = 'generator'
-          AND `url` = 'contract_generator/contract_generator/'
+          AND `url` != 'contract_generator/'
     ");
+    // Clear session-cached modules so the corrected URL takes effect
+    foreach (array_keys($_SESSION ?? []) as $k) {
+        if (str_starts_with($k, 'gate_modules_')) {
+            unset($_SESSION[$k]);
+        }
+    }
 } catch (PDOException $e) {
     // skip if table not ready
 }
