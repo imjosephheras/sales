@@ -413,7 +413,14 @@
     function saveRequest() {
         console.log('Saving request...');
 
+        const requestId = document.getElementById('request_id').value;
+        if (!requestId || requestId.trim() === '') {
+            showNotification('❌ No active request selected. Please select a task before saving.', 'error');
+            return;
+        }
+
         const formData = getFormData();
+        formData.id = requestId;
 
         fetch('controllers/update_request.php', {
             method: 'POST',
