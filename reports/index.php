@@ -246,20 +246,20 @@ function formatCurrency($value) {
         }
 
         .table-wrapper {
-            overflow-x: auto;
+            overflow: auto;
             max-height: calc(100vh - 220px);
         }
 
         /* Modern Spreadsheet Table */
         .data-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             font-size: 0.85rem;
         }
 
-        .data-table thead {
+        .data-table thead th {
             position: sticky;
-            top: 0;
             z-index: 10;
         }
 
@@ -271,23 +271,22 @@ function formatCurrency($value) {
             color: #1e293b;
             border-bottom: 2px solid #e2e8f0;
             white-space: nowrap;
-            position: relative;
         }
 
         .data-table th:hover {
             background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
         }
 
-        /* Filter row */
+        /* Header row - sticks at the top */
         .data-table thead tr:first-child th {
             top: 0;
         }
 
+        /* Filter row - sticks below the header row */
         .data-table .filter-row th {
             background: #f1f5f9;
             padding: 6px 8px;
             border-bottom: 2px solid #003080;
-            top: 48px;
         }
 
         .column-filter {
@@ -888,6 +887,21 @@ function formatCurrency($value) {
             currentTh = null;
             document.body.style.cursor = '';
         });
+
+        // Dynamically set the filter row top offset based on actual header row height
+        function updateFilterRowOffset() {
+            const table = document.getElementById('dataTable');
+            if (!table) return;
+            const headerRow = table.querySelector('thead tr:first-child');
+            const filterRow = table.querySelector('thead .filter-row');
+            if (!headerRow || !filterRow) return;
+            const headerHeight = headerRow.getBoundingClientRect().height;
+            filterRow.querySelectorAll('th').forEach(function(th) {
+                th.style.top = headerHeight + 'px';
+            });
+        }
+        updateFilterRowOffset();
+        window.addEventListener('resize', updateFilterRowOffset);
     </script>
 </body>
 </html>
