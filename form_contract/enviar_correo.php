@@ -174,23 +174,14 @@ $photos = $_FILES['photos'] ?? null;
 $uploaded_photos = [];
 
 if (!empty($photos) && isset($photos['tmp_name'])) {
+    require_once __DIR__ . '/../app/Core/FileStorageService.php';
+    $storage = new FileStorageService();
+    $uploadResults = $storage->uploadMultiple($photos, 'form_photos', 'images');
 
-    for ($i = 0; $i < count($photos['tmp_name']); $i++) {
-
-        if ($photos['error'][$i] === UPLOAD_ERR_OK) {
-
-            $tmp_name = $photos['tmp_name'][$i];
-            $name     = time() . "_" . basename($photos['name'][$i]);
-
-            $destination = __DIR__ . "/Uploads/" . $name;
-
-            if (!is_dir(__DIR__ . "/Uploads/")) {
-                mkdir(__DIR__ . "/Uploads/", 0777, true);
-            }
-
-            if (move_uploaded_file($tmp_name, $destination)) {
-                $uploaded_photos[] = $destination;
-            }
+    foreach ($uploadResults['uploaded'] as $photo) {
+        $fullPath = $storage->getFullPath($photo['path']);
+        if ($fullPath) {
+            $uploaded_photos[] = $fullPath;
         }
     }
 }
