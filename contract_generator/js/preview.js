@@ -104,6 +104,9 @@
                     <p class="price-display"><strong>Total Price:</strong> $${formatPrice(data.Total_Price)} ${data.Currency || 'USD'}</p>
                 </div>
 
+                <!-- SERVICE REPORT DYNAMIC SECTIONS -->
+                ${renderServiceReportSections(data)}
+
                 <div class="doc-footer">
                     <p><em>This is a placeholder template. Final template will be provided.</em></p>
                 </div>
@@ -642,6 +645,9 @@
                         <p>${escapeHtml(data.Additional_Comments).replace(/\n/g, '<br>')}</p>
                     </div>
                 </div>` : ''}
+
+                <!-- SERVICE REPORT DYNAMIC SECTIONS -->
+                ${renderServiceReportSections(data)}
 
                 <!-- PAGE SEPARATOR -->
                 <div class="jwo-footer-wrapper">
@@ -1327,6 +1333,123 @@
                 </div>
             </div>
         `;
+    }
+
+    // ========================================
+    // SERVICE REPORT DYNAMIC SECTIONS RENDERER
+    // ========================================
+
+    /**
+     * renderServiceReportSections(data)
+     * Generates HTML for the 5 dynamic service-report sections
+     * (Scope of Work, Initial Condition, Service Performed,
+     *  Post-Service Condition, Technical Data) based on the
+     *  _serviceConfig attached to the data by editor.js.
+     *
+     * Returns an HTML string or '' if no config is present.
+     */
+    function renderServiceReportSections(data) {
+        var cfg = data._serviceConfig;
+        if (!cfg) return '';
+
+        var html = '';
+
+        // Styles scoped to the service-report preview block
+        html += '<style>';
+        html += '.sr-preview-block { margin-top: 20px; }';
+        html += '.sr-title { background: #001f54; color: #fff; font-weight: bold; padding: 6px 10px; font-size: 10pt; text-transform: uppercase; margin-bottom: 0; }';
+        html += '.sr-section { border: 1px solid #ddd; margin-bottom: 8px; border-radius: 2px; overflow: hidden; }';
+        html += '.sr-section-header { background: #001f54; color: #fff; padding: 4px 8px; font-weight: bold; font-size: 9pt; }';
+        html += '.sr-section-content { padding: 6px 10px; background: #fafafa; font-size: 9pt; }';
+        html += '.sr-checkbox-item { display: block; margin: 2px 0; padding-left: 16px; position: relative; font-size: 9pt; }';
+        html += '.sr-checkbox-item:before { content: "\\2610"; position: absolute; left: 0; font-size: 11px; }';
+        html += '.sr-two-col { display: flex; gap: 10px; }';
+        html += '.sr-two-col .sr-col { flex: 1; }';
+        html += '.sr-checklist-table { width: 100%; border-collapse: collapse; font-size: 9pt; }';
+        html += '.sr-checklist-table th, .sr-checklist-table td { border: 1px solid #ddd; padding: 3px 5px; text-align: left; }';
+        html += '.sr-checklist-table th { background: #e8e8e8; color: #001f54; font-weight: bold; }';
+        html += '.sr-checklist-table td.center { text-align: center; width: 30px; }';
+        html += '.sr-checklist-table .sr-subheader { background: #d0e4f7; font-weight: bold; color: #001f54; }';
+        html += '.sr-tech-table { width: 100%; border-collapse: collapse; }';
+        html += '.sr-tech-table td { padding: 3px 6px; font-size: 9pt; border-bottom: 1px solid #eee; }';
+        html += '.sr-tech-label { font-weight: bold; color: #001f54; width: 40%; }';
+        html += '.sr-tech-value { border-bottom: 1px dotted #999; }';
+        html += '</style>';
+
+        html += '<div class="sr-preview-block">';
+
+        // Report title
+        html += '<div class="sr-title">' + escapeHtml(cfg.title || 'SERVICE REPORT').toUpperCase() + '</div>';
+
+        // -- Scope of Work --
+        if (cfg.scope_of_work && cfg.scope_of_work.length > 0) {
+            var mid = Math.ceil(cfg.scope_of_work.length / 2);
+            var col1 = cfg.scope_of_work.slice(0, mid);
+            var col2 = cfg.scope_of_work.slice(mid);
+            html += '<div class="sr-section">';
+            html += '<div class="sr-section-header">2. SYSTEM / AREA SERVICED</div>';
+            html += '<div class="sr-section-content"><div class="sr-two-col"><div class="sr-col">';
+            col1.forEach(function(item) { html += '<div class="sr-checkbox-item">' + escapeHtml(item) + '</div>'; });
+            html += '</div><div class="sr-col">';
+            col2.forEach(function(item) { html += '<div class="sr-checkbox-item">' + escapeHtml(item) + '</div>'; });
+            html += '</div></div></div></div>';
+        }
+
+        // -- Initial Condition / Inspection --
+        if (cfg.initial_condition && cfg.initial_condition.length > 0) {
+            html += '<div class="sr-section">';
+            html += '<div class="sr-section-header">3. INITIAL CONDITION / INSPECTION</div>';
+            html += '<div class="sr-section-content">';
+            html += '<table class="sr-checklist-table"><thead><tr><th>Element</th><th class="center">Yes</th><th class="center">No</th><th class="center">N/A</th><th>Comment</th></tr></thead><tbody>';
+            html += '<tr><td colspan="5" class="sr-subheader">' + escapeHtml(cfg.initial_condition_header || 'BEFORE SERVICE') + '</td></tr>';
+            cfg.initial_condition.forEach(function(item) {
+                html += '<tr><td>' + escapeHtml(item) + '</td><td class="center">&#9744;</td><td class="center">&#9744;</td><td class="center">&#9744;</td><td></td></tr>';
+            });
+            html += '</tbody></table></div></div>';
+        }
+
+        // -- Service Performed --
+        if (cfg.service_performed && cfg.service_performed.length > 0) {
+            var spMid = Math.ceil(cfg.service_performed.length / 2);
+            var spCol1 = cfg.service_performed.slice(0, spMid);
+            var spCol2 = cfg.service_performed.slice(spMid);
+            html += '<div class="sr-section">';
+            html += '<div class="sr-section-header">4. ' + escapeHtml(cfg.service_performed_header || 'SERVICE PERFORMED') + '</div>';
+            html += '<div class="sr-section-content"><div class="sr-two-col"><div class="sr-col">';
+            spCol1.forEach(function(item) { html += '<div class="sr-checkbox-item">' + escapeHtml(item) + '</div>'; });
+            html += '</div><div class="sr-col">';
+            spCol2.forEach(function(item) { html += '<div class="sr-checkbox-item">' + escapeHtml(item) + '</div>'; });
+            html += '</div></div></div></div>';
+        }
+
+        // -- Post-Service Condition --
+        if (cfg.post_service_condition && cfg.post_service_condition.length > 0) {
+            var psMid = Math.ceil(cfg.post_service_condition.length / 2);
+            var psCol1 = cfg.post_service_condition.slice(0, psMid);
+            var psCol2 = cfg.post_service_condition.slice(psMid);
+            html += '<div class="sr-section">';
+            html += '<div class="sr-section-header">5. ' + escapeHtml(cfg.post_service_header || 'POST-SERVICE CONDITION') + '</div>';
+            html += '<div class="sr-section-content"><div class="sr-two-col"><div class="sr-col">';
+            psCol1.forEach(function(item) { html += '<div class="sr-checkbox-item">' + escapeHtml(item) + '</div>'; });
+            html += '</div><div class="sr-col">';
+            psCol2.forEach(function(item) { html += '<div class="sr-checkbox-item">' + escapeHtml(item) + '</div>'; });
+            html += '</div></div></div></div>';
+        }
+
+        // -- Technical Data --
+        if (cfg.technical_data && cfg.technical_data.length > 0) {
+            html += '<div class="sr-section">';
+            html += '<div class="sr-section-header">6. TECHNICAL DATA (If Applicable)</div>';
+            html += '<div class="sr-section-content"><table class="sr-tech-table">';
+            cfg.technical_data.forEach(function(field) {
+                var placeholder = field.type === 'number' ? '______' : '__________________';
+                html += '<tr><td class="sr-tech-label">' + escapeHtml(field.label) + ':</td><td class="sr-tech-value">' + placeholder + '</td></tr>';
+            });
+            html += '</table></div></div>';
+        }
+
+        html += '</div>'; // close sr-preview-block
+        return html;
     }
 
     // ========================================

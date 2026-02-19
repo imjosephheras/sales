@@ -18,6 +18,14 @@
 
     let currentRequestData = null;
 
+    /**
+     * SERVICE REPORT CONFIG CACHE
+     * Loaded once from get_service_config.php and cached in memory.
+     * Each key maps to the full section config (title, scope_of_work,
+     * initial_condition, service_performed, post_service_condition, technical_data).
+     */
+    var serviceReportConfig = null;
+
     // ========================================
     // INICIALIZACIÓN
     // ========================================
@@ -78,7 +86,104 @@
         if (btnAddKit) btnAddKit.addEventListener('click', function() { addServiceRow('kitchen'); });
         var btnAddStaff = document.getElementById('btn-add-staff');
         if (btnAddStaff) btnAddStaff.addEventListener('click', function() { addStaffRow(); });
+
+        // ========================================
+        // REPORT TYPE SELECTOR - Toggle buttons
+        // ========================================
+        loadServiceReportConfig();
+        initReportTypeSelector();
     });
+
+    // ========================================
+    // LOAD SERVICE REPORT CONFIG (once)
+    // ========================================
+
+    function loadServiceReportConfig() {
+        fetch('controllers/get_service_config.php')
+            .then(function(response) { return response.json(); })
+            .then(function(result) {
+                if (result.success) {
+                    serviceReportConfig = result.data;
+                    console.log('Service report config loaded:', Object.keys(serviceReportConfig));
+                    // Expose globally so preview.js can access it
+                    window.ServiceReportConfig = serviceReportConfig;
+                } else {
+                    console.error('Error loading service config:', result.error);
+                }
+            })
+            .catch(function(error) {
+                console.error('Failed to load service config:', error);
+            });
+    }
+
+    // ========================================
+    // REPORT TYPE SELECTOR - Init & handlers
+    // ========================================
+
+    function initReportTypeSelector() {
+        var buttons = document.querySelectorAll('#report-type-options .report-type-btn');
+        buttons.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var serviceKey = btn.dataset.serviceKey;
+                selectReportType(serviceKey);
+            });
+        });
+    }
+
+    /**
+     * selectReportType(key)
+     * Called when the user clicks a report-type toggle button.
+     * - Highlights the active button
+     * - Syncs the hidden Service_Type <select>
+     * - Updates the document title
+     * - Triggers preview update
+     */
+    function selectReportType(serviceKey) {
+        // 1. Highlight the active button
+        var buttons = document.querySelectorAll('#report-type-options .report-type-btn');
+        buttons.forEach(function(btn) {
+            if (btn.dataset.serviceKey === serviceKey) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // 2. Sync the Service_Type dropdown (hidden inside the form)
+        var serviceTypeSelect = document.getElementById('Service_Type');
+        if (serviceTypeSelect) {
+            serviceTypeSelect.value = serviceKey;
+        }
+
+        // 3. Update the document title to reflect the service type
+        var cfg = serviceReportConfig ? serviceReportConfig[serviceKey] : null;
+        var title = cfg ? cfg.title : serviceKey;
+        var companyName = document.getElementById('Company_Name');
+        var companyLabel = (companyName && companyName.value) ? companyName.value : '';
+        var docTitleEl = document.getElementById('doc-title');
+        if (docTitleEl) {
+            docTitleEl.textContent = companyLabel ? companyLabel + ' — ' + title : title;
+        }
+
+        // 4. Trigger preview update so the live preview renders the new service type
+        updatePreview();
+    }
+
+    /**
+     * syncReportTypeSelectorFromValue(serviceKey)
+     * Utility: highlight the correct button when loading existing data.
+     */
+    function syncReportTypeSelectorFromValue(serviceKey) {
+        if (!serviceKey) return;
+        var buttons = document.querySelectorAll('#report-type-options .report-type-btn');
+        buttons.forEach(function(btn) {
+            if (btn.dataset.serviceKey === serviceKey) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
 
     // ========================================
     // CARGAR DATOS DE SOLICITUD
@@ -235,6 +340,10 @@
             }
         });
 
+        // Clear report type selector
+        var rtButtons = document.querySelectorAll('#report-type-options .report-type-btn');
+        rtButtons.forEach(function(btn) { btn.classList.remove('active'); });
+
         // Hide all Section 4 blocks and clear table bodies
         var janitorialSection = document.getElementById('janitorial-section');
         var kitchenSection = document.getElementById('kitchen-section');
@@ -296,8 +405,19 @@
         setValue('Site_Observation', data.Site_Observation);
         setValue('Additional_Comments', data.Additional_Comments);
 
-        // Update header
-        document.getElementById('doc-title').textContent = data.Company_Name || 'Untitled Request';
+        // Sync report type selector bar
+        syncReportTypeSelectorFromValue(data.Service_Type);
+
+        // Update header - show company name with service type title
+        var serviceTitle = '';
+        if (serviceReportConfig && data.Service_Type && serviceReportConfig[data.Service_Type]) {
+            serviceTitle = serviceReportConfig[data.Service_Type].title;
+        }
+        var headerLabel = data.Company_Name || 'Untitled Request';
+        if (serviceTitle) {
+            headerLabel = headerLabel + ' — ' + serviceTitle;
+        }
+        document.getElementById('doc-title').textContent = headerLabel;
         document.getElementById('doc-number').textContent = data.docnum || 'Not generated yet';
 
         // Update badge de tipo de documento en preview panel
@@ -941,6 +1061,11 @@
                         formData[field] = currentRequestData[field];
                     }
                 });
+            }
+
+            // Attach service config for the selected type so preview can render dynamic sections
+            if (serviceReportConfig && formData.Service_Type && serviceReportConfig[formData.Service_Type]) {
+                formData._serviceConfig = serviceReportConfig[formData.Service_Type];
             }
 
             window.PreviewModule.render(formData);
