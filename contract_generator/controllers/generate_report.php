@@ -3,6 +3,11 @@
  * GENERATE REPORT CONTROLLER
  * Generates printable reports for different service types.
  * Reads from forms + contract_items (single source of truth).
+ *
+ * Supports two modes:
+ *   1. Legacy contract reports: ?type=hood_vent|kitchen|janitorial|staff|summary&id=123
+ *   2. Universal service reports: ?type=service_report&service_type=kitchen_exhaust_cleaning&id=123
+ *      (Redirects to generate_service_report.php)
  */
 
 require_once '../config/db_config.php';
@@ -13,6 +18,17 @@ $formId = $_GET['id'] ?? null;
 
 if (!$formId) {
     die('Error: Form ID is required');
+}
+
+// If requesting a universal service report, delegate to the universal controller
+if ($reportType === 'service_report') {
+    $serviceType = $_GET['service_type'] ?? null;
+    if (!$serviceType) {
+        die('Error: service_type parameter is required for service reports');
+    }
+    $preview = isset($_GET['preview']) ? '&preview=' . $_GET['preview'] : '';
+    header('Location: generate_service_report.php?id=' . urlencode($formId) . '&service_type=' . urlencode($serviceType) . $preview);
+    exit;
 }
 
 if (!in_array($reportType, ['hood_vent', 'kitchen', 'janitorial', 'staff', 'summary'])) {
