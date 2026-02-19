@@ -20,13 +20,23 @@ $_topbar_lang  = $page_lang ?? null; // Current language code ('en', 'es') or nu
 $_topbar_user    = Auth::user();
 $_topbar_name    = $_topbar_user['full_name'] ?? 'User';
 $_topbar_role_id = (int)($_topbar_user['role_id'] ?? 0);
+$_topbar_user_id = (int)($_topbar_user['user_id'] ?? 0);
 
-// Resolve role name from DB
+// Resolve role name and photo from DB
 $_topbar_role_name = '';
+$_topbar_photo     = null;
 if (isset($pdo)) {
     $_trStmt = $pdo->prepare("SELECT name FROM roles WHERE role_id = :rid LIMIT 1");
     $_trStmt->execute([':rid' => $_topbar_role_id]);
     $_topbar_role_name = $_trStmt->fetchColumn() ?: '';
+
+    // Fetch user photo
+    $_tpStmt = $pdo->prepare("SELECT photo FROM users WHERE user_id = :uid LIMIT 1");
+    $_tpStmt->execute([':uid' => $_topbar_user_id]);
+    $_topbar_photo_file = $_tpStmt->fetchColumn() ?: null;
+    if ($_topbar_photo_file) {
+        $_topbar_photo = url('/storage/uploads/profile_photos/' . $_topbar_photo_file);
+    }
 }
 
 // User initials for avatar
@@ -58,13 +68,19 @@ if (count($_topbar_name_parts) > 1) {
         </div>
         <?php endif; ?>
         <div class="db-topbar-user">
-            <div class="db-topbar-user-avatar">
-                <?= htmlspecialchars($_topbar_initials, ENT_QUOTES, 'UTF-8') ?>
-            </div>
-            <div class="db-topbar-user-info">
-                <span class="db-topbar-user-name"><?= htmlspecialchars($_topbar_name, ENT_QUOTES, 'UTF-8') ?></span>
-                <span class="db-topbar-user-role"><?= htmlspecialchars($_topbar_role_name, ENT_QUOTES, 'UTF-8') ?></span>
-            </div>
+            <a href="<?= url('/profile/') ?>" class="db-topbar-profile-link" title="Mi Perfil">
+                <div class="db-topbar-user-avatar">
+                    <?php if ($_topbar_photo): ?>
+                        <img src="<?= htmlspecialchars($_topbar_photo, ENT_QUOTES, 'UTF-8') ?>" alt="Avatar">
+                    <?php else: ?>
+                        <?= htmlspecialchars($_topbar_initials, ENT_QUOTES, 'UTF-8') ?>
+                    <?php endif; ?>
+                </div>
+                <div class="db-topbar-user-info">
+                    <span class="db-topbar-user-name"><?= htmlspecialchars($_topbar_name, ENT_QUOTES, 'UTF-8') ?></span>
+                    <span class="db-topbar-user-role"><?= htmlspecialchars($_topbar_role_name, ENT_QUOTES, 'UTF-8') ?></span>
+                </div>
+            </a>
             <a href="<?= url('/public/index.php?action=logout') ?>" class="db-topbar-logout" title="Cerrar Sesión">
                 <i class="fas fa-sign-out-alt"></i>
             </a>

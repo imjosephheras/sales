@@ -15,13 +15,23 @@ $_sidebar_user    = Auth::user();
 $_sidebar_modules = Gate::modules();
 $_sidebar_name    = $_sidebar_user['full_name'] ?? 'User';
 $_sidebar_role_id = (int)($_sidebar_user['role_id'] ?? 0);
+$_sidebar_user_id = (int)($_sidebar_user['user_id'] ?? 0);
 
 // Resolve role name from session or DB
 $_sidebar_role_name = '';
+$_sidebar_photo     = null;
 if (isset($pdo)) {
     $_rStmt = $pdo->prepare("SELECT name FROM roles WHERE role_id = :rid LIMIT 1");
     $_rStmt->execute([':rid' => $_sidebar_role_id]);
     $_sidebar_role_name = $_rStmt->fetchColumn() ?: '';
+
+    // Fetch user photo
+    $_spStmt = $pdo->prepare("SELECT photo FROM users WHERE user_id = :uid LIMIT 1");
+    $_spStmt->execute([':uid' => $_sidebar_user_id]);
+    $_sidebar_photo_file = $_spStmt->fetchColumn() ?: null;
+    if ($_sidebar_photo_file) {
+        $_sidebar_photo = url('/storage/uploads/profile_photos/' . $_sidebar_photo_file);
+    }
 }
 
 // User initials for avatar
@@ -90,11 +100,17 @@ $_current_slug = $page_slug ?? '';
     <!-- Footer / User Info -->
     <div class="db-sidebar-footer">
         <div class="db-sidebar-user">
-            <div class="db-sidebar-user-avatar">
-                <?= htmlspecialchars($_initials, ENT_QUOTES, 'UTF-8') ?>
-            </div>
+            <a href="<?= url('/profile/') ?>" class="db-sidebar-user-avatar" title="Mi Perfil" style="text-decoration:none;color:#fff;">
+                <?php if ($_sidebar_photo): ?>
+                    <img src="<?= htmlspecialchars($_sidebar_photo, ENT_QUOTES, 'UTF-8') ?>" alt="Avatar">
+                <?php else: ?>
+                    <?= htmlspecialchars($_initials, ENT_QUOTES, 'UTF-8') ?>
+                <?php endif; ?>
+            </a>
             <div class="db-sidebar-user-info">
-                <div class="db-sidebar-user-name"><?= htmlspecialchars($_sidebar_name, ENT_QUOTES, 'UTF-8') ?></div>
+                <a href="<?= url('/profile/') ?>" style="text-decoration:none;">
+                    <div class="db-sidebar-user-name"><?= htmlspecialchars($_sidebar_name, ENT_QUOTES, 'UTF-8') ?></div>
+                </a>
                 <div class="db-sidebar-user-role"><?= htmlspecialchars($_sidebar_role_name, ENT_QUOTES, 'UTF-8') ?></div>
             </div>
             <a href="<?= url('/public/index.php?action=logout') ?>" class="db-sidebar-logout" title="Cerrar Sesion">
