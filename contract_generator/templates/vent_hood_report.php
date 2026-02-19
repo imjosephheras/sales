@@ -1,10 +1,26 @@
 <?php
 /**
- * VENT HOOD SERVICE REPORT TEMPLATE
- * Template for PDF generation of Vent Hood service reports
+ * UNIVERSAL SERVICE REPORT - PDF TEMPLATE
+ * =========================================
+ * Structural skeleton for PDF generation.
+ * Contains 11 mandatory sections with empty placeholders
+ * ready for dynamic configuration injection per service type.
+ *
+ * Sections:
+ *  1. Service Report / Work Order
+ *  2. Client Information
+ *  3. Service Category
+ *  4. Scope of Work
+ *  5. Initial Condition / Inspection
+ *  6. Service Performed
+ *  7. Post-Service Condition
+ *  8. Technical Findings & Observations
+ *  9. Recommendations
+ * 10. Parts / Materials Used or Required
+ * 11. Client Acknowledgement & Signatures
  */
 
-// Company info - Fixed values
+// Company info
 $company_name = "PRIME FACILITY SERVICES GROUP";
 $company_address = "8303 Westglen Dr ~ Houston, TX 77063";
 $company_phone = "713-338-2553";
@@ -23,23 +39,19 @@ if (file_exists($logo_path)) {
     $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_path));
 }
 
-// Get data from request
+// Data from request
 $work_order = $data['docnum'] ?? '';
-$service_date = date('m/d/Y');
-$next_service_date = '';
-$frequency = '';
-
-// Client info from database
 $client_name = $data['Company_Name'] ?? '';
 $client_address = $data['Company_Address'] ?? '';
 $client_contact = $data['Client_Name'] ?? '';
 $client_email = $data['Email'] ?? '';
+$client_phone = $data['Number_Phone'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vent Hood Service Report - <?php echo htmlspecialchars($client_name); ?></title>
+    <title>Universal Service Report - <?php echo htmlspecialchars($client_name); ?></title>
     <style>
         @page {
             margin: 35mm 18mm 32mm 18mm;
@@ -55,7 +67,9 @@ $client_email = $data['Email'] ?? '';
             padding: 0;
         }
 
-        /* Header - fixed position, repeats on every page */
+        /* =============================================
+           HEADER - fixed, repeats on every page
+           ============================================= */
         .header-wrapper {
             position: fixed;
             top: -30mm;
@@ -99,12 +113,41 @@ $client_email = $data['Email'] ?? '';
             letter-spacing: 0.5px;
         }
 
-        .report-subtitle {
-            font-size: 10px;
-            color: #666;
-            margin-top: 2px;
+        /* =============================================
+           FOOTER - fixed, repeats on every page
+           ============================================= */
+        .footer-wrapper {
+            position: fixed;
+            bottom: -27mm;
+            left: 0;
+            right: 0;
+            overflow: visible;
         }
 
+        .footer-top {
+            background-color: #A30000;
+            color: white;
+            text-align: center;
+            padding: 3px 10px;
+            font-size: 7pt;
+        }
+
+        .footer-bottom {
+            background-color: #CC0000;
+            color: white;
+            text-align: center;
+            padding: 8px 10px;
+            font-size: 8pt;
+        }
+
+        .footer-bottom a {
+            color: white;
+            text-decoration: none;
+        }
+
+        /* =============================================
+           SECTIONS
+           ============================================= */
         .section {
             margin-bottom: 3px;
             border: 1px solid #ddd;
@@ -126,6 +169,9 @@ $client_email = $data['Email'] ?? '';
             background: #fafafa;
         }
 
+        /* =============================================
+           INFO GRID
+           ============================================= */
         .info-grid {
             display: table;
             width: 100%;
@@ -152,6 +198,9 @@ $client_email = $data['Email'] ?? '';
             color: #333;
         }
 
+        /* =============================================
+           LAYOUT HELPERS
+           ============================================= */
         .two-columns {
             display: table;
             width: 100%;
@@ -169,27 +218,18 @@ $client_email = $data['Email'] ?? '';
             padding-left: 8px;
         }
 
-        .checkbox-group {
-            margin: 1px 0;
-        }
-
-        .checkbox-item {
-            display: block;
-            margin: 1px 0;
-            padding-left: 14px;
-            position: relative;
-            font-size: 10px;
-        }
-
-        .checkbox-item:before {
-            content: "\2610";
-            position: absolute;
-            left: 0;
-            font-size: 12px;
-        }
-
-        .checkbox-item.checked:before {
-            content: "\2611";
+        /* =============================================
+           DYNAMIC CONTENT PLACEHOLDERS
+           ============================================= */
+        .dynamic-placeholder {
+            min-height: 30px;
+            border: 1px dashed #ccc;
+            border-radius: 2px;
+            padding: 4px 6px;
+            background: #fff;
+            color: #999;
+            font-size: 9px;
+            font-style: italic;
         }
 
         .checklist-table {
@@ -223,19 +263,11 @@ $client_email = $data['Email'] ?? '';
             color: #555;
         }
 
-        .frequency-options {
-            display: table;
-            width: 100%;
-        }
-
-        .freq-option {
-            display: table-cell;
-            padding: 2px 6px;
-            text-align: center;
-        }
-
+        /* =============================================
+           NOTES AREA
+           ============================================= */
         .notes-area {
-            min-height: 25px;
+            min-height: 30px;
             border: 1px solid #ddd;
             border-radius: 2px;
             padding: 3px;
@@ -243,6 +275,31 @@ $client_email = $data['Email'] ?? '';
             margin-top: 2px;
         }
 
+        /* =============================================
+           PARTS TABLE
+           ============================================= */
+        .parts-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .parts-table th,
+        .parts-table td {
+            border: 1px solid #ddd;
+            padding: 3px 6px;
+            font-size: 10px;
+            text-align: left;
+        }
+
+        .parts-table th {
+            background: #e8e8e8;
+            font-weight: bold;
+            color: #001f54;
+        }
+
+        /* =============================================
+           SIGNATURES
+           ============================================= */
         .signature-section {
             display: table;
             width: 100%;
@@ -268,154 +325,17 @@ $client_email = $data['Email'] ?? '';
             color: #666;
         }
 
+        .acknowledgement-block {
+            margin-top: 4px;
+            padding: 4px 6px;
+            background: #e8f5e9;
+            border-radius: 2px;
+            border-left: 2px solid #28a745;
+        }
+
         .page-break {
             page-break-before: always;
         }
-
-        /* Footer - fixed position, repeats on every page */
-        .footer-wrapper {
-            position: fixed;
-            bottom: -27mm;
-            left: 0;
-            right: 0;
-            overflow: visible;
-        }
-
-        .footer-top {
-            background-color: #A30000;
-            color: white;
-            text-align: center;
-            padding: 3px 10px;
-            font-size: 7pt;
-        }
-
-        .footer-bottom {
-            background-color: #CC0000;
-            color: white;
-            text-align: center;
-            padding: 8px 10px;
-            font-size: 8pt;
-        }
-
-        .footer-bottom a {
-            color: white;
-            text-decoration: none;
-        }
-
-        .sub-section {
-            margin: 2px 0;
-            padding: 3px;
-            background: white;
-            border: 1px solid #eee;
-            border-radius: 2px;
-            page-break-inside: avoid;
-        }
-
-        .sub-section-title {
-            font-weight: bold;
-            color: #001f54;
-            font-size: 10px;
-            margin-bottom: 2px;
-            padding-bottom: 1px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .table-subheader {
-            background: #d0e4f7;
-            font-weight: bold;
-            color: #001f54;
-            text-align: left;
-        }
-
-        .inline-checkbox {
-            display: inline-block;
-            margin-right: 10px;
-            font-size: 10px;
-        }
-
-        .photos-grid {
-            display: table;
-            width: 100%;
-        }
-
-        .photo-item {
-            display: table-cell;
-            width: 25%;
-            padding: 4px;
-            text-align: center;
-        }
-
-        /* Section 7 - Products */
-        .products-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .products-table td {
-            width: 20%;
-            padding: 4px;
-            text-align: center;
-            vertical-align: top;
-            border: 1px solid #eee;
-        }
-
-        .products-table img {
-            width: 80px;
-            height: 60px;
-        }
-
-        .product-name-cell {
-            font-size: 7px;
-            font-weight: bold;
-            color: #001f54;
-            margin-top: 2px;
-            line-height: 1.2;
-        }
-
-        .product-qty-cell {
-            font-size: 8px;
-            color: #333;
-            margin-top: 2px;
-        }
-
-        .authorization-block {
-            margin-top: 8px;
-            padding: 6px 8px;
-            background: #f0f4fa;
-            border: 1px solid #c0d0e0;
-            font-size: 8px;
-            color: #333;
-            line-height: 1.5;
-        }
-
-        .authorization-sig-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px;
-            border-top: 1px solid #ccc;
-        }
-
-        .authorization-sig-table td {
-            padding: 6px 8px;
-            vertical-align: top;
-            font-size: 8px;
-            color: #555;
-            width: 33.33%;
-        }
-
-        .authorization-sig-table .sig-label {
-            font-weight: bold;
-            color: #001f54;
-            display: block;
-            margin-bottom: 3px;
-        }
-
-        .sig-line {
-            border-bottom: 1px solid #333;
-            height: 25px;
-            margin-top: 4px;
-        }
-
     </style>
 </head>
 <body>
@@ -447,10 +367,12 @@ $client_email = $data['Email'] ?? '';
     </div>
 
     <div style="text-align: center; margin-bottom: 4px;">
-        <div class="report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
+        <div class="report-title">UNIVERSAL SERVICE REPORT</div>
     </div>
 
-    <!-- SERVICE REPORT / WORK ORDER INFO -->
+    <!-- =============================================
+         SECTION 1: SERVICE REPORT / WORK ORDER
+         ============================================= -->
     <div class="section">
         <div class="section-header">SERVICE REPORT / WORK ORDER</div>
         <div class="section-content">
@@ -466,41 +388,51 @@ $client_email = $data['Email'] ?? '';
                 <div class="column">
                     <div class="info-grid">
                         <div class="info-row">
-                            <div class="info-cell info-label">Service date:</div>
+                            <div class="info-cell info-label">Service Date:</div>
                             <div class="info-cell info-value">____ / ____ / ______</div>
                         </div>
                         <div class="info-row">
-                            <div class="info-cell info-label">Next recommended date:</div>
+                            <div class="info-cell info-label">Next Recommended Date:</div>
                             <div class="info-cell info-value">____ / ____ / ______</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div style="margin-top: 3px;">
-                <span style="font-weight: bold; color: #001f54; font-size: 10px;">Frequency:</span>
-                <span class="inline-checkbox">&square; 30 days</span>
-                <span class="inline-checkbox">&square; 60 days</span>
-                <span class="inline-checkbox">&square; 90 days</span>
-                <span class="inline-checkbox">&square; 120 days</span>
-                <span class="inline-checkbox">&square; Other: ____</span>
-            </div>
         </div>
     </div>
 
-    <!-- 1. INFORMACION DEL CLIENTE -->
+    <!-- =============================================
+         SECTION 2: CLIENT INFORMATION
+         ============================================= -->
     <div class="section">
-        <div class="section-header">1. CLIENT INFORMATION</div>
+        <div class="section-header">CLIENT INFORMATION</div>
         <div class="section-content">
             <div class="two-columns">
                 <div class="column">
                     <div class="info-grid">
                         <div class="info-row">
-                            <div class="info-cell info-label">Client / Restaurant:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($client_name); ?></div>
+                            <div class="info-cell info-label">Client Name:</div>
+                            <div class="info-cell info-value">__________________________</div>
                         </div>
                         <div class="info-row">
                             <div class="info-cell info-label">Address:</div>
-                            <div class="info-cell info-value"><?php echo htmlspecialchars($client_address); ?></div>
+                            <div class="info-cell info-value">__________________________</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-cell info-label">Contact Person:</div>
+                            <div class="info-cell info-value">__________________________</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <div class="info-cell info-label">Phone:</div>
+                            <div class="info-cell info-value">__________________________</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-cell info-label">Email:</div>
+                            <div class="info-cell info-value">__________________________</div>
                         </div>
                     </div>
                 </div>
@@ -508,381 +440,145 @@ $client_email = $data['Email'] ?? '';
         </div>
     </div>
 
-    <!-- 2. SISTEMA SERVICIADO -->
+    <!-- =============================================
+         SECTION 3: SERVICE CATEGORY
+         ============================================= -->
     <div class="section">
-        <div class="section-header">2. SYSTEM SERVICED</div>
+        <div class="section-header">SERVICE CATEGORY</div>
         <div class="section-content">
-            <div class="two-columns">
-                <div class="column">
-                    <div class="checkbox-item">Main Hood </div>
-                    <div class="checkbox-item">Extraction Ducts </div>
-                    <div class="checkbox-item">Roof Fan </div>
-                </div>
-                <div class="column">
-                    <div class="checkbox-item">Grease Gutter</div>
-                    <div class="checkbox-item">Fire System (inspection only)</div>
-                    <div class="checkbox-item">Other: _______________________</div>
-                </div>
+            <div class="dynamic-placeholder" id="service-category-container">
+                <!-- Dynamic: Service type options will be injected here per configuration -->
             </div>
         </div>
     </div>
 
-    <!-- 3. INSPECTION CHECKLIST, RESULTS & ROOF INSPECTION (CONSOLIDATED) -->
+    <!-- =============================================
+         SECTION 4: SCOPE OF WORK
+         ============================================= -->
     <div class="section">
-        <div class="section-header">3. INSPECTION CHECKLIST, RESULTS & ROOF INSPECTION</div>
+        <div class="section-header">SCOPE OF WORK</div>
         <div class="section-content">
-            <table class="checklist-table">
+            <div class="dynamic-placeholder" id="scope-of-work-container">
+                <!-- Dynamic: Scope items will be injected here per configuration -->
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         SECTION 5: INITIAL CONDITION / INSPECTION
+         ============================================= -->
+    <div class="section">
+        <div class="section-header">INITIAL CONDITION / INSPECTION</div>
+        <div class="section-content">
+            <div class="dynamic-placeholder" id="initial-condition-container">
+                <!-- Dynamic: Inspection checklist items will be injected here per configuration -->
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         SECTION 6: SERVICE PERFORMED
+         ============================================= -->
+    <div class="section">
+        <div class="section-header">SERVICE PERFORMED</div>
+        <div class="section-content">
+            <div class="dynamic-placeholder" id="service-performed-container">
+                <!-- Dynamic: Service tasks/checklist will be injected here per configuration -->
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         SECTION 7: POST-SERVICE CONDITION
+         ============================================= -->
+    <div class="section">
+        <div class="section-header">POST-SERVICE CONDITION</div>
+        <div class="section-content">
+            <div class="dynamic-placeholder" id="post-service-condition-container">
+                <!-- Dynamic: Post-service verification items will be injected here per configuration -->
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         SECTION 8: TECHNICAL FINDINGS & OBSERVATIONS
+         ============================================= -->
+    <div class="section">
+        <div class="section-header">TECHNICAL FINDINGS &amp; OBSERVATIONS</div>
+        <div class="section-content">
+            <div class="notes-area" id="findings-container"></div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         SECTION 9: RECOMMENDATIONS
+         ============================================= -->
+    <div class="section">
+        <div class="section-header">RECOMMENDATIONS</div>
+        <div class="section-content">
+            <div class="notes-area" id="recommendations-container"></div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         SECTION 10: PARTS / MATERIALS USED OR REQUIRED
+         ============================================= -->
+    <div class="section">
+        <div class="section-header">PARTS / MATERIALS USED OR REQUIRED</div>
+        <div class="section-content">
+            <table class="parts-table">
                 <thead>
                     <tr>
-                        <th>Element</th>
-                        <th class="center">Yes</th>
-                        <th class="center">No</th>
-                        <th class="center">N/A</th>
-                        <th>Comment</th>
+                        <th>#</th>
+                        <th>Description</th>
+                        <th>Qty</th>
+                        <th>Status</th>
+                        <th>Notes</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- BEFORE CLEANING -->
-                    <tr><td colspan="5" class="table-subheader">BEFORE CLEANING</td></tr>
+                <tbody id="parts-table-body">
+                    <!-- Dynamic: Parts/materials rows will be injected here per configuration -->
                     <tr>
-                        <td>Fans working correctly?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Filters with grease accumulation?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Hood lights working?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Visible grease in ducts?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Grease container present?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Visible damage in system?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <!-- AFTER CLEANING -->
-                    <tr><td colspan="5" class="table-subheader">AFTER CLEANING</td></tr>
-                    <tr>
-                        <td>System clean and operative</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Fan working at completion</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Work area delivered clean</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Client informed of final status</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <!-- ROOF INSPECTION -->
-                    <tr><td colspan="5" class="table-subheader">ROOF INSPECTION</td></tr>
-                    <tr>
-                        <td>Grease accumulation on roof?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Is it a severe problem?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Absorption unit installation recommended?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Roof damage from grease?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
-                    </tr>
-                    <tr>
-                        <td>Is there proper drainage?</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="center">&square;</td>
-                        <td class="comment-cell"></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- 4. SERVICE PERFORMED (CLEANING) -->
+    <!-- =============================================
+         SECTION 11: CLIENT ACKNOWLEDGEMENT & SIGNATURES
+         ============================================= -->
     <div class="section">
-        <div class="section-header">4. SERVICE PERFORMED (CLEANING)</div>
+        <div class="section-header">CLIENT ACKNOWLEDGEMENT &amp; SIGNATURES</div>
         <div class="section-content">
-            <div class="two-columns">
-                <div class="column">
-                    <div class="checkbox-item">Complete hood cleaning</div>
-                    <div class="checkbox-item">Filter cleaning</div>
-                    <div class="checkbox-item">Duct cleaning</div>
-                    <div class="checkbox-item">Extractor/fan cleaning</div>
-                </div>
-                <div class="column">
-                    <div class="checkbox-item">Grease gutter cleaning</div>
-                    <div class="checkbox-item">Kitchen area cleaning (affected)</div>
-                    <div class="checkbox-item">Sticker placed on site</div>
-                    <div class="checkbox-item">Before/after photos taken</div>
-                </div>
+            <div class="acknowledgement-block" style="margin-bottom: 6px;">
+                <p style="font-weight: bold; color: #1b5e20; font-size: 9px;">SERVICE ACKNOWLEDGEMENT</p>
+                <p style="font-size: 8px; color: #333; margin-top: 2px;">By signing below, the client acknowledges that the service described in this report has been completed and the work area was left in satisfactory condition.</p>
             </div>
-        </div>
-    </div>
-
-    <!-- 5. TECHNICAL SYSTEM DATA -->
-    <div class="section">
-        <div class="section-header">5. TECHNICAL SYSTEM DATA</div>
-        <div class="section-content">
-            <div class="two-columns">
-                <div class="column">
-                    <div class="info-grid">
-                        <div class="info-row">
-                            <div class="info-cell info-label">Number of Fans:</div>
-                            <div class="info-cell info-value">____________</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-cell info-label">Number of Stacks:</div>
-                            <div class="info-cell info-value">____________</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="column">
-                    <div class="info-grid">
-                        <div class="info-row">
-                            <div class="info-cell info-label">Fan Type:</div>
-                            <div class="info-cell info-value">
-                                <span class="inline-checkbox">&square; Marshall</span>
-                                <span class="inline-checkbox">&square; Upblast</span>
-                                <span class="inline-checkbox">&square; Supreme</span>
-                                <span class="inline-checkbox">&square; Other: ____</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 6. TECHNICIAN NOTES & SIGNATURES -->
-    <div class="section">
-        <div class="section-header">6. TECHNICIAN NOTES & SIGNATURES</div>
-        <div class="section-content">
-            <p style="font-weight: bold; color: #001f54; font-size: 10px; margin-bottom: 2px;">Notes / Observations:</p>
-            <div class="notes-area"></div>
 
             <div class="signature-section">
                 <div class="signature-box">
-                    <p style="font-weight: bold; margin-bottom: 2px; color: #001f54; font-size: 10px;">Responsible Technician:</p>
-                    <p style="font-size: 9px;">Name: _________________ Signature: _________________</p>
+                    <p style="font-weight: bold; margin-bottom: 2px; color: #001f54; font-size: 10px;">Technician:</p>
+                    <p style="font-size: 9px;">Name: _________________________________</p>
+                    <p style="font-size: 9px; margin-top: 2px;">Signature:</p>
+                    <div class="signature-line"></div>
                     <p style="font-size: 9px; margin-top: 2px;">Date: ____/____/______</p>
                 </div>
                 <div class="signature-box">
-                    <p style="font-weight: bold; margin-bottom: 2px; color: #001f54; font-size: 10px;">Client / Manager:</p>
-                    <p style="font-size: 9px;">Name: _________________ Signature: _________________</p>
+                    <p style="font-weight: bold; margin-bottom: 2px; color: #001f54; font-size: 10px;">Client / Authorized Representative:</p>
+                    <p style="font-size: 9px;">Name: _________________________________</p>
+                    <p style="font-size: 9px; margin-top: 2px;">Signature:</p>
+                    <div class="signature-line"></div>
                     <p style="font-size: 9px; margin-top: 2px;">Date: ____/____/______</p>
                 </div>
             </div>
-
-            <div style="margin-top: 4px; padding: 4px; background: #e8f5e9; border-radius: 2px; border-left: 2px solid #28a745;">
-                <p style="font-weight: bold; color: #1b5e20; font-size: 9px;">ACKNOWLEDGEMENT OF KITCHEN CONDITION & SERVICE COMPLETED</p>
-                <p style="font-size: 8px; color: #333; margin-top: 2px;">By signing above, the customer acknowledges that the service was completed and the kitchen was left clean and in satisfactory condition.</p>
-            </div>
         </div>
     </div>
-
-    <?php
-    // Section 7 - Products (only shown if product data is provided)
-    $products_list = [
-        ['image' => '5 16 inch chain.png', 'name' => '16" Chain (5 ft)'],
-        ['image' => '6 Break-Away Stud Doors.png', 'name' => 'Break-Away Stud Doors'],
-        ['image' => 'Canopy Hood Light Fixture with Clear Coated Tempered Glass Globe and Wire Guard.png', 'name' => 'Canopy Hood Light Fixture – Clear Coated Tempered Glass Globe & Wire Guard'],
-        ['image' => 'Canopy Hood Light Fixture with Clear Tempered Glass Globe.png', 'name' => 'Canopy Hood Light Fixture – Clear Tempered Glass Globe'],
-        ['image' => 'Canopy Hood Lights.png', 'name' => 'Canopy Hood Lights'],
-        ['image' => 'CaptiveAire Hinge Kits.png', 'name' => 'Captive Aire Hinge Kits'],
-        ['image' => 'Centrifugal Fan Impeller.png', 'name' => 'Centrifugal Fan Impeller'],
-        ['image' => 'Clear Coated Tempered Glass Globe for L50 L55 Hood Lights.png', 'name' => 'Clear Coated Tempered Glass Globe for L50/L55 Hood Lights'],
-        ['image' => 'Downblast HVAC Exhaust Fans.png', 'name' => 'Downblast HVAC Exhaust Fans'],
-        ['image' => 'Driploc Hinge Kits.png', 'name' => 'DripLoc Hinge Kits'],
-        ['image' => 'DRIPLOC Type 1-S Exhaust Fan Hinge Kit.png', 'name' => 'DripLoc Type 1-S Exhaust Fan Hinge Kit'],
-        ['image' => 'Driploc Grease Containment.png', 'name' => 'DripLoc Grease Containment'],
-        ['image' => 'Duct Wrap Kit.png', 'name' => 'Duct Wrap Kit'],
-        ['image' => 'Ductmate Moist Drain Fitting – Galvanized – 3-4.png', 'name' => 'Ductmate Moist Drain Fitting – Galvanized (3–4")'],
-        ['image' => 'Exhaust Fan Accessories.png', 'name' => 'Exhaust Fan Accessories'],
-        ['image' => 'Exhaust Fan Grease Box.png', 'name' => 'Exhaust Fan Grease Box'],
-        ['image' => 'Exhaust Fan Motor and Blower Assembly.png', 'name' => 'Exhaust Fan Motor & Blower Assembly'],
-        ['image' => 'Exhaust Hood Fan Motor (Replacement).png', 'name' => 'Exhaust Hood Fan Motor (Replacement)'],
-        ['image' => 'Exhaust Hood.png', 'name' => 'Exhaust Hood'],
-        ['image' => 'EZ Kleen Industrial Air Filter.png', 'name' => 'EZ Kleen Industrial Air Filter'],
-        ['image' => 'Fire Suppression Blow-Off Caps.png', 'name' => 'Fire Suppression Blow-Off Caps'],
-        ['image' => 'Food Truck Exhaust Fans.png', 'name' => 'Food Truck Exhaust Fans'],
-        ['image' => 'Galvanized Conical Duct Transition.png', 'name' => 'Galvanized Conical Duct Transition'],
-        ['image' => 'Grease Away Rooftop Grease Neutralize – 16oz Shaker.png', 'name' => 'Grease Away Rooftop Grease Neutralizer – 16 oz Shaker'],
-        ['image' => 'Grease Catcher.png', 'name' => 'Grease Catcher'],
-        ['image' => 'Grease containment ring.png', 'name' => 'Grease Containment Ring'],
-        ['image' => 'Grease Cups & Drains.png', 'name' => 'Grease Cups & Drains'],
-        ['image' => 'Grease Hood Filter (Mesh 320).png', 'name' => 'Grease Hood Filter (Mesh 320)'],
-        ['image' => 'Hinge Kit Exhaust Fan Hinge.png', 'name' => 'Exhaust Fan Hinge Kit'],
-        ['image' => 'Hinge Kits.png', 'name' => 'Hinge Kits'],
-        ['image' => 'Hood Filters with Bottom Hooks – All Brands.png', 'name' => 'Hood Filters with Bottom Hooks – All Brands'],
-        ['image' => 'HVAC duct insulation.png', 'name' => 'HVAC Duct Insulation'],
-        ['image' => 'Kason Welded Grease Filters.png', 'name' => 'Kason Welded Grease Filters'],
-        ['image' => 'Mavrik Stainless Steel Hood Filters.jpg', 'name' => 'Mavrik Stainless Steel Hood Filters'],
-        ['image' => 'Metal Electrical Junction Box with Terminal Block.png', 'name' => 'Metal Electrical Junction Box with Terminal Block'],
-        ['image' => 'Omni Super Hinge.png', 'name' => 'Omni Super Hinge'],
-        ['image' => 'Optional Wire Guard Replacement for Canopy Lighting.png', 'name' => 'Optional Wire Guard for Canopy Lighting'],
-        ['image' => 'Replacement Grease Pillows.png', 'name' => 'Replacement Grease Pillows'],
-        ['image' => 'Restaurant Upblast Exhaust.png', 'name' => 'Restaurant Upblast Exhaust'],
-        ['image' => 'Roof Curbs.png', 'name' => 'Roof Curbs'],
-        ['image' => 'Spark Arrestor Hood Filters.png', 'name' => 'Spark Arrestor Hood Filters'],
-        ['image' => 'Spill Prevention and Clean Up.png', 'name' => 'Spill Prevention & Clean-Up'],
-        ['image' => 'Standard Aluminum Grease Filters.png', 'name' => 'Standard Aluminum Grease Filters'],
-        ['image' => 'Standard Galvanized Grease Filters.png', 'name' => 'Standard Galvanized Grease Filters'],
-        ['image' => 'Start Stop Push Button Station.png', 'name' => 'Start/Stop Push Button Station'],
-        ['image' => 'Upflow Installation Kit (Vertical Return Air Kit).png', 'name' => 'Upflow Installation Kit (Vertical Return Air Kit)'],
-    ];
-
-    $show_products = isset($data['show_products']) && $data['show_products'];
-    if ($show_products):
-    ?>
-    <!-- 7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION -->
-    <div class="section" style="page-break-inside: auto;">
-        <div class="section-header">7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION</div>
-        <div class="section-content">
-            <p style="font-size: 9px; color: #555; margin-bottom: 4px;">If additional parts or products are needed, please indicate the quantity required for each item below.</p>
-            <?php
-            // Filter only products that have a quantity
-            $selected_products = [];
-            foreach ($products_list as $j => $prod) {
-                $qty_key = 'product_qty_' . $j;
-                $qty_val = $data[$qty_key] ?? '';
-                if (!empty($qty_val) && $qty_val != '0') {
-                    $selected_products[] = ['index' => $j, 'product' => $prod, 'qty' => $qty_val];
-                }
-            }
-
-            if (!empty($selected_products)):
-            ?>
-            <table class="products-table">
-                <?php
-                $cols = 3;
-                $total_sel = count($selected_products);
-                for ($i = 0; $i < $total_sel; $i += $cols):
-                ?>
-                <tr>
-                    <?php for ($j = $i; $j < $i + $cols && $j < $total_sel; $j++):
-                        $prod = $selected_products[$j]['product'];
-                        $qty_val = $selected_products[$j]['qty'];
-                        $img_path = __DIR__ . '/../../../Images/hoodvent/' . $prod['image'];
-                        $ext = pathinfo($prod['image'], PATHINFO_EXTENSION);
-                        $mime = ($ext === 'jpg' || $ext === 'jpeg') ? 'image/jpeg' : 'image/png';
-                        $img_b64 = '';
-                        if (file_exists($img_path)) {
-                            $img_b64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($img_path));
-                        }
-                    ?>
-                    <td style="width: 33.33%;">
-                        <?php if ($img_b64): ?>
-                            <img src="<?php echo $img_b64; ?>" alt="<?php echo htmlspecialchars($prod['name']); ?>">
-                        <?php endif; ?>
-                        <div class="product-name-cell"><?php echo htmlspecialchars($prod['name']); ?></div>
-                        <div class="product-qty-cell">Qty: <?php echo htmlspecialchars($qty_val); ?></div>
-                    </td>
-                    <?php endfor; ?>
-                    <?php
-                    $remaining = ($i + $cols) - $total_sel;
-                    if ($remaining > 0 && $i + $cols > $total_sel):
-                        for ($k = 0; $k < $remaining; $k++):
-                    ?>
-                    <td style="width: 33.33%;"></td>
-                    <?php
-                        endfor;
-                    endif;
-                    ?>
-                </tr>
-                <?php endfor; ?>
-            </table>
-            <?php else: ?>
-            <p style="font-size: 8px; color: #888; font-style: italic;">No products selected.</p>
-            <?php endif; ?>
-
-            <div class="authorization-block">
-                <p>By signing below, the Customer acknowledges and agrees to the repair parts listed above and the recommended repairs described in the Technician Notes/Observations. The Customer authorizes Prime to proceed with the described repairs and installations.</p>
-            </div>
-
-            <table class="authorization-sig-table">
-                <tr>
-                    <td>
-                        <span class="sig-label">Client / Manager:</span>
-                        <span>Name: <?php echo htmlspecialchars($data['auth_client_name'] ?? '________________'); ?></span>
-                    </td>
-                    <td>
-                        <span class="sig-label">Signature:</span>
-                        <?php if (!empty($data['auth_client_signature'])): ?>
-                            <img src="<?php echo $data['auth_client_signature']; ?>" style="max-height: 25px;">
-                        <?php else: ?>
-                            <div class="sig-line"></div>
-                        <?php endif; ?>
-                    </td>
-                    <td>
-                        <span class="sig-label">Date:</span>
-                        <span><?php echo htmlspecialchars($data['auth_client_date'] ?? '____/____/______'); ?></span>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
-    <?php endif; ?>
-
 
 </body>
 </html>

@@ -1,8 +1,9 @@
 <?php
 /**
- * GENERATE VENT HOOD REPORT PDF CONTROLLER
- * Generates PDF for Vent Hood Service Reports.
- * Reads from forms + contract_items (single source of truth).
+ * GENERATE UNIVERSAL SERVICE REPORT PDF CONTROLLER
+ * =================================================
+ * Generates PDF for Universal Service Reports.
+ * Reads from forms table (single source of truth).
  */
 
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
@@ -28,24 +29,15 @@ try {
         throw new Exception('Form not found');
     }
 
-    // Get hood vent services from contract_items
-    $stmtItems = $pdo->prepare("SELECT * FROM contract_items WHERE form_id = ? AND category = 'hood_vent' ORDER BY position");
-    $stmtItems->execute([$id]);
-    $hoodVentServices = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
-
-    // Get scope of work
-    $stmtS = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
-    $stmtS->execute([$id]);
-    $scopeOfWorkTasks = $stmtS->fetchAll(PDO::FETCH_COLUMN);
-
     // Build $data for template
     $data = [
         'Company_Name' => $form['company_name'],
-        'client_name' => $form['client_name'],
+        'Client_Name' => $form['client_name'],
         'Company_Address' => $form['address'],
         'Number_Phone' => $form['phone'],
         'Email' => $form['email'],
         'Seller' => $form['seller'],
+        'Service_Type' => $form['service_type'] ?? '',
         'docnum' => $form['docnum'] ?? $form['Order_Nomenclature'],
         'Document_Date' => $form['Document_Date'],
         'Work_Date' => $form['Work_Date'],
@@ -61,7 +53,7 @@ try {
     $template_file = __DIR__ . '/../templates/vent_hood_report.php';
 
     if (!file_exists($template_file)) {
-        throw new Exception('Vent hood report template not found');
+        throw new Exception('Universal service report template not found');
     }
 
     ob_start();
@@ -88,7 +80,7 @@ try {
 
     // Output PDF
     $company_safe = preg_replace('/[^a-zA-Z0-9_-]/', '_', $data['Company_Name'] ?? 'Document');
-    $filename = "VENT_HOOD_REPORT_{$company_safe}.pdf";
+    $filename = "SERVICE_REPORT_{$company_safe}.pdf";
 
     header('Content-Type: application/pdf');
     header('Content-Disposition: inline; filename="' . $filename . '"');
