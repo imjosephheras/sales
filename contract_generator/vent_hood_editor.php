@@ -28,9 +28,9 @@ $work_order = $data['docnum'] ?? '';
 // Supports both legacy values ("Hospitality") and new config keys
 $dept = strtolower(trim($data['Service_Type'] ?? ''));
 if (strpos($dept, 'hospitality') !== false) {
-    $logo_path = __DIR__ . '/../../Images/Hospitality.png';
+    $logo_path = __DIR__ . '/../Images/Hospitality.png';
 } else {
-    $logo_path = __DIR__ . '/../../Images/Facility.png';
+    $logo_path = __DIR__ . '/../Images/Facility.png';
 }
 $logo_base64 = '';
 if (file_exists($logo_path)) {
