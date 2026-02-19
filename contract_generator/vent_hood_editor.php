@@ -25,6 +25,7 @@ $client_email = $data['Email'] ?? '';
 $work_order = $data['docnum'] ?? '';
 
 // Logo - dynamic based on Service_Type (Facility.png / Hospitality.png)
+// Supports both legacy values ("Hospitality") and new config keys
 $dept = strtolower(trim($data['Service_Type'] ?? ''));
 if (strpos($dept, 'hospitality') !== false) {
     $logo_path = __DIR__ . '/../../Images/Hospitality.png';

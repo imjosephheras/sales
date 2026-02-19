@@ -54,8 +54,14 @@
                                 <label>Service Type</label>
                                 <select name="Service_Type" id="Service_Type">
                                     <option value="">-- Select --</option>
-                                    <option value="Janitorial">Janitorial</option>
-                                    <option value="Hospitality">Hospitality</option>
+                                    <?php
+                                    $serviceConfigs = require __DIR__ . '/../config/service_report_config.php';
+                                    foreach ($serviceConfigs as $key => $config) {
+                                        $title = htmlspecialchars($config['title']);
+                                        $keyAttr = htmlspecialchars($key);
+                                        echo "<option value=\"{$keyAttr}\">{$title}</option>\n";
+                                    }
+                                    ?>
                                 </select>
                             </div>
                             <div class="form-group">
