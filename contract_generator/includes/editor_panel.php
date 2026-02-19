@@ -13,7 +13,25 @@
 
     <!-- Estado activo: solicitud seleccionada -->
     <div id="editor-active-state" style="display: none;">
-        
+
+        <!-- REPORT TYPE SELECTOR BAR -->
+        <div class="report-type-selector-bar" id="report-type-selector-bar">
+            <div class="report-type-selector-label">
+                <i class="fas fa-file-medical-alt"></i>
+                <span>Report Type</span>
+            </div>
+            <div class="report-type-options" id="report-type-options">
+                <?php
+                $selectorConfigs = require __DIR__ . '/../config/service_report_config.php';
+                foreach ($selectorConfigs as $key => $cfg) {
+                    $keyAttr = htmlspecialchars($key);
+                    $title   = htmlspecialchars($cfg['title']);
+                    echo "<button type=\"button\" class=\"report-type-btn\" data-service-key=\"{$keyAttr}\" title=\"{$title}\">{$title}</button>\n";
+                }
+                ?>
+            </div>
+        </div>
+
         <!-- 📄 Header del documento -->
         <div class="document-header">
             <div class="doc-info">

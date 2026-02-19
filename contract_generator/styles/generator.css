@@ -1192,6 +1192,78 @@ body {
   background: linear-gradient(135deg, #bf360c 0%, #e65100 100%);
 }
 
+/* ============================================
+   REPORT TYPE SELECTOR BAR
+   ============================================ */
+
+.report-type-selector-bar {
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8ecf5 100%);
+  border-bottom: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.report-type-selector-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.report-type-selector-label i {
+  font-size: 1rem;
+}
+
+.report-type-options {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 2px 0;
+}
+
+.report-type-options::-webkit-scrollbar {
+  display: none;
+}
+
+.report-type-btn {
+  padding: 0.4rem 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 20px;
+  background: var(--bg-white);
+  color: var(--text-gray);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.report-type-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: rgba(0, 31, 84, 0.04);
+}
+
+.report-type-btn.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(0, 31, 84, 0.25);
+}
+
 /* Editor form section */
 .editor-form-section {
   flex: 1;
