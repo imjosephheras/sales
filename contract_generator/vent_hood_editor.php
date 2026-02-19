@@ -1211,8 +1211,8 @@ if (file_exists($logo_path)) {
             ];
             foreach ($products as $index => $product):
             ?>
-            <div class="product-preview-tile" data-index="<?php echo $index; ?>" data-image="../../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" data-name="<?php echo htmlspecialchars($product['name']); ?>" onclick="toggleProductSelection(this)">
-                <img src="../../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+            <div class="product-preview-tile" data-index="<?php echo $index; ?>" data-image="../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" data-name="<?php echo htmlspecialchars($product['name']); ?>" onclick="toggleProductSelection(this)">
+                <img src="../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                 <div class="preview-name"><?php echo htmlspecialchars($product['name']); ?></div>
             </div>
             <?php endforeach; ?>
