@@ -30,7 +30,12 @@ if (isset($pdo)) {
     $_spStmt->execute([':uid' => $_sidebar_user_id]);
     $_sidebar_photo_file = $_spStmt->fetchColumn() ?: null;
     if ($_sidebar_photo_file) {
-        $_sidebar_photo = url('/storage/uploads/profile_photos/' . $_sidebar_photo_file);
+        // Support both old path (modules/admin/uploads/photos/) and new centralized storage
+        if (file_exists(__DIR__ . '/../../../modules/admin/uploads/photos/' . $_sidebar_photo_file)) {
+            $_sidebar_photo = url('/modules/admin/uploads/photos/' . $_sidebar_photo_file);
+        } else {
+            $_sidebar_photo = url('/storage/uploads/profile_photos/' . $_sidebar_photo_file);
+        }
     }
 }
 
@@ -104,7 +109,7 @@ $_current_slug = $page_slug ?? '';
                 <?php if ($_sidebar_photo): ?>
                     <img src="<?= htmlspecialchars($_sidebar_photo, ENT_QUOTES, 'UTF-8') ?>" alt="Avatar">
                 <?php else: ?>
-                    <?= htmlspecialchars($_initials, ENT_QUOTES, 'UTF-8') ?>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23667eea'/%3E%3Ccircle cx='32' cy='24' r='11' fill='%23fff'/%3E%3Cpath d='M12 56c0-11 9-20 20-20s20 9 20 20' fill='%23fff'/%3E%3C/svg%3E" alt="Avatar">
                 <?php endif; ?>
             </a>
             <div class="db-sidebar-user-info">

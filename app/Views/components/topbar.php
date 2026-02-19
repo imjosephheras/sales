@@ -35,7 +35,12 @@ if (isset($pdo)) {
     $_tpStmt->execute([':uid' => $_topbar_user_id]);
     $_topbar_photo_file = $_tpStmt->fetchColumn() ?: null;
     if ($_topbar_photo_file) {
-        $_topbar_photo = url('/storage/uploads/profile_photos/' . $_topbar_photo_file);
+        // Support both old path (modules/admin/uploads/photos/) and new centralized storage
+        if (file_exists(__DIR__ . '/../../../modules/admin/uploads/photos/' . $_topbar_photo_file)) {
+            $_topbar_photo = url('/modules/admin/uploads/photos/' . $_topbar_photo_file);
+        } else {
+            $_topbar_photo = url('/storage/uploads/profile_photos/' . $_topbar_photo_file);
+        }
     }
 }
 
@@ -73,7 +78,7 @@ if (count($_topbar_name_parts) > 1) {
                     <?php if ($_topbar_photo): ?>
                         <img src="<?= htmlspecialchars($_topbar_photo, ENT_QUOTES, 'UTF-8') ?>" alt="Avatar">
                     <?php else: ?>
-                        <?= htmlspecialchars($_topbar_initials, ENT_QUOTES, 'UTF-8') ?>
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23667eea'/%3E%3Ccircle cx='32' cy='24' r='11' fill='%23fff'/%3E%3Cpath d='M12 56c0-11 9-20 20-20s20 9 20 20' fill='%23fff'/%3E%3C/svg%3E" alt="Avatar">
                     <?php endif; ?>
                 </div>
                 <div class="db-topbar-user-info">
