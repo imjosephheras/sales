@@ -782,6 +782,68 @@ if (file_exists($logo_path)) {
         }
 
         /* =============================================
+           SERVICE TYPE SELECTOR (toolbar)
+           ============================================= */
+        .toolbar-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .service-type-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .service-type-wrapper label {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .service-type-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            padding: 7px 36px 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+            min-width: 260px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .service-type-select:hover {
+            background-color: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .service-type-select:focus {
+            background-color: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.7);
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
+        }
+
+        .service-type-select option {
+            background: #001f54;
+            color: #fff;
+            padding: 8px;
+        }
+
+        /* =============================================
            SIDE PANEL - PRODUCT CATALOG
            ============================================= */
         .app-layout {
@@ -1060,12 +1122,26 @@ if (file_exists($logo_path)) {
     <div class="toolbar-title">
         VENT HOOD REPORT EDITOR
     </div>
+    <div class="toolbar-center">
+        <div class="service-type-wrapper">
+            <label for="serviceTypeSelect">Report Type:</label>
+            <select class="service-type-select" id="serviceTypeSelect" onchange="handleServiceTypeChange(this.value)">
+                <option value="kitchen_exhaust_cleaning">Kitchen Exhaust Cleaning Service</option>
+                <option value="roof_exterior">Roof &amp; Exterior Service</option>
+                <option value="kitchen_deep_cleaning">Kitchen Deep Cleaning Service</option>
+                <option value="equipment_cleaning">Equipment Cleaning Service</option>
+                <option value="preventive_maintenance">Preventive Maintenance Service</option>
+                <option value="repair_corrections">Repair &amp; Corrections Service</option>
+                <option value="emergency_service">Emergency Service</option>
+            </select>
+        </div>
+    </div>
     <div class="toolbar-actions">
         <button class="toolbar-btn btn-add-products" id="btnToggleProducts" onclick="toggleProductsSection()">Add Products Section</button>
         <button class="toolbar-btn btn-clear" onclick="clearAllFields()">Clear All</button>
         <button class="toolbar-btn btn-print" onclick="window.print()">Print Report</button>
         <?php if ($request_id): ?>
-        <button class="toolbar-btn btn-download-pdf" onclick="window.open('controllers/generate_vent_hood_report.php?id=<?php echo htmlspecialchars($request_id); ?>', '_blank')">Download PDF</button>
+        <button class="toolbar-btn btn-download-pdf" onclick="window.open('controllers/generate_vent_hood_report.php?id=<?php echo htmlspecialchars($request_id); ?>&service_type=' + encodeURIComponent(document.getElementById('serviceTypeSelect').value), '_blank')">Download PDF</button>
         <?php endif; ?>
     </div>
 </div>
@@ -1166,7 +1242,7 @@ if (file_exists($logo_path)) {
             <?php if ($logo_base64): ?>
                 <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Prime Facility Services Group">
             <?php endif; ?>
-            <div class="report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
+            <div class="report-title dynamic-report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
         </div>
 
         <!-- SERVICE REPORT / WORK ORDER -->
@@ -1245,8 +1321,8 @@ if (file_exists($logo_path)) {
             </div>
         </div>
 
-        <!-- 2. SYSTEM SERVICED -->
-        <div class="section">
+        <!-- 2. SCOPE OF WORK / SYSTEM SERVICED -->
+        <div class="section" id="sectionScopeOfWork">
             <div class="section-header">2. SYSTEM SERVICED</div>
             <div class="section-content">
                 <div class="two-columns">
@@ -1264,8 +1340,8 @@ if (file_exists($logo_path)) {
             </div>
         </div>
 
-        <!-- 3. INSPECTION CHECKLIST, RESULTS & ROOF INSPECTION -->
-        <div class="section">
+        <!-- 3. INSPECTION CHECKLIST / INITIAL CONDITION -->
+        <div class="section" id="sectionInspection">
             <div class="section-header">3. INSPECTION CHECKLIST, RESULTS & ROOF INSPECTION</div>
             <div class="section-content">
                 <table class="checklist-table">
@@ -1395,8 +1471,8 @@ if (file_exists($logo_path)) {
             </div>
         </div>
 
-        <!-- 4. SERVICE PERFORMED (CLEANING) -->
-        <div class="section">
+        <!-- 4. SERVICE PERFORMED -->
+        <div class="section" id="sectionServicePerformed">
             <div class="section-header">4. SERVICE PERFORMED (CLEANING)</div>
             <div class="section-content">
                 <div class="two-columns">
@@ -1435,11 +1511,11 @@ if (file_exists($logo_path)) {
             <?php if ($logo_base64): ?>
                 <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Prime Facility Services Group">
             <?php endif; ?>
-            <div class="report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
+            <div class="report-title dynamic-report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
         </div>
 
         <!-- 5. TECHNICAL SYSTEM DATA (moved to page 2) -->
-        <div class="section">
+        <div class="section" id="sectionTechnicalData">
             <div class="section-header">5. TECHNICAL SYSTEM DATA</div>
             <div class="section-content">
                 <div class="two-columns">
@@ -1556,7 +1632,7 @@ if (file_exists($logo_path)) {
             <?php if ($logo_base64): ?>
                 <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Prime Facility Services Group">
             <?php endif; ?>
-            <div class="report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
+            <div class="report-title dynamic-report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
         </div>
 
         <!-- 7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION (appears when products selected from side panel) -->
@@ -1939,6 +2015,13 @@ if (file_exists($logo_path)) {
         document.getElementById('selectedProductsGrid').innerHTML = '';
         document.getElementById('section7Detail').classList.remove('visible');
         updatePanelCount();
+
+        // Reset service type selector to default
+        var selector = document.getElementById('serviceTypeSelect');
+        if (selector) {
+            selector.value = 'kitchen_exhaust_cleaning';
+            handleServiceTypeChange('kitchen_exhaust_cleaning');
+        }
     };
 
     // =============================================
@@ -2013,6 +2096,201 @@ if (file_exists($logo_path)) {
     }
 
     // =============================================
+    // SERVICE TYPE STATE & CACHE
+    // =============================================
+    // Global state — accessible from anywhere; sent to backend on PDF generation
+    window.selectedServiceType = 'kitchen_exhaust_cleaning';
+    var serviceConfigCache = {};
+
+    // =============================================
+    // HANDLE SERVICE TYPE CHANGE
+    // =============================================
+    window.handleServiceTypeChange = function(key) {
+        window.selectedServiceType = key;
+
+        // If config already cached, apply immediately
+        if (serviceConfigCache[key]) {
+            applyServiceConfig(key, serviceConfigCache[key]);
+            return;
+        }
+
+        // Fetch config from backend
+        fetch('controllers/get_service_config.php?key=' + encodeURIComponent(key))
+            .then(function(res) { return res.json(); })
+            .then(function(json) {
+                if (json.success && json.data) {
+                    serviceConfigCache[key] = json.data;
+                    applyServiceConfig(key, json.data);
+                }
+            })
+            .catch(function(err) {
+                console.error('Failed to load service config:', err);
+            });
+    };
+
+    /**
+     * Apply a service configuration to the dynamic sections of the report.
+     * Updates: document title, section 2 (scope), section 3 (inspection),
+     *          section 4 (service performed), section 5 (technical data).
+     */
+    function applyServiceConfig(key, cfg) {
+        // --- 1. Update all report titles across pages ---
+        var titles = document.querySelectorAll('.dynamic-report-title');
+        var titleText = (cfg.title || 'SERVICE REPORT').toUpperCase();
+        titles.forEach(function(el) { el.textContent = titleText; });
+
+        // --- 2. Rebuild Section 2: Scope of Work ---
+        var sec2 = document.getElementById('sectionScopeOfWork');
+        if (sec2) {
+            var header2 = sec2.querySelector('.section-header');
+            header2.textContent = '2. SCOPE OF WORK';
+            var content2 = sec2.querySelector('.section-content');
+            content2.innerHTML = buildCheckboxColumns(cfg.scope_of_work || []);
+        }
+
+        // --- 3. Rebuild Section 3: Inspection / Initial Condition + Post-Service ---
+        var sec3 = document.getElementById('sectionInspection');
+        if (sec3) {
+            var header3 = sec3.querySelector('.section-header');
+            header3.textContent = '3. ' + (cfg.initial_condition_header || 'INSPECTION CHECKLIST').toUpperCase() + ' & ' + (cfg.post_service_header || 'POST-SERVICE CONDITION').toUpperCase();
+            var content3 = sec3.querySelector('.section-content');
+            content3.innerHTML = buildInspectionTable(cfg);
+        }
+
+        // --- 4. Rebuild Section 4: Service Performed ---
+        var sec4 = document.getElementById('sectionServicePerformed');
+        if (sec4) {
+            var header4 = sec4.querySelector('.section-header');
+            header4.textContent = '4. ' + (cfg.service_performed_header || 'SERVICE PERFORMED').toUpperCase();
+            var content4 = sec4.querySelector('.section-content');
+            content4.innerHTML = buildCheckboxColumns(cfg.service_performed || []);
+        }
+
+        // --- 5. Rebuild Section 5: Technical Data ---
+        var sec5 = document.getElementById('sectionTechnicalData');
+        if (sec5) {
+            var header5 = sec5.querySelector('.section-header');
+            header5.textContent = '5. TECHNICAL SYSTEM DATA';
+            var content5 = sec5.querySelector('.section-content');
+            content5.innerHTML = buildTechnicalData(cfg.technical_data || []);
+        }
+    }
+
+    /**
+     * Build two-column checkbox HTML from an array of labels.
+     */
+    function buildCheckboxColumns(items) {
+        if (!items.length) return '';
+        var mid = Math.ceil(items.length / 2);
+        var col1 = items.slice(0, mid);
+        var col2 = items.slice(mid);
+
+        var html = '<div class="two-columns"><div class="column">';
+        col1.forEach(function(item) {
+            if (item.indexOf('Other:') === 0) {
+                html += '<div class="checkbox-item"><span class="cb" onclick="toggleCheckbox(this.parentElement)"></span> Other: <input type="text" class="editable-field medium" placeholder="Specify"></div>';
+            } else {
+                html += '<div class="checkbox-item" onclick="toggleCheckbox(this)"><span class="cb"></span> ' + escapeHtml(item) + '</div>';
+            }
+        });
+        html += '</div><div class="column">';
+        col2.forEach(function(item) {
+            if (item.indexOf('Other:') === 0) {
+                html += '<div class="checkbox-item"><span class="cb" onclick="toggleCheckbox(this.parentElement)"></span> Other: <input type="text" class="editable-field medium" placeholder="Specify"></div>';
+            } else {
+                html += '<div class="checkbox-item" onclick="toggleCheckbox(this)"><span class="cb"></span> ' + escapeHtml(item) + '</div>';
+            }
+        });
+        html += '</div></div>';
+        return html;
+    }
+
+    /**
+     * Build the inspection checklist table with Before (initial_condition)
+     * and After (post_service_condition) sub-sections.
+     */
+    function buildInspectionTable(cfg) {
+        var beforeItems = cfg.initial_condition || [];
+        var afterItems = cfg.post_service_condition || [];
+        var beforeHeader = cfg.initial_condition_header || 'BEFORE SERVICE';
+        var afterHeader = cfg.post_service_header || 'POST-SERVICE CONDITION';
+
+        var html = '<table class="checklist-table">';
+        html += '<thead><tr><th>Element</th><th class="center">Yes</th><th class="center">No</th><th class="center">N/A</th><th>Comment</th></tr></thead>';
+        html += '<tbody>';
+
+        // Before / Initial condition
+        html += '<tr><td colspan="5" class="table-subheader">' + escapeHtml(beforeHeader) + '</td></tr>';
+        beforeItems.forEach(function(item, idx) {
+            var grp = 'dyn_bc' + idx;
+            html += '<tr>';
+            html += '<td>' + escapeHtml(item) + '</td>';
+            html += '<td class="center"><span class="cb" onclick="toggleRadio(this, \'' + grp + '\')"></span></td>';
+            html += '<td class="center"><span class="cb" onclick="toggleRadio(this, \'' + grp + '\')"></span></td>';
+            html += '<td class="center"><span class="cb" onclick="toggleRadio(this, \'' + grp + '\')"></span></td>';
+            html += '<td class="comment-cell"><input type="text" class="comment-input" placeholder=""></td>';
+            html += '</tr>';
+        });
+
+        // After / Post-service condition
+        html += '<tr><td colspan="5" class="table-subheader">' + escapeHtml(afterHeader) + '</td></tr>';
+        afterItems.forEach(function(item, idx) {
+            var grp = 'dyn_ac' + idx;
+            html += '<tr>';
+            html += '<td>' + escapeHtml(item) + '</td>';
+            html += '<td class="center"><span class="cb" onclick="toggleRadio(this, \'' + grp + '\')"></span></td>';
+            html += '<td class="center"><span class="cb" onclick="toggleRadio(this, \'' + grp + '\')"></span></td>';
+            html += '<td class="center"><span class="cb" onclick="toggleRadio(this, \'' + grp + '\')"></span></td>';
+            html += '<td class="comment-cell"><input type="text" class="comment-input" placeholder=""></td>';
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        return html;
+    }
+
+    /**
+     * Build technical data fields from config.
+     */
+    function buildTechnicalData(fields) {
+        if (!fields.length) return '';
+        var mid = Math.ceil(fields.length / 2);
+        var col1 = fields.slice(0, mid);
+        var col2 = fields.slice(mid);
+
+        var html = '<div class="two-columns">';
+        html += '<div class="column"><div class="info-grid">';
+        col1.forEach(function(f) {
+            var inputType = f.type === 'number' ? 'number' : 'text';
+            html += '<div class="info-row">';
+            html += '<div class="info-cell info-label">' + escapeHtml(f.label) + ':</div>';
+            html += '<div class="info-cell info-value"><input type="' + inputType + '" class="editable-field medium" placeholder=""></div>';
+            html += '</div>';
+        });
+        html += '</div></div>';
+        html += '<div class="column"><div class="info-grid">';
+        col2.forEach(function(f) {
+            var inputType = f.type === 'number' ? 'number' : 'text';
+            html += '<div class="info-row">';
+            html += '<div class="info-cell info-label">' + escapeHtml(f.label) + ':</div>';
+            html += '<div class="info-cell info-value"><input type="' + inputType + '" class="editable-field medium" placeholder=""></div>';
+            html += '</div>';
+        });
+        html += '</div></div>';
+        html += '</div>';
+        return html;
+    }
+
+    /**
+     * Simple HTML-escaping utility.
+     */
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    // =============================================
     // INITIALIZE
     // =============================================
     document.addEventListener('DOMContentLoaded', function() {
@@ -2035,6 +2313,18 @@ if (file_exists($logo_path)) {
                 signaturePads[id].resize();
             });
         });
+
+        // Pre-cache the default service type config
+        fetch('controllers/get_service_config.php')
+            .then(function(res) { return res.json(); })
+            .then(function(json) {
+                if (json.success && json.data) {
+                    Object.keys(json.data).forEach(function(k) {
+                        serviceConfigCache[k] = json.data[k];
+                    });
+                }
+            })
+            .catch(function() {});
     });
 
 })();

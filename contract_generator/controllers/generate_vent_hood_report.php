@@ -38,6 +38,13 @@ try {
     $stmtS->execute([$id]);
     $scopeOfWorkTasks = $stmtS->fetchAll(PDO::FETCH_COLUMN);
 
+    // Resolve service type: query param > DB value > default
+    $service_type = $_GET['service_type'] ?? $form['service_type'] ?? 'kitchen_exhaust_cleaning';
+
+    // Load service report config for the selected type
+    $allServiceConfigs = require __DIR__ . '/../config/service_report_config.php';
+    $serviceConfig = $allServiceConfigs[$service_type] ?? $allServiceConfigs['kitchen_exhaust_cleaning'];
+
     // Build $data for template
     $data = [
         'Company_Name' => $form['company_name'],
@@ -55,6 +62,8 @@ try {
         'total_cost' => $form['total_cost'],
         'Order_Nomenclature' => $form['Order_Nomenclature'],
         'order_number' => $form['order_number'],
+        'service_type' => $service_type,
+        'service_config' => $serviceConfig,
     ];
 
     // Render report template
@@ -88,7 +97,8 @@ try {
 
     // Output PDF
     $company_safe = preg_replace('/[^a-zA-Z0-9_-]/', '_', $data['Company_Name'] ?? 'Document');
-    $filename = "VENT_HOOD_REPORT_{$company_safe}.pdf";
+    $type_safe = strtoupper(preg_replace('/[^a-zA-Z0-9_-]/', '_', $service_type));
+    $filename = "SERVICE_REPORT_{$type_safe}_{$company_safe}.pdf";
 
     header('Content-Type: application/pdf');
     header('Content-Disposition: inline; filename="' . $filename . '"');
