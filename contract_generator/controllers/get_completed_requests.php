@@ -16,9 +16,11 @@ try {
     $searchCondition = '';
     $searchParams = [];
     if ($search !== '') {
-        $searchCondition = " AND (client_name LIKE :search OR company_name LIKE :search2)";
+        $searchCondition = " AND (client_name LIKE :search OR company_name LIKE :search2 OR seller LIKE :search3 OR Order_Nomenclature LIKE :search4)";
         $searchParams[':search'] = '%' . $search . '%';
         $searchParams[':search2'] = '%' . $search . '%';
+        $searchParams[':search3'] = '%' . $search . '%';
+        $searchParams[':search4'] = '%' . $search . '%';
     }
 
     // Get completed forms ordered by completion date (newest first)

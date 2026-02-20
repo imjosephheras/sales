@@ -21,9 +21,11 @@ try {
     $searchCondition = '';
     $searchParams = [];
     if ($search !== '') {
-        $searchCondition = " AND (f.client_name LIKE :search OR f.company_name LIKE :search2)";
+        $searchCondition = " AND (f.client_name LIKE :search OR f.company_name LIKE :search2 OR f.seller LIKE :search3 OR f.Order_Nomenclature LIKE :search4)";
         $searchParams[':search'] = '%' . $search . '%';
         $searchParams[':search2'] = '%' . $search . '%';
+        $searchParams[':search3'] = '%' . $search . '%';
+        $searchParams[':search4'] = '%' . $search . '%';
     }
 
     // Get total count first
