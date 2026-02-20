@@ -799,34 +799,425 @@
     }
 
     function renderProposal(data) {
+        var companyName = escapeHtml(data.Company_Name || '(company_name)');
+        var companyAddress = escapeHtml(data.Company_Address || '(address)');
+        var contractDuration = formatDuration(data.Contract_Duration) || '(contract_duration)';
+
+        // Determine logo
+        var deptLower = (data.Service_Type || '').toLowerCase();
+        var logoSrc = deptLower.indexOf('hospitality') !== -1 ? '/sales/Images/phospitality.png' : '/sales/Images/pfacility.png';
+
+        // Group staff by department
+        var staffItems = data.contract_staff || [];
+        var staffByDept = {};
+        staffItems.forEach(function(s) {
+            var dept = (s.department && s.department.trim()) ? s.department.trim() : 'GENERAL';
+            if (!staffByDept[dept]) staffByDept[dept] = [];
+            staffByDept[dept].push(s);
+        });
+
+        // Build staffing fees HTML
+        var staffingHtml = '';
+        var deptNames = Object.keys(staffByDept);
+        if (deptNames.length > 0) {
+            deptNames.forEach(function(dept) {
+                staffingHtml += '<div class="proposal-dept-header">' + escapeHtml(dept).toUpperCase() + '</div>';
+                staffingHtml += '<table class="proposal-staff-table"><thead><tr><th style="width:65%;">Position</th><th style="width:35%;">Bill Rate</th></tr></thead><tbody>';
+                staffByDept[dept].forEach(function(s) {
+                    var billRate = parseFloat(s.bill_rate || 0).toFixed(2);
+                    staffingHtml += '<tr><td>' + escapeHtml(s.position || '') + '</td><td class="bill-rate">$' + formatPrice(billRate) + '</td></tr>';
+                });
+                staffingHtml += '</tbody></table>';
+            });
+        } else {
+            staffingHtml = '<p style="color: #999; font-style: italic; text-align: center; padding: 20px;">No staff positions defined. Add positions in the Staff section above.</p>';
+        }
+
+        // Validation warnings
+        var warnings = [];
+        if (!data.Company_Name) warnings.push('Company Name is required');
+        if (!data.Company_Address) warnings.push('Company Address is required');
+        if (!data.Contract_Duration || data.Contract_Duration === 'not_applicable') warnings.push('Contract Duration is required');
+        if (staffItems.length === 0) warnings.push('At least one staff position is required');
+
+        var warningHtml = '';
+        if (warnings.length > 0) {
+            warningHtml = '<div class="proposal-warnings"><strong>Missing required fields:</strong><ul>';
+            warnings.forEach(function(w) { warningHtml += '<li>' + escapeHtml(w) + '</li>'; });
+            warningHtml += '</ul></div>';
+        }
+
         return `
-            <div class="document-preview">
-                <div class="doc-header-preview">
-                    <h1>SERVICE PROPOSAL</h1>
-                    <p class="doc-number">${data.docnum || 'DRAFT'}</p>
-                </div>
-                
-                <div class="doc-section">
-                    <h2>Proposal For</h2>
-                    <p><strong>${data.Company_Name || 'N/A'}</strong></p>
-                    <p>${data.Address || 'N/A'}</p>
-                    <p>${data.City || ''}, ${data.State || ''} ${data.Zip_Code || ''}</p>
+            <div class="document-preview proposal-preview-exact">
+                <style>
+                    .proposal-preview-exact {
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 9.5pt;
+                        color: #000;
+                        line-height: 1.4;
+                        background: white;
+                        padding: 20px;
+                    }
+                    .proposal-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        border-bottom: 3px solid #CC0000;
+                        padding-bottom: 10px;
+                        margin-bottom: 15px;
+                    }
+                    .proposal-header img {
+                        max-height: 65px;
+                        width: auto;
+                    }
+                    .proposal-header .title-section {
+                        text-align: left;
+                        padding-left: 15px;
+                    }
+                    .proposal-header .doc-title {
+                        color: #CC0000;
+                        font-size: 13pt;
+                        font-weight: bold;
+                        text-transform: uppercase;
+                        margin-bottom: 2px;
+                    }
+                    .proposal-header .doc-subtitle {
+                        font-size: 16pt;
+                        font-weight: bold;
+                        color: #000;
+                    }
+                    .proposal-section-title {
+                        color: #CC0000;
+                        font-weight: bold;
+                        font-size: 12pt;
+                        margin-top: 20px;
+                        margin-bottom: 10px;
+                        text-transform: uppercase;
+                        border-bottom: 2px solid #CC0000;
+                        padding-bottom: 4px;
+                    }
+                    .proposal-subsection-title {
+                        color: #CC0000;
+                        font-weight: bold;
+                        font-size: 10pt;
+                        margin-top: 14px;
+                        margin-bottom: 6px;
+                        text-transform: uppercase;
+                    }
+                    .proposal-content {
+                        margin-bottom: 12px;
+                        text-align: justify;
+                        line-height: 1.5;
+                    }
+                    .proposal-content p {
+                        margin-bottom: 8px;
+                    }
+                    .proposal-notice-block {
+                        margin: 10px 15px;
+                        line-height: 1.5;
+                    }
+                    .proposal-notice-block strong {
+                        display: block;
+                        margin-bottom: 2px;
+                    }
+                    .proposal-dept-header {
+                        background-color: #CC0000;
+                        color: white;
+                        font-weight: bold;
+                        font-size: 10pt;
+                        padding: 6px 10px;
+                        margin-top: 12px;
+                        margin-bottom: 0;
+                        text-transform: uppercase;
+                    }
+                    .proposal-staff-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 8px;
+                    }
+                    .proposal-staff-table th {
+                        background-color: #f0f0f0;
+                        color: #333;
+                        font-weight: bold;
+                        padding: 6px 10px;
+                        text-align: left;
+                        border: 1px solid #ccc;
+                        font-size: 9pt;
+                    }
+                    .proposal-staff-table td {
+                        padding: 5px 10px;
+                        border: 1px solid #ccc;
+                        font-size: 9pt;
+                    }
+                    .proposal-staff-table .bill-rate {
+                        text-align: right;
+                        font-weight: bold;
+                    }
+                    .proposal-staffing-intro {
+                        margin: 10px 0;
+                        font-size: 9pt;
+                        line-height: 1.5;
+                        color: #333;
+                    }
+                    .proposal-page-sep {
+                        border: none;
+                        border-top: 2px dashed #ccc;
+                        margin: 25px 0;
+                    }
+                    .proposal-sig-block {
+                        margin-top: 20px;
+                    }
+                    .proposal-sig-row {
+                        display: flex;
+                        gap: 20px;
+                    }
+                    .proposal-sig-col {
+                        width: 48%;
+                    }
+                    .proposal-sig-block-title {
+                        font-weight: bold;
+                        font-size: 10pt;
+                        margin-bottom: 8px;
+                    }
+                    .proposal-sig-item {
+                        margin-bottom: 12px;
+                    }
+                    .proposal-sig-label {
+                        font-weight: bold;
+                        font-size: 9pt;
+                        margin-bottom: 2px;
+                    }
+                    .proposal-sig-line {
+                        border-bottom: 1px solid #000;
+                        height: 22px;
+                    }
+                    .proposal-footer-wrapper {
+                        margin-top: 30px;
+                    }
+                    .proposal-footer-top {
+                        background-color: #A30000;
+                        color: white;
+                        text-align: center;
+                        padding: 3px 10px;
+                        font-size: 7pt;
+                    }
+                    .proposal-footer-bottom {
+                        background-color: #CC0000;
+                        color: white;
+                        text-align: center;
+                        padding: 8px 10px;
+                        font-size: 8pt;
+                    }
+                    .proposal-warnings {
+                        background: #fff3cd;
+                        border: 1px solid #ffc107;
+                        border-radius: 4px;
+                        padding: 10px 15px;
+                        margin-bottom: 15px;
+                        font-size: 9pt;
+                    }
+                    .proposal-warnings strong {
+                        color: #856404;
+                    }
+                    .proposal-warnings ul {
+                        margin: 5px 0 0 20px;
+                        color: #856404;
+                    }
+                </style>
+
+                ${warningHtml}
+
+                <!-- HEADER -->
+                <div class="proposal-header">
+                    <img src="${logoSrc}" alt="Prime Hospitality Services" onerror="this.style.display='none'">
+                    <div class="title-section">
+                        <div class="doc-title">Service</div>
+                        <div class="doc-subtitle">PROPOSAL</div>
+                    </div>
                 </div>
 
-                <div class="doc-section">
-                    <h2>Proposed Services</h2>
-                    <p><strong>Service Type:</strong> ${data.Service_Type || 'N/A'}</p>
-                    <p><strong>Specific Service:</strong> ${data.Requested_Service || 'N/A'}</p>
-                    <p><strong>Duration:</strong> ${formatDuration(data.Contract_Duration)}</p>
+                <!-- NOTICES -->
+                <div class="proposal-section-title">Notices</div>
+                <div class="proposal-content">
+                    <p>All notices required under this Agreement shall be in writing, and if to the CLIENT shall be sufficient in all respects if delivered in person or sent by a nationally recognized overnight courier service or by registered or certified mail to:</p>
+
+                    <div class="proposal-notice-block">
+                        <strong>Client:</strong>
+                        ${companyName}<br>
+                        ${companyAddress}
+                        <br><br>
+                        <strong>Attn:</strong><br>
+                        Thomas Turner<br>
+                        General Manager<br>
+                        (817) 879-1702<br>
+                        tturner@ambassadorhc.com
+                    </div>
+
+                    <p>Moreover, if to Contractor shall be sufficient in all respects if delivered in person or sent by a nationally recognized overnight courier service or by registered or certified mail to:</p>
+
+                    <div class="proposal-notice-block">
+                        <strong>Service Provider:</strong><br>
+                        Prime Hospitality Services of Texas Inc.<br>
+                        8303 Westglen Dr<br>
+                        Houston, Texas 77063
+                        <br><br>
+                        <strong>Attn:</strong><br>
+                        Patty Perez &ndash; President<br>
+                        <em>or</em><br>
+                        Rafael S. Perez Jr. &ndash; Sr. Vice President
+                    </div>
                 </div>
 
-                <div class="doc-section">
-                    <h2>Investment</h2>
-                    <p class="price-display"><strong>Total:</strong> $${formatPrice(data.Total_Price)} ${data.Currency || 'USD'}</p>
+                <!-- PAGE SEPARATOR -->
+                <div class="proposal-footer-wrapper">
+                    <div class="proposal-footer-top">PRIME HOSPITALITY SERVICES OF TEXAS</div>
+                    <div class="proposal-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div>
+                </div>
+                <hr class="proposal-page-sep">
+                <div class="proposal-header">
+                    <img src="${logoSrc}" alt="Prime Hospitality Services" onerror="this.style.display='none'">
+                    <div class="title-section">
+                        <div class="doc-title">Service</div>
+                        <div class="doc-subtitle">PROPOSAL</div>
+                    </div>
                 </div>
 
-                <div class="doc-footer">
-                    <p><em>This is a placeholder template. Final template will be provided.</em></p>
+                <!-- STAFFING FEES -->
+                <div class="proposal-section-title">Staffing Fees</div>
+                <div class="proposal-subsection-title">Hourly Rates by Department</div>
+
+                <div class="proposal-staffing-intro">
+                    <p>This sheet presents the hourly staffing rates, organized by department.
+                    The rates shown correspond to the Bill Rate applicable per position and are billed per hour worked.</p>
+                    <p>Positions and rates are grouped by department according to the classification established in the system.</p>
+                    <p>All rates are expressed in United States Dollars (USD) and are subject to the terms of the service agreement.</p>
+                </div>
+
+                ${staffingHtml}
+
+                <!-- PAGE SEPARATOR -->
+                <div class="proposal-footer-wrapper">
+                    <div class="proposal-footer-top">PRIME HOSPITALITY SERVICES OF TEXAS</div>
+                    <div class="proposal-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div>
+                </div>
+                <hr class="proposal-page-sep">
+                <div class="proposal-header">
+                    <img src="${logoSrc}" alt="Prime Hospitality Services" onerror="this.style.display='none'">
+                    <div class="title-section">
+                        <div class="doc-title">Service</div>
+                        <div class="doc-subtitle">PROPOSAL</div>
+                    </div>
+                </div>
+
+                <!-- TERMS AND CONDITIONS -->
+                <div class="proposal-section-title">Terms and Conditions</div>
+
+                <div class="proposal-subsection-title">Billing Terms and Rates</div>
+                <div class="proposal-content">
+                    <p>The rates established in this agreement shall take effect upon execution by both parties and may be seasonally adjusted with prior written notice.</p>
+                    <p>Hours worked by any associate assigned to a client will be billed under the following conditions:</p>
+                    <p>Hours exceeding forty (40) in one (1) workweek, or any other applicable legal threshold, will be billed at one and a half (1.5) times the associate's regular rate. Hours worked on company-recognized holidays will also be billed at one and a half (1.5) times the associate's regular rate.</p>
+                    <p>The company observes the following official holidays: New Year's Day, Memorial Day, Independence Day, Labor Day, Thanksgiving, and Christmas.</p>
+                </div>
+
+                <div class="proposal-subsection-title">Staffing Request Deadlines</div>
+                <div class="proposal-content">
+                    <p>The deadline for staffing requests is 72 hours prior to the requested start date. Requests submitted after this deadline may be subject to emergency rates, calculated as the regular rate multiplied by 1.5. The minimum service request is 6 hours.</p>
+                </div>
+
+                <div class="proposal-subsection-title">Governing Law</div>
+                <div class="proposal-content">
+                    <p>This Agreement shall be governed by and construed in accordance with the laws of the State of Texas, without regard to its conflict of law principles. The parties agree that any legal action or proceeding arising out of or relating to this Agreement shall be brought in a court of competent jurisdiction located in the State of Texas.</p>
+                </div>
+
+                <div class="proposal-subsection-title">Liability &amp; Insurance</div>
+                <div class="proposal-content">
+                    <p>Prime Hospitality Services of Texas will perform all services in a professional manner, adhering to industry safety standards and applicable health regulations specific to food service environments. Prime Hospitality Services of Texas maintains General Liability and Workers' Compensation Insurance to protect both parties against accidents, injuries, or property damage occurring during the performance of hospitality-related services.</p>
+                    <p>The client acknowledges that Prime Hospitality Services of Texas shall not be responsible for pre-existing damages, equipment malfunctions, or issues resulting from improper installation or maintenance not related to the work performed.</p>
+                </div>
+
+                <!-- PAGE SEPARATOR -->
+                <div class="proposal-footer-wrapper">
+                    <div class="proposal-footer-top">PRIME HOSPITALITY SERVICES OF TEXAS</div>
+                    <div class="proposal-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div>
+                </div>
+                <hr class="proposal-page-sep">
+                <div class="proposal-header">
+                    <img src="${logoSrc}" alt="Prime Hospitality Services" onerror="this.style.display='none'">
+                    <div class="title-section">
+                        <div class="doc-title">Service</div>
+                        <div class="doc-subtitle">PROPOSAL</div>
+                    </div>
+                </div>
+
+                <!-- TERMS AND CONDITIONS (continued) -->
+                <div class="proposal-section-title">Terms and Conditions</div>
+
+                <div class="proposal-subsection-title">Confidentiality</div>
+                <div class="proposal-content">
+                    <p>Both parties agree to maintain strict confidentiality regarding all shared information, including business data, pricing, operational details, and client-specific information related to hospitality operations.</p>
+                    <p>Such information shall not be disclosed, distributed, or used for any purpose other than fulfilling the scope of this agreement, except when required by law or with prior written consent from the other party.</p>
+                </div>
+
+                <div class="proposal-subsection-title">Termination &amp; Payment Terms</div>
+                <div class="proposal-content">
+                    <p>Payment terms shall be Net 30 (thirty days from the invoice date). Any outstanding balances after the payment due date may accrue interest at the applicable legal rate and may be subject to reasonable administrative fees.</p>
+                    <p>If payment remains unpaid sixty (60) days past the invoice date, services may be suspended upon written notice until the outstanding balance is fully settled. Any amounts formally disputed in writing shall not be considered past due while under review.</p>
+                    <p>If services are canceled after scheduling, any completed work, reserved personnel time, or prepared materials shall be invoiced accordingly.</p>
+                    <p>The prices mentioned do not include taxes; these will be calculated and added in accordance with applicable law.</p>
+                </div>
+
+                <div class="proposal-subsection-title">Non-Solicitation</div>
+                <div class="proposal-content">
+                    <p>During the term of this Agreement and for a period of two (2) years following its termination, the Client shall not, without the prior written consent of Prime Hospitality Services of Texas, directly or indirectly hire, solicit, or engage the services of any employee, associate, or subcontractor of Prime Hospitality Services of Texas who was employed or engaged by the Company at any time during the term of this Agreement.</p>
+                    <p>In the event of a breach of this provision, the Client agrees to pay Prime Hospitality Services of Texas a placement and training fee equal to thirty percent (30%) of the employee's or contractor's most recent annual compensation.</p>
+                </div>
+
+                <!-- PAGE SEPARATOR -->
+                <div class="proposal-footer-wrapper">
+                    <div class="proposal-footer-top">PRIME HOSPITALITY SERVICES OF TEXAS</div>
+                    <div class="proposal-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div>
+                </div>
+                <hr class="proposal-page-sep">
+                <div class="proposal-header">
+                    <img src="${logoSrc}" alt="Prime Hospitality Services" onerror="this.style.display='none'">
+                    <div class="title-section">
+                        <div class="doc-title">Service</div>
+                        <div class="doc-subtitle">PROPOSAL</div>
+                    </div>
+                </div>
+
+                <!-- TERMS OF AGREEMENT -->
+                <div class="proposal-section-title">Terms of Agreement</div>
+                <div class="proposal-content">
+                    <p>This Agreement shall be valid for a period of ${escapeHtml(contractDuration)} from the date it is executed by both parties. In cases of bankruptcy, insolvency, discontinuation of operations, or failure to make required payments, either party may terminate this Agreement with twenty-four (24) hours' written notice.</p>
+                    <p>Upon expiration, this Agreement shall automatically renew for successive one (1) year terms unless either party provides written notice of non-renewal at least thirty (30) days prior to the end of the then-current term. All terms, conditions, and provisions shall remain in full force and effect during any renewal period unless modified in writing by mutual consent of both parties.</p>
+                </div>
+
+                <!-- SIGNATURE BLOCK -->
+                <div class="proposal-sig-block">
+                    <div class="proposal-sig-row">
+                        <div class="proposal-sig-col">
+                            <div class="proposal-sig-block-title">${companyName}</div>
+                            <div class="proposal-sig-item"><div class="proposal-sig-label">Signature:</div><div class="proposal-sig-line"></div></div>
+                            <div class="proposal-sig-item"><div class="proposal-sig-label">Printed Name:</div><div class="proposal-sig-line"></div></div>
+                            <div class="proposal-sig-item"><div class="proposal-sig-label">Title:</div><div class="proposal-sig-line"></div></div>
+                            <div class="proposal-sig-item"><div class="proposal-sig-label">Date:</div><div class="proposal-sig-line"></div></div>
+                        </div>
+                        <div class="proposal-sig-col">
+                            <div class="proposal-sig-block-title">Prime Hospitality Services of Texas</div>
+                            <div class="proposal-sig-item"><div class="proposal-sig-label">Signature:</div><div class="proposal-sig-line"></div></div>
+                            <div class="proposal-sig-item"><div class="proposal-sig-label">Printed Name:</div><div class="proposal-sig-line"></div></div>
+                            <div class="proposal-sig-item"><div class="proposal-sig-label">Title:</div><div class="proposal-sig-line"></div></div>
+                            <div class="proposal-sig-item"><div class="proposal-sig-label">Date:</div><div class="proposal-sig-line"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FOOTER -->
+                <div class="proposal-footer-wrapper">
+                    <div class="proposal-footer-top">PRIME HOSPITALITY SERVICES OF TEXAS</div>
+                    <div class="proposal-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div>
                 </div>
             </div>
         `;

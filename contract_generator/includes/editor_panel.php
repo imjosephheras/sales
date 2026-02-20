@@ -306,6 +306,7 @@
                             <table class="editor-services-table" id="staff-table">
                                 <thead>
                                     <tr>
+                                        <th>Department</th>
                                         <th>Position</th>
                                         <th>Base Rate ($)</th>
                                         <th>% Increase</th>

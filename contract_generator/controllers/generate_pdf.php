@@ -56,6 +56,11 @@ try {
     $stmtSS->execute([$id]);
     $scopeSections = $stmtSS->fetchAll(PDO::FETCH_ASSOC);
 
+    // Get contract staff positions
+    $stmtStaff = $pdo->prepare("SELECT * FROM contract_staff WHERE form_id = ? ORDER BY department ASC, id ASC");
+    $stmtStaff->execute([$id]);
+    $contractStaff = $stmtStaff->fetchAll(PDO::FETCH_ASSOC);
+
     // Build $data array compatible with templates
     $data = [
         'id' => $form['form_id'],
@@ -90,6 +95,8 @@ try {
         'Order_Nomenclature' => $form['Order_Nomenclature'],
         'order_number' => $form['order_number'],
         'total_cost' => $form['total_cost'],
+        'contract_staff' => $contractStaff,
+        'scope_sections' => $scopeSections,
     ];
 
     // Determine template

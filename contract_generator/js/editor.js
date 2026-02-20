@@ -589,12 +589,14 @@
         var tr = document.createElement('tr');
         tr.className = 'editor-service-row';
 
+        var department = (item && item.department) || '';
         var position = (item && item.position) || '';
         var baseRate = (item && item.base_rate) ? parseFloat(item.base_rate).toFixed(2) : '';
         var pctIncrease = (item && item.percent_increase) ? parseFloat(item.percent_increase).toFixed(2) : '';
         var billRate = (item && item.bill_rate) ? parseFloat(item.bill_rate).toFixed(2) : '';
 
         tr.innerHTML =
+            '<td><input type="text" class="svc-input staff-department" value="' + escapeAttr(department) + '" placeholder="e.g. Housekeeping"></td>' +
             '<td><input type="text" class="svc-input staff-position" value="' + escapeAttr(position) + '" placeholder="Position name"></td>' +
             '<td><input type="number" class="svc-input staff-base" value="' + escapeAttr(baseRate) + '" placeholder="0.00" step="0.01" min="0"></td>' +
             '<td><input type="number" class="svc-input staff-increase" value="' + escapeAttr(pctIncrease) + '" placeholder="0" step="0.01" min="0"></td>' +
@@ -709,6 +711,7 @@
         var items = [];
         var rows = tbody.querySelectorAll('tr.editor-service-row');
         rows.forEach(function(tr) {
+            var department = tr.querySelector('.staff-department').value.trim();
             var position = tr.querySelector('.staff-position').value.trim();
             var baseRate = tr.querySelector('.staff-base').value.trim();
             var pctIncrease = tr.querySelector('.staff-increase').value.trim();
@@ -716,6 +719,7 @@
 
             if (position || baseRate) {
                 items.push({
+                    department: department,
                     position: position,
                     base_rate: baseRate || '0.00',
                     percent_increase: pctIncrease || '0.00',
@@ -1098,9 +1102,14 @@
     function toggleContractFields() {
         var requestType = document.getElementById('Request_Type').value;
         var contractSection = document.getElementById('contract-specific-section');
+        var staffSection = document.getElementById('staff-section');
 
-        if (requestType === 'Contract') {
+        if (requestType === 'Contract' || requestType === 'Proposal') {
             contractSection.style.display = 'block';
+            // Show staff section for Proposal type even if no data loaded yet
+            if (requestType === 'Proposal' && staffSection && staffSection.style.display === 'none') {
+                staffSection.style.display = 'block';
+            }
         } else {
             contractSection.style.display = 'none';
         }
