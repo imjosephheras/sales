@@ -76,5 +76,5 @@ php -d upload_max_filesize=20M \
     -d max_file_uploads=100 \
     -d max_execution_time=300 \
     -d max_input_time=300 \
-    -d memory_limit=256M \
+    -d memory_limit=512M \
     -S localhost:$PORT
