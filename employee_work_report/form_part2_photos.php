@@ -165,6 +165,39 @@
     color: #666;
     margin-top: 10px;
 }
+
+.compress-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.compress-overlay.active {
+    display: flex;
+}
+.compress-overlay-content {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+.compress-spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #a30000;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: compress-spin 1s linear infinite;
+    margin: 0 auto 15px;
+}
+@keyframes compress-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>
 
 <!-- BEFORE & AFTER MODE -->
@@ -185,6 +218,14 @@
     <input type="file" id="bulk-photo-input" name="all_photos[]" accept="image/*" multiple style="display:none;">
     <div class="bulk-photos-grid" id="bulk-photos-grid"></div>
     <div class="photos-count" id="photos-count"></div>
+</div>
+
+<!-- COMPRESS LOADING OVERLAY -->
+<div id="compress-overlay" class="compress-overlay">
+    <div class="compress-overlay-content">
+        <div class="compress-spinner"></div>
+        <div id="compress-status"><?= $t["wr_compressing"] ?? "Optimizing photos..." ?></div>
+    </div>
 </div>
 
 <script>
@@ -211,6 +252,66 @@ document.addEventListener("DOMContentLoaded", () => {
     const MAX_PHOTOS = 100;
 
     // ==========================================
+    // CLIENT-SIDE IMAGE COMPRESSION
+    // ==========================================
+    const COMPRESS_MAX_DIM = 1920;
+    const COMPRESS_QUALITY = 0.7;
+
+    const compressOverlay = document.getElementById("compress-overlay");
+    const compressStatusEl = document.getElementById("compress-status");
+
+    function showCompressOverlay(msg) {
+        compressStatusEl.textContent = msg || "<?= $t['wr_compressing'] ?? 'Optimizing photos...' ?>";
+        compressOverlay.classList.add("active");
+    }
+
+    function hideCompressOverlay() {
+        compressOverlay.classList.remove("active");
+    }
+
+    function compressImageClient(file) {
+        return new Promise(function(resolve) {
+            if (!file.type.startsWith("image/")) {
+                resolve(file);
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    var canvas = document.createElement("canvas");
+                    var width = img.width;
+                    var height = img.height;
+
+                    // Resize if exceeds max dimension
+                    if (width > COMPRESS_MAX_DIM || height > COMPRESS_MAX_DIM) {
+                        var ratio = Math.min(COMPRESS_MAX_DIM / width, COMPRESS_MAX_DIM / height);
+                        width = Math.round(width * ratio);
+                        height = Math.round(height * ratio);
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(function(blob) {
+                        var baseName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+                        var compressed = new File([blob], baseName, {
+                            type: "image/jpeg",
+                            lastModified: Date.now()
+                        });
+                        resolve(compressed);
+                    }, "image/jpeg", COMPRESS_QUALITY);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // ==========================================
     // BEFORE & AFTER MODE FUNCTIONS
     // ==========================================
     function createPhotoBox(type) {
@@ -233,14 +334,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         box.addEventListener("click", () => input.click());
 
-        input.addEventListener("change", () => {
+        input.addEventListener("change", async () => {
             const file = input.files[0];
             if (!file) return;
+
+            showCompressOverlay();
+            const compressed = await compressImageClient(file);
+            hideCompressOverlay();
+
+            // Replace file in input with compressed version
+            const dt = new DataTransfer();
+            dt.items.add(compressed);
+            input.files = dt.files;
 
             placeholder.remove();
 
             const img = document.createElement("img");
-            img.src = URL.createObjectURL(file);
+            img.src = URL.createObjectURL(compressed);
             box.appendChild(img);
 
             const del = document.createElement("div");
@@ -297,7 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     bulkUploadBox.addEventListener("click", () => bulkPhotoInput.click());
 
-    bulkPhotoInput.addEventListener("change", () => {
+    bulkPhotoInput.addEventListener("change", async () => {
         const newFiles = Array.from(bulkPhotoInput.files);
 
         // Check if adding new files would exceed the limit
@@ -313,7 +423,16 @@ document.addEventListener("DOMContentLoaded", () => {
             alert(labels.maxPhotosReached + " (" + (newFiles.length - filesToAdd.length) + " photos not added)");
         }
 
-        bulkFiles = bulkFiles.concat(filesToAdd);
+        // Compress all selected photos before adding
+        showCompressOverlay();
+        const compressedFiles = [];
+        for (let i = 0; i < filesToAdd.length; i++) {
+            compressStatusEl.textContent = "<?= $t['wr_compressing_progress'] ?? 'Optimizing photo' ?> " + (i + 1) + " / " + filesToAdd.length + "...";
+            compressedFiles.push(await compressImageClient(filesToAdd[i]));
+        }
+        hideCompressOverlay();
+
+        bulkFiles = bulkFiles.concat(compressedFiles);
         renderBulkPhotos();
         updateFileInput();
     });

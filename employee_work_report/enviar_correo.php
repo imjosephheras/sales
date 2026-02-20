@@ -45,6 +45,7 @@ if (!file_exists($upload_dir)) mkdir($upload_dir, 0755, true);
 // =====================================
 function compressImage($source, $destination, $quality = 55) {
     $info = getimagesize($source);
+    $maxDim = 1920;
 
     switch ($info['mime']) {
         case 'image/jpeg':
@@ -61,6 +62,19 @@ function compressImage($source, $destination, $quality = 55) {
             break;
         default:
             return false;
+    }
+
+    // Redimensionar si excede el tamaño máximo
+    $width = imagesx($image);
+    $height = imagesy($image);
+    if ($width > $maxDim || $height > $maxDim) {
+        $ratio = min($maxDim / $width, $maxDim / $height);
+        $newWidth = (int) round($width * $ratio);
+        $newHeight = (int) round($height * $ratio);
+        $resized = imagecreatetruecolor($newWidth, $newHeight);
+        imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        imagedestroy($image);
+        $image = $resized;
     }
 
     imagejpeg($image, $destination, $quality);
