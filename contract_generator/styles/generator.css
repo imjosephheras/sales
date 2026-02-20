@@ -238,10 +238,26 @@ body {
 
 /* Inbox Search Bar */
 .inbox-search-bar {
-  padding: 0.75rem 1rem;
-  background: var(--bg-white);
+  padding: 0.85rem 1rem 0.65rem;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8edf5 100%);
   border-bottom: 2px solid var(--border-color);
   flex-shrink: 0;
+}
+
+.inbox-search-bar .search-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.5rem;
+}
+
+.inbox-search-bar .search-label i {
+  font-size: 0.7rem;
 }
 
 .inbox-search-bar .search-box {
@@ -261,11 +277,11 @@ body {
 
 .inbox-search-bar .search-box input {
   width: 100%;
-  padding: 0.6rem 2.25rem 0.6rem 2.25rem;
+  padding: 0.65rem 2.25rem 0.65rem 2.25rem;
   border: 2px solid var(--border-color);
   border-radius: 8px;
   font-size: 0.85rem;
-  background: var(--bg-light);
+  background: var(--bg-white);
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 
@@ -279,6 +295,31 @@ body {
 .inbox-search-bar .search-box input::placeholder {
   color: var(--text-gray);
   font-size: 0.8rem;
+}
+
+.search-filters-hint {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-gray);
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.2rem 0.45rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.filter-chip i {
+  font-size: 0.58rem;
+  opacity: 0.7;
 }
 
 .search-clear-btn {

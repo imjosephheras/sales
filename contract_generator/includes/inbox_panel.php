@@ -8,12 +8,22 @@
     <!-- SEARCH BAR -->
     <!-- ========================================= -->
     <div class="inbox-search-bar">
+        <div class="search-label">
+            <i class="fas fa-search"></i>
+            <span>Search Work Orders</span>
+        </div>
         <div class="search-box">
             <i class="fas fa-search"></i>
-            <input type="text" id="client-search-input" placeholder="Search by client, company, seller or work order #..." autocomplete="off">
+            <input type="text" id="client-search-input" placeholder="Client name, company or WO #..." autocomplete="off">
             <button class="search-clear-btn" id="search-clear-btn" style="display: none;" title="Clear search">
                 <i class="fas fa-times"></i>
             </button>
+        </div>
+        <div class="search-filters-hint">
+            <span class="filter-chip"><i class="fas fa-user"></i> Client</span>
+            <span class="filter-chip"><i class="fas fa-building"></i> Company</span>
+            <span class="filter-chip"><i class="fas fa-hashtag"></i> WO #</span>
+            <span class="filter-chip"><i class="fas fa-user-tie"></i> Seller</span>
         </div>
     </div>
 
