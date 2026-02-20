@@ -269,8 +269,11 @@ try {
     // ============================================================
     $pdo->prepare("DELETE FROM scope_sections WHERE form_id = ?")->execute([$saved_form_id]);
 
+    $stmtScopeSec = $pdo->prepare("INSERT INTO scope_sections (form_id, section_order, title, scope_content) VALUES (?, ?, ?, ?)");
+    $scopeSectionOrder = 0;
+
+    // 2b-i: Save manually created scope sections
     if (isset($_POST['Scope_Sections_Title']) && is_array($_POST['Scope_Sections_Title'])) {
-        $stmtScopeSec = $pdo->prepare("INSERT INTO scope_sections (form_id, section_order, title, scope_content) VALUES (?, ?, ?, ?)");
         $titles = $_POST['Scope_Sections_Title'];
         $contents = $_POST['Scope_Sections_Content'] ?? [];
 
@@ -278,7 +281,32 @@ try {
             $secTitle = trim($titles[$i] ?? '');
             $secContent = trim($contents[$i] ?? '');
             if (!empty($secTitle) || !empty($secContent)) {
-                $stmtScopeSec->execute([$saved_form_id, $i, $secTitle, $secContent]);
+                $stmtScopeSec->execute([$saved_form_id, $scopeSectionOrder, $secTitle, $secContent]);
+                $scopeSectionOrder++;
+            }
+        }
+    }
+
+    // 2b-ii: Save selected catalog products as scope sections
+    // When a service type from the catalog is selected (has predefined scope),
+    // it is automatically saved as a scope section with its title and scope items.
+    if (isset($_POST['Selected_Products_Name']) && is_array($_POST['Selected_Products_Name'])) {
+        $productNames = $_POST['Selected_Products_Name'];
+        $productScopes = $_POST['Selected_Products_Scope'] ?? [];
+
+        for ($i = 0; $i < count($productNames); $i++) {
+            $prodTitle = trim($productNames[$i] ?? '');
+            $prodScopeJson = $productScopes[$i] ?? '[]';
+            $prodScopeItems = json_decode($prodScopeJson, true);
+
+            if (!empty($prodTitle) && is_array($prodScopeItems) && !empty($prodScopeItems)) {
+                // Join scope items into a readable text block with bullet points
+                $prodScopeContent = implode("\n", array_map(function($item) {
+                    return "• " . trim($item);
+                }, $prodScopeItems));
+
+                $stmtScopeSec->execute([$saved_form_id, $scopeSectionOrder, $prodTitle, $prodScopeContent]);
+                $scopeSectionOrder++;
             }
         }
     }

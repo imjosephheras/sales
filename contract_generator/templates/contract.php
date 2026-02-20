@@ -236,9 +236,9 @@
     // Encode logo as base64 for DOMPDF compatibility
     $dept = strtolower(trim($data['Service_Type'] ?? ''));
     if (strpos($dept, 'hospitality') !== false) {
-        $logo_file = __DIR__ . '/../../../Images/phospitality.png';
+        $logo_file = __DIR__ . '/../../Images/phospitality.png';
     } else {
-        $logo_file = __DIR__ . '/../../../Images/pfacility.png';
+        $logo_file = __DIR__ . '/../../Images/pfacility.png';
     }
     $logo_base64 = '';
     if (file_exists($logo_file)) {
