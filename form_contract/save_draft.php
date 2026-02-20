@@ -404,8 +404,8 @@ try {
 
     if (isset($_POST['includeStaff']) && $_POST['includeStaff'] === 'Yes') {
         $stmtStaff = $pdo->prepare("
-            INSERT INTO contract_staff (form_id, position, base_rate, percent_increase, bill_rate)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO contract_staff (form_id, department, position, base_rate, percent_increase, bill_rate)
+            VALUES (?, ?, ?, ?, ?, ?)
         ");
 
         // Collect staff positions from dynamic form fields (base_{slug}, increase_{slug}, bill_{slug})
@@ -417,12 +417,14 @@ try {
                 $percentIncrease = floatval($_POST['increase_' . $slug] ?? 0);
                 $billRateRaw = $_POST['bill_' . $slug] ?? '0';
                 $billRate = floatval(str_replace(['$', ','], '', $billRateRaw));
+                $department = $_POST['department_' . $slug] ?? null;
 
                 if ($baseRate > 0 || $percentIncrease > 0 || $billRate > 0) {
                     // Convert slug back to readable position name
                     $positionName = ucwords(str_replace('_', ' ', $slug));
                     $stmtStaff->execute([
                         $saved_form_id,
+                        !empty($department) ? $department : null,
                         $positionName,
                         $baseRate > 0 ? $baseRate : null,
                         $percentIncrease > 0 ? $percentIncrease : null,

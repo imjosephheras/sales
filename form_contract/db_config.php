@@ -165,15 +165,30 @@ function initializeFormsTable($pdo) {
     CREATE TABLE IF NOT EXISTS `contract_staff` (
       `id` INT AUTO_INCREMENT PRIMARY KEY,
       `form_id` INT NOT NULL,
+      `department` VARCHAR(150) DEFAULT NULL,
       `position` VARCHAR(150) DEFAULT NULL,
       `base_rate` DECIMAL(12,2) DEFAULT NULL,
       `percent_increase` DECIMAL(5,2) DEFAULT NULL,
       `bill_rate` DECIMAL(12,2) DEFAULT NULL,
       `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      INDEX `idx_form_id` (`form_id`)
+      INDEX `idx_form_id` (`form_id`),
+      INDEX `idx_department` (`department`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     ");
+
+    // Add department column to contract_staff if missing (upgrade path)
+    try {
+        $stmt = $pdo->query("SHOW COLUMNS FROM `contract_staff` LIKE 'department'");
+        if ($stmt->rowCount() == 0) {
+            $pdo->exec("ALTER TABLE `contract_staff` ADD COLUMN `department` VARCHAR(150) DEFAULT NULL AFTER `form_id`");
+            try {
+                $pdo->exec("ALTER TABLE `contract_staff` ADD INDEX `idx_department` (`department`)");
+            } catch (Exception $e) { /* index may already exist */ }
+        }
+    } catch (Exception $e) {
+        error_log("Error adding department column to contract_staff: " . $e->getMessage());
+    }
 
     // Form photos (Section 8)
     $pdo->exec("

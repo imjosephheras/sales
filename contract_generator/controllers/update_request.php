@@ -159,12 +159,13 @@ try {
 
         // Insert updated rows
         $insertStmt = $pdo->prepare("
-            INSERT INTO contract_staff (form_id, position, base_rate, percent_increase, bill_rate)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO contract_staff (form_id, department, position, base_rate, percent_increase, bill_rate)
+            VALUES (?, ?, ?, ?, ?, ?)
         ");
         foreach ($staffItems as $item) {
             $insertStmt->execute([
                 $id,
+                !empty($item['department']) ? $item['department'] : null,
                 $item['position'] ?? null,
                 !empty($item['base_rate']) ? $item['base_rate'] : null,
                 !empty($item['percent_increase']) ? $item['percent_increase'] : null,
