@@ -14,6 +14,16 @@ use PHPMailer\PHPMailer\PHPMailer;
 $mail_config = require '../mail_config.php';
 
 // =====================================
+//  DETECT BASE PATH FOR URLs
+// =====================================
+$projectRoot = realpath(__DIR__ . '/..');
+$docRoot     = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
+$basePath    = '';
+if ($docRoot && $projectRoot && str_starts_with($projectRoot, $docRoot)) {
+    $basePath = rtrim(str_replace('\\', '/', substr($projectRoot, strlen($docRoot))), '/');
+}
+
+// =====================================
 //  CAPTURAR DATOS DEL FORM
 // =====================================
 $jwo_number = $_POST['JWO_Number'] ?? 'N/A';
@@ -471,7 +481,7 @@ foreach ($bulk_photos as $photo) {
 // =====================================
 if ($action === 'print_only') {
     // Redirect to PDF for printing
-    header('Location: /storage/uploads/work_report_photos/' . $pdf_filename);
+    header('Location: ' . $basePath . '/storage/uploads/work_report_photos/' . $pdf_filename);
     exit;
 }
 
@@ -550,7 +560,7 @@ body { background:#f0f0f0; text-align:center; padding:40px; font-family:Arial; }
 <h2 style="color:#2e7d32;">✓ Service Completion Photo Report Submitted Successfully</h2>
 <p>JWO #: <?= htmlspecialchars($jwo_number) ?></p>
 <div style="margin-top:20px;">
-    <a href="/storage/uploads/work_report_photos/<?= htmlspecialchars($pdf_filename) ?>" target="_blank" class="btn btn-print">Print Report</a>
+    <a href="<?= htmlspecialchars($basePath) ?>/storage/uploads/work_report_photos/<?= htmlspecialchars($pdf_filename) ?>" target="_blank" class="btn btn-print">Print Report</a>
     <a href="index.php" class="btn btn-back">Back</a>
 </div>
 </div>
