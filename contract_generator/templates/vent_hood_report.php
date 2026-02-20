@@ -14,9 +14,9 @@ $company_website = "www.primefacilityservicesgroup.com";
 // Logo path (base64 encode for PDF) - dynamic based on Service_Type
 $dept = strtolower(trim($data['Service_Type'] ?? ''));
 if (strpos($dept, 'hospitality') !== false) {
-    $logo_path = __DIR__ . '/../../../Images/Hospitality.png';
+    $logo_path = __DIR__ . '/../../Images/Hospitality.png';
 } else {
-    $logo_path = __DIR__ . '/../../../Images/Facility.png';
+    $logo_path = __DIR__ . '/../../Images/Facility.png';
 }
 $logo_base64 = '';
 if (file_exists($logo_path)) {
@@ -822,7 +822,7 @@ $client_email = $data['Email'] ?? '';
                     <?php for ($j = $i; $j < $i + $cols && $j < $total_sel; $j++):
                         $prod = $selected_products[$j]['product'];
                         $qty_val = $selected_products[$j]['qty'];
-                        $img_path = __DIR__ . '/../../../Images/hoodvent/' . $prod['image'];
+                        $img_path = __DIR__ . '/../../Images/hoodvent/' . $prod['image'];
                         $ext = pathinfo($prod['image'], PATHINFO_EXTENSION);
                         $mime = ($ext === 'jpg' || $ext === 'jpeg') ? 'image/jpeg' : 'image/png';
                         $img_b64 = '';
