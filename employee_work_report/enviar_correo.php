@@ -161,6 +161,59 @@ if (file_exists($logo_path)) {
 }
 
 // =====================================
+//  MEMORY LIMIT FOR PDF WITH MANY IMAGES
+// =====================================
+ini_set('memory_limit', '512M');
+
+// =====================================
+//  FUNCION PARA REDIMENSIONAR IMAGEN PARA PDF
+// =====================================
+function getImageBase64ForPdf($filepath, $maxDim = 300) {
+    $info = getimagesize($filepath);
+    if (!$info) {
+        // Fallback: return original base64
+        $mime = mime_content_type($filepath);
+        return ['mime' => $mime, 'base64' => base64_encode(file_get_contents($filepath))];
+    }
+
+    $mime = $info['mime'];
+    switch ($mime) {
+        case 'image/jpeg':
+            $image = imagecreatefromjpeg($filepath);
+            break;
+        case 'image/png':
+            $image = imagecreatefrompng($filepath);
+            imagepalettetotruecolor($image);
+            break;
+        case 'image/webp':
+            $image = imagecreatefromwebp($filepath);
+            break;
+        default:
+            return ['mime' => $mime, 'base64' => base64_encode(file_get_contents($filepath))];
+    }
+
+    $width = imagesx($image);
+    $height = imagesy($image);
+
+    if ($width > $maxDim || $height > $maxDim) {
+        $ratio = min($maxDim / $width, $maxDim / $height);
+        $newWidth = (int) round($width * $ratio);
+        $newHeight = (int) round($height * $ratio);
+        $resized = imagecreatetruecolor($newWidth, $newHeight);
+        imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        imagedestroy($image);
+        $image = $resized;
+    }
+
+    ob_start();
+    imagejpeg($image, null, 70);
+    $data = ob_get_clean();
+    imagedestroy($image);
+
+    return ['mime' => 'image/jpeg', 'base64' => base64_encode($data)];
+}
+
+// =====================================
 //  GENERAR HTML PARA PDF
 // =====================================
 ob_start();
@@ -315,11 +368,10 @@ This document includes photographic evidence captured by our field team in relat
 ?>
     <div class="photo-grid-row">
         <?php foreach ($row_photos as $row_photo):
-            $mime = mime_content_type($row_photo);
-            $base64 = base64_encode(file_get_contents($row_photo));
+            $imgData = getImageBase64ForPdf($row_photo, 300);
         ?>
         <div class="photo-grid-cell">
-            <img src="data:<?= $mime ?>;base64,<?= $base64 ?>">
+            <img src="data:<?= $imgData['mime'] ?>;base64,<?= $imgData['base64'] ?>">
         </div>
         <?php endforeach; ?>
     </div>
@@ -432,16 +484,14 @@ This document provides photographic evidence collected by our field team in conn
         <tr class="photo-row">
             <td>
                 <?php if (isset($before_photos[$i])):
-                    $mime = mime_content_type($before_photos[$i]);
-                    $base64 = base64_encode(file_get_contents($before_photos[$i])); ?>
-                    <img src="data:<?= $mime ?>;base64,<?= $base64 ?>">
+                    $imgData = getImageBase64ForPdf($before_photos[$i], 400); ?>
+                    <img src="data:<?= $imgData['mime'] ?>;base64,<?= $imgData['base64'] ?>">
                 <?php endif; ?>
             </td>
             <td>
                 <?php if (isset($after_photos[$i])):
-                    $mime = mime_content_type($after_photos[$i]);
-                    $base64 = base64_encode(file_get_contents($after_photos[$i])); ?>
-                    <img src="data:<?= $mime ?>;base64,<?= $base64 ?>">
+                    $imgData = getImageBase64ForPdf($after_photos[$i], 400); ?>
+                    <img src="data:<?= $imgData['mime'] ?>;base64,<?= $imgData['base64'] ?>">
                 <?php endif; ?>
             </td>
         </tr>
