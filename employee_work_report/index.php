@@ -66,7 +66,7 @@ ob_start();
                 <div class="btn-content">
                     <span class="btn-icon">2</span>
                     <span class="btn-label"><?= $t["wr_btn_all_photos"] ?? "All Photos" ?></span>
-                    <span class="btn-desc"><?= $t["wr_btn_all_photos_desc"] ?? "All photos together, up to 100 (20 per page)" ?></span>
+                    <span class="btn-desc"><?= $t["wr_btn_all_photos_desc"] ?? "All photos together, up to 100" ?></span>
                 </div>
             </label>
         </div>

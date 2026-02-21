@@ -77,7 +77,7 @@ $translations = [
         "wr_btn_before_after" => "Before & After",
         "wr_btn_before_after_desc" => "Side-by-side comparison photos",
         "wr_btn_all_photos" => "All Photos",
-        "wr_btn_all_photos_desc" => "All photos together, up to 100 (20 per page)",
+        "wr_btn_all_photos_desc" => "All photos together, up to 100",
 
         // Section 1
         "wr_sec1_title" => "Section 1: Employee Information",
@@ -197,7 +197,7 @@ $translations = [
         "wr_btn_before_after" => "Antes y Después",
         "wr_btn_before_after_desc" => "Fotos comparativas lado a lado",
         "wr_btn_all_photos" => "Todas las Fotos",
-        "wr_btn_all_photos_desc" => "Todas las fotos juntas, hasta 100 (20 por página)",
+        "wr_btn_all_photos_desc" => "Todas las fotos juntas, hasta 100",
 
         // Section 1
         "wr_sec1_title" => "Sección 1: Información del Empleado",

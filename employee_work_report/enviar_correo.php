@@ -260,7 +260,7 @@ h2 {
 
 if ($report_type === 'all_photos') {
     // =====================================
-    // REPORT TYPE 2: ALL PHOTOS GRID (max 20 per page)
+    // REPORT TYPE 2: ALL PHOTOS GRID (continuous flow)
     // =====================================
     // Use bulk photos if available, otherwise merge before/after
     $all_photos = count($bulk_photos) > 0 ? $bulk_photos : array_merge($before_photos, $after_photos);
@@ -270,9 +270,7 @@ if ($report_type === 'all_photos') {
         $all_photos = array_slice($all_photos, 0, 100);
     }
 
-    $photos_per_page = 20;
     $photos_per_row = 4;
-    $total_pages = max(1, ceil(count($all_photos) / $photos_per_page));
 
     ?>
 <html>
@@ -306,9 +304,6 @@ if ($report_type === 'all_photos') {
     object-fit: cover;
     border: 1px solid #ddd;
 }
-.page-break {
-    page-break-after: always;
-}
 .content-wrapper {
     padding-bottom: 10mm;
 }
@@ -318,9 +313,6 @@ if ($report_type === 'all_photos') {
 
 <div class="content-wrapper">
 <?php
-    $photo_index = 0;
-    $page_num = 1;
-
     if (count($all_photos) === 0):
 ?>
 <!-- NO PHOTOS - Show message -->
@@ -342,8 +334,6 @@ This document includes photographic evidence captured by our field team in relat
 
 <?php
     else:
-    while ($photo_index < count($all_photos)):
-        $photos_on_page = array_slice($all_photos, $photo_index, $photos_per_page);
 ?>
 
 <!-- LOGO -->
@@ -356,20 +346,18 @@ This document includes photographic evidence captured by our field team in relat
 <h1>Service Completion Photo Report</h1>
 <h3>JWO #: <?= htmlspecialchars($jwo_number) ?></h3>
 
-<?php if ($page_num === 1): ?>
 <div class="template-box">
 This document includes photographic evidence captured by our field team in relation to the assigned Job Work Order (JWO). The images serve as supporting material to verify the work completed and to provide a clear visual record of the service conditions. This report has been prepared to promote transparency, ensure compliance with quality assurance standards, and maintain accurate documentation of all services performed.
 </div>
-<?php endif; ?>
 
-<h2>Photo Evidence <?php if ($total_pages > 1): ?>(Page <?= $page_num ?> of <?= $total_pages ?>)<?php endif; ?></h2>
+<h2>Photo Evidence</h2>
 
 <div class="photo-grid">
 <?php
     $row_photos = [];
-    foreach ($photos_on_page as $idx => $photo):
+    foreach ($all_photos as $idx => $photo):
         $row_photos[] = $photo;
-        if (count($row_photos) === $photos_per_row || $idx === count($photos_on_page) - 1):
+        if (count($row_photos) === $photos_per_row || $idx === count($all_photos) - 1):
 ?>
     <div class="photo-grid-row">
         <?php foreach ($row_photos as $row_photo):
@@ -388,14 +376,6 @@ This document includes photographic evidence captured by our field team in relat
 </div>
 
 <?php
-        $photo_index += $photos_per_page;
-        $page_num++;
-        if ($photo_index < count($all_photos)):
-?>
-<div class="page-break"></div>
-<?php
-        endif;
-    endwhile;
     endif;
 ?>
 </div><!-- end content-wrapper -->
