@@ -2,6 +2,14 @@
 error_reporting(E_ALL & ~E_DEPRECATED & ~E_NOTICE);
 
 // =====================================
+//  PHP LIMITS FOR LARGE PHOTO UPLOADS
+// =====================================
+// max_file_uploads default is 20 — increase via .user.ini / .htaccess / php.ini
+// These ini_set calls cover the directives changeable at runtime:
+ini_set('max_execution_time', 300);
+ini_set('memory_limit', '1024M');
+
+// =====================================
 //  LOAD DEPENDENCIES
 // =====================================
 require '../vendor/autoload.php';
@@ -160,10 +168,7 @@ if (file_exists($logo_path)) {
     $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_path));
 }
 
-// =====================================
-//  MEMORY LIMIT FOR PDF WITH MANY IMAGES
-// =====================================
-ini_set('memory_limit', '512M');
+// Memory limit already set at the top of the file (1024M)
 
 // =====================================
 //  FUNCION PARA REDIMENSIONAR IMAGEN PARA PDF
