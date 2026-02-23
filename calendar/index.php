@@ -139,6 +139,10 @@ ob_start();
                             <i class="fas fa-concierge-bell"></i>
                             <span>Services</span>
                         </button>
+                        <button class="nav-toggle-btn" id="toggle-view-mode" title="Toggle Compact/Expanded view">
+                            <i class="fas fa-compress-alt" id="view-mode-icon"></i>
+                            <span id="view-mode-label">Compact</span>
+                        </button>
                     </div>
                 </div>
 
@@ -159,6 +163,25 @@ ob_start();
             </div>
         </div>
 
+    </div>
+
+    <!-- Day Orders Modal Overlay -->
+    <div class="day-modal-overlay" id="day-modal-overlay"></div>
+
+    <!-- Day Orders Modal -->
+    <div class="day-modal" id="day-modal">
+        <div class="day-modal-header">
+            <div class="day-modal-header-left">
+                <h3><i class="fas fa-calendar-day"></i> <span id="day-modal-title"></span></h3>
+                <span class="day-modal-count" id="day-modal-count"></span>
+            </div>
+            <button class="day-modal-close-btn" id="day-modal-close" title="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="day-modal-body" id="day-modal-body">
+            <!-- Order cards rendered here -->
+        </div>
     </div>
 
     <!-- Mini Form Overlay -->
@@ -205,7 +228,23 @@ ob_start();
                 <textarea id="mini-form-notes" placeholder="Add notes for this agenda..." rows="3"></textarea>
             </div>
 
-            <!-- 3 & 4. Frequency: Months and Years -->
+            <!-- 3. Service Status -->
+            <div class="mini-form-field">
+                <label for="mini-form-service-status">
+                    <i class="fas fa-clipboard-check"></i> Service Status
+                </label>
+                <select id="mini-form-service-status">
+                    <option value="pending">Pending</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                    <option value="not_completed">Not Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+
+            <!-- 4 & 5. Frequency: Months and Years -->
             <div class="mini-form-freq-row">
                 <div class="mini-form-field">
                     <label for="mini-form-freq-months">
