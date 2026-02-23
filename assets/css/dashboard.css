@@ -1035,3 +1035,30 @@ body.dashboard-body {
         font-size: 0.7rem;
     }
 }
+
+/* ============================================================
+   PRINT STYLES - Hide dashboard shell, show only page content
+   ============================================================ */
+@media print {
+    .db-sidebar,
+    .db-topbar,
+    .db-overlay {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    .db-main {
+        margin-left: 0 !important;
+        padding-top: 0 !important;
+        padding: 0 !important;
+    }
+
+    .db-content {
+        padding: 0 !important;
+    }
+
+    body.dashboard-body {
+        background: white !important;
+    }
+}

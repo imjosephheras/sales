@@ -84,7 +84,13 @@ class Calendar {
         this.prevBtn.addEventListener('click', () => this.changeMonth(-1));
         this.nextBtn.addEventListener('click', () => this.changeMonth(1));
         this.todayBtn.addEventListener('click', () => this.goToToday());
-        this.printBtn.addEventListener('click', () => window.print());
+        this.printBtn.addEventListener('click', () => {
+            document.body.classList.add('printing');
+            window.print();
+        });
+        window.addEventListener('afterprint', () => {
+            document.body.classList.remove('printing');
+        });
 
         // Mini form close
         if (this.miniFormOverlay) {
