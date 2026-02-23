@@ -112,9 +112,14 @@ ob_start();
     </button>
 </div>
 
-<!-- EDITOR CONTAINER: iframe for Service Report / Product Report -->
+<!-- EDITOR CONTAINER: iframe for Service Report -->
 <div id="editorContainer" style="display:none;">
     <iframe id="editorFrame" src="about:blank" style="width:100%; border:none; border-radius:10px; background:#525659;"></iframe>
+</div>
+
+<!-- PRODUCT EDITOR CONTAINER: separate iframe to preserve selections -->
+<div id="productEditorContainer" style="display:none;">
+    <iframe id="productEditorFrame" src="about:blank" style="width:100%; border:none; border-radius:10px; background:#525659;"></iframe>
 </div>
 
 <!-- PHOTO REPORT CONTENT (inline form) -->
@@ -519,7 +524,8 @@ ob_start();
     box-shadow: 0 2px 8px rgba(0,31,84,0.2);
 }
 /* Editor iframe container */
-#editorFrame {
+#editorFrame,
+#productEditorFrame {
     min-height: 85vh;
 }
 @media (max-width: 480px) {
@@ -857,9 +863,12 @@ document.addEventListener("DOMContentLoaded", function() {
     var backBar = document.getElementById("backToReportsBar");
     var editorContainer = document.getElementById("editorContainer");
     var editorFrame = document.getElementById("editorFrame");
+    var productEditorContainer = document.getElementById("productEditorContainer");
+    var productEditorFrame = document.getElementById("productEditorFrame");
     var photoContent = document.getElementById("photoReportContent");
     var manageProductsContent = document.getElementById("manageProductsContent");
     var activeReport = null;
+    var productEditorLoaded = false;
 
     var editorUrls = {
         service: "../contract_generator/vent_hood_editor.php?embedded=1",
@@ -882,21 +891,34 @@ document.addEventListener("DOMContentLoaded", function() {
             // Show inline photo report form
             photoContent.style.display = "block";
             editorContainer.style.display = "none";
+            productEditorContainer.style.display = "none";
             manageProductsContent.style.display = "none";
-            editorFrame.src = "about:blank";
             photoContent.scrollIntoView({ behavior: "smooth", block: "start" });
         } else if (type === "manage_products") {
             // Show manage products view
             manageProductsContent.style.display = "block";
             photoContent.style.display = "none";
             editorContainer.style.display = "none";
-            editorFrame.src = "about:blank";
+            productEditorContainer.style.display = "none";
             loadProducts();
             manageProductsContent.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else {
-            // Load editor in iframe
+        } else if (type === "product") {
+            // Show product editor in its own persistent iframe
             photoContent.style.display = "none";
             manageProductsContent.style.display = "none";
+            editorContainer.style.display = "none";
+            productEditorContainer.style.display = "block";
+            // Only load once - preserve state on subsequent opens
+            if (!productEditorLoaded) {
+                productEditorFrame.src = editorUrls.product;
+                productEditorLoaded = true;
+            }
+            productEditorContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+            // Load service editor in iframe
+            photoContent.style.display = "none";
+            manageProductsContent.style.display = "none";
+            productEditorContainer.style.display = "none";
             editorContainer.style.display = "block";
             editorFrame.src = editorUrls[type];
             editorContainer.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -915,9 +937,13 @@ document.addEventListener("DOMContentLoaded", function() {
         // Hide back button
         backBar.style.display = "none";
 
-        // Hide editors
+        // Hide service editor and reset it
         editorContainer.style.display = "none";
         editorFrame.src = "about:blank";
+
+        // Hide product editor but do NOT reset its src - preserve selections
+        productEditorContainer.style.display = "none";
+
         photoContent.style.display = "none";
         manageProductsContent.style.display = "none";
 
