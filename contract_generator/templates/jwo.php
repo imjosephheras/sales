@@ -110,6 +110,13 @@
 
         .services-table .service-desc {
             text-align: left;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .services-table td {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .services-table .amount {
@@ -551,7 +558,7 @@
     if (empty($allServiceRows)) {
         $service_description = '';
         if (!empty($data['Site_Observation'])) {
-            $service_description = htmlspecialchars($data['Site_Observation']);
+            $service_description = nl2br(htmlspecialchars($data['Site_Observation']));
         } elseif (!empty($data['scope_of_work'])) {
             $service_description = strip_tags($data['scope_of_work']);
         } else {
@@ -613,10 +620,10 @@
                 $isSecondaryInBundle = $isBundle && !$isFirstInBundle;
             ?>
             <tr<?php if ($isBundle): ?> style="border-left: 3px solid #0066cc;"<?php endif; ?>>
-                <td class="service-desc"><?php echo htmlspecialchars($row['type']); ?></td>
-                <td><?php echo htmlspecialchars($row['time']); ?></td>
-                <td><?php echo htmlspecialchars($row['freq']); ?></td>
-                <td class="service-desc"><?php echo htmlspecialchars($row['desc']); ?></td>
+                <td class="service-desc"><?php echo nl2br(htmlspecialchars($row['type'])); ?></td>
+                <td><?php echo nl2br(htmlspecialchars($row['time'])); ?></td>
+                <td><?php echo nl2br(htmlspecialchars($row['freq'])); ?></td>
+                <td class="service-desc"><?php echo nl2br(htmlspecialchars($row['desc'])); ?></td>
                 <?php if ($isFirstInBundle): ?>
                 <td class="amount" style="text-align: right; vertical-align: middle; background: linear-gradient(135deg, #e8f4fd, #d0ebff);" rowspan="<?php echo $bundleGroupInfo[$bg]['count']; ?>">
                     $<?php echo number_format($bundleGroupInfo[$bg]['total'], 2); ?>

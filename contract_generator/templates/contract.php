@@ -197,6 +197,12 @@
             margin-bottom: 2px;
         }
 
+        /* Ensure text wraps by word and respects line breaks in cells/blocks */
+        td, .notice-block, .preamble, .appendix-content {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
         /* Footer - fixed position, repeats on every page */
         .footer-wrapper {
             position: fixed;

@@ -280,6 +280,8 @@ $tax_rate = 0.0825;
             padding: 6px 10px;
             border: 1px solid #ddd;
             font-size: 9.5pt;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .pricing-table td.amount {
@@ -455,9 +457,9 @@ $tax_rate = 0.0825;
         <tbody>
             <?php foreach ($serviceRows as $row): ?>
             <tr>
-                <td><?php echo htmlspecialchars($row['type']); ?></td>
-                <td><?php echo htmlspecialchars($row['time']); ?></td>
-                <td><?php echo htmlspecialchars($row['freq']); ?></td>
+                <td><?php echo nl2br(htmlspecialchars($row['type'])); ?></td>
+                <td><?php echo nl2br(htmlspecialchars($row['time'])); ?></td>
+                <td><?php echo nl2br(htmlspecialchars($row['freq'])); ?></td>
                 <td class="amount">$<?php echo number_format($row['subtotal'], 2); ?></td>
             </tr>
             <?php endforeach; ?>
