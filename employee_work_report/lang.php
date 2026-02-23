@@ -133,8 +133,7 @@ $translations = [
         "wr_report_photo" => "Photo Report",
         "wr_report_photo_desc" => "Photo documentation of completed services",
         "wr_report_product" => "Product Report",
-        "wr_report_product_desc" => "Product report (coming soon)",
-        "wr_coming_soon" => "Coming soon",
+        "wr_report_product_desc" => "Invoice for replacement parts",
     ],
 
 
@@ -270,8 +269,7 @@ $translations = [
         "wr_report_photo" => "Reporte Fotográfico",
         "wr_report_photo_desc" => "Documentación fotográfica de servicios completados",
         "wr_report_product" => "Reporte de Producto",
-        "wr_report_product_desc" => "Reporte de producto (próximamente)",
-        "wr_coming_soon" => "Próximamente",
+        "wr_report_product_desc" => "Factura por reemplazo de piezas",
     ]
 ];
 ?>
