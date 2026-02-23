@@ -1869,6 +1869,44 @@ body {
     font-size: 0.65rem;
 }
 
+/* Open in Request Form button */
+.day-modal-card-open-form {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: white;
+    background: var(--color-contract);
+    padding: 3px 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.day-modal-card-open-form:hover {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.day-modal-card-open-form i {
+    font-size: 0.65rem;
+}
+
+/* Highlighted card (when navigating from form) */
+.day-modal-card.highlighted {
+    box-shadow: 0 0 0 2px var(--color-contract), var(--shadow-md);
+    background: var(--chip-contract-bg);
+    animation: highlightPulse 1.5s ease-in-out 2;
+}
+
+@keyframes highlightPulse {
+    0%, 100% { box-shadow: 0 0 0 2px var(--color-contract), var(--shadow-md); }
+    50% { box-shadow: 0 0 0 4px var(--color-contract), var(--shadow-lg); }
+}
+
 /* ===== Print Styles ===== */
 @page {
     size: landscape;
