@@ -90,6 +90,17 @@ ob_start();
             </div>
             <div class="report-tile-arrow"><i class="fas fa-external-link-alt"></i></div>
         </a>
+        <!-- Manage Products -->
+        <div class="report-tile" id="tileManageProducts" data-report="manage_products">
+            <div class="report-tile-icon" style="background: linear-gradient(135deg, #0d7c5f, #10a37f);">
+                <i class="fas fa-boxes"></i>
+            </div>
+            <div class="report-tile-body">
+                <h4><?= ($lang === 'es') ? 'Administrar Productos' : 'Manage Products' ?></h4>
+                <p><?= ($lang === 'es') ? 'Crear y administrar catálogo de productos' : 'Create and manage product catalog' ?></p>
+            </div>
+            <div class="report-tile-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
     </div>
 </div>
 
@@ -221,6 +232,84 @@ ob_start();
 
 </form>
 </div>
+
+<!-- MANAGE PRODUCTS CONTENT (inline view) -->
+<div id="manageProductsContent" style="display:none;">
+    <div class="manage-products-container">
+        <h3 class="mp-title">
+            <i class="fas fa-boxes"></i>
+            <?= ($lang === 'es') ? 'Administrar Productos' : 'Manage Products' ?>
+        </h3>
+
+        <!-- Add Product Form -->
+        <div class="mp-form-card">
+            <h4 class="mp-form-title">
+                <i class="fas fa-plus-circle"></i>
+                <?= ($lang === 'es') ? 'Agregar Nuevo Producto' : 'Add New Product' ?>
+            </h4>
+            <form id="addProductForm" enctype="multipart/form-data">
+                <div class="mp-form-group">
+                    <label class="mp-label" for="productName">
+                        <?= ($lang === 'es') ? 'Nombre del Producto' : 'Product Name' ?> <span style="color:#a30000;">*</span>
+                    </label>
+                    <input type="text" id="productName" name="product_name" class="mp-input"
+                           placeholder="<?= ($lang === 'es') ? 'Ingrese nombre del producto' : 'Enter product name' ?>" required>
+                </div>
+                <div class="mp-form-group">
+                    <label class="mp-label">
+                        <?= ($lang === 'es') ? 'Imagen del Producto' : 'Product Image' ?> <span style="color:#a30000;">*</span>
+                    </label>
+                    <!-- Paste Zone -->
+                    <div class="mp-paste-zone" id="pasteZone" tabindex="0">
+                        <div class="mp-paste-icon"><i class="fas fa-clipboard"></i></div>
+                        <p class="mp-paste-text">
+                            <?= ($lang === 'es') ? 'Haz clic aquí y pega una imagen (Ctrl+V)' : 'Click here and paste an image (Ctrl+V)' ?>
+                        </p>
+                        <p class="mp-paste-hint">
+                            <?= ($lang === 'es') ? 'O usa el botón de abajo para subir un archivo' : 'Or use the button below to upload a file' ?>
+                        </p>
+                    </div>
+                    <!-- Image Preview -->
+                    <div class="mp-image-preview" id="imagePreview" style="display:none;">
+                        <img id="previewImg" src="" alt="Preview">
+                        <button type="button" class="mp-remove-image" id="removeImageBtn" title="Remove image">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <!-- File Upload -->
+                    <div class="mp-upload-row">
+                        <label class="mp-upload-btn" for="productImageFile">
+                            <i class="fas fa-upload"></i>
+                            <?= ($lang === 'es') ? 'Subir Archivo' : 'Upload File' ?>
+                        </label>
+                        <input type="file" id="productImageFile" name="product_image" accept="image/*" style="display:none;">
+                        <span class="mp-file-name" id="fileName"></span>
+                    </div>
+                    <input type="hidden" id="productImageBase64" name="product_image_base64" value="">
+                </div>
+                <div class="mp-form-actions">
+                    <button type="submit" class="mp-save-btn" id="saveProductBtn">
+                        <i class="fas fa-save"></i>
+                        <?= ($lang === 'es') ? 'Guardar Producto' : 'Save Product' ?>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Products List -->
+        <div class="mp-list-card">
+            <h4 class="mp-form-title">
+                <i class="fas fa-th-large"></i>
+                <?= ($lang === 'es') ? 'Catálogo de Productos' : 'Product Catalog' ?>
+                <span class="mp-product-count" id="productCount"></span>
+            </h4>
+            <div id="productGrid" class="mp-product-grid">
+                <div class="mp-loading"><i class="fas fa-spinner fa-spin"></i> <?= ($lang === 'es') ? 'Cargando...' : 'Loading...' ?></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 </div>
 
 <style>
@@ -446,6 +535,316 @@ ob_start();
         font-size: 14px;
     }
 }
+
+/* =============================================
+   MANAGE PRODUCTS STYLES
+   ============================================= */
+.manage-products-container {
+    max-width: 100%;
+}
+.mp-title {
+    color: #0d7c5f;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.mp-form-card,
+.mp-list-card {
+    background: #f8f9fa;
+    border: 2px solid #e0e4ea;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.mp-form-title {
+    color: #1e293b;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.mp-form-title i {
+    color: #0d7c5f;
+}
+.mp-product-count {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    margin-left: auto;
+}
+.mp-form-group {
+    margin-bottom: 16px;
+}
+.mp-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+}
+.mp-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #dde1e7;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: white;
+}
+.mp-input:focus {
+    outline: none;
+    border-color: #0d7c5f;
+    box-shadow: 0 0 0 3px rgba(13,124,95,0.12);
+}
+/* Paste Zone */
+.mp-paste-zone {
+    border: 2px dashed #c0c7d0;
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    background: #fafbfc;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    outline: none;
+}
+.mp-paste-zone:hover,
+.mp-paste-zone:focus {
+    border-color: #0d7c5f;
+    background: #f0faf6;
+}
+.mp-paste-zone.drag-over {
+    border-color: #0d7c5f;
+    background: #e6f7f0;
+}
+.mp-paste-icon {
+    font-size: 32px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+.mp-paste-zone:hover .mp-paste-icon,
+.mp-paste-zone:focus .mp-paste-icon {
+    color: #0d7c5f;
+}
+.mp-paste-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+    margin: 0 0 4px 0;
+}
+.mp-paste-hint {
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 0;
+}
+/* Image Preview */
+.mp-image-preview {
+    position: relative;
+    display: inline-block;
+    margin-top: 10px;
+    border: 2px solid #e0e4ea;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+}
+.mp-image-preview img {
+    display: block;
+    max-width: 250px;
+    max-height: 200px;
+    object-fit: contain;
+}
+.mp-remove-image {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(220,38,38,0.9);
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.mp-remove-image:hover {
+    background: #dc2626;
+}
+/* Upload Row */
+.mp-upload-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+.mp-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #334155;
+    color: white;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.mp-upload-btn:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+}
+.mp-file-name {
+    font-size: 13px;
+    color: #64748b;
+}
+/* Form Actions */
+.mp-form-actions {
+    text-align: right;
+    margin-top: 16px;
+}
+.mp-save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: #0d7c5f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.mp-save-btn:hover {
+    background: #0a6b51;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13,124,95,0.3);
+}
+.mp-save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+/* Products Grid */
+.mp-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+}
+.mp-product-card {
+    background: white;
+    border: 2px solid #e0e4ea;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.2s;
+    position: relative;
+}
+.mp-product-card:hover {
+    border-color: #0d7c5f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.mp-product-card-img {
+    width: 100%;
+    height: 120px;
+    object-fit: contain;
+    background: #f8f9fa;
+    padding: 8px;
+}
+.mp-product-card-body {
+    padding: 10px 12px;
+}
+.mp-product-card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.3;
+    margin: 0 0 6px 0;
+    word-break: break-word;
+}
+.mp-product-card-date {
+    font-size: 11px;
+    color: #94a3b8;
+}
+.mp-product-delete {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(220,38,38,0.85);
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.mp-product-card:hover .mp-product-delete {
+    opacity: 1;
+}
+.mp-product-delete:hover {
+    background: #dc2626;
+}
+.mp-loading {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+    padding: 30px;
+    grid-column: 1 / -1;
+}
+.mp-empty {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+    padding: 30px;
+    grid-column: 1 / -1;
+}
+.mp-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+.mp-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.mp-toast.success {
+    background: #0d7c5f;
+}
+.mp-toast.error {
+    background: #dc2626;
+}
+@media (max-width: 480px) {
+    .mp-product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+}
 </style>
 
 <script>
@@ -459,6 +858,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var editorContainer = document.getElementById("editorContainer");
     var editorFrame = document.getElementById("editorFrame");
     var photoContent = document.getElementById("photoReportContent");
+    var manageProductsContent = document.getElementById("manageProductsContent");
     var activeReport = null;
 
     var editorUrls = {
@@ -482,11 +882,21 @@ document.addEventListener("DOMContentLoaded", function() {
             // Show inline photo report form
             photoContent.style.display = "block";
             editorContainer.style.display = "none";
+            manageProductsContent.style.display = "none";
             editorFrame.src = "about:blank";
             photoContent.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (type === "manage_products") {
+            // Show manage products view
+            manageProductsContent.style.display = "block";
+            photoContent.style.display = "none";
+            editorContainer.style.display = "none";
+            editorFrame.src = "about:blank";
+            loadProducts();
+            manageProductsContent.scrollIntoView({ behavior: "smooth", block: "start" });
         } else {
             // Load editor in iframe
             photoContent.style.display = "none";
+            manageProductsContent.style.display = "none";
             editorContainer.style.display = "block";
             editorFrame.src = editorUrls[type];
             editorContainer.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -509,6 +919,7 @@ document.addEventListener("DOMContentLoaded", function() {
         editorContainer.style.display = "none";
         editorFrame.src = "about:blank";
         photoContent.style.display = "none";
+        manageProductsContent.style.display = "none";
 
         // Scroll to top of hub
         reportsHub.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -527,6 +938,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.getElementById("tileProductReport").addEventListener("click", function() {
         openReport("product");
+    });
+
+    document.getElementById("tileManageProducts").addEventListener("click", function() {
+        openReport("manage_products");
     });
 
     // Back button
@@ -612,6 +1027,257 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("main_form").target = "_self";
         document.getElementById("main_form").submit();
     };
+
+    // =============================================
+    // MANAGE PRODUCTS FUNCTIONALITY
+    // =============================================
+    var mpImageBase64 = "";
+    var mpImageFile = null;
+    var pasteZone = document.getElementById("pasteZone");
+    var imagePreview = document.getElementById("imagePreview");
+    var previewImg = document.getElementById("previewImg");
+    var productImageFile = document.getElementById("productImageFile");
+    var productImageBase64 = document.getElementById("productImageBase64");
+    var fileNameEl = document.getElementById("fileName");
+    var removeImageBtn = document.getElementById("removeImageBtn");
+
+    function showImagePreview(src) {
+        previewImg.src = src;
+        imagePreview.style.display = "inline-block";
+        pasteZone.style.display = "none";
+    }
+
+    function clearImageSelection() {
+        mpImageBase64 = "";
+        mpImageFile = null;
+        productImageBase64.value = "";
+        productImageFile.value = "";
+        fileNameEl.textContent = "";
+        previewImg.src = "";
+        imagePreview.style.display = "none";
+        pasteZone.style.display = "";
+    }
+
+    // Clipboard Paste
+    pasteZone.addEventListener("click", function() {
+        pasteZone.focus();
+    });
+
+    document.addEventListener("paste", function(e) {
+        if (manageProductsContent.style.display === "none") return;
+        var items = e.clipboardData && e.clipboardData.items;
+        if (!items) return;
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") !== -1) {
+                e.preventDefault();
+                var blob = items[i].getAsFile();
+                var reader = new FileReader();
+                reader.onload = function(evt) {
+                    mpImageBase64 = evt.target.result;
+                    mpImageFile = null;
+                    productImageBase64.value = mpImageBase64;
+                    productImageFile.value = "";
+                    fileNameEl.textContent = "";
+                    showImagePreview(mpImageBase64);
+                };
+                reader.readAsDataURL(blob);
+                break;
+            }
+        }
+    });
+
+    // Drag and Drop
+    pasteZone.addEventListener("dragover", function(e) {
+        e.preventDefault();
+        pasteZone.classList.add("drag-over");
+    });
+    pasteZone.addEventListener("dragleave", function() {
+        pasteZone.classList.remove("drag-over");
+    });
+    pasteZone.addEventListener("drop", function(e) {
+        e.preventDefault();
+        pasteZone.classList.remove("drag-over");
+        var file = e.dataTransfer.files[0];
+        if (file && file.type.indexOf("image") !== -1) {
+            var reader = new FileReader();
+            reader.onload = function(evt) {
+                mpImageBase64 = evt.target.result;
+                mpImageFile = null;
+                productImageBase64.value = mpImageBase64;
+                productImageFile.value = "";
+                fileNameEl.textContent = "";
+                showImagePreview(mpImageBase64);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // File Upload
+    productImageFile.addEventListener("change", function() {
+        if (this.files && this.files[0]) {
+            var file = this.files[0];
+            mpImageFile = file;
+            mpImageBase64 = "";
+            productImageBase64.value = "";
+            fileNameEl.textContent = file.name;
+            var reader = new FileReader();
+            reader.onload = function(evt) {
+                showImagePreview(evt.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Remove Image
+    removeImageBtn.addEventListener("click", function() {
+        clearImageSelection();
+    });
+
+    // Toast notifications
+    function showToast(message, type) {
+        var existing = document.querySelector(".mp-toast");
+        if (existing) existing.remove();
+        var toast = document.createElement("div");
+        toast.className = "mp-toast " + type;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(function() { toast.classList.add("show"); }, 10);
+        setTimeout(function() {
+            toast.classList.remove("show");
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 3000);
+    }
+
+    // Save Product
+    document.getElementById("addProductForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        var name = document.getElementById("productName").value.trim();
+        if (!name) {
+            showToast("Product name is required", "error");
+            return;
+        }
+        if (!mpImageBase64 && !mpImageFile) {
+            showToast("Product image is required", "error");
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append("product_name", name);
+
+        if (mpImageBase64) {
+            formData.append("product_image_base64", mpImageBase64);
+        } else if (mpImageFile) {
+            formData.append("product_image", mpImageFile);
+        }
+
+        var saveBtn = document.getElementById("saveProductBtn");
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "save_product.php", true);
+        xhr.onload = function() {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> <?= ($lang === "es") ? "Guardar Producto" : "Save Product" ?>';
+            try {
+                var resp = JSON.parse(xhr.responseText);
+                if (resp.success) {
+                    showToast(resp.message, "success");
+                    document.getElementById("productName").value = "";
+                    clearImageSelection();
+                    loadProducts();
+                } else {
+                    showToast(resp.message || "Error saving product", "error");
+                }
+            } catch(err) {
+                showToast("Server error", "error");
+            }
+        };
+        xhr.onerror = function() {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> <?= ($lang === "es") ? "Guardar Producto" : "Save Product" ?>';
+            showToast("Network error", "error");
+        };
+        xhr.send(formData);
+    });
+
+    // Load Products
+    function loadProducts() {
+        var grid = document.getElementById("productGrid");
+        var countEl = document.getElementById("productCount");
+        grid.innerHTML = '<div class="mp-loading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "get_products.php", true);
+        xhr.onload = function() {
+            try {
+                var resp = JSON.parse(xhr.responseText);
+                if (resp.success && resp.products) {
+                    countEl.textContent = "(" + resp.products.length + ")";
+                    if (resp.products.length === 0) {
+                        grid.innerHTML = '<div class="mp-empty"><i class="fas fa-box-open"></i><br><?= ($lang === "es") ? "No hay productos aún" : "No products yet" ?></div>';
+                        return;
+                    }
+                    var html = "";
+                    resp.products.forEach(function(p) {
+                        html += '<div class="mp-product-card" data-id="' + p.id + '">' +
+                            '<button class="mp-product-delete" onclick="deleteProduct(' + p.id + ', this)" title="Delete">' +
+                                '<i class="fas fa-trash"></i>' +
+                            '</button>' +
+                            '<img class="mp-product-card-img" src="../' + escapeAttr(p.image_path) + '" alt="' + escapeAttr(p.name) + '">' +
+                            '<div class="mp-product-card-body">' +
+                                '<p class="mp-product-card-name">' + escapeHtml(p.name) + '</p>' +
+                                '<span class="mp-product-card-date">' + (p.created_at || '') + '</span>' +
+                            '</div>' +
+                        '</div>';
+                    });
+                    grid.innerHTML = html;
+                } else {
+                    grid.innerHTML = '<div class="mp-empty">Error loading products</div>';
+                }
+            } catch(err) {
+                grid.innerHTML = '<div class="mp-empty">Error loading products</div>';
+            }
+        };
+        xhr.onerror = function() {
+            grid.innerHTML = '<div class="mp-empty">Network error</div>';
+        };
+        xhr.send();
+    }
+
+    // Delete Product
+    window.deleteProduct = function(id, btn) {
+        if (!confirm("<?= ($lang === 'es') ? '¿Eliminar este producto?' : 'Delete this product?' ?>")) return;
+        var formData = new FormData();
+        formData.append("id", id);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "delete_product.php", true);
+        xhr.onload = function() {
+            try {
+                var resp = JSON.parse(xhr.responseText);
+                if (resp.success) {
+                    showToast(resp.message, "success");
+                    loadProducts();
+                } else {
+                    showToast(resp.message || "Error deleting product", "error");
+                }
+            } catch(err) {
+                showToast("Server error", "error");
+            }
+        };
+        xhr.send(formData);
+    };
+
+    // Utility functions for manage products
+    function escapeHtml(str) {
+        var div = document.createElement("div");
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+    function escapeAttr(str) {
+        return String(str).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
 });
 </script>
 

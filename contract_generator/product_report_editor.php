@@ -37,58 +37,83 @@ if (file_exists($logo_path)) {
     $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_path));
 }
 
-// Product catalog (same as Service Report)
-$products = [
-    ['image' => '5 16 inch chain.png', 'name' => '16" Chain (5 ft)'],
-    ['image' => '6 Break-Away Stud Doors.png', 'name' => 'Break-Away Stud Doors'],
-    ['image' => 'Canopy Hood Light Fixture with Clear Coated Tempered Glass Globe and Wire Guard.png', 'name' => 'Canopy Hood Light Fixture – Clear Coated Tempered Glass Globe & Wire Guard'],
-    ['image' => 'Canopy Hood Light Fixture with Clear Tempered Glass Globe.png', 'name' => 'Canopy Hood Light Fixture – Clear Tempered Glass Globe'],
-    ['image' => 'Canopy Hood Lights.png', 'name' => 'Canopy Hood Lights'],
-    ['image' => 'CaptiveAire Hinge Kits.png', 'name' => 'Captive Aire Hinge Kits'],
-    ['image' => 'Centrifugal Fan Impeller.png', 'name' => 'Centrifugal Fan Impeller'],
-    ['image' => 'Clear Coated Tempered Glass Globe for L50 L55 Hood Lights.png', 'name' => 'Clear Coated Tempered Glass Globe for L50/L55 Hood Lights'],
-    ['image' => 'Downblast HVAC Exhaust Fans.png', 'name' => 'Downblast HVAC Exhaust Fans'],
-    ['image' => 'Driploc Hinge Kits.png', 'name' => 'DripLoc Hinge Kits'],
-    ['image' => 'DRIPLOC Type 1-S Exhaust Fan Hinge Kit.png', 'name' => 'DripLoc Type 1-S Exhaust Fan Hinge Kit'],
-    ['image' => 'Driploc Grease Containment.png', 'name' => 'DripLoc Grease Containment'],
-    ['image' => 'Duct Wrap Kit.png', 'name' => 'Duct Wrap Kit'],
-    ['image' => 'Ductmate Moist Drain Fitting – Galvanized – 3-4.png', 'name' => 'Ductmate Moist Drain Fitting – Galvanized (3–4")'],
-    ['image' => 'Exhaust Fan Accessories.png', 'name' => 'Exhaust Fan Accessories'],
-    ['image' => 'Exhaust Fan Grease Box.png', 'name' => 'Exhaust Fan Grease Box'],
-    ['image' => 'Exhaust Fan Motor and Blower Assembly.png', 'name' => 'Exhaust Fan Motor & Blower Assembly'],
-    ['image' => 'Exhaust Hood Fan Motor (Replacement).png', 'name' => 'Exhaust Hood Fan Motor (Replacement)'],
-    ['image' => 'Exhaust Hood.png', 'name' => 'Exhaust Hood'],
-    ['image' => 'EZ Kleen Industrial Air Filter.png', 'name' => 'EZ Kleen Industrial Air Filter'],
-    ['image' => 'Fire Suppression Blow-Off Caps.png', 'name' => 'Fire Suppression Blow-Off Caps'],
-    ['image' => 'Food Truck Exhaust Fans.png', 'name' => 'Food Truck Exhaust Fans'],
-    ['image' => 'Galvanized Conical Duct Transition.png', 'name' => 'Galvanized Conical Duct Transition'],
-    ['image' => 'Grease Away Rooftop Grease Neutralize – 16oz Shaker.png', 'name' => 'Grease Away Rooftop Grease Neutralizer – 16 oz Shaker'],
-    ['image' => 'Grease Catcher.png', 'name' => 'Grease Catcher'],
-    ['image' => 'Grease containment ring.png', 'name' => 'Grease Containment Ring'],
-    ['image' => 'Grease Cups & Drains.png', 'name' => 'Grease Cups & Drains'],
-    ['image' => 'Grease Drain Kit.png', 'name' => 'Grease Drain Kit'],
-    ['image' => 'Grease Hood Filter (Mesh 320).png', 'name' => 'Grease Hood Filter (Mesh 320)'],
-    ['image' => 'Hinge Kit Exhaust Fan Hinge.png', 'name' => 'Exhaust Fan Hinge Kit'],
-    ['image' => 'Hinge Kits.png', 'name' => 'Hinge Kits'],
-    ['image' => 'Hood Filters with Bottom Hooks – All Brands.png', 'name' => 'Hood Filters with Bottom Hooks – All Brands'],
-    ['image' => 'HVAC duct insulation.png', 'name' => 'HVAC Duct Insulation'],
-    ['image' => 'Kason Welded Grease Filters.png', 'name' => 'Kason Welded Grease Filters'],
-    ['image' => 'Mavrik Stainless Steel Hood Filters.jpg', 'name' => 'Mavrik Stainless Steel Hood Filters'],
-    ['image' => 'Metal Electrical Junction Box with Terminal Block.png', 'name' => 'Metal Electrical Junction Box with Terminal Block'],
-    ['image' => 'Omni Super Hinge.png', 'name' => 'Omni Super Hinge'],
-    ['image' => 'Optional Wire Guard Replacement for Canopy Lighting.png', 'name' => 'Optional Wire Guard for Canopy Lighting'],
-    ['image' => 'PVC 90-degree elbow.png', 'name' => 'PVC 90-degree elbow'],
-    ['image' => 'Replacement Grease Pillows.png', 'name' => 'Replacement Grease Pillows'],
-    ['image' => 'Restaurant Upblast Exhaust.png', 'name' => 'Restaurant Upblast Exhaust'],
-    ['image' => 'Roof Curbs.png', 'name' => 'Roof Curbs'],
-    ['image' => 'Roof Exhaust Fan Grease Containment Mat.jpg', 'name' => 'Roof Exhaust Fan Grease Containment Mat'],
-    ['image' => 'Spark Arrestor Hood Filters.png', 'name' => 'Spark Arrestor Hood Filters'],
-    ['image' => 'Spill Prevention and Clean Up.png', 'name' => 'Spill Prevention & Clean-Up'],
-    ['image' => 'Standard Aluminum Grease Filters.png', 'name' => 'Standard Aluminum Grease Filters'],
-    ['image' => 'Standard Galvanized Grease Filters.png', 'name' => 'Standard Galvanized Grease Filters'],
-    ['image' => 'Start Stop Push Button Station.png', 'name' => 'Start/Stop Push Button Station'],
-    ['image' => 'Upflow Installation Kit (Vertical Return Air Kit).png', 'name' => 'Upflow Installation Kit (Vertical Return Air Kit)'],
+// Product catalog - hardcoded defaults
+$hardcoded_products = [
+    ['image' => '../Images/hoodvent/5 16 inch chain.png', 'name' => '16" Chain (5 ft)'],
+    ['image' => '../Images/hoodvent/6 Break-Away Stud Doors.png', 'name' => 'Break-Away Stud Doors'],
+    ['image' => '../Images/hoodvent/Canopy Hood Light Fixture with Clear Coated Tempered Glass Globe and Wire Guard.png', 'name' => 'Canopy Hood Light Fixture – Clear Coated Tempered Glass Globe & Wire Guard'],
+    ['image' => '../Images/hoodvent/Canopy Hood Light Fixture with Clear Tempered Glass Globe.png', 'name' => 'Canopy Hood Light Fixture – Clear Tempered Glass Globe'],
+    ['image' => '../Images/hoodvent/Canopy Hood Lights.png', 'name' => 'Canopy Hood Lights'],
+    ['image' => '../Images/hoodvent/CaptiveAire Hinge Kits.png', 'name' => 'Captive Aire Hinge Kits'],
+    ['image' => '../Images/hoodvent/Centrifugal Fan Impeller.png', 'name' => 'Centrifugal Fan Impeller'],
+    ['image' => '../Images/hoodvent/Clear Coated Tempered Glass Globe for L50 L55 Hood Lights.png', 'name' => 'Clear Coated Tempered Glass Globe for L50/L55 Hood Lights'],
+    ['image' => '../Images/hoodvent/Downblast HVAC Exhaust Fans.png', 'name' => 'Downblast HVAC Exhaust Fans'],
+    ['image' => '../Images/hoodvent/Driploc Hinge Kits.png', 'name' => 'DripLoc Hinge Kits'],
+    ['image' => '../Images/hoodvent/DRIPLOC Type 1-S Exhaust Fan Hinge Kit.png', 'name' => 'DripLoc Type 1-S Exhaust Fan Hinge Kit'],
+    ['image' => '../Images/hoodvent/Driploc Grease Containment.png', 'name' => 'DripLoc Grease Containment'],
+    ['image' => '../Images/hoodvent/Duct Wrap Kit.png', 'name' => 'Duct Wrap Kit'],
+    ['image' => '../Images/hoodvent/Ductmate Moist Drain Fitting – Galvanized – 3-4.png', 'name' => 'Ductmate Moist Drain Fitting – Galvanized (3–4")'],
+    ['image' => '../Images/hoodvent/Exhaust Fan Accessories.png', 'name' => 'Exhaust Fan Accessories'],
+    ['image' => '../Images/hoodvent/Exhaust Fan Grease Box.png', 'name' => 'Exhaust Fan Grease Box'],
+    ['image' => '../Images/hoodvent/Exhaust Fan Motor and Blower Assembly.png', 'name' => 'Exhaust Fan Motor & Blower Assembly'],
+    ['image' => '../Images/hoodvent/Exhaust Hood Fan Motor (Replacement).png', 'name' => 'Exhaust Hood Fan Motor (Replacement)'],
+    ['image' => '../Images/hoodvent/Exhaust Hood.png', 'name' => 'Exhaust Hood'],
+    ['image' => '../Images/hoodvent/EZ Kleen Industrial Air Filter.png', 'name' => 'EZ Kleen Industrial Air Filter'],
+    ['image' => '../Images/hoodvent/Fire Suppression Blow-Off Caps.png', 'name' => 'Fire Suppression Blow-Off Caps'],
+    ['image' => '../Images/hoodvent/Food Truck Exhaust Fans.png', 'name' => 'Food Truck Exhaust Fans'],
+    ['image' => '../Images/hoodvent/Galvanized Conical Duct Transition.png', 'name' => 'Galvanized Conical Duct Transition'],
+    ['image' => '../Images/hoodvent/Grease Away Rooftop Grease Neutralize – 16oz Shaker.png', 'name' => 'Grease Away Rooftop Grease Neutralizer – 16 oz Shaker'],
+    ['image' => '../Images/hoodvent/Grease Catcher.png', 'name' => 'Grease Catcher'],
+    ['image' => '../Images/hoodvent/Grease containment ring.png', 'name' => 'Grease Containment Ring'],
+    ['image' => '../Images/hoodvent/Grease Cups & Drains.png', 'name' => 'Grease Cups & Drains'],
+    ['image' => '../Images/hoodvent/Grease Drain Kit.png', 'name' => 'Grease Drain Kit'],
+    ['image' => '../Images/hoodvent/Grease Hood Filter (Mesh 320).png', 'name' => 'Grease Hood Filter (Mesh 320)'],
+    ['image' => '../Images/hoodvent/Hinge Kit Exhaust Fan Hinge.png', 'name' => 'Exhaust Fan Hinge Kit'],
+    ['image' => '../Images/hoodvent/Hinge Kits.png', 'name' => 'Hinge Kits'],
+    ['image' => '../Images/hoodvent/Hood Filters with Bottom Hooks – All Brands.png', 'name' => 'Hood Filters with Bottom Hooks – All Brands'],
+    ['image' => '../Images/hoodvent/HVAC duct insulation.png', 'name' => 'HVAC Duct Insulation'],
+    ['image' => '../Images/hoodvent/Kason Welded Grease Filters.png', 'name' => 'Kason Welded Grease Filters'],
+    ['image' => '../Images/hoodvent/Mavrik Stainless Steel Hood Filters.jpg', 'name' => 'Mavrik Stainless Steel Hood Filters'],
+    ['image' => '../Images/hoodvent/Metal Electrical Junction Box with Terminal Block.png', 'name' => 'Metal Electrical Junction Box with Terminal Block'],
+    ['image' => '../Images/hoodvent/Omni Super Hinge.png', 'name' => 'Omni Super Hinge'],
+    ['image' => '../Images/hoodvent/Optional Wire Guard Replacement for Canopy Lighting.png', 'name' => 'Optional Wire Guard for Canopy Lighting'],
+    ['image' => '../Images/hoodvent/PVC 90-degree elbow.png', 'name' => 'PVC 90-degree elbow'],
+    ['image' => '../Images/hoodvent/Replacement Grease Pillows.png', 'name' => 'Replacement Grease Pillows'],
+    ['image' => '../Images/hoodvent/Restaurant Upblast Exhaust.png', 'name' => 'Restaurant Upblast Exhaust'],
+    ['image' => '../Images/hoodvent/Roof Curbs.png', 'name' => 'Roof Curbs'],
+    ['image' => '../Images/hoodvent/Roof Exhaust Fan Grease Containment Mat.jpg', 'name' => 'Roof Exhaust Fan Grease Containment Mat'],
+    ['image' => '../Images/hoodvent/Spark Arrestor Hood Filters.png', 'name' => 'Spark Arrestor Hood Filters'],
+    ['image' => '../Images/hoodvent/Spill Prevention and Clean Up.png', 'name' => 'Spill Prevention & Clean-Up'],
+    ['image' => '../Images/hoodvent/Standard Aluminum Grease Filters.png', 'name' => 'Standard Aluminum Grease Filters'],
+    ['image' => '../Images/hoodvent/Standard Galvanized Grease Filters.png', 'name' => 'Standard Galvanized Grease Filters'],
+    ['image' => '../Images/hoodvent/Start Stop Push Button Station.png', 'name' => 'Start/Stop Push Button Station'],
+    ['image' => '../Images/hoodvent/Upflow Installation Kit (Vertical Return Air Kit).png', 'name' => 'Upflow Installation Kit (Vertical Return Air Kit)'],
 ];
+
+// Load products from database and merge with hardcoded
+$db_products = [];
+try {
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `products` (
+            `id`         INT AUTO_INCREMENT PRIMARY KEY,
+            `name`       VARCHAR(255) NOT NULL,
+            `image_path` VARCHAR(500) NOT NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+    $dbStmt = $pdo->query("SELECT * FROM `products` ORDER BY `name` ASC");
+    $dbRows = $dbStmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($dbRows as $row) {
+        $db_products[] = [
+            'image' => '../' . $row['image_path'],
+            'name' => $row['name'],
+        ];
+    }
+} catch (PDOException $e) {
+    // Silently skip if table doesn't exist yet
+}
+
+$products = array_merge($db_products, $hardcoded_products);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -802,6 +827,47 @@ $products = [
             line-height: 1.2;
         }
 
+        /* Search Bar in Side Panel */
+        .panel-search-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: white;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .panel-search-icon {
+            position: absolute;
+            left: 12px;
+            color: #999;
+            font-size: 13px;
+            pointer-events: none;
+        }
+        .panel-search-input {
+            width: 100%;
+            padding: 10px 14px 10px 36px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .panel-search-input:focus {
+            border-color: #6f42c1;
+            box-shadow: 0 0 0 3px rgba(111,66,193,0.12);
+        }
+        .panel-no-results {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            padding: 20px 10px;
+            font-style: italic;
+        }
+
         .side-panel-count {
             background: #f5f5f5;
             padding: 10px 18px;
@@ -988,10 +1054,16 @@ $products = [
     </div>
     <div class="side-panel-body">
         <p class="panel-hint">Select the products needed for replacement. Selected items will appear in the invoice table.</p>
+        <!-- Search Bar -->
+        <div class="panel-search-wrapper">
+            <i class="panel-search-icon fas fa-search"></i>
+            <input type="text" id="catalogSearch" class="panel-search-input" placeholder="Search products..." autocomplete="off">
+        </div>
+        <div id="catalogNoResults" class="panel-no-results" style="display:none;">No products found</div>
         <div class="product-preview-grid" id="productPreviewGrid">
             <?php foreach ($products as $index => $product): ?>
-            <div class="product-preview-tile" data-index="<?php echo $index; ?>" data-image="../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" data-name="<?php echo htmlspecialchars($product['name']); ?>" onclick="toggleProductSelection(this)">
-                <img src="../Images/hoodvent/<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
+            <div class="product-preview-tile" data-index="<?php echo $index; ?>" data-image="<?php echo htmlspecialchars($product['image']); ?>" data-name="<?php echo htmlspecialchars($product['name']); ?>" onclick="toggleProductSelection(this)">
+                <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>">
                 <div class="preview-name"><?php echo htmlspecialchars($product['name']); ?></div>
             </div>
             <?php endforeach; ?>
@@ -1610,6 +1682,38 @@ $products = [
     }
 
     // =============================================
+    // CATALOG SEARCH
+    // =============================================
+    function initCatalogSearch() {
+        var searchInput = document.getElementById('catalogSearch');
+        var noResults = document.getElementById('catalogNoResults');
+        var tiles = document.querySelectorAll('.product-preview-tile');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function() {
+            var query = this.value.toLowerCase().trim();
+            var visibleCount = 0;
+
+            tiles.forEach(function(tile) {
+                var name = (tile.getAttribute('data-name') || '').toLowerCase();
+                if (query === '' || name.indexOf(query) !== -1) {
+                    tile.style.display = '';
+                    visibleCount++;
+                } else {
+                    tile.style.display = 'none';
+                }
+            });
+
+            if (visibleCount === 0 && query !== '') {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+        });
+    }
+
+    // =============================================
     // INITIALIZE
     // =============================================
     document.addEventListener('DOMContentLoaded', function() {
@@ -1617,6 +1721,7 @@ $products = [
         initSignaturePad('sig-tech');
         initDateFields();
         initCalendarButtons();
+        initCatalogSearch();
 
         window.addEventListener('resize', function() {
             Object.keys(signaturePads).forEach(function(id) {
