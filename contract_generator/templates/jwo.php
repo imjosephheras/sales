@@ -388,13 +388,14 @@
     <!-- CLIENT & WORK INFO - 7 COLUMNS INVISIBLE -->
     <?php
     // Prepare data - using correct database field names
-    $client_name = htmlspecialchars($data['client_name'] ?? $data['Client_Name'] ?? 'N/A');
-    $client_title = htmlspecialchars($data['Client_Title'] ?? '');
-    $client_email = htmlspecialchars($data['Email'] ?? 'N/A');
-    $client_phone = htmlspecialchars($data['Number_Phone'] ?? 'N/A');
+    // nl2br preserves line breaks entered by the user in Section 2
+    $client_name = nl2br(htmlspecialchars($data['client_name'] ?? $data['Client_Name'] ?? 'N/A'));
+    $client_title = nl2br(htmlspecialchars($data['Client_Title'] ?? ''));
+    $client_email = nl2br(htmlspecialchars($data['Email'] ?? 'N/A'));
+    $client_phone = nl2br(htmlspecialchars($data['Number_Phone'] ?? 'N/A'));
 
-    $company_name = htmlspecialchars($data['Company_Name'] ?? 'N/A');
-    $company_address = htmlspecialchars($data['Company_Address'] ?? 'N/A');
+    $company_name = nl2br(htmlspecialchars($data['Company_Name'] ?? 'N/A'));
+    $company_address = nl2br(htmlspecialchars($data['Company_Address'] ?? 'N/A'));
 
     $seller = htmlspecialchars($data['Seller'] ?? 'N/A');
     $work_date = date('m/d/Y');

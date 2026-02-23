@@ -2,7 +2,7 @@
 
 <!-- PREAMBLE -->
 <div class="preamble">
-    <strong>PRIME HOSPITALITY SERVICES OF TEXAS</strong>, with main office at 8303 Westglen Dr., Houston, TX 77063 ("<strong>PRIME</strong>"), and <strong><?php echo nl2br($company_name) ?: '(company name)'; ?></strong>, with its main office at <?php echo nl2br($company_address) ?: '(address)'; ?> ("<strong>CLIENT</strong>"), accept the terms and conditions set forth in this Temporary Staffing Services Agreement (the "Agreement").
+    <strong>PRIME HOSPITALITY SERVICES OF TEXAS</strong>, with main office at 8303 Westglen Dr., Houston, TX 77063 ("<strong>PRIME</strong>"), and <strong><?php echo $company_name ?: '(company name)'; ?></strong>, with its main office at <?php echo $company_address ?: '(address)'; ?> ("<strong>CLIENT</strong>"), accept the terms and conditions set forth in this Temporary Staffing Services Agreement (the "Agreement").
 </div>
 
 <!-- SECTION 1 -->

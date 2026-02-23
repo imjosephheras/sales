@@ -7,12 +7,12 @@
 
     <div class="notice-block">
         <strong>Customer:</strong>
-        <?php echo nl2br($company_name) ?: '(Company Name)'; ?><br>
-        <?php echo nl2br($company_address) ?: '(ADDRESS)'; ?>
+        <?php echo $company_name ?: '(Company Name)'; ?><br>
+        <?php echo $company_address ?: '(ADDRESS)'; ?>
         <br><br>
         <strong>For the attention of:</strong>
-        <?php echo nl2br($client_name) ?: '(customer_name)'; ?><br>
-        <?php echo nl2br($client_title) ?: '(contact_name)'; ?>
+        <?php echo $client_name ?: '(customer_name)'; ?><br>
+        <?php echo $client_title ?: '(contact_name)'; ?>
     </div>
 
     <p><span class="subsection-label">II.</span> In addition, it will be sufficient for the Contractor to deliver it in person or send it by a nationally recognized express courier service or by registered mail to:</p>

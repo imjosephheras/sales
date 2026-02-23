@@ -92,11 +92,11 @@ if (file_exists($logo_file)) {
     $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_file));
 }
 
-// Client data
-$company_name = htmlspecialchars($data['Company_Name'] ?? '');
-$company_address = htmlspecialchars($data['Company_Address'] ?? '');
-$client_name = htmlspecialchars($data['client_name'] ?? '');
-$client_title = htmlspecialchars($data['Client_Title'] ?? '');
+// Client data (nl2br preserves line breaks entered by the user in Section 2)
+$company_name = nl2br(htmlspecialchars($data['Company_Name'] ?? ''));
+$company_address = nl2br(htmlspecialchars($data['Company_Address'] ?? ''));
+$client_name = nl2br(htmlspecialchars($data['client_name'] ?? ''));
+$client_title = nl2br(htmlspecialchars($data['Client_Title'] ?? ''));
 
 // Contract duration mapping
 $duration_map = [
@@ -401,8 +401,8 @@ foreach ($contractStaff as $staff) {
 
         <div class="notice-block">
             <strong>Client:</strong>
-            <?php echo nl2br($company_name); ?><br>
-            <?php echo nl2br($company_address); ?>
+            <?php echo $company_name; ?><br>
+            <?php echo $company_address; ?>
             <br><br>
             <strong>Attn:</strong><br>
             Thomas Turner<br>
@@ -541,7 +541,7 @@ foreach ($contractStaff as $staff) {
         <table class="sig-table">
             <tr>
                 <td>
-                    <div class="signature-block-title"><?php echo nl2br($company_name); ?></div>
+                    <div class="signature-block-title"><?php echo $company_name; ?></div>
                     <div class="sig-line-item">
                         <div class="sig-label">Signature:</div>
                         <div class="sig-underline"></div>

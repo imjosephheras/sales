@@ -251,11 +251,11 @@
         $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_file));
     }
 
-    // Prepare client data
-    $client_name = htmlspecialchars($data['client_name'] ?? $data['Client_Name'] ?? '');
-    $client_title = htmlspecialchars($data['Client_Title'] ?? '');
-    $company_name = htmlspecialchars($data['Company_Name'] ?? '');
-    $company_address = htmlspecialchars($data['Company_Address'] ?? '');
+    // Prepare client data (nl2br preserves line breaks entered by the user in Section 2)
+    $client_name = nl2br(htmlspecialchars($data['client_name'] ?? $data['Client_Name'] ?? ''));
+    $client_title = nl2br(htmlspecialchars($data['Client_Title'] ?? ''));
+    $company_name = nl2br(htmlspecialchars($data['Company_Name'] ?? ''));
+    $company_address = nl2br(htmlspecialchars($data['Company_Address'] ?? ''));
 
     // Contract duration mapping
     $duration_map = [

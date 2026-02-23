@@ -434,12 +434,12 @@ ob_start();
 <div class="section">
 <h2>Section 2: Client Information</h2>
 
-<div class="field"><span class="label">Client Name:</span><?= htmlspecialchars($client_name) ?></div>
-<div class="field"><span class="label">Client Title:</span><?= htmlspecialchars($client_title) ?></div>
-<div class="field"><span class="label">Email:</span><?= htmlspecialchars($email) ?></div>
-<div class="field"><span class="label">Phone:</span><?= htmlspecialchars($number_phone) ?></div>
-<div class="field"><span class="label">Company:</span><?= htmlspecialchars($company_name) ?></div>
-<div class="field"><span class="label">Address:</span><?= htmlspecialchars($company_address) ?></div>
+<div class="field"><span class="label">Client Name:</span><?= nl2br(htmlspecialchars($client_name)) ?></div>
+<div class="field"><span class="label">Client Title:</span><?= nl2br(htmlspecialchars($client_title)) ?></div>
+<div class="field"><span class="label">Email:</span><?= nl2br(htmlspecialchars($email)) ?></div>
+<div class="field"><span class="label">Phone:</span><?= nl2br(htmlspecialchars($number_phone)) ?></div>
+<div class="field"><span class="label">Company:</span><?= nl2br(htmlspecialchars($company_name)) ?></div>
+<div class="field"><span class="label">Address:</span><?= nl2br(htmlspecialchars($company_address)) ?></div>
 <div class="field"><span class="label">New Client:</span><?= htmlspecialchars($is_new_client) ?></div>
 </div>
 
