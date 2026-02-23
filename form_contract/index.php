@@ -1012,6 +1012,9 @@ ob_start();
   <button type="button" id="btnPasteForm" class="clipboard-btn clipboard-paste">
     📌 <?= ($lang=='en') ? "Paste" : "Pegar"; ?>
   </button>
+  <button type="button" id="btnViewInCalendar" class="clipboard-btn clipboard-calendar" style="display:none;">
+    📅 <?= ($lang=='en') ? "View in Calendar" : "Ver en Calendario"; ?>
+  </button>
 </div>
 
 <style>
@@ -1069,6 +1072,16 @@ ob_start();
 .clipboard-paste:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+}
+
+.clipboard-calendar {
+  background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+  color: white;
+}
+
+.clipboard-calendar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26,115,232,0.3);
 }
 
 @media (max-width: 768px) {
@@ -2289,6 +2302,25 @@ window.loadFormData = function(formId) {
       document.querySelector(`[data-form-id="${formId}"]`)?.classList.add('active');
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Show/hide "View in Calendar" button based on Work_Date
+      const calBtn = document.getElementById('btnViewInCalendar');
+      if (calBtn) {
+        const workDate = data.form.Work_Date;
+        if (workDate) {
+          calBtn.style.display = '';
+          calBtn.onclick = function() {
+            window.location.href = '../calendar/?date=' + encodeURIComponent(workDate) + '&form_id=' + formId;
+          };
+        } else {
+          calBtn.style.display = '';
+          calBtn.onclick = function() {
+            alert(formLang === 'en'
+              ? 'This order has no Work Date assigned. Please set a Work Date first to view it in the Calendar.'
+              : 'Esta orden no tiene Fecha de Trabajo asignada. Establezca una Fecha de Trabajo primero para verla en el Calendario.');
+          };
+        }
+      }
     })
     .catch(err => {
       console.error('❌ Error:', err);
@@ -2709,6 +2741,10 @@ window.loadFormData = function(formId) {
     // Clear read-only mode if it was active
     applyCompletedReadonly(false);
 
+    // Hide "View in Calendar" button since there's no order loaded
+    const calBtn = document.getElementById('btnViewInCalendar');
+    if (calBtn) calBtn.style.display = 'none';
+
     // Hide janitorial section and reset table
     const section18 = document.getElementById('section18Container');
     if (section18) section18.style.display = 'none';
@@ -3012,6 +3048,23 @@ window.loadFormData = function(formId) {
       }, 200);
     }, 200);
   });
+
+  /* ===============================
+     AUTO-LOAD ORDER FROM URL PARAMS
+     Supports: ?form_id=123 (from Calendar cross-navigation)
+  =============================== */
+  const urlParams = new URLSearchParams(window.location.search);
+  const autoLoadFormId = urlParams.get('form_id');
+  if (autoLoadFormId && !isNaN(autoLoadFormId)) {
+    // Small delay to ensure pending forms sidebar is loaded first
+    setTimeout(() => {
+      loadFormData(parseInt(autoLoadFormId, 10));
+      // Clean the URL without reloading (remove form_id param)
+      const cleanUrl = new URL(window.location);
+      cleanUrl.searchParams.delete('form_id');
+      window.history.replaceState({}, '', cleanUrl.pathname + cleanUrl.search);
+    }, 500);
+  }
 
 });
 </script>

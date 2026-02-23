@@ -108,6 +108,21 @@ class Calendar {
         this.initViewModeToggle();
         this.initDayModal();
 
+        // Check URL params for cross-navigation from Request Form
+        this.urlParams = new URLSearchParams(window.location.search);
+        const navDate = this.urlParams.get('date');
+        const navFormId = this.urlParams.get('form_id');
+
+        if (navDate) {
+            const parsed = new Date(navDate + 'T00:00:00');
+            if (!isNaN(parsed.getTime())) {
+                this.currentMonth = parsed.getMonth();
+                this.currentYear = parsed.getFullYear();
+                this.pendingNavDay = parsed.getDate();
+                this.pendingNavFormId = navFormId ? parseInt(navFormId, 10) : null;
+            }
+        }
+
         this.loadAndRender();
     }
 
@@ -206,6 +221,7 @@ class Calendar {
             html += ev.isBaseEvent
                 ? `<span class="detail-badge-type badge-base-sm">BASE</span>`
                 : `<span class="detail-badge-type badge-recurring-sm"><i class="fas fa-sync-alt"></i> REC</span>`;
+            html += `<a href="../form_contract/?form_id=${ev.formId}" class="day-modal-card-open-form" title="Open in Request Form" onclick="event.stopPropagation();"><i class="fas fa-file-contract"></i> Open Form</a>`;
             html += `<span class="day-modal-card-edit"><i class="fas fa-pen"></i> Edit</span>`;
             html += `</div>`;
 
@@ -404,6 +420,42 @@ class Calendar {
         this.extractClients();
         await this.fetchServiceTypes();
         this.applyFilter();
+
+        // Handle pending navigation from URL params (cross-nav from Request Form)
+        if (this.pendingNavDay) {
+            const day = this.pendingNavDay;
+            const formId = this.pendingNavFormId;
+            this.pendingNavDay = null;
+            this.pendingNavFormId = null;
+
+            // Clean URL params without reload
+            const cleanUrl = new URL(window.location);
+            cleanUrl.searchParams.delete('date');
+            cleanUrl.searchParams.delete('form_id');
+            window.history.replaceState({}, '', cleanUrl.pathname + cleanUrl.search);
+
+            // Open the day modal for that day
+            setTimeout(() => {
+                if (this.events[day] && this.events[day].length > 0) {
+                    this.showDayModal(day);
+                    // Highlight the specific order card if form_id is provided
+                    if (formId) {
+                        setTimeout(() => {
+                            const cards = this.dayModalBody.querySelectorAll('.day-modal-card');
+                            cards.forEach(card => {
+                                const ev = this.events[day].find(e =>
+                                    e.eventId === parseInt(card.dataset.eventId, 10)
+                                );
+                                if (ev && ev.formId === formId) {
+                                    card.classList.add('highlighted');
+                                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }
+                            });
+                        }, 200);
+                    }
+                }
+            }, 300);
+        }
     }
 
     async fetchEvents() {
