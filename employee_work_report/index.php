@@ -39,11 +39,47 @@ ob_start();
     </p>
 </div>
 
-<!-- VENHOOD REPORT BUTTON -->
-<div class="venhood-action-bar">
-    <button type="button" id="btnVentHoodReport" class="btn-venhood-report" title="<?= $t['wr_venhood_desc'] ?? 'Fill, print or download the Vent Hood Service Report' ?>">
-        <i class="fas fa-file-pdf"></i> <?= $t['wr_venhood_btn'] ?? 'Vent Hood Report' ?>
-    </button>
+<!-- REPORTS HUB -->
+<div class="reports-hub">
+    <h3 class="reports-hub-title">
+        <i class="fas fa-folder-open"></i>
+        <?= $t['wr_reports_hub_title'] ?? 'Reports' ?>
+    </h3>
+    <div class="reports-hub-grid">
+        <!-- Reporte de Servicio -->
+        <a href="../contract_generator/vent_hood_editor.php" target="_blank" class="report-tile" id="tileServiceReport">
+            <div class="report-tile-icon" style="background: linear-gradient(135deg, #001f54, #003080);">
+                <i class="fas fa-file-pdf"></i>
+            </div>
+            <div class="report-tile-body">
+                <h4><?= $t['wr_report_service'] ?? 'Service Report' ?></h4>
+                <p><?= $t['wr_report_service_desc'] ?? 'Fill, print or download the service report' ?></p>
+            </div>
+            <div class="report-tile-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
+        <!-- Reporte Fotografico -->
+        <div class="report-tile active" id="tilePhotoReport">
+            <div class="report-tile-icon" style="background: linear-gradient(135deg, #a30000, #c70734);">
+                <i class="fas fa-camera"></i>
+            </div>
+            <div class="report-tile-body">
+                <h4><?= $t['wr_report_photo'] ?? 'Photo Report' ?></h4>
+                <p><?= $t['wr_report_photo_desc'] ?? 'Photo documentation of completed services' ?></p>
+            </div>
+            <div class="report-tile-arrow"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <!-- Reporte de Producto -->
+        <div class="report-tile disabled" id="tileProductReport">
+            <div class="report-tile-icon" style="background: linear-gradient(135deg, #6f42c1, #8257d8);">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <div class="report-tile-body">
+                <h4><?= $t['wr_report_product'] ?? 'Product Report' ?></h4>
+                <p><?= $t['wr_report_product_desc'] ?? 'Product report (coming soon)' ?></p>
+            </div>
+            <span class="report-tile-badge"><?= $t['wr_coming_soon'] ?? 'Coming soon' ?></span>
+        </div>
+    </div>
 </div>
 
 <div class="form-content">
@@ -238,32 +274,120 @@ ob_start();
     font-size: 12px;
     color: #666;
 }
-.venhood-action-bar {
-    text-align: center;
-    margin-bottom: 20px;
-    padding: 15px;
-    background: #f0f4ff;
-    border-radius: 10px;
-    border: 2px solid #d0d9f0;
+/* Reports Hub */
+.reports-hub {
+    margin-bottom: 25px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    border: 2px solid #e0e4ea;
 }
-.btn-venhood-report {
-    display: inline-flex;
+.reports-hub-title {
+    color: #001f54;
+    margin: 0 0 16px 0;
+    font-size: 17px;
+    font-weight: 700;
+    display: flex;
     align-items: center;
     gap: 10px;
-    background: linear-gradient(135deg, #001f54 0%, #003080 100%);
-    color: white;
-    padding: 14px 30px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,31,84,0.3);
 }
-.btn-venhood-report:hover {
+.reports-hub-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.report-tile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    border: 2px solid #e0e4ea;
+    border-radius: 10px;
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+}
+.report-tile:hover {
+    border-color: #003080;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,31,84,0.4);
+    box-shadow: 0 4px 15px rgba(0,31,84,0.12);
+}
+.report-tile.active {
+    border-color: #a30000;
+    background: #fff5f5;
+    box-shadow: 0 2px 10px rgba(163,0,0,0.1);
+}
+.report-tile.disabled {
+    opacity: 0.65;
+    cursor: default;
+}
+.report-tile.disabled:hover {
+    border-color: #e0e4ea;
+    transform: none;
+    box-shadow: none;
+}
+.report-tile-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+.report-tile-body {
+    flex: 1;
+    min-width: 0;
+}
+.report-tile-body h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 2px 0;
+}
+.report-tile-body p {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0;
+}
+.report-tile-arrow {
+    color: #94a3b8;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.report-tile:hover .report-tile-arrow {
+    color: #003080;
+}
+.report-tile.active .report-tile-arrow {
+    color: #a30000;
+}
+.report-tile-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6f42c1;
+    background: #f3e8ff;
+    padding: 3px 10px;
+    border-radius: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+@media (max-width: 480px) {
+    .report-tile {
+        padding: 12px 14px;
+    }
+    .report-tile-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+    }
+    .report-tile-body h4 {
+        font-size: 14px;
+    }
 }
 </style>
 
@@ -295,10 +419,14 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    var ventHoodBtn = document.getElementById("btnVentHoodReport");
-    if (ventHoodBtn) {
-        ventHoodBtn.addEventListener("click", function() {
-            window.open("../contract_generator/vent_hood_editor.php", "_blank");
+    // Photo Report tile: scroll to form
+    var tilePhoto = document.getElementById("tilePhotoReport");
+    if (tilePhoto) {
+        tilePhoto.addEventListener("click", function() {
+            var formContent = document.querySelector(".form-content");
+            if (formContent) {
+                formContent.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
         });
     }
 

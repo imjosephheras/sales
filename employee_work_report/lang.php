@@ -118,6 +118,16 @@ $translations = [
         // Venhood Report Button
         "wr_venhood_btn" => "Vent Hood Report",
         "wr_venhood_desc" => "Fill, print or download the Vent Hood Service Report",
+
+        // Reports Hub
+        "wr_reports_hub_title" => "Reports",
+        "wr_report_service" => "Service Report",
+        "wr_report_service_desc" => "Fill, print or download the service report",
+        "wr_report_photo" => "Photo Report",
+        "wr_report_photo_desc" => "Photo documentation of completed services",
+        "wr_report_product" => "Product Report",
+        "wr_report_product_desc" => "Product report (coming soon)",
+        "wr_coming_soon" => "Coming soon",
     ],
 
 
@@ -238,6 +248,16 @@ $translations = [
         // Venhood Report Button
         "wr_venhood_btn" => "Reporte Vent Hood",
         "wr_venhood_desc" => "Llenar, imprimir o descargar el Reporte de Servicio Vent Hood",
+
+        // Reports Hub
+        "wr_reports_hub_title" => "Reportes",
+        "wr_report_service" => "Reporte de Servicio",
+        "wr_report_service_desc" => "Llenar, imprimir o descargar el reporte de servicio",
+        "wr_report_photo" => "Reporte Fotográfico",
+        "wr_report_photo_desc" => "Documentación fotográfica de servicios completados",
+        "wr_report_product" => "Reporte de Producto",
+        "wr_report_product_desc" => "Reporte de producto (próximamente)",
+        "wr_coming_soon" => "Próximamente",
     ]
 ];
 ?>
