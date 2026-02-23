@@ -58,7 +58,7 @@ ob_start();
             <div class="report-tile-arrow"><i class="fas fa-chevron-right"></i></div>
         </a>
         <!-- Reporte Fotografico -->
-        <div class="report-tile active" id="tilePhotoReport">
+        <div class="report-tile" id="tilePhotoReport">
             <div class="report-tile-icon" style="background: linear-gradient(135deg, #a30000, #c70734);">
                 <i class="fas fa-camera"></i>
             </div>
@@ -66,7 +66,7 @@ ob_start();
                 <h4><?= $t['wr_report_photo'] ?? 'Photo Report' ?></h4>
                 <p><?= $t['wr_report_photo_desc'] ?? 'Photo documentation of completed services' ?></p>
             </div>
-            <div class="report-tile-arrow"><i class="fas fa-chevron-down"></i></div>
+            <div class="report-tile-arrow"><i class="fas fa-chevron-right"></i></div>
         </div>
         <!-- Reporte de Producto -->
         <div class="report-tile disabled" id="tileProductReport">
@@ -82,7 +82,7 @@ ob_start();
     </div>
 </div>
 
-<div class="form-content">
+<div class="form-content" id="photoReportContent" style="display:none;">
 <form id="main_form" action="enviar_correo.php" method="POST" enctype="multipart/form-data">
 
     <!-- REPORT TYPE SELECTION -->
@@ -124,6 +124,14 @@ ob_start();
     </div>
     <div class="section-content hidden">
         <?php include 'form_part2_photos.php'; ?>
+    </div>
+
+    <!-- SECTION: NOTES -->
+    <div class="section-title collapsible">
+        <?= $t["wr_notes_title"] ?? "Notes" ?> <span class="toggle-icon">&#9660;</span>
+    </div>
+    <div class="section-content hidden">
+        <?php include 'form_part_notes.php'; ?>
     </div>
 
     <!-- SECTION 3 (INTERNAL ONLY) -->
@@ -419,13 +427,23 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // Photo Report tile: scroll to form
+    // Photo Report tile: toggle form visibility
     var tilePhoto = document.getElementById("tilePhotoReport");
-    if (tilePhoto) {
+    var photoContent = document.getElementById("photoReportContent");
+    if (tilePhoto && photoContent) {
         tilePhoto.addEventListener("click", function() {
-            var formContent = document.querySelector(".form-content");
-            if (formContent) {
-                formContent.scrollIntoView({ behavior: "smooth", block: "start" });
+            var isActive = tilePhoto.classList.contains("active");
+            if (isActive) {
+                // Collapse
+                tilePhoto.classList.remove("active");
+                tilePhoto.querySelector(".report-tile-arrow i").className = "fas fa-chevron-right";
+                photoContent.style.display = "none";
+            } else {
+                // Expand
+                tilePhoto.classList.add("active");
+                tilePhoto.querySelector(".report-tile-arrow i").className = "fas fa-chevron-down";
+                photoContent.style.display = "block";
+                photoContent.scrollIntoView({ behavior: "smooth", block: "start" });
             }
         });
     }

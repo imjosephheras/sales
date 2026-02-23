@@ -36,6 +36,8 @@ if ($docRoot && $projectRoot && str_starts_with($projectRoot, $docRoot)) {
 // =====================================
 $jwo_number = $_POST['JWO_Number'] ?? 'N/A';
 $report_type = $_POST['report_type'] ?? 'before_after';
+$note_title = $_POST['note_title'] ?? '';
+$note_description = $_POST['note_description'] ?? '';
 $before = $_FILES['before'] ?? null;
 $after  = $_FILES['after']  ?? null;
 
@@ -221,6 +223,20 @@ function getImageBase64ForPdf($filepath, $maxDim = 300) {
 // =====================================
 //  GENERAR HTML PARA PDF
 // =====================================
+// Build Notes HTML block (reused in both report types)
+$notes_html = '';
+if (trim($note_title) !== '' || trim($note_description) !== '') {
+    $notes_html .= '<div class="notes-section">';
+    $notes_html .= '<h2>Notes</h2>';
+    if (trim($note_title) !== '') {
+        $notes_html .= '<div class="note-title">' . htmlspecialchars($note_title) . '</div>';
+    }
+    if (trim($note_description) !== '') {
+        $notes_html .= '<div class="note-description">' . htmlspecialchars($note_description) . '</div>';
+    }
+    $notes_html .= '</div>';
+}
+
 ob_start();
 
 // Common styles for both report types
@@ -254,6 +270,33 @@ h2 {
     margin-top:20px;
     font-size: 13px;
     line-height: 1.5;
+}
+
+.notes-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-left: 4px solid #001f54;
+    border-radius: 4px;
+}
+.notes-section h2 {
+    color: #001f54;
+    font-size: 16px;
+    margin: 0 0 8px 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.notes-section .note-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+.notes-section .note-description {
+    font-size: 13px;
+    color: #444;
+    line-height: 1.6;
+    white-space: pre-wrap;
 }
 
 ";
@@ -378,6 +421,9 @@ This document includes photographic evidence captured by our field team in relat
 <?php
     endif;
 ?>
+
+<?= $notes_html ?>
+
 </div><!-- end content-wrapper -->
 
 </body>
@@ -484,6 +530,8 @@ This document provides photographic evidence collected by our field team in conn
     </tbody>
 </table>
 
+<?= $notes_html ?>
+
 </div><!-- end content-wrapper -->
 
 </body>
@@ -553,7 +601,17 @@ try {
     $mail->addAddress($mail_config['to_email']);
 
     $mail->Subject = "Service Completion Photo Report - JWO $jwo_number";
-    $mail->Body    = "Attached is the Service Completion Photo Report.<br><br>JWO: $jwo_number";
+    $email_body = "Attached is the Service Completion Photo Report.<br><br>JWO: $jwo_number";
+    if (trim($note_title) !== '' || trim($note_description) !== '') {
+        $email_body .= "<br><br><strong>Notes:</strong>";
+        if (trim($note_title) !== '') {
+            $email_body .= "<br>" . htmlspecialchars($note_title);
+        }
+        if (trim($note_description) !== '') {
+            $email_body .= "<br>" . nl2br(htmlspecialchars($note_description));
+        }
+    }
+    $mail->Body    = $email_body;
     $mail->isHTML(true);
 
     // SOLO PDF
