@@ -812,14 +812,39 @@ class Calendar {
                                   draggable="true"
                                   data-event-id="${ev.eventId}"
                                   title="${this.escapeHtml(ev.client)} - ${this.escapeHtml(ev.company)} | ${ev.requestType} | ${ev.requestedService}${ev.isBaseEvent ? ' [BASE]' : ' [Recurring]'}">`;
-                    if (typeShort) {
-                        html += `<span class="chip-type-badge ${typeClass}">${typeShort}</span>`;
+
+                    if (isExpanded) {
+                        // Expanded mode: Line 1 = Badge + WO# + Client
+                        html += `<div class="event-chip-row">`;
+                        if (typeShort) {
+                            html += `<span class="chip-type-badge ${typeClass}">${typeShort}</span>`;
+                        }
+                        const woLabel = ev.nomenclature ? this.escapeHtml(ev.nomenclature) : `WO #${ev.formId}`;
+                        html += `<span class="event-wo-number">${woLabel}</span>`;
+                        if (!ev.isBaseEvent) {
+                            html += `<span class="chip-recurring-badge"><i class="fas fa-sync-alt"></i></span>`;
+                        }
+                        html += `</div>`;
+                        // Line 2 = Client
+                        html += `<span class="event-client">${this.escapeHtml(ev.client)}</span>`;
+                        // Line 3 = Site (company)
+                        html += `<span class="event-company-name">${this.escapeHtml(ev.company)}</span>`;
+                        // Line 4 = Status
+                        const statusLabelClass = ev.status === 'submitted' ? 'status-submitted' :
+                                                 ev.status === 'draft' ? 'status-draft' : 'status-pending';
+                        html += `<span class="event-status-label ${statusLabelClass}">${ev.status}</span>`;
+                    } else {
+                        // Compact mode: Badge + Client + Company
+                        if (typeShort) {
+                            html += `<span class="chip-type-badge ${typeClass}">${typeShort}</span>`;
+                        }
+                        if (!ev.isBaseEvent) {
+                            html += `<span class="chip-recurring-badge"><i class="fas fa-sync-alt"></i></span>`;
+                        }
+                        html += `<span class="event-client">${this.escapeHtml(ev.client)}</span>`;
+                        html += `<span class="event-company-name">${this.escapeHtml(ev.company)}</span>`;
                     }
-                    if (!ev.isBaseEvent) {
-                        html += `<span class="chip-recurring-badge"><i class="fas fa-sync-alt"></i></span>`;
-                    }
-                    html += `<span class="event-client">${this.escapeHtml(ev.client)}</span>`;
-                    html += `<span class="event-company-name">${this.escapeHtml(ev.company)}</span>`;
+
                     html += `</div>`;
                 });
 
