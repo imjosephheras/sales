@@ -503,6 +503,11 @@ ob_start();
     color: #991b1b;
 }
 
+.form-card-status.cancelled {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
 .form-card-contract-badge {
     font-size: 10px;
     padding: 2px 8px;
@@ -1626,6 +1631,10 @@ document.addEventListener("DOMContentLoaded", () => {
       statusClass = 'not-completed';
       statusText = 'NOT COMPLETED';
       statusIcon = '❌';
+    } else if (serviceStatus === 'cancelled') {
+      statusClass = 'cancelled';
+      statusText = 'CANCELLED';
+      statusIcon = '🚫';
     }
 
     // Contract-level completed badge
