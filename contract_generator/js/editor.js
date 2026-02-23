@@ -19,6 +19,9 @@
     let currentRequestData = null;
     let editorSalesMode = 'service'; // 'service' or 'product'
 
+    // Expose sales mode globally so preview.js can read the current value
+    window.editorSalesMode = editorSalesMode;
+
     /**
      * SERVICE REPORT CONFIG CACHE
      * Loaded once from get_service_config.php and cached in memory.
@@ -36,6 +39,7 @@
     // ========================================
     window.setEditorSalesMode = function(mode) {
         editorSalesMode = mode;
+        window.editorSalesMode = mode;
         var btnService = document.getElementById('editorBtnModeService');
         var btnProduct = document.getElementById('editorBtnModeProduct');
         if (btnService) {
