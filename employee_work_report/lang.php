@@ -119,6 +119,13 @@ $translations = [
         "wr_venhood_btn" => "Vent Hood Report",
         "wr_venhood_desc" => "Fill, print or download the Vent Hood Service Report",
 
+        // Notes Section
+        "wr_notes_title" => "Notes",
+        "wr_note_title_label" => "Title",
+        "wr_note_title_placeholder" => "Enter a title for the note",
+        "wr_note_description_label" => "Description",
+        "wr_note_description_placeholder" => "Enter additional details or observations",
+
         // Reports Hub
         "wr_reports_hub_title" => "Reports",
         "wr_report_service" => "Service Report",
@@ -248,6 +255,13 @@ $translations = [
         // Venhood Report Button
         "wr_venhood_btn" => "Reporte Vent Hood",
         "wr_venhood_desc" => "Llenar, imprimir o descargar el Reporte de Servicio Vent Hood",
+
+        // Notes Section
+        "wr_notes_title" => "Notas",
+        "wr_note_title_label" => "Título",
+        "wr_note_title_placeholder" => "Ingrese un título para la nota",
+        "wr_note_description_label" => "Descripción",
+        "wr_note_description_placeholder" => "Ingrese detalles adicionales u observaciones",
 
         // Reports Hub
         "wr_reports_hub_title" => "Reportes",
