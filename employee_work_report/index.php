@@ -68,17 +68,17 @@ ob_start();
             </div>
             <div class="report-tile-arrow"><i class="fas fa-chevron-right"></i></div>
         </div>
-        <!-- Reporte de Producto -->
-        <div class="report-tile disabled" id="tileProductReport">
+        <!-- Reporte de Producto (Invoice for Replacement Parts) -->
+        <a href="../contract_generator/product_report_editor.php" target="_blank" class="report-tile" id="tileProductReport">
             <div class="report-tile-icon" style="background: linear-gradient(135deg, #6f42c1, #8257d8);">
                 <i class="fas fa-box-open"></i>
             </div>
             <div class="report-tile-body">
                 <h4><?= $t['wr_report_product'] ?? 'Product Report' ?></h4>
-                <p><?= $t['wr_report_product_desc'] ?? 'Product report (coming soon)' ?></p>
+                <p><?= $t['wr_report_product_desc'] ?? 'Invoice for replacement parts' ?></p>
             </div>
-            <span class="report-tile-badge"><?= $t['wr_coming_soon'] ?? 'Coming soon' ?></span>
-        </div>
+            <div class="report-tile-arrow"><i class="fas fa-chevron-right"></i></div>
+        </a>
     </div>
 </div>
 
