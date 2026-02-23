@@ -79,6 +79,17 @@ ob_start();
             </div>
             <div class="report-tile-arrow"><i class="fas fa-chevron-right"></i></div>
         </div>
+        <!-- System Prime (external link) -->
+        <a class="report-tile" href="https://primefsgroup.com/addresses" target="_blank" rel="noopener noreferrer">
+            <div class="report-tile-icon" style="background: linear-gradient(135deg, #e8a817, #f5c842);">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="report-tile-body">
+                <h4><?= $t['wr_report_prime'] ?? 'System Prime' ?></h4>
+                <p><?= $t['wr_report_prime_desc'] ?? 'Access external Prime system for products and accounts' ?></p>
+            </div>
+            <div class="report-tile-arrow"><i class="fas fa-external-link-alt"></i></div>
+        </a>
     </div>
 </div>
 
