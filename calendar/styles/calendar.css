@@ -1528,6 +1528,273 @@ body {
     cursor: not-allowed;
 }
 
+/* ===== Expanded View Mode ===== */
+.day-cell.view-expanded {
+    min-height: 120px;
+}
+
+.day-events-expanded {
+    overflow-y: auto;
+    max-height: 150px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+.day-events-expanded::-webkit-scrollbar {
+    width: 4px;
+}
+
+.day-events-expanded::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.day-events-expanded::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+.day-events-expanded::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ===== Day Orders Modal Overlay ===== */
+.day-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.day-modal-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ===== Day Orders Modal ===== */
+.day-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 560px;
+    max-width: 95vw;
+    max-height: 85vh;
+    background: var(--bg-card);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    z-index: 410;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.day-modal.visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.day-modal-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.day-modal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.day-modal-header h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.day-modal-count {
+    background: rgba(255,255,255,0.2);
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 500;
+}
+
+.day-modal-close-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.day-modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.day-modal-body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.day-modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.day-modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.day-modal-body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.day-modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ===== Day Modal Order Card ===== */
+.day-modal-card {
+    background: var(--bg-light);
+    border-radius: 10px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.day-modal-card:hover {
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+    border-left-width: 5px;
+}
+
+/* Request type colored borders for modal cards */
+.day-modal-card.chip-contract-border {
+    border-left-color: var(--color-contract);
+}
+.day-modal-card.chip-proposal-border {
+    border-left-color: var(--color-proposal);
+}
+.day-modal-card.chip-jwo-border {
+    border-left-color: var(--color-jwo);
+}
+.day-modal-card.chip-quote-border {
+    border-left-color: var(--color-quote);
+}
+
+.day-modal-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.day-modal-card-wo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.day-modal-wo-number {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+}
+
+.day-modal-card-client {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.day-modal-card-client i {
+    color: var(--primary-color);
+    font-size: 0.8rem;
+    width: 16px;
+    text-align: center;
+}
+
+.day-modal-card-site {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.day-modal-card-site i {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    width: 16px;
+    text-align: center;
+}
+
+.day-modal-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    flex-wrap: wrap;
+}
+
+.day-modal-card-edit {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.day-modal-card:hover .day-modal-card-edit {
+    opacity: 1;
+}
+
+.day-modal-card-edit i {
+    font-size: 0.65rem;
+}
+
 /* ===== Print Styles ===== */
 @page {
     size: landscape;
@@ -1547,7 +1814,9 @@ body {
     .calendar-nav-toggles,
     .event-detail-panel,
     .mini-form-overlay,
-    .mini-form-panel {
+    .mini-form-panel,
+    .day-modal-overlay,
+    .day-modal {
         display: none !important;
     }
 
@@ -1895,5 +2164,14 @@ body {
 
     .mini-form-freq-row {
         grid-template-columns: 1fr;
+    }
+
+    .day-modal {
+        width: 95vw;
+        max-height: 90vh;
+    }
+
+    .day-modal-card-edit {
+        opacity: 1;
     }
 }

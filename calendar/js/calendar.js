@@ -1,7 +1,8 @@
 /**
  * CALENDAR MODULE - Main JavaScript
  * Month-by-month calendar with scheduled agendas (base + recurring events)
- * Features: Client filter sidebar, Mini form, Drag & Drop, Recurrence
+ * Features: Client filter sidebar, Mini form, Drag & Drop, Recurrence,
+ *           Compact/Expanded view modes, Day orders modal
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -57,6 +58,13 @@ class Calendar {
         this.draggedEvent = null;
         this.draggedElement = null;
 
+        // View mode: 'compact' or 'expanded'
+        this.viewMode = localStorage.getItem('calendar-view-mode') || 'compact';
+
+        // Track if mini form was opened from day modal (to re-open modal after save)
+        this.openedFromDayModal = false;
+        this.dayModalDay = null;
+
         this.monthNames = [
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'
@@ -78,14 +86,6 @@ class Calendar {
         this.todayBtn.addEventListener('click', () => this.goToToday());
         this.printBtn.addEventListener('click', () => window.print());
 
-        // Close detail panel when clicking outside
-        document.addEventListener('click', (e) => {
-            const panel = document.getElementById('event-detail-panel');
-            if (panel && !panel.contains(e.target) && !e.target.closest('.day-cell')) {
-                panel.classList.remove('visible');
-            }
-        });
-
         // Mini form close
         if (this.miniFormOverlay) {
             this.miniFormOverlay.addEventListener('click', () => this.closeMiniForm());
@@ -105,8 +105,134 @@ class Calendar {
         this.initSidebar();
         this.initServiceSidebar();
         this.initNavToggles();
+        this.initViewModeToggle();
+        this.initDayModal();
 
         this.loadAndRender();
+    }
+
+    // ===== VIEW MODE TOGGLE =====
+
+    initViewModeToggle() {
+        this.viewModeBtn = document.getElementById('toggle-view-mode');
+        this.viewModeIcon = document.getElementById('view-mode-icon');
+        this.viewModeLabel = document.getElementById('view-mode-label');
+
+        this.updateViewModeUI();
+
+        this.viewModeBtn.addEventListener('click', () => {
+            this.viewMode = this.viewMode === 'compact' ? 'expanded' : 'compact';
+            localStorage.setItem('calendar-view-mode', this.viewMode);
+            this.updateViewModeUI();
+            this.render();
+        });
+    }
+
+    updateViewModeUI() {
+        if (this.viewMode === 'expanded') {
+            this.viewModeIcon.className = 'fas fa-expand-alt';
+            this.viewModeLabel.textContent = 'Expanded';
+            this.viewModeBtn.classList.add('active');
+        } else {
+            this.viewModeIcon.className = 'fas fa-compress-alt';
+            this.viewModeLabel.textContent = 'Compact';
+            this.viewModeBtn.classList.remove('active');
+        }
+    }
+
+    // ===== DAY ORDERS MODAL =====
+
+    initDayModal() {
+        this.dayModalOverlay = document.getElementById('day-modal-overlay');
+        this.dayModal = document.getElementById('day-modal');
+        this.dayModalTitle = document.getElementById('day-modal-title');
+        this.dayModalCount = document.getElementById('day-modal-count');
+        this.dayModalBody = document.getElementById('day-modal-body');
+        this.dayModalClose = document.getElementById('day-modal-close');
+
+        this.dayModalOverlay.addEventListener('click', () => this.closeDayModal());
+        this.dayModalClose.addEventListener('click', () => this.closeDayModal());
+    }
+
+    showDayModal(day) {
+        const eventsForDay = this.events[day] || [];
+        if (eventsForDay.length === 0) return;
+
+        this.dayModalDay = day;
+        const dateStr = `${this.monthNames[this.currentMonth]} ${day}, ${this.currentYear}`;
+        this.dayModalTitle.textContent = dateStr;
+        this.dayModalCount.textContent = `${eventsForDay.length} order${eventsForDay.length !== 1 ? 's' : ''}`;
+
+        let html = '';
+        eventsForDay.forEach(ev => {
+            const typeClass = this.getRequestTypeClass(ev.requestType);
+            const typeShort = this.getRequestTypeShort(ev.requestType);
+            const svcDetailClass = this.getServiceStatusDetailClass(ev.serviceStatus);
+            const svcLabel = this.getServiceStatusLabel(ev.serviceStatus);
+            const isPriorityRush = ev.priority === 'Rush';
+
+            html += `<div class="day-modal-card ${typeClass}-border" data-event-id="${ev.eventId}">`;
+
+            // Card header row: WO# + badges
+            html += `<div class="day-modal-card-header">`;
+            html += `<div class="day-modal-card-wo">`;
+            if (ev.nomenclature) {
+                html += `<span class="day-modal-wo-number">${this.escapeHtml(ev.nomenclature)}</span>`;
+            } else {
+                html += `<span class="day-modal-wo-number">WO #${ev.formId}</span>`;
+            }
+            if (typeShort) {
+                html += `<span class="chip-type-badge ${typeClass}">${typeShort}</span>`;
+            }
+            if (isPriorityRush) {
+                html += `<span class="detail-priority-rush"><i class="fas fa-bolt"></i> Rush</span>`;
+            }
+            html += `</div>`;
+            // Service status
+            html += `<span class="detail-svc-status ${svcDetailClass}"><i class="fas fa-circle" style="font-size:0.4rem;margin-right:4px;"></i>${svcLabel}</span>`;
+            html += `</div>`;
+
+            // Client
+            html += `<div class="day-modal-card-client"><i class="fas fa-user"></i> ${this.escapeHtml(ev.client)}</div>`;
+
+            // Site (company)
+            html += `<div class="day-modal-card-site"><i class="fas fa-building"></i> ${this.escapeHtml(ev.company)}</div>`;
+
+            // Status row
+            html += `<div class="day-modal-card-footer">`;
+            const statusClass = ev.status === 'submitted' ? 'status-submitted' :
+                                ev.status === 'draft' ? 'status-draft' : 'status-pending';
+            html += `<span class="detail-status ${statusClass}">${ev.status}</span>`;
+            html += ev.isBaseEvent
+                ? `<span class="detail-badge-type badge-base-sm">BASE</span>`
+                : `<span class="detail-badge-type badge-recurring-sm"><i class="fas fa-sync-alt"></i> REC</span>`;
+            html += `<span class="day-modal-card-edit"><i class="fas fa-pen"></i> Edit</span>`;
+            html += `</div>`;
+
+            html += `</div>`;
+        });
+
+        this.dayModalBody.innerHTML = html;
+
+        // Show modal
+        this.dayModalOverlay.classList.add('visible');
+        this.dayModal.classList.add('visible');
+
+        // Click on card opens mini form
+        this.dayModalBody.querySelectorAll('.day-modal-card[data-event-id]').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const eid = parseInt(card.dataset.eventId, 10);
+                this.openedFromDayModal = true;
+                this.openMiniForm(eid);
+            });
+        });
+    }
+
+    closeDayModal() {
+        this.dayModalOverlay.classList.remove('visible');
+        this.dayModal.classList.remove('visible');
+        this.dayModalDay = null;
     }
 
     /**
@@ -643,6 +769,8 @@ class Calendar {
         const isCurrentMonth = today.getMonth() === this.currentMonth && today.getFullYear() === this.currentYear;
         const todayDate = today.getDate();
 
+        const isExpanded = this.viewMode === 'expanded';
+
         let html = '';
 
         // Empty cells before the 1st
@@ -658,6 +786,7 @@ class Calendar {
 
             if (isToday) classes.push('today');
             if (hasEvents) classes.push('has-events');
+            if (isExpanded) classes.push('view-expanded');
 
             // Build full date string for drop target
             const monthStr = String(this.currentMonth + 1).padStart(2, '0');
@@ -669,9 +798,9 @@ class Calendar {
 
             if (hasEvents) {
                 const eventsForDay = this.events[day];
-                const maxVisible = 3;
+                const maxVisible = isExpanded ? eventsForDay.length : 3;
 
-                html += '<div class="day-events">';
+                html += `<div class="day-events${isExpanded ? ' day-events-expanded' : ''}">`;
                 eventsForDay.slice(0, maxVisible).forEach(ev => {
                     const typeClass = this.getRequestTypeClass(ev.requestType);
                     const typeShort = this.getRequestTypeShort(ev.requestType);
@@ -694,7 +823,7 @@ class Calendar {
                     html += `</div>`;
                 });
 
-                if (eventsForDay.length > maxVisible) {
+                if (!isExpanded && eventsForDay.length > maxVisible) {
                     html += `<div class="event-more">+${eventsForDay.length - maxVisible} more</div>`;
                 }
                 html += '</div>';
@@ -705,22 +834,25 @@ class Calendar {
 
         this.gridEl.innerHTML = html;
 
-        // Attach click listeners for days with events
-        this.gridEl.querySelectorAll('.day-cell.has-events').forEach(cell => {
+        // Attach click listeners for day cells (open day modal)
+        this.gridEl.querySelectorAll('.day-cell:not(.empty)').forEach(cell => {
             cell.addEventListener('click', (e) => {
-                // Don't open detail if we clicked on a chip (that opens mini form)
+                // Don't open modal if we clicked on a chip (that opens mini form directly)
                 if (e.target.closest('.event-chip')) return;
                 e.stopPropagation();
                 const day = parseInt(cell.dataset.day, 10);
-                this.showDayDetail(day, cell);
+                if (this.events[day] && this.events[day].length > 0) {
+                    this.showDayModal(day);
+                }
             });
         });
 
-        // Attach click listeners on event chips to open mini form
+        // Attach click listeners on event chips to open mini form directly
         this.gridEl.querySelectorAll('.event-chip').forEach(chip => {
             chip.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const eventId = parseInt(chip.dataset.eventId, 10);
+                this.openedFromDayModal = false;
                 this.openMiniForm(eventId);
             });
         });
@@ -876,6 +1008,9 @@ class Calendar {
         // Notes = this specific event's description
         document.getElementById('mini-form-notes').value = event.description || '';
 
+        // Service Status
+        document.getElementById('mini-form-service-status').value = event.serviceStatus || 'pending';
+
         // Frequency from base event
         document.getElementById('mini-form-freq-months').value = baseEvent.frequencyMonths;
         document.getElementById('mini-form-freq-years').value = baseEvent.frequencyYears;
@@ -900,6 +1035,7 @@ class Calendar {
         const eventId = document.getElementById('mini-form-event-id').value;
         const workDate = document.getElementById('mini-form-work-date').value;
         const description = document.getElementById('mini-form-notes').value;
+        const serviceStatus = document.getElementById('mini-form-service-status').value;
         const freqMonths = document.getElementById('mini-form-freq-months').value;
         const freqYears = document.getElementById('mini-form-freq-years').value;
 
@@ -921,11 +1057,15 @@ class Calendar {
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
+        // Remember the day we came from (for refreshing the day modal)
+        const reopenDay = this.openedFromDayModal ? this.dayModalDay : null;
+
         try {
             const formData = new FormData();
             formData.append('event_id', eventId);
             formData.append('work_date', workDate);
             formData.append('description', description);
+            formData.append('service_status', serviceStatus);
             formData.append('frequency_months', fm);
             formData.append('frequency_years', fy);
 
@@ -937,7 +1077,19 @@ class Calendar {
 
             if (data.success) {
                 this.closeMiniForm();
+
+                // Refresh events data and re-render calendar
                 await this.loadAndRender();
+
+                // If opened from day modal, re-open the day modal with refreshed data
+                if (reopenDay && this.events[reopenDay] && this.events[reopenDay].length > 0) {
+                    this.showDayModal(reopenDay);
+                } else {
+                    // Close the day modal if no more events on that day
+                    this.closeDayModal();
+                }
+
+                this.openedFromDayModal = false;
             } else {
                 alert('Error: ' + (data.message || 'Failed to save'));
             }
@@ -948,99 +1100,5 @@ class Calendar {
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="fas fa-save"></i> Save';
         }
-    }
-
-    // ===== DAY DETAIL PANEL =====
-
-    showDayDetail(day, cell) {
-        let panel = document.getElementById('event-detail-panel');
-        if (!panel) {
-            panel = document.createElement('div');
-            panel.id = 'event-detail-panel';
-            panel.className = 'event-detail-panel';
-            document.querySelector('.calendar-wrapper').appendChild(panel);
-        }
-
-        const eventsForDay = this.events[day] || [];
-        const dateStr = `${this.monthNames[this.currentMonth]} ${day}, ${this.currentYear}`;
-
-        let html = `<div class="detail-header">`;
-        html += `<h3><i class="fas fa-calendar-day"></i> ${dateStr}</h3>`;
-        html += `<span class="detail-count">${eventsForDay.length} schedule${eventsForDay.length !== 1 ? 's' : ''}</span>`;
-        html += `</div>`;
-        html += `<div class="detail-list">`;
-
-        eventsForDay.forEach(ev => {
-            const statusClass = ev.status === 'submitted' ? 'status-submitted' :
-                                ev.status === 'draft' ? 'status-draft' : 'status-pending';
-            const typeClass = this.getRequestTypeClass(ev.requestType);
-            const svcStatusClass = this.getServiceStatusClass(ev.serviceStatus);
-            const svcDetailClass = this.getServiceStatusDetailClass(ev.serviceStatus);
-            const svcLabel = this.getServiceStatusLabel(ev.serviceStatus);
-            const isPriorityRush = ev.priority === 'Rush';
-
-            html += `<div class="detail-item ${typeClass}-border" data-event-id="${ev.eventId}" style="cursor:pointer;">`;
-
-            // Header row
-            html += `<div class="detail-item-header">`;
-            if (ev.nomenclature) {
-                html += `<span class="detail-nomenclature">${this.escapeHtml(ev.nomenclature)}</span>`;
-            }
-            // Base/Recurring badge
-            html += ev.isBaseEvent
-                ? `<span class="detail-badge-type badge-base-sm">BASE</span>`
-                : `<span class="detail-badge-type badge-recurring-sm"><i class="fas fa-sync-alt"></i> Recurring</span>`;
-            if (isPriorityRush) {
-                html += `<span class="detail-priority-rush"><i class="fas fa-bolt"></i> Rush</span>`;
-            }
-            html += `<span class="detail-status ${statusClass}">${ev.status}</span>`;
-            html += `</div>`;
-
-            // Service status badge
-            html += `<div style="margin-bottom:2px;"><span class="detail-svc-status ${svcDetailClass}"><i class="fas fa-circle" style="font-size:0.4rem;margin-right:4px;"></i>${svcLabel}</span></div>`;
-
-            // Badges
-            html += `<div class="detail-badges">`;
-            if (ev.requestType) {
-                html += `<span class="detail-badge ${typeClass}">${ev.requestType}</span>`;
-            }
-            if (ev.serviceType) {
-                html += `<span class="detail-badge badge-service">${ev.serviceType}</span>`;
-            }
-            html += `</div>`;
-
-            // Client & Company
-            html += `<div class="detail-client"><i class="fas fa-user"></i> ${this.escapeHtml(ev.client)}</div>`;
-            html += `<div class="detail-company"><i class="fas fa-building"></i> ${this.escapeHtml(ev.company)}</div>`;
-
-            if (ev.requestedService) {
-                html += `<div class="detail-service"><i class="fas fa-concierge-bell"></i> ${this.escapeHtml(ev.requestedService)}</div>`;
-            }
-
-            if (ev.seller) {
-                html += `<div class="detail-seller"><i class="fas fa-user-tie"></i> ${this.escapeHtml(ev.seller)}</div>`;
-            }
-
-            // Notes preview
-            if (ev.description) {
-                html += `<div class="detail-notes"><i class="fas fa-sticky-note"></i> ${this.escapeHtml(ev.description.substring(0, 80))}${ev.description.length > 80 ? '...' : ''}</div>`;
-            }
-
-            html += `</div>`;
-        });
-
-        html += `</div>`;
-        panel.innerHTML = html;
-        panel.classList.add('visible');
-
-        // Click on detail item opens mini form
-        panel.querySelectorAll('.detail-item[data-event-id]').forEach(item => {
-            item.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const eid = parseInt(item.dataset.eventId, 10);
-                panel.classList.remove('visible');
-                this.openMiniForm(eid);
-            });
-        });
     }
 }

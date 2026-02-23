@@ -67,10 +67,28 @@ try {
         ? max(0, min(5, (int)$_POST['frequency_years']))
         : (int)$baseEvent['frequency_years'];
 
-    // Update forms.Work_Date if changed
+    $newServiceStatus = isset($_POST['service_status']) && !empty($_POST['service_status'])
+        ? trim($_POST['service_status'])
+        : null;
+
+    // Update forms table directly (same data source as Request Form)
+    // This ensures changes from calendar reflect in the Request Form
+    $formUpdates = [];
+    $formParams = [':fid' => $formId];
+
     if ($newWorkDate !== $baseEvent['event_date']) {
-        $pdo->prepare("UPDATE forms SET Work_Date = :wd WHERE form_id = :fid")
-            ->execute([':wd' => $newWorkDate, ':fid' => $formId]);
+        $formUpdates[] = 'Work_Date = :wd';
+        $formParams[':wd'] = $newWorkDate;
+    }
+
+    if ($newServiceStatus !== null) {
+        $formUpdates[] = 'service_status = :ss';
+        $formParams[':ss'] = $newServiceStatus;
+    }
+
+    if (count($formUpdates) > 0) {
+        $pdo->prepare("UPDATE forms SET " . implode(', ', $formUpdates) . " WHERE form_id = :fid")
+            ->execute($formParams);
     }
 
     // If description was updated for a specific recurring event, save it there
