@@ -782,35 +782,82 @@ if (file_exists($logo_path)) {
         }
 
         /* =============================================
+           SERVICE TYPE SELECTOR (toolbar)
+           ============================================= */
+        .toolbar-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .service-type-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .service-type-wrapper label {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .service-type-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.12);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            padding: 7px 36px 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+            min-width: 260px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .service-type-select:hover {
+            background-color: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .service-type-select:focus {
+            background-color: rgba(255,255,255,0.25);
+            border-color: rgba(255,255,255,0.7);
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
+        }
+
+        .service-type-select option {
+            background: #001f54;
+            color: #fff;
+            padding: 8px;
+        }
+
+        /* =============================================
            SIDE PANEL - PRODUCT CATALOG
            ============================================= */
-        .app-layout {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .main-content {
-            flex: 1;
-            transition: margin-right 0.3s ease;
-        }
-
-        .main-content.panel-open {
-            margin-right: 370px;
-        }
-
         .side-panel {
             position: fixed;
             top: 0;
-            right: -370px;
-            width: 370px;
+            right: -450px;
+            width: 450px;
             height: 100vh;
-            background: #f5f6fa;
-            box-shadow: -3px 0 15px rgba(0,0,0,0.2);
+            background: white;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.2);
             z-index: 999;
-            transition: right 0.3s ease;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            transition: right 0.3s ease;
         }
 
         .side-panel.open {
@@ -820,48 +867,41 @@ if (file_exists($logo_path)) {
         .side-panel-header {
             background: linear-gradient(135deg, #001f54 0%, #003080 100%);
             color: white;
-            padding: 52px 16px 12px 16px;
+            padding: 14px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0;
         }
 
         .side-panel-header h3 {
-            font-size: 13px;
-            font-weight: bold;
+            font-size: 14px;
             margin: 0;
         }
 
         .side-panel-close {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
+            background: none;
+            border: none;
             color: white;
-            border-radius: 4px;
-            width: 28px;
-            height: 28px;
-            font-size: 16px;
+            font-size: 22px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
+            line-height: 1;
+            padding: 0 4px;
         }
 
         .side-panel-close:hover {
-            background: rgba(255,255,255,0.25);
+            opacity: 0.7;
         }
 
         .side-panel-body {
             flex: 1;
             overflow-y: auto;
-            padding: 12px;
+            padding: 14px;
         }
 
-        .side-panel-body p.panel-hint {
-            font-size: 10px;
+        .panel-hint {
+            font-size: 12px;
             color: #666;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             line-height: 1.4;
         }
 
@@ -944,6 +984,27 @@ if (file_exists($logo_path)) {
 
         .side-panel-count.has-items {
             display: block;
+        }
+
+        /* =============================================
+           OVERLAY
+           ============================================= */
+        .side-panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .side-panel-overlay.active {
+            display: block;
+            opacity: 1;
         }
 
         /* =============================================
@@ -1034,12 +1095,9 @@ if (file_exists($logo_path)) {
                 background: transparent !important;
             }
 
-            .side-panel {
+            .side-panel,
+            .side-panel-overlay {
                 display: none !important;
-            }
-
-            .main-content.panel-open {
-                margin-right: 0 !important;
             }
 
             .section-7-detail.visible {
@@ -1071,6 +1129,21 @@ if (file_exists($logo_path)) {
     <div class="toolbar-title">
         VENT HOOD REPORT EDITOR
     </div>
+    <div class="toolbar-center">
+        <div class="service-type-wrapper">
+            <label for="serviceTypeSelect">Report Type:</label>
+            <select class="service-type-select" id="serviceTypeSelect" onchange="handleServiceTypeChange(this.value)">
+                <?php
+                $reportConfigs = require __DIR__ . '/config/service_report_config.php';
+                foreach ($reportConfigs as $key => $cfg) {
+                    $keyAttr = htmlspecialchars($key);
+                    $title = htmlspecialchars($cfg['title']);
+                    echo "<option value=\"{$keyAttr}\">{$title}</option>\n                ";
+                }
+                ?>
+            </select>
+        </div>
+    </div>
     <div class="toolbar-actions">
         <button class="toolbar-btn btn-add-products" id="btnToggleProducts" onclick="toggleProductsSection()">Add Products Section</button>
         <button class="toolbar-btn btn-clear" onclick="clearAllFields()">Clear All</button>
@@ -1080,6 +1153,11 @@ if (file_exists($logo_path)) {
         <?php endif; ?>
     </div>
 </div>
+
+<!-- =============================================
+     OVERLAY
+     ============================================= -->
+<div class="side-panel-overlay" id="sidePanelOverlay" onclick="closeSidePanel()"></div>
 
 <!-- =============================================
      SIDE PANEL - PRODUCT CATALOG
@@ -1788,20 +1866,20 @@ if (file_exists($logo_path)) {
     // =============================================
     function openSidePanel() {
         var panel = document.getElementById('sidePanel');
-        var main = document.getElementById('mainContent');
+        var overlay = document.getElementById('sidePanelOverlay');
         var btn = document.getElementById('btnToggleProducts');
+        overlay.classList.add('active');
         panel.classList.add('open');
-        main.classList.add('panel-open');
         btn.textContent = 'Close Product Catalog';
         btn.style.background = '#d63031';
     }
 
     window.closeSidePanel = function() {
         var panel = document.getElementById('sidePanel');
-        var main = document.getElementById('mainContent');
+        var overlay = document.getElementById('sidePanelOverlay');
         var btn = document.getElementById('btnToggleProducts');
         panel.classList.remove('open');
-        main.classList.remove('panel-open');
+        overlay.classList.remove('active');
         btn.textContent = 'Add Products Section';
         btn.style.background = '#6c5ce7';
     };
@@ -1951,7 +2029,11 @@ if (file_exists($logo_path)) {
         document.getElementById('section7Detail').classList.remove('visible');
         updatePanelCount();
 
-        // Reset service type to default
+        // Reset service type selector to default
+        var selector = document.getElementById('serviceTypeSelect');
+        if (selector) {
+            selector.value = 'kitchen_exhaust_cleaning';
+        }
         handleServiceTypeChange('kitchen_exhaust_cleaning');
     };
 
