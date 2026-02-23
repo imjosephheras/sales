@@ -117,19 +117,14 @@ try {
         'total_cost' => $form['total_cost'],
     ];
 
-    // Sales mode: 'service' (default) or 'product' — affects template selection
+    // Sales mode: 'service' (default) or 'product' — affects only visible headers
     $salesMode = ($input['sales_mode'] ?? 'service') === 'product' ? 'product' : 'service';
 
-    // Determine template — product mode uses the parts replacement invoice
-    if ($salesMode === 'product') {
-        $template_file = __DIR__ . '/../templates/parts_replacement_invoice.php';
-    } else {
-        $request_type = strtolower($data['Request_Type'] ?? 'quote');
-        $template_file = __DIR__ . "/../templates/{$request_type}.php";
-    }
+    // Determine template
+    $request_type = strtolower($data['Request_Type'] ?? 'quote');
+    $template_file = __DIR__ . "/../templates/{$request_type}.php";
 
     if (!file_exists($template_file)) {
-        $request_type = $request_type ?? $salesMode;
         throw new Exception("Template not found for type: {$request_type}");
     }
 
@@ -158,8 +153,7 @@ try {
     }
 
     $company_safe = preg_replace('/[^a-zA-Z0-9_-]/', '_', $data['Company_Name'] ?? 'Document');
-    $filePrefix = ($salesMode === 'product') ? 'PARTS_INVOICE' : strtoupper($request_type ?? 'DOCUMENT');
-    $pdf_filename = "{$filePrefix}_{$docnum}_{$company_safe}_FINAL.pdf";
+    $pdf_filename = strtoupper($request_type) . "_{$docnum}_{$company_safe}_FINAL.pdf";
     $pdf_full_path = $pdfDir . '/' . $pdf_filename;
     $pdf_relative_path = 'storage/final_pdfs/' . $pdf_filename;
 

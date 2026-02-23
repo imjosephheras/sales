@@ -99,19 +99,14 @@ try {
         'scope_sections' => $scopeSections,
     ];
 
-    // Sales mode: 'service' (default) or 'product' — affects template selection
+    // Sales mode: 'service' (default) or 'product' — affects only visible headers
     $salesMode = ($_GET['sales_mode'] ?? 'service') === 'product' ? 'product' : 'service';
 
-    // Determine template — product mode uses the parts replacement invoice
-    if ($salesMode === 'product') {
-        $template_file = __DIR__ . '/../templates/parts_replacement_invoice.php';
-    } else {
-        $request_type = strtolower($data['Request_Type'] ?? 'quote');
-        $template_file = __DIR__ . "/../templates/{$request_type}.php";
-    }
+    // Determine template
+    $request_type = strtolower($data['Request_Type'] ?? 'quote');
+    $template_file = __DIR__ . "/../templates/{$request_type}.php";
 
     if (!file_exists($template_file)) {
-        $request_type = $request_type ?? $salesMode;
         throw new Exception("Template not found for type: {$request_type}");
     }
 
@@ -141,8 +136,7 @@ try {
     // Output PDF
     $company_safe = preg_replace('/[^a-zA-Z0-9_-]/', '_', $data['Company_Name'] ?? 'Document');
     $docnum = $data['docnum'] ?? 'DRAFT';
-    $filePrefix = ($salesMode === 'product') ? 'PARTS_INVOICE' : strtoupper($request_type ?? 'DOCUMENT');
-    $filename = "{$filePrefix}_{$docnum}_{$company_safe}.pdf";
+    $filename = strtoupper($request_type) . "_{$docnum}_{$company_safe}.pdf";
 
     header('Content-Type: application/pdf');
     header('Content-Disposition: inline; filename="' . $filename . '"');
