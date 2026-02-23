@@ -596,10 +596,10 @@
                 <table class="jwo-services-exact">
                     <thead>
                         <tr>
-                            <th style="width: 25%;">TYPE OF SERVICES</th>
-                            <th style="width: 12%;">SERVICE TIME</th>
-                            <th style="width: 12%;">FREQUENCY</th>
-                            <th style="width: 36%;">SERVICE DESCRIPTION</th>
+                            <th style="width: 25%;">${typeof editorSalesMode !== 'undefined' && editorSalesMode === 'product' ? 'PRODUCT' : 'TYPE OF SERVICES'}</th>
+                            <th style="width: 12%;">${typeof editorSalesMode !== 'undefined' && editorSalesMode === 'product' ? 'QUANTITY' : 'SERVICE TIME'}</th>
+                            <th style="width: 12%;">${typeof editorSalesMode !== 'undefined' && editorSalesMode === 'product' ? 'UNIT PRICE' : 'FREQUENCY'}</th>
+                            <th style="width: 36%;">${typeof editorSalesMode !== 'undefined' && editorSalesMode === 'product' ? 'DESCRIPTION' : 'SERVICE DESCRIPTION'}</th>
                             <th style="width: 15%;">SUBTOTAL</th>
                         </tr>
                     </thead>

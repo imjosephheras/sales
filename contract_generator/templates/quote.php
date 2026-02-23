@@ -437,12 +437,18 @@ $tax_rate = 0.0825;
 
     <div class="section-title">Pricing Summary</div>
 
+    <?php
+    $isProductMode = isset($salesMode) && $salesMode === 'product';
+    $qHdrType = $isProductMode ? 'Product' : 'Service';
+    $qHdrTime = $isProductMode ? 'Quantity' : 'Service Time';
+    $qHdrFreq = $isProductMode ? 'Unit Price' : 'Frequency';
+    ?>
     <table class="pricing-table">
         <thead>
             <tr>
-                <th style="width: 30%;">Service</th>
-                <th style="width: 20%;">Service Time</th>
-                <th style="width: 20%;">Frequency</th>
+                <th style="width: 30%;"><?php echo $qHdrType; ?></th>
+                <th style="width: 20%;"><?php echo $qHdrTime; ?></th>
+                <th style="width: 20%;"><?php echo $qHdrFreq; ?></th>
                 <th style="width: 30%;">Subtotal</th>
             </tr>
         </thead>

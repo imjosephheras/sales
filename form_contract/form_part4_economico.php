@@ -6,6 +6,22 @@
   <?= ($lang=='en') ? "Section 4: Economic Information" : "Sección 4: Información Económica"; ?>
 </div>
 
+<!-- 🔄 Sales Mode Toggle -->
+<div class="question-block" id="qSalesMode">
+  <label class="question-label">
+    <?= ($lang=='en') ? "Sales Mode" : "Modo de Venta"; ?>
+  </label>
+  <div class="sales-mode-toggle">
+    <button type="button" id="btnModeService" class="sales-mode-btn active" onclick="setSalesMode('service')">
+      <?= ($lang=='en') ? "Sell Service" : "Vender Servicio"; ?>
+    </button>
+    <button type="button" id="btnModeProduct" class="sales-mode-btn" onclick="setSalesMode('product')">
+      <?= ($lang=='en') ? "Sell Product" : "Vender Producto"; ?>
+    </button>
+  </div>
+  <input type="hidden" name="sales_mode" id="sales_mode" value="service">
+</div>
+
 <!-- 16️⃣ Seller -->
 <div class="question-block" id="q16">
   <label for="Seller" class="question-label">
@@ -95,10 +111,10 @@ function updatePriceLabel() {
       <thead>
         <tr>
           <th class="th-check">&nbsp;</th>
-          <th><?= ($lang=='en') ? "Type of Services" : "Tipo de Servicio"; ?></th>
-          <th><?= ($lang=='en') ? "Service Time" : "Tiempo de Servicio"; ?></th>
-          <th><?= ($lang=='en') ? "Frequency" : "Frecuencia"; ?></th>
-          <th><?= ($lang=='en') ? "Description" : "Descripción"; ?></th>
+          <th class="svc-header-type" data-service-en="Type of Services" data-service-es="Tipo de Servicio" data-product-en="Product" data-product-es="Producto"><?= ($lang=='en') ? "Type of Services" : "Tipo de Servicio"; ?></th>
+          <th class="svc-header-time" data-service-en="Service Time" data-service-es="Tiempo de Servicio" data-product-en="Quantity" data-product-es="Cantidad"><?= ($lang=='en') ? "Service Time" : "Tiempo de Servicio"; ?></th>
+          <th class="svc-header-freq" data-service-en="Frequency" data-service-es="Frecuencia" data-product-en="Unit Price" data-product-es="Precio Unitario"><?= ($lang=='en') ? "Frequency" : "Frecuencia"; ?></th>
+          <th class="svc-header-desc" data-service-en="Description" data-service-es="Descripción" data-product-en="Description" data-product-es="Descripción"><?= ($lang=='en') ? "Description" : "Descripción"; ?></th>
           <th><?= ($lang=='en') ? "Subtotal" : "Subtotal"; ?></th>
         </tr>
       </thead>
@@ -1003,10 +1019,10 @@ function applyBundleVisuals18() {
       <thead>
         <tr>
           <th class="th-check">&nbsp;</th>
-          <th><?= ($lang=='en') ? "Type of Services" : "Tipo de Servicio"; ?></th>
-          <th><?= ($lang=='en') ? "Service Time" : "Tiempo de Servicio"; ?></th>
-          <th><?= ($lang=='en') ? "Frequency" : "Frecuencia"; ?></th>
-          <th><?= ($lang=='en') ? "Service Description" : "Descripción del Servicio"; ?></th>
+          <th class="svc-header-type" data-service-en="Type of Services" data-service-es="Tipo de Servicio" data-product-en="Product" data-product-es="Producto"><?= ($lang=='en') ? "Type of Services" : "Tipo de Servicio"; ?></th>
+          <th class="svc-header-time" data-service-en="Service Time" data-service-es="Tiempo de Servicio" data-product-en="Quantity" data-product-es="Cantidad"><?= ($lang=='en') ? "Service Time" : "Tiempo de Servicio"; ?></th>
+          <th class="svc-header-freq" data-service-en="Frequency" data-service-es="Frecuencia" data-product-en="Unit Price" data-product-es="Precio Unitario"><?= ($lang=='en') ? "Frequency" : "Frecuencia"; ?></th>
+          <th class="svc-header-desc" data-service-en="Service Description" data-service-es="Descripción del Servicio" data-product-en="Description" data-product-es="Descripción"><?= ($lang=='en') ? "Service Description" : "Descripción del Servicio"; ?></th>
           <th><?= ($lang=='en') ? "SUBTOTAL" : "SUBTOTAL"; ?></th>
         </tr>
       </thead>

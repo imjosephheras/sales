@@ -220,6 +220,34 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    /* ======= SALES MODE TOGGLE ======= */
+    .sales-mode-toggle {
+      display: inline-flex;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #001f54;
+    }
+    .sales-mode-btn {
+      padding: 8px 20px;
+      border: none;
+      background: #fff;
+      color: #001f54;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .sales-mode-btn:first-child {
+      border-right: 1px solid #001f54;
+    }
+    .sales-mode-btn.active {
+      background: #001f54;
+      color: #fff;
+    }
+    .sales-mode-btn:hover:not(.active) {
+      background: #e8edf3;
+    }
+
     /* ======= ETIQUETAS MEJORADAS ======= */
     .question-label,
     .sub-label {

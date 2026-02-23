@@ -17,6 +17,7 @@
     // ========================================
 
     let currentRequestData = null;
+    let editorSalesMode = 'service'; // 'service' or 'product'
 
     /**
      * SERVICE REPORT CONFIG CACHE
@@ -29,6 +30,44 @@
     // ========================================
     // INICIALIZACIÓN
     // ========================================
+
+    // ========================================
+    // SALES MODE TOGGLE (editor side)
+    // ========================================
+    window.setEditorSalesMode = function(mode) {
+        editorSalesMode = mode;
+        var btnService = document.getElementById('editorBtnModeService');
+        var btnProduct = document.getElementById('editorBtnModeProduct');
+        if (btnService) {
+            btnService.style.background = mode === 'service' ? '#001f54' : '#fff';
+            btnService.style.color = mode === 'service' ? '#fff' : '#001f54';
+        }
+        if (btnProduct) {
+            btnProduct.style.background = mode === 'product' ? '#001f54' : '#fff';
+            btnProduct.style.color = mode === 'product' ? '#fff' : '#001f54';
+        }
+
+        var labels = {
+            service: { type: 'Type of Service', time: 'Service Time', freq: 'Frequency', desc: 'Description' },
+            product: { type: 'Product', time: 'Quantity', freq: 'Unit Price', desc: 'Description' }
+        };
+        var l = labels[mode] || labels.service;
+        document.querySelectorAll('.editor-svc-header-type').forEach(function(el) { el.textContent = l.type; });
+        document.querySelectorAll('.editor-svc-header-time').forEach(function(el) { el.textContent = l.time; });
+        document.querySelectorAll('.editor-svc-header-freq').forEach(function(el) { el.textContent = l.freq; });
+        document.querySelectorAll('.editor-svc-header-desc').forEach(function(el) { el.textContent = l.desc; });
+
+        // Persist per request
+        var reqId = document.getElementById('request_id');
+        if (reqId && reqId.value) {
+            localStorage.setItem('sales_mode_' + reqId.value, mode);
+        }
+
+        // Update preview if available
+        if (typeof updatePreview === 'function') {
+            updatePreview();
+        }
+    };
 
     document.addEventListener('DOMContentLoaded', function() {
         console.log('Editor module loaded');
@@ -209,6 +248,9 @@
                 if (data.success) {
                     currentRequestData = data.data;
                     populateForm(data.data);
+                    // Restore sales mode from localStorage
+                    var savedMode = localStorage.getItem('sales_mode_' + id) || 'service';
+                    setEditorSalesMode(savedMode);
                     updatePreview();
                 } else {
                     alert('Error loading request: ' + data.error);
@@ -884,7 +926,7 @@
         fetch('controllers/mark_completed.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ request_id: requestId })
+            body: JSON.stringify({ request_id: requestId, sales_mode: editorSalesMode })
         })
         .then(function(response) { return response.json(); })
         .then(function(data) {
@@ -948,7 +990,7 @@
             return;
         }
 
-        window.open('controllers/generate_pdf.php?id=' + requestId, '_blank');
+        window.open('controllers/generate_pdf.php?id=' + requestId + '&sales_mode=' + encodeURIComponent(editorSalesMode), '_blank');
     }
 
     // ========================================

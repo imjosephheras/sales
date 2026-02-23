@@ -221,6 +221,15 @@
                         </div>
                     </div>
 
+                    <!-- 🔄 Sales Mode Toggle -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-exchange-alt"></i> Sales Mode</h3>
+                        <div style="display:inline-flex; border-radius:6px; overflow:hidden; border:2px solid #001f54; margin-bottom:10px;">
+                            <button type="button" id="editorBtnModeService" class="editor-sales-mode-btn active" onclick="setEditorSalesMode('service')" style="padding:6px 16px; border:none; background:#001f54; color:#fff; font-weight:600; font-size:12px; cursor:pointer;">Sell Service</button>
+                            <button type="button" id="editorBtnModeProduct" class="editor-sales-mode-btn" onclick="setEditorSalesMode('product')" style="padding:6px 16px; border:none; background:#fff; color:#001f54; font-weight:600; font-size:12px; cursor:pointer; border-left:1px solid #001f54;">Sell Product</button>
+                        </div>
+                    </div>
+
                     <!-- 🔹 SECTION 18: Janitorial Services (conditionally shown based on Work Order) -->
                     <div class="form-section" id="janitorial-section" style="display: none;">
                         <h3><i class="fas fa-broom"></i> 18. Janitorial Services</h3>
@@ -228,10 +237,10 @@
                             <table class="editor-services-table" id="janitorial-table">
                                 <thead>
                                     <tr>
-                                        <th>Type of Service</th>
-                                        <th>Service Time</th>
-                                        <th>Frequency</th>
-                                        <th>Description</th>
+                                        <th class="editor-svc-header-type">Type of Service</th>
+                                        <th class="editor-svc-header-time">Service Time</th>
+                                        <th class="editor-svc-header-freq">Frequency</th>
+                                        <th class="editor-svc-header-desc">Description</th>
                                         <th>Subtotal</th>
                                         <th style="width:40px;"></th>
                                     </tr>
@@ -267,10 +276,10 @@
                             <table class="editor-services-table" id="kitchen-table">
                                 <thead>
                                     <tr>
-                                        <th>Type of Service</th>
-                                        <th>Service Time</th>
-                                        <th>Frequency</th>
-                                        <th>Description</th>
+                                        <th class="editor-svc-header-type">Type of Service</th>
+                                        <th class="editor-svc-header-time">Service Time</th>
+                                        <th class="editor-svc-header-freq">Frequency</th>
+                                        <th class="editor-svc-header-desc">Description</th>
                                         <th>Subtotal</th>
                                         <th style="width:40px;"></th>
                                     </tr>

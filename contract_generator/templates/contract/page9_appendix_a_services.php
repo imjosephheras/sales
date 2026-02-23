@@ -51,12 +51,18 @@
 
     if ($hasServices && !empty($allServices)):
     ?>
+    <?php
+    $isProductMode = isset($salesMode) && $salesMode === 'product';
+    $hdrType = $isProductMode ? 'Product' : 'Type of Service';
+    $hdrTime = $isProductMode ? 'Quantity' : 'Service Time';
+    $hdrFreq = $isProductMode ? 'Unit Price' : 'Frequency';
+    ?>
     <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
         <thead>
             <tr>
-                <th style="background-color: #CC0000; color: white; padding: 8px 6px; text-align: center; border: 1px solid #000; font-size: 8pt; text-transform: uppercase;">Type of Service</th>
-                <th style="background-color: #CC0000; color: white; padding: 8px 6px; text-align: center; border: 1px solid #000; font-size: 8pt; text-transform: uppercase;">Service Time</th>
-                <th style="background-color: #CC0000; color: white; padding: 8px 6px; text-align: center; border: 1px solid #000; font-size: 8pt; text-transform: uppercase;">Frequency</th>
+                <th style="background-color: #CC0000; color: white; padding: 8px 6px; text-align: center; border: 1px solid #000; font-size: 8pt; text-transform: uppercase;"><?php echo $hdrType; ?></th>
+                <th style="background-color: #CC0000; color: white; padding: 8px 6px; text-align: center; border: 1px solid #000; font-size: 8pt; text-transform: uppercase;"><?php echo $hdrTime; ?></th>
+                <th style="background-color: #CC0000; color: white; padding: 8px 6px; text-align: center; border: 1px solid #000; font-size: 8pt; text-transform: uppercase;"><?php echo $hdrFreq; ?></th>
                 <th style="background-color: #CC0000; color: white; padding: 8px 6px; text-align: center; border: 1px solid #000; font-size: 8pt; text-transform: uppercase;">Description</th>
                 <th style="background-color: #CC0000; color: white; padding: 8px 6px; text-align: center; border: 1px solid #000; font-size: 8pt; text-transform: uppercase;">Subtotal</th>
             </tr>
