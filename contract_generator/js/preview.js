@@ -78,37 +78,454 @@
     // ========================================
 
     function renderQuote(data) {
+        // Data preparation (matching quote.php)
+        const companyName = escapeHtml(data.Company_Name || '');
+        const companyAddress = escapeHtml(data.Company_Address || '');
+        const clientName = escapeHtml(data.client_name || data.Client_Name || '');
+        const seller = escapeHtml(data.Seller || '');
+        const requestedService = escapeHtml(data.Requested_Service || 'General Service');
+
+        // Date
+        const workDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' });
+
+        // Logo based on Service_Type
+        const deptLower = (data.Service_Type || '').toLowerCase();
+        const logoSrc = deptLower.includes('hospitality') ? '/sales/Images/phospitality.png' : '/sales/Images/pfacility.png';
+        const companyLabel = deptLower.includes('hospitality') ? 'PRIME HOSPITALITY SERVICES OF TEXAS' : 'PRIME FACILITY SERVICES GROUP, INC.';
+
+        // ========================================
+        // BUILD SERVICE ROWS from DB detail tables
+        // ========================================
+        let serviceRows = [];
+        let runningTotal = 0;
+        let hasDetailServices = false;
+
+        // --- Janitorial Services ---
+        if (data.janitorial_services && Array.isArray(data.janitorial_services) && data.janitorial_services.length > 0) {
+            hasDetailServices = true;
+            data.janitorial_services.forEach(function(svc) {
+                const svcSub = parseFloat(svc.subtotal || 0);
+                runningTotal += svcSub;
+                serviceRows.push({
+                    type: svc.service_type || 'Janitorial',
+                    time: svc.service_time || '',
+                    freq: svc.frequency || '',
+                    subtotal: svcSub
+                });
+            });
+        } else if (data.includeJanitorial === 'Yes' && data.type18 && Array.isArray(data.type18)) {
+            hasDetailServices = true;
+            data.type18.forEach(function(type, i) {
+                if (!type) return;
+                const svcSub = parseFloat((data.subtotal18 && data.subtotal18[i]) || 0);
+                runningTotal += svcSub;
+                serviceRows.push({
+                    type: type,
+                    time: (data.time18 && data.time18[i]) || '',
+                    freq: (data.freq18 && data.freq18[i]) || '',
+                    subtotal: svcSub
+                });
+            });
+        }
+
+        // --- Kitchen Cleaning Services ---
+        if (data.kitchen_services && Array.isArray(data.kitchen_services) && data.kitchen_services.length > 0) {
+            hasDetailServices = true;
+            data.kitchen_services.forEach(function(svc) {
+                const svcSub = parseFloat(svc.subtotal || 0);
+                runningTotal += svcSub;
+                serviceRows.push({
+                    type: svc.service_type || 'Kitchen Cleaning',
+                    time: svc.service_time || '',
+                    freq: svc.frequency || '',
+                    subtotal: svcSub
+                });
+            });
+        } else if (data.includeKitchen === 'Yes' && data.type19 && Array.isArray(data.type19)) {
+            hasDetailServices = true;
+            data.type19.forEach(function(type, i) {
+                if (!type) return;
+                const svcSub = parseFloat((data.subtotal19 && data.subtotal19[i]) || 0);
+                runningTotal += svcSub;
+                serviceRows.push({
+                    type: type,
+                    time: (data.time19 && data.time19[i]) || '',
+                    freq: (data.freq19 && data.freq19[i]) || '',
+                    subtotal: svcSub
+                });
+            });
+        }
+
+        // --- Hood Vent Services ---
+        if (data.hood_vent_services && Array.isArray(data.hood_vent_services) && data.hood_vent_services.length > 0) {
+            hasDetailServices = true;
+            data.hood_vent_services.forEach(function(svc) {
+                const svcSub = parseFloat(svc.subtotal || 0);
+                runningTotal += svcSub;
+                serviceRows.push({
+                    type: svc.service_type || 'Hood Vent',
+                    time: svc.service_time || '',
+                    freq: svc.frequency || '',
+                    subtotal: svcSub
+                });
+            });
+        }
+
+        // Calculate subtotal
+        let subtotal;
+        if (hasDetailServices && runningTotal > 0) {
+            subtotal = runningTotal;
+        } else {
+            subtotal = parseFloat(data.Total_Price || data.total_cost || data.PriceInput || 0);
+        }
+
+        // If no detail service rows, create a single generic row
+        if (serviceRows.length === 0) {
+            serviceRows.push({
+                type: requestedService,
+                time: '',
+                freq: '',
+                subtotal: subtotal
+            });
+        }
+
+        // Sales mode headers
+        const isProductMode = typeof editorSalesMode !== 'undefined' && editorSalesMode === 'product';
+        const hdrType = isProductMode ? 'Product' : 'Service';
+        const hdrTime = isProductMode ? 'Quantity' : 'Service Time';
+        const hdrFreq = isProductMode ? 'Unit Price' : 'Frequency';
+
+        // Build service rows HTML
+        let serviceRowsHtml = '';
+        serviceRows.forEach(function(row) {
+            serviceRowsHtml += `
+                <tr>
+                    <td>${escapeHtml(row.type)}</td>
+                    <td>${escapeHtml(row.time)}</td>
+                    <td>${escapeHtml(row.freq)}</td>
+                    <td class="amount">$${formatPrice(row.subtotal)}</td>
+                </tr>
+            `;
+        });
+
+        // Build scope sections HTML
+        const scopeSections = data.scope_sections || data.Scope_Sections || [];
+        let scopeHtml = '';
+        if (scopeSections.length > 0) {
+            scopeSections.forEach(function(section) {
+                scopeHtml += `
+                    <div class="quote-scope-block">
+                        <div class="quote-scope-title">${escapeHtml(section.title || '').toUpperCase()}</div>
+                        <div class="quote-scope-content">${escapeHtml(section.scope_content || section.content || '').replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+            });
+        } else if (data.Site_Observation) {
+            scopeHtml = `
+                <div class="quote-scope-block">
+                    <div class="quote-scope-content">${escapeHtml(data.Site_Observation).replace(/\n/g, '<br>')}</div>
+                </div>
+            `;
+        }
+
         return `
-            <div class="document-preview">
-                <div class="doc-header-preview">
-                    <h1>QUOTATION</h1>
-                    <p class="doc-number">${data.docnum || 'DRAFT'}</p>
-                </div>
-                
-                <div class="doc-section">
-                    <h2>Client Information</h2>
-                    <p><strong>Company Name:</strong> ${data.Company_Name || 'N/A'}</p>
-                    <p><strong>Client Name:</strong> ${data.client_name || data.Client_Name || 'N/A'}</p>
-                    <p><strong>Email:</strong> ${data.Email || 'N/A'}</p>
-                    <p><strong>Phone:</strong> ${data.Number_Phone || 'N/A'}</p>
+            <div class="document-preview quote-preview-exact">
+                <style>
+                    .quote-preview-exact {
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 10pt;
+                        color: #333;
+                        line-height: 1.5;
+                        background: white;
+                        padding: 20px;
+                    }
+
+                    /* Header */
+                    .quote-header-exact {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        border-bottom: 3px solid #CC0000;
+                        padding-bottom: 10px;
+                        margin-bottom: 15px;
+                    }
+                    .quote-header-exact img {
+                        max-height: 65px;
+                        width: auto;
+                    }
+                    .quote-header-exact .title-section {
+                        text-align: left;
+                        padding-left: 15px;
+                    }
+                    .quote-header-exact .doc-title {
+                        color: #CC0000;
+                        font-size: 13pt;
+                        font-weight: bold;
+                        text-transform: uppercase;
+                        margin-bottom: 2px;
+                    }
+                    .quote-header-exact .doc-subtitle {
+                        font-size: 16pt;
+                        font-weight: bold;
+                        color: #000;
+                    }
+
+                    /* Date */
+                    .quote-date {
+                        font-size: 10pt;
+                        color: #555;
+                        margin-bottom: 20px;
+                    }
+
+                    /* Greeting / client block */
+                    .quote-greeting-block {
+                        margin-bottom: 18px;
+                        line-height: 1.6;
+                    }
+                    .quote-greeting-block .dear {
+                        font-size: 10pt;
+                        color: #000;
+                    }
+                    .quote-greeting-block .client-info {
+                        font-size: 10pt;
+                        color: #333;
+                    }
+
+                    /* Intro text */
+                    .quote-intro-text {
+                        margin-bottom: 16px;
+                        font-size: 10pt;
+                        text-align: justify;
+                        line-height: 1.6;
+                    }
+
+                    /* Section titles */
+                    .quote-section-title {
+                        color: #CC0000;
+                        font-weight: bold;
+                        font-size: 11pt;
+                        margin-top: 22px;
+                        margin-bottom: 8px;
+                        text-transform: uppercase;
+                        border-bottom: 2px solid #CC0000;
+                        padding-bottom: 4px;
+                    }
+                    .quote-subsection-title {
+                        color: #CC0000;
+                        font-weight: bold;
+                        font-size: 10pt;
+                        margin-top: 12px;
+                        margin-bottom: 4px;
+                        text-transform: uppercase;
+                    }
+
+                    /* Scope blocks */
+                    .quote-scope-block {
+                        margin-bottom: 10px;
+                    }
+                    .quote-scope-block .quote-scope-title {
+                        font-weight: bold;
+                        font-size: 10pt;
+                        color: #000;
+                        margin-bottom: 3px;
+                        text-transform: uppercase;
+                    }
+                    .quote-scope-block .quote-scope-content {
+                        font-size: 9.5pt;
+                        line-height: 1.5;
+                        padding-left: 10px;
+                    }
+
+                    /* Tax note */
+                    .quote-tax-note {
+                        margin-top: 12px;
+                        margin-bottom: 18px;
+                        font-size: 9pt;
+                        color: #555;
+                        font-style: italic;
+                    }
+
+                    /* Pricing table */
+                    .quote-pricing-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 6px;
+                    }
+                    .quote-pricing-table th {
+                        background-color: #CC0000;
+                        color: white;
+                        font-weight: bold;
+                        padding: 7px 10px;
+                        text-align: left;
+                        border: 1px solid #CC0000;
+                        font-size: 9pt;
+                        text-transform: uppercase;
+                    }
+                    .quote-pricing-table td {
+                        padding: 6px 10px;
+                        border: 1px solid #ddd;
+                        font-size: 9.5pt;
+                        word-wrap: break-word;
+                        overflow-wrap: break-word;
+                    }
+                    .quote-pricing-table td.amount {
+                        text-align: right;
+                        font-weight: bold;
+                    }
+                    .quote-pricing-table tr:nth-child(even) {
+                        background-color: #f9f9f9;
+                    }
+
+                    /* Terms */
+                    .quote-terms-block {
+                        margin-top: 22px;
+                        margin-bottom: 16px;
+                    }
+                    .quote-terms-block p {
+                        font-size: 9.5pt;
+                        margin-bottom: 6px;
+                        line-height: 1.5;
+                    }
+                    .quote-terms-block ul {
+                        margin: 6px 0 6px 20px;
+                        padding: 0;
+                    }
+                    .quote-terms-block li {
+                        font-size: 9.5pt;
+                        margin-bottom: 4px;
+                        line-height: 1.4;
+                    }
+
+                    /* Closing */
+                    .quote-closing-block {
+                        margin-top: 24px;
+                        font-size: 10pt;
+                        line-height: 1.6;
+                    }
+                    .quote-closing-block .signature-name {
+                        font-weight: bold;
+                        font-size: 10pt;
+                        margin-top: 30px;
+                    }
+                    .quote-closing-block .signature-title {
+                        font-size: 9.5pt;
+                        color: #555;
+                    }
+
+                    /* Footer */
+                    .quote-footer-wrapper {
+                        margin-top: 30px;
+                    }
+                    .quote-footer-top {
+                        background-color: #A30000;
+                        color: white;
+                        text-align: center;
+                        padding: 3px 10px;
+                        font-size: 7pt;
+                    }
+                    .quote-footer-bottom {
+                        background-color: #CC0000;
+                        color: white;
+                        text-align: center;
+                        padding: 8px 10px;
+                        font-size: 8pt;
+                    }
+                    .quote-footer-bottom a {
+                        color: white;
+                        text-decoration: none;
+                    }
+                </style>
+
+                <!-- HEADER -->
+                <div class="quote-header-exact">
+                    <img src="${logoSrc}" alt="Prime Services" onerror="this.style.display='none'">
+                    <div class="title-section">
+                        <div class="doc-title">Service</div>
+                        <div class="doc-subtitle">QUOTATION</div>
+                    </div>
                 </div>
 
-                <div class="doc-section">
-                    <h2>Service Details</h2>
-                    <p><strong>Service Type:</strong> ${data.Service_Type || 'N/A'}</p>
-                    <p><strong>Requested Service:</strong> ${data.Requested_Service || 'N/A'}</p>
+                <!-- DATE -->
+                <div class="quote-date">${workDate}</div>
+
+                <!-- GREETING -->
+                <div class="quote-greeting-block">
+                    <div class="dear">Dear ${clientName || 'Valued Client'},</div>
+                    <div class="client-info">
+                        ${companyName}<br>
+                        ${companyAddress}
+                    </div>
                 </div>
 
-                <div class="doc-section">
-                    <h2>Pricing</h2>
-                    <p class="price-display"><strong>Total Price:</strong> $${formatPrice(data.Total_Price)} ${data.Currency || 'USD'}</p>
+                <!-- INTRO PARAGRAPHS -->
+                <div class="quote-intro-text">
+                    We appreciate the opportunity to visit your business. We gathered the necessary information to prepare this quotation and provide you with the best possible service.
+                </div>
+                <div class="quote-intro-text">
+                    In response to your request, we are pleased to present the following proposal for <strong>${requestedService}</strong>.
+                </div>
+
+                <!-- QUOTATION - SCOPE OF SERVICE -->
+                <div class="quote-section-title">Quotation</div>
+                <div class="quote-subsection-title">Scope of Service</div>
+
+                ${scopeHtml}
+
+                <!-- TAX NOTE -->
+                <div class="quote-tax-note">
+                    An 8.25% sales tax will be added to the final invoice.
+                </div>
+
+                <!-- PRICING SUMMARY -->
+                <div class="quote-section-title">Pricing Summary</div>
+
+                <table class="quote-pricing-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">${hdrType}</th>
+                            <th style="width: 20%;">${hdrTime}</th>
+                            <th style="width: 20%;">${hdrFreq}</th>
+                            <th style="width: 30%;">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${serviceRowsHtml}
+                    </tbody>
+                </table>
+
+                <!-- TERMS AND APPROVAL -->
+                <div class="quote-section-title">Terms and Approval</div>
+
+                <div class="quote-terms-block">
+                    <p>Approval of this quotation by phone or email authorizes PRIME to proceed with the service described above.</p>
+                    <ul>
+                        <li>We protect your facilities with comprehensive insurance coverage.</li>
+                        <li>We are insured and authorized to operate in the State of Texas.</li>
+                        <li>References available upon request.</li>
+                    </ul>
+                </div>
+
+                <!-- CLOSING -->
+                <div class="quote-closing-block">
+                    <p>Thank you in advance for your consideration.<br>
+                    We look forward to the opportunity to work with you.</p>
+
+                    <p>Sincerely,</p>
+
+                    <div class="signature-name">${seller || 'Sales Department'}</div>
+                    <div class="signature-title">Sales Manager</div>
                 </div>
 
                 <!-- SERVICE REPORT DYNAMIC SECTIONS -->
                 ${renderServiceReportSections(data)}
 
-                <div class="doc-footer">
-                    <p><em>This is a placeholder template. Final template will be provided.</em></p>
+                <!-- FOOTER -->
+                <div class="quote-footer-wrapper">
+                    <div class="quote-footer-top">${companyLabel}</div>
+                    <div class="quote-footer-bottom">
+                        <strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>
+                        www.primefacilityservicesgroup.com
+                    </div>
                 </div>
             </div>
         `;
