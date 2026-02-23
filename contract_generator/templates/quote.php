@@ -38,10 +38,10 @@ if (file_exists($logo_file)) {
     $logo_base64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logo_file));
 }
 
-// Client data
-$company_name    = htmlspecialchars($data['Company_Name'] ?? '');
-$company_address = htmlspecialchars($data['Company_Address'] ?? '');
-$client_name     = htmlspecialchars($data['client_name'] ?? '');
+// Client data (nl2br preserves line breaks entered by the user in Section 2)
+$company_name    = nl2br(htmlspecialchars($data['Company_Name'] ?? ''));
+$company_address = nl2br(htmlspecialchars($data['Company_Address'] ?? ''));
+$client_name     = nl2br(htmlspecialchars($data['client_name'] ?? ''));
 $seller          = htmlspecialchars($data['Seller'] ?? '');
 $requested_service = htmlspecialchars($data['Requested_Service'] ?? 'General Service');
 

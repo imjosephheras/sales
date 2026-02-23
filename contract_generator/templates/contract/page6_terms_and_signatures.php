@@ -18,7 +18,7 @@
     <table class="sig-table">
         <tr>
             <td>
-                <div class="signature-block-title"><?php echo nl2br($company_name) ?: '(Company Name)'; ?>:</div>
+                <div class="signature-block-title"><?php echo $company_name ?: '(Company Name)'; ?>:</div>
                 <div class="sig-line-item">
                     <div class="sig-label">Signature:</div>
                     <div class="sig-underline"></div>
