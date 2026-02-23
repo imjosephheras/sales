@@ -75,10 +75,10 @@
                 $isSecondaryInBundle = $isBundle && !$isFirstInBundle;
             ?>
             <tr<?php if ($isBundle): ?> style="border-left: 3px solid #0066cc;"<?php endif; ?>>
-                <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: left;"><?php echo htmlspecialchars($svc['service_type'] ?? ''); ?></td>
-                <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: center;"><?php echo htmlspecialchars($svc['service_time'] ?? ''); ?></td>
-                <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: center;"><?php echo htmlspecialchars($svc['frequency'] ?? ''); ?></td>
-                <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: left;"><?php echo htmlspecialchars($svc['description'] ?? ''); ?></td>
+                <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: left; word-wrap: break-word;"><?php echo nl2br(htmlspecialchars($svc['service_type'] ?? '')); ?></td>
+                <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: center; word-wrap: break-word;"><?php echo nl2br(htmlspecialchars($svc['service_time'] ?? '')); ?></td>
+                <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: center; word-wrap: break-word;"><?php echo nl2br(htmlspecialchars($svc['frequency'] ?? '')); ?></td>
+                <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: left; word-wrap: break-word;"><?php echo nl2br(htmlspecialchars($svc['description'] ?? '')); ?></td>
                 <?php if ($isFirstInBundle): ?>
                 <td style="border: 1px solid #000; padding: 6px 8px; font-size: 8pt; text-align: right; font-weight: bold; vertical-align: middle; background: linear-gradient(135deg, #e8f4fd, #d0ebff);" rowspan="<?php echo $bundleGroupInfo[$bg]['count']; ?>">
                     $<?php echo number_format($bundleGroupInfo[$bg]['total'], 2); ?>

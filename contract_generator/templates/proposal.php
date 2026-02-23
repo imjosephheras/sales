@@ -262,6 +262,12 @@ foreach ($contractStaff as $staff) {
             margin-bottom: 2px;
         }
 
+        /* Ensure text wraps by word and respects line breaks in cells/blocks */
+        td, .notice-block, .content-section {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
         /* Staffing fees table */
         .department-header {
             background-color: #CC0000;
@@ -395,8 +401,8 @@ foreach ($contractStaff as $staff) {
 
         <div class="notice-block">
             <strong>Client:</strong>
-            <?php echo $company_name; ?><br>
-            <?php echo $company_address; ?>
+            <?php echo nl2br($company_name); ?><br>
+            <?php echo nl2br($company_address); ?>
             <br><br>
             <strong>Attn:</strong><br>
             Thomas Turner<br>
@@ -535,7 +541,7 @@ foreach ($contractStaff as $staff) {
         <table class="sig-table">
             <tr>
                 <td>
-                    <div class="signature-block-title"><?php echo $company_name; ?></div>
+                    <div class="signature-block-title"><?php echo nl2br($company_name); ?></div>
                     <div class="sig-line-item">
                         <div class="sig-label">Signature:</div>
                         <div class="sig-underline"></div>
