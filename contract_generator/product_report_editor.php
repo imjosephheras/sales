@@ -688,8 +688,8 @@ $products = [
         .side-panel {
             position: fixed;
             top: 0;
-            right: -380px;
-            width: 380px;
+            right: -450px;
+            width: 450px;
             height: 100vh;
             background: white;
             box-shadow: -4px 0 20px rgba(0,0,0,0.2);
@@ -818,15 +818,29 @@ $products = [
         }
 
         /* =============================================
-           MAIN CONTENT
+           OVERLAY
            ============================================= */
-        .main-content {
-            transition: margin-right 0.3s ease;
+        .side-panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        .main-content.panel-open {
-            margin-right: 380px;
+        .side-panel-overlay.active {
+            display: block;
+            opacity: 1;
         }
+
+        /* =============================================
+           MAIN CONTENT
+           ============================================= */
 
         /* =============================================
            EMBEDDED MODE (inside iframe)
@@ -901,12 +915,9 @@ $products = [
                 display: none !important;
             }
 
-            .side-panel {
+            .side-panel,
+            .side-panel-overlay {
                 display: none !important;
-            }
-
-            .main-content.panel-open {
-                margin-right: 0 !important;
             }
 
             .invoice-table .remove-btn {
@@ -932,10 +943,6 @@ $products = [
             .side-panel {
                 width: 100%;
                 right: -100%;
-            }
-
-            .main-content.panel-open {
-                margin-right: 0;
             }
 
             .toolbar {
@@ -965,6 +972,11 @@ $products = [
         <button class="toolbar-btn btn-print" onclick="window.print()">Print Invoice</button>
     </div>
 </div>
+
+<!-- =============================================
+     OVERLAY
+     ============================================= -->
+<div class="side-panel-overlay" id="sidePanelOverlay" onclick="closeSidePanel()"></div>
 
 <!-- =============================================
      SIDE PANEL - PRODUCT CATALOG
@@ -1321,20 +1333,20 @@ $products = [
     // =============================================
     function openSidePanel() {
         var panel = document.getElementById('sidePanel');
-        var main = document.getElementById('mainContent');
+        var overlay = document.getElementById('sidePanelOverlay');
         var btn = document.getElementById('btnToggleProducts');
+        overlay.classList.add('active');
         panel.classList.add('open');
-        main.classList.add('panel-open');
         btn.textContent = 'Close Catalog';
         btn.style.background = '#d63031';
     }
 
     window.closeSidePanel = function() {
         var panel = document.getElementById('sidePanel');
-        var main = document.getElementById('mainContent');
+        var overlay = document.getElementById('sidePanelOverlay');
         var btn = document.getElementById('btnToggleProducts');
         panel.classList.remove('open');
-        main.classList.remove('panel-open');
+        overlay.classList.remove('active');
         btn.textContent = 'Select Products';
         btn.style.background = '#e65100';
     };
