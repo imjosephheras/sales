@@ -190,7 +190,7 @@
         }
 
         // Sales mode headers
-        const isProductMode = typeof editorSalesMode !== 'undefined' && editorSalesMode === 'product';
+        const isProductMode = window.editorSalesMode === 'product';
         const hdrType = isProductMode ? 'Product' : 'Service';
         const hdrTime = isProductMode ? 'Quantity' : 'Service Time';
         const hdrFreq = isProductMode ? 'Unit Price' : 'Frequency';
@@ -1013,10 +1013,10 @@
                 <table class="jwo-services-exact">
                     <thead>
                         <tr>
-                            <th style="width: 25%;">${typeof editorSalesMode !== 'undefined' && editorSalesMode === 'product' ? 'PRODUCT' : 'TYPE OF SERVICES'}</th>
-                            <th style="width: 12%;">${typeof editorSalesMode !== 'undefined' && editorSalesMode === 'product' ? 'QUANTITY' : 'SERVICE TIME'}</th>
-                            <th style="width: 12%;">${typeof editorSalesMode !== 'undefined' && editorSalesMode === 'product' ? 'UNIT PRICE' : 'FREQUENCY'}</th>
-                            <th style="width: 36%;">${typeof editorSalesMode !== 'undefined' && editorSalesMode === 'product' ? 'DESCRIPTION' : 'SERVICE DESCRIPTION'}</th>
+                            <th style="width: 25%;">${window.editorSalesMode === 'product' ? 'PRODUCT' : 'TYPE OF SERVICES'}</th>
+                            <th style="width: 12%;">${window.editorSalesMode === 'product' ? 'QUANTITY' : 'SERVICE TIME'}</th>
+                            <th style="width: 12%;">${window.editorSalesMode === 'product' ? 'UNIT PRICE' : 'FREQUENCY'}</th>
+                            <th style="width: 36%;">${window.editorSalesMode === 'product' ? 'DESCRIPTION' : 'SERVICE DESCRIPTION'}</th>
                             <th style="width: 15%;">SUBTOTAL</th>
                         </tr>
                     </thead>
@@ -1652,6 +1652,58 @@
         const deptLower = (data.Service_Type || '').toLowerCase();
         const logoSrc = deptLower.includes('hospitality') ? '/sales/Images/phospitality.png' : '/sales/Images/pfacility.png';
 
+        // Build Appendix A service rows from DB detail tables (same logic as PDF)
+        const isProductMode = window.editorSalesMode === 'product';
+        const hdrType = isProductMode ? 'PRODUCT' : 'TYPE OF SERVICE';
+        const hdrTime = isProductMode ? 'QUANTITY' : 'SERVICE TIME';
+        const hdrFreq = isProductMode ? 'UNIT PRICE' : 'FREQUENCY';
+
+        let contractServiceRows = [];
+        if (data.janitorial_services && Array.isArray(data.janitorial_services)) {
+            data.janitorial_services.forEach(function(svc) {
+                contractServiceRows.push(svc);
+            });
+        }
+        if (data.kitchen_services && Array.isArray(data.kitchen_services)) {
+            data.kitchen_services.forEach(function(svc) {
+                contractServiceRows.push(svc);
+            });
+        }
+        if (data.hood_vent_services && Array.isArray(data.hood_vent_services)) {
+            data.hood_vent_services.forEach(function(svc) {
+                contractServiceRows.push(svc);
+            });
+        }
+
+        let appendixAHtml = '';
+        if (contractServiceRows.length > 0) {
+            let rowsHtml = '';
+            contractServiceRows.forEach(function(svc) {
+                const svcType = escapeHtml(svc.service_type || '');
+                const svcTime = escapeHtml(svc.service_time || '');
+                const svcFreq = escapeHtml(svc.frequency || '');
+                const svcDesc = escapeHtml(svc.description || '');
+                const svcSub = parseFloat(svc.subtotal || 0);
+                rowsHtml += '<tr>' +
+                    '<td style="border:1px solid #000;padding:6px 8px;font-size:8pt;text-align:left;">' + svcType + '</td>' +
+                    '<td style="border:1px solid #000;padding:6px 8px;font-size:8pt;text-align:center;">' + svcTime + '</td>' +
+                    '<td style="border:1px solid #000;padding:6px 8px;font-size:8pt;text-align:center;">' + svcFreq + '</td>' +
+                    '<td style="border:1px solid #000;padding:6px 8px;font-size:8pt;text-align:left;">' + svcDesc + '</td>' +
+                    '<td style="border:1px solid #000;padding:6px 8px;font-size:8pt;text-align:right;font-weight:bold;">$' + formatPrice(svcSub) + '</td>' +
+                    '</tr>';
+            });
+            appendixAHtml = '<table style="width:100%;border-collapse:collapse;margin-top:10px;">' +
+                '<thead><tr>' +
+                '<th style="background-color:#CC0000;color:white;padding:8px 6px;text-align:center;border:1px solid #000;font-size:8pt;text-transform:uppercase;">' + hdrType + '</th>' +
+                '<th style="background-color:#CC0000;color:white;padding:8px 6px;text-align:center;border:1px solid #000;font-size:8pt;text-transform:uppercase;">' + hdrTime + '</th>' +
+                '<th style="background-color:#CC0000;color:white;padding:8px 6px;text-align:center;border:1px solid #000;font-size:8pt;text-transform:uppercase;">' + hdrFreq + '</th>' +
+                '<th style="background-color:#CC0000;color:white;padding:8px 6px;text-align:center;border:1px solid #000;font-size:8pt;text-transform:uppercase;">DESCRIPTION</th>' +
+                '<th style="background-color:#CC0000;color:white;padding:8px 6px;text-align:center;border:1px solid #000;font-size:8pt;text-transform:uppercase;">SUBTOTAL</th>' +
+                '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
+        } else {
+            appendixAHtml = '<p style="text-align: center; color: #666; font-style: italic;">(Service prices to be detailed here)</p>';
+        }
+
         return `
             <div class="document-preview contract-preview-exact">
                 <style>
@@ -2056,7 +2108,7 @@
                 <div class="contract-appendix-title">APPENDIX (A)</div>
                 <div class="contract-appendix-subtitle">Service Prices</div>
                 <div class="contract-appendix-content">
-                    <p style="text-align: center; color: #666; font-style: italic;">(Service prices to be detailed here)</p>
+                    ${appendixAHtml}
                 </div>
 
                 <!-- APPENDIX B -->
