@@ -127,6 +127,76 @@ if (file_exists($logo_path)) {
         }
 
         /* =============================================
+           TEMPLATE SELECTOR DROPDOWN
+           ============================================= */
+        .template-selector-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .btn-template {
+            background: #f39c12;
+            color: white;
+        }
+
+        .template-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 6px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            min-width: 280px;
+            z-index: 1100;
+            overflow: hidden;
+        }
+
+        .template-dropdown.open {
+            display: block;
+        }
+
+        .template-dropdown-header {
+            background: #001f54;
+            color: white;
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .template-dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            background: white;
+            text-align: left;
+            font-size: 12px;
+            font-family: inherit;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .template-dropdown-item:hover {
+            background: #e8f0fe;
+        }
+
+        .template-dropdown-item.active {
+            background: #e8f0fe;
+            color: #001f54;
+            font-weight: bold;
+        }
+
+        .template-dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        /* =============================================
            PAGE CONTAINER
            ============================================= */
         .pages-container {
@@ -782,35 +852,20 @@ if (file_exists($logo_path)) {
         }
 
         /* =============================================
-           SIDE PANEL - PRODUCT CATALOG
+           SIDE PANEL - PRODUCT CATALOG (overlay drawer)
            ============================================= */
-        .app-layout {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .main-content {
-            flex: 1;
-            transition: margin-right 0.3s ease;
-        }
-
-        .main-content.panel-open {
-            margin-right: 370px;
-        }
-
         .side-panel {
             position: fixed;
             top: 0;
-            right: -370px;
-            width: 370px;
+            right: -450px;
+            width: 450px;
             height: 100vh;
-            background: #f5f6fa;
-            box-shadow: -3px 0 15px rgba(0,0,0,0.2);
+            background: white;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.2);
             z-index: 999;
-            transition: right 0.3s ease;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            transition: right 0.3s ease;
         }
 
         .side-panel.open {
@@ -820,7 +875,7 @@ if (file_exists($logo_path)) {
         .side-panel-header {
             background: linear-gradient(135deg, #001f54 0%, #003080 100%);
             color: white;
-            padding: 52px 16px 12px 16px;
+            padding: 14px 18px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -828,122 +883,194 @@ if (file_exists($logo_path)) {
         }
 
         .side-panel-header h3 {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: bold;
             margin: 0;
         }
 
         .side-panel-close {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
+            background: none;
+            border: none;
             color: white;
-            border-radius: 4px;
-            width: 28px;
-            height: 28px;
-            font-size: 16px;
+            font-size: 22px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
+            line-height: 1;
+            padding: 0 4px;
         }
 
         .side-panel-close:hover {
-            background: rgba(255,255,255,0.25);
+            opacity: 0.7;
         }
 
         .side-panel-body {
             flex: 1;
             overflow-y: auto;
-            padding: 12px;
+            padding: 14px;
         }
 
         .side-panel-body p.panel-hint {
-            font-size: 10px;
+            font-size: 12px;
             color: #666;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             line-height: 1.4;
+        }
+
+        /* Search Bar in Side Panel */
+        .panel-search-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: white;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .panel-search-icon {
+            position: absolute;
+            left: 12px;
+            color: #999;
+            font-size: 13px;
+            pointer-events: none;
+        }
+        .panel-search-input {
+            width: 100%;
+            padding: 10px 14px 10px 36px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .panel-search-input:focus {
+            border-color: #003080;
+            box-shadow: 0 0 0 3px rgba(0,48,128,0.12);
+        }
+        .panel-no-results {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            padding: 20px 10px;
+            font-style: italic;
         }
 
         .side-panel .product-preview-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
+            gap: 10px;
         }
 
         .side-panel .product-preview-tile {
-            width: 100%;
-            aspect-ratio: 1;
-            border: 2px solid #ddd;
-            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
             cursor: pointer;
-            overflow: hidden;
+            transition: all 0.2s;
             position: relative;
             background: white;
-            transition: all 0.2s;
         }
 
         .side-panel .product-preview-tile:hover {
             border-color: #003080;
-            box-shadow: 0 2px 10px rgba(0,31,84,0.2);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,31,84,0.15);
         }
 
         .side-panel .product-preview-tile.selected {
             border-color: #001f54;
-            box-shadow: 0 0 0 2px #001f54, 0 2px 10px rgba(0,31,84,0.3);
+            background: #e8f0fe;
         }
 
         .side-panel .product-preview-tile.selected::after {
             content: "\2713";
             position: absolute;
-            top: 3px;
-            right: 3px;
+            top: 6px;
+            right: 8px;
             background: #001f54;
             color: white;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
             font-weight: bold;
         }
 
         .side-panel .product-preview-tile img {
             width: 100%;
-            height: 65%;
+            height: 80px;
             object-fit: contain;
-            padding: 4px;
+            margin-bottom: 6px;
         }
 
         .side-panel .product-preview-tile .preview-name {
-            font-size: 8px;
-            font-weight: bold;
+            font-size: 10px;
+            font-weight: 600;
             color: #001f54;
-            text-align: center;
-            padding: 0 4px 4px 4px;
             line-height: 1.2;
-            height: 35%;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
         }
 
         .side-panel-count {
-            background: #001f54;
-            color: white;
-            padding: 8px 16px;
-            font-size: 11px;
-            font-weight: bold;
+            background: #f5f5f5;
+            padding: 10px 18px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
             text-align: center;
+            border-top: 1px solid #ddd;
             flex-shrink: 0;
             display: none;
         }
 
         .side-panel-count.has-items {
             display: block;
+            background: #e8f0fe;
+            color: #001f54;
+        }
+
+        /* =============================================
+           OVERLAY
+           ============================================= */
+        .side-panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 998;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .side-panel-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* =============================================
+           RESPONSIVE
+           ============================================= */
+        @media (max-width: 768px) {
+            .side-panel {
+                width: 100%;
+                right: -100%;
+            }
+
+            .toolbar {
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 8px 12px;
+            }
+
+            .toolbar-actions {
+                flex-wrap: wrap;
+            }
         }
 
         /* =============================================
@@ -1034,12 +1161,13 @@ if (file_exists($logo_path)) {
                 background: transparent !important;
             }
 
-            .side-panel {
+            .side-panel,
+            .side-panel-overlay {
                 display: none !important;
             }
 
-            .main-content.panel-open {
-                margin-right: 0 !important;
+            .template-selector-wrapper {
+                display: none !important;
             }
 
             .section-7-detail.visible {
@@ -1072,6 +1200,19 @@ if (file_exists($logo_path)) {
         VENT HOOD REPORT EDITOR
     </div>
     <div class="toolbar-actions">
+        <div class="template-selector-wrapper">
+            <button class="toolbar-btn btn-template" id="btnTemplate" onclick="toggleTemplateDropdown()">Report Type</button>
+            <div class="template-dropdown" id="templateDropdown">
+                <div class="template-dropdown-header">Select Report Type</div>
+                <button class="template-dropdown-item active" data-key="kitchen_exhaust_cleaning" onclick="selectTemplate(this)">Kitchen Exhaust Cleaning Service</button>
+                <button class="template-dropdown-item" data-key="roof_exterior" onclick="selectTemplate(this)">Roof &amp; Exterior Service</button>
+                <button class="template-dropdown-item" data-key="kitchen_deep_cleaning" onclick="selectTemplate(this)">Kitchen Deep Cleaning Service</button>
+                <button class="template-dropdown-item" data-key="equipment_cleaning" onclick="selectTemplate(this)">Equipment Cleaning Service</button>
+                <button class="template-dropdown-item" data-key="preventive_maintenance" onclick="selectTemplate(this)">Preventive Maintenance Service</button>
+                <button class="template-dropdown-item" data-key="repair_corrections" onclick="selectTemplate(this)">Repair &amp; Corrections Service</button>
+                <button class="template-dropdown-item" data-key="emergency_service" onclick="selectTemplate(this)">Emergency Service</button>
+            </div>
+        </div>
         <button class="toolbar-btn btn-add-products" id="btnToggleProducts" onclick="toggleProductsSection()">Add Products Section</button>
         <button class="toolbar-btn btn-clear" onclick="clearAllFields()">Clear All</button>
         <button class="toolbar-btn btn-print" onclick="window.print()">Print Report</button>
@@ -1080,6 +1221,11 @@ if (file_exists($logo_path)) {
         <?php endif; ?>
     </div>
 </div>
+
+<!-- =============================================
+     OVERLAY
+     ============================================= -->
+<div class="side-panel-overlay" id="sidePanelOverlay" onclick="closeSidePanel()"></div>
 
 <!-- =============================================
      SIDE PANEL - PRODUCT CATALOG
@@ -1091,6 +1237,12 @@ if (file_exists($logo_path)) {
     </div>
     <div class="side-panel-body">
         <p class="panel-hint">Select the products needed by clicking on them. Selected items will appear in Section 7 of the document.</p>
+        <!-- Search Bar -->
+        <div class="panel-search-wrapper">
+            <span class="panel-search-icon">&#128269;</span>
+            <input type="text" id="catalogSearch" class="panel-search-input" placeholder="Search products..." autocomplete="off">
+        </div>
+        <div id="catalogNoResults" class="panel-no-results" style="display:none;">No products found</div>
         <div class="product-preview-grid" id="productPreviewGrid">
             <?php
             $products = [
@@ -1788,20 +1940,20 @@ if (file_exists($logo_path)) {
     // =============================================
     function openSidePanel() {
         var panel = document.getElementById('sidePanel');
-        var main = document.getElementById('mainContent');
+        var overlay = document.getElementById('sidePanelOverlay');
         var btn = document.getElementById('btnToggleProducts');
+        overlay.classList.add('active');
         panel.classList.add('open');
-        main.classList.add('panel-open');
         btn.textContent = 'Close Product Catalog';
         btn.style.background = '#d63031';
     }
 
     window.closeSidePanel = function() {
         var panel = document.getElementById('sidePanel');
-        var main = document.getElementById('mainContent');
+        var overlay = document.getElementById('sidePanelOverlay');
         var btn = document.getElementById('btnToggleProducts');
         panel.classList.remove('open');
-        main.classList.remove('panel-open');
+        overlay.classList.remove('active');
         btn.textContent = 'Add Products Section';
         btn.style.background = '#6c5ce7';
     };
@@ -2222,6 +2374,69 @@ if (file_exists($logo_path)) {
     }
 
     // =============================================
+    // CATALOG SEARCH
+    // =============================================
+    function initCatalogSearch() {
+        var searchInput = document.getElementById('catalogSearch');
+        var noResults = document.getElementById('catalogNoResults');
+        var tiles = document.querySelectorAll('.product-preview-tile');
+
+        if (!searchInput) return;
+
+        searchInput.addEventListener('input', function() {
+            var query = this.value.toLowerCase().trim();
+            var visibleCount = 0;
+
+            tiles.forEach(function(tile) {
+                var name = (tile.getAttribute('data-name') || '').toLowerCase();
+                if (query === '' || name.indexOf(query) !== -1) {
+                    tile.style.display = '';
+                    visibleCount++;
+                } else {
+                    tile.style.display = 'none';
+                }
+            });
+
+            if (visibleCount === 0 && query !== '') {
+                noResults.style.display = 'block';
+            } else {
+                noResults.style.display = 'none';
+            }
+        });
+    }
+
+    // =============================================
+    // TEMPLATE DROPDOWN
+    // =============================================
+    window.toggleTemplateDropdown = function() {
+        var dropdown = document.getElementById('templateDropdown');
+        dropdown.classList.toggle('open');
+    };
+
+    window.selectTemplate = function(btn) {
+        var key = btn.getAttribute('data-key');
+        // Update active state
+        document.querySelectorAll('.template-dropdown-item').forEach(function(item) {
+            item.classList.remove('active');
+        });
+        btn.classList.add('active');
+        // Close dropdown
+        document.getElementById('templateDropdown').classList.remove('open');
+        // Update button label
+        document.getElementById('btnTemplate').textContent = btn.textContent;
+        // Apply the service config
+        handleServiceTypeChange(key);
+    };
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        var wrapper = document.querySelector('.template-selector-wrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            document.getElementById('templateDropdown').classList.remove('open');
+        }
+    });
+
+    // =============================================
     // INITIALIZE
     // =============================================
     document.addEventListener('DOMContentLoaded', function() {
@@ -2237,6 +2452,9 @@ if (file_exists($logo_path)) {
 
         // Initialize authorization checkbox
         initAuthorizationCheckbox();
+
+        // Initialize catalog search
+        initCatalogSearch();
 
         // Re-init on window resize for signature canvases
         window.addEventListener('resize', function() {
