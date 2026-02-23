@@ -588,13 +588,20 @@
         }
     }
     ?>
+    <?php
+    $isProductMode = isset($salesMode) && $salesMode === 'product';
+    $jHdrType = $isProductMode ? 'PRODUCT' : 'TYPE OF SERVICES';
+    $jHdrTime = $isProductMode ? 'QUANTITY' : 'SERVICE TIME';
+    $jHdrFreq = $isProductMode ? 'UNIT PRICE' : 'FREQUENCY';
+    $jHdrDesc = $isProductMode ? 'DESCRIPTION' : 'SERVICE DESCRIPTION';
+    ?>
     <table class="services-table">
         <thead>
             <tr>
-                <th style="width: 25%;">TYPE OF SERVICES</th>
-                <th style="width: 12%;">SERVICE TIME</th>
-                <th style="width: 12%;">FREQUENCY</th>
-                <th style="width: 36%;">SERVICE DESCRIPTION</th>
+                <th style="width: 25%;"><?php echo $jHdrType; ?></th>
+                <th style="width: 12%;"><?php echo $jHdrTime; ?></th>
+                <th style="width: 12%;"><?php echo $jHdrFreq; ?></th>
+                <th style="width: 36%;"><?php echo $jHdrDesc; ?></th>
                 <th style="width: 15%;">SUBTOTAL</th>
             </tr>
         </thead>

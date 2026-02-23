@@ -208,11 +208,17 @@ function formatDate($date) {
             <?php if (!empty($reportData)): ?>
             <table>
                 <thead>
+                    <?php
+                    $rptSalesMode = ($_GET['sales_mode'] ?? 'service') === 'product' ? 'product' : 'service';
+                    $rptHdrType = $rptSalesMode === 'product' ? 'Product' : 'Service Type';
+                    $rptHdrTime = $rptSalesMode === 'product' ? 'Quantity' : 'Time';
+                    $rptHdrFreq = $rptSalesMode === 'product' ? 'Unit Price' : 'Frequency';
+                    ?>
                     <tr>
                         <th>#</th>
-                        <th>Service Type</th>
-                        <th>Time</th>
-                        <th>Frequency</th>
+                        <th><?= $rptHdrType ?></th>
+                        <th><?= $rptHdrTime ?></th>
+                        <th><?= $rptHdrFreq ?></th>
                         <th>Description</th>
                         <th class="text-right">Subtotal</th>
                     </tr>

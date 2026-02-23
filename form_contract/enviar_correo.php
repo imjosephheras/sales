@@ -495,12 +495,18 @@ if ($one_time) echo "<strong>One Time:</strong> " . htmlspecialchars($one_time) 
 
 <?php if ($includeJanitorial === "Yes"): ?>
 
+<?php
+$emailSalesMode = ($_POST['sales_mode'] ?? 'service') === 'product' ? 'product' : 'service';
+$emailHdrType = $emailSalesMode === 'product' ? 'Product' : 'Type of Services';
+$emailHdrTime = $emailSalesMode === 'product' ? 'Quantity' : 'Service Time';
+$emailHdrFreq = $emailSalesMode === 'product' ? 'Unit Price' : 'Frequency';
+?>
 <table style="width:100%; border-collapse: collapse; font-size:13px; margin-top:10px;">
     <thead>
         <tr style="background:#c00; color:white;">
-            <th style="padding:6px; border:1px solid #ddd;">Type of Services</th>
-            <th style="padding:6px; border:1px solid #ddd;">Service Time</th>
-            <th style="padding:6px; border:1px solid #ddd;">Frequency</th>
+            <th style="padding:6px; border:1px solid #ddd;"><?= $emailHdrType ?></th>
+            <th style="padding:6px; border:1px solid #ddd;"><?= $emailHdrTime ?></th>
+            <th style="padding:6px; border:1px solid #ddd;"><?= $emailHdrFreq ?></th>
             <th style="padding:6px; border:1px solid #ddd;">Description</th>
             <th style="padding:6px; border:1px solid #ddd;">Subtotal</th>
         </tr>
@@ -542,9 +548,9 @@ if ($one_time) echo "<strong>One Time:</strong> " . htmlspecialchars($one_time) 
 <table style="width:100%; border-collapse: collapse; font-size:13px; margin-top:10px;">
     <thead>
         <tr style="background:#c00; color:white;">
-            <th style="padding:6px; border:1px solid #ddd;">Type of Services</th>
-            <th style="padding:6px; border:1px solid #ddd;">Service Time</th>
-            <th style="padding:6px; border:1px solid #ddd;">Frequency</th>
+            <th style="padding:6px; border:1px solid #ddd;"><?= $emailHdrType ?></th>
+            <th style="padding:6px; border:1px solid #ddd;"><?= $emailHdrTime ?></th>
+            <th style="padding:6px; border:1px solid #ddd;"><?= $emailHdrFreq ?></th>
             <th style="padding:6px; border:1px solid #ddd;">Description</th>
             <th style="padding:6px; border:1px solid #ddd;">Subtotal</th>
         </tr>

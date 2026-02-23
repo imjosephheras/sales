@@ -117,6 +117,9 @@ try {
         'total_cost' => $form['total_cost'],
     ];
 
+    // Sales mode: 'service' (default) or 'product' — affects only visible headers
+    $salesMode = ($input['sales_mode'] ?? 'service') === 'product' ? 'product' : 'service';
+
     // Determine template
     $request_type = strtolower($data['Request_Type'] ?? 'quote');
     $template_file = __DIR__ . "/../templates/{$request_type}.php";

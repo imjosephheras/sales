@@ -1383,6 +1383,40 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentFormIsCompleted = false; // Track if the loaded form has status=completed
   let currentFormCanEdit = true; // Track if the user can edit the loaded form
 
+  // ===============================
+  // SALES MODE TOGGLE (Service / Product)
+  // ===============================
+  const currentLang = '<?= $lang ?>';
+
+  window.setSalesMode = function(mode) {
+    const hiddenInput = document.getElementById('sales_mode');
+    if (hiddenInput) hiddenInput.value = mode;
+
+    const btnService = document.getElementById('btnModeService');
+    const btnProduct = document.getElementById('btnModeProduct');
+    if (btnService) btnService.classList.toggle('active', mode === 'service');
+    if (btnProduct) btnProduct.classList.toggle('active', mode === 'product');
+
+    // Update all table headers with class svc-header-*
+    const suffix = mode + '-' + currentLang;
+    document.querySelectorAll('.svc-header-type, .svc-header-time, .svc-header-freq, .svc-header-desc').forEach(function(th) {
+      const label = th.getAttribute('data-' + suffix);
+      if (label) th.textContent = label;
+    });
+
+    // Persist per form in localStorage
+    if (currentFormId) {
+      localStorage.setItem('sales_mode_' + currentFormId, mode);
+    }
+    // Also persist as last-used mode for new forms
+    localStorage.setItem('sales_mode_default', mode);
+  };
+
+  window.getSalesMode = function() {
+    const hiddenInput = document.getElementById('sales_mode');
+    return (hiddenInput && hiddenInput.value === 'product') ? 'product' : 'service';
+  };
+
   /* ===============================
      SIDEBAR TOGGLE
   =============================== */
@@ -2226,6 +2260,10 @@ window.loadFormData = function(formId) {
 
       currentFormId = formId;
 
+      // Restore sales mode from localStorage (default: service)
+      const savedMode = localStorage.getItem('sales_mode_' + formId) || 'service';
+      setSalesMode(savedMode);
+
       // Track completed status and edit permission
       currentFormIsCompleted = (data.form.form_status === 'completed');
       currentFormCanEdit = data.can_edit !== false;
@@ -2664,6 +2702,9 @@ window.loadFormData = function(formId) {
     currentFormId = null;
     currentFormIsCompleted = false;
     currentFormCanEdit = true;
+
+    // Reset sales mode to default (service)
+    setSalesMode('service');
 
     // Clear read-only mode if it was active
     applyCompletedReadonly(false);
