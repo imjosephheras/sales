@@ -829,6 +829,17 @@ $products = [
         }
 
         /* =============================================
+           EMBEDDED MODE (inside iframe)
+           ============================================= */
+        body.embedded .toolbar {
+            position: sticky;
+        }
+
+        body.embedded .pages-container {
+            padding-top: 20px;
+        }
+
+        /* =============================================
            PRINT STYLES
            ============================================= */
         @media print {
@@ -939,7 +950,7 @@ $products = [
         }
     </style>
 </head>
-<body>
+<body<?php if (isset($_GET['embedded'])) echo ' class="embedded"'; ?>>
 
 <!-- =============================================
      TOOLBAR

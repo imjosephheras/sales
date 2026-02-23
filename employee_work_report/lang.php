@@ -69,8 +69,8 @@ $translations = [
         // ---------------------------------
 
         // Page Title
-        "wr_title" => "Service Completion Photo Report",
-        "wr_subtitle" => "Photo documentation for completed services",
+        "wr_title" => "Employee Work Report",
+        "wr_subtitle" => "Internal form for job documentation",
 
         // Report Type Buttons
         "wr_report_type" => "Select Report Type",
@@ -205,8 +205,8 @@ $translations = [
         // ---------------------------------
 
         // Page Title
-        "wr_title" => "Reporte de Fotos de Servicio Completado",
-        "wr_subtitle" => "Documentación fotográfica de servicios completados",
+        "wr_title" => "Reporte de Trabajo del Empleado",
+        "wr_subtitle" => "Formulario interno para documentación de trabajos",
 
         // Report Type Buttons
         "wr_report_type" => "Seleccionar Tipo de Reporte",
