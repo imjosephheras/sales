@@ -40,14 +40,14 @@ ob_start();
 </div>
 
 <!-- REPORTS HUB -->
-<div class="reports-hub">
+<div class="reports-hub" id="reportsHub">
     <h3 class="reports-hub-title">
         <i class="fas fa-folder-open"></i>
         <?= $t['wr_reports_hub_title'] ?? 'Reports' ?>
     </h3>
     <div class="reports-hub-grid">
-        <!-- Reporte de Servicio -->
-        <a href="../contract_generator/vent_hood_editor.php" target="_blank" class="report-tile" id="tileServiceReport">
+        <!-- Service Report -->
+        <div class="report-tile" id="tileServiceReport" data-report="service">
             <div class="report-tile-icon" style="background: linear-gradient(135deg, #001f54, #003080);">
                 <i class="fas fa-file-pdf"></i>
             </div>
@@ -56,9 +56,9 @@ ob_start();
                 <p><?= $t['wr_report_service_desc'] ?? 'Fill, print or download the service report' ?></p>
             </div>
             <div class="report-tile-arrow"><i class="fas fa-chevron-right"></i></div>
-        </a>
-        <!-- Reporte Fotografico -->
-        <div class="report-tile" id="tilePhotoReport">
+        </div>
+        <!-- Photo Report -->
+        <div class="report-tile" id="tilePhotoReport" data-report="photo">
             <div class="report-tile-icon" style="background: linear-gradient(135deg, #a30000, #c70734);">
                 <i class="fas fa-camera"></i>
             </div>
@@ -68,8 +68,8 @@ ob_start();
             </div>
             <div class="report-tile-arrow"><i class="fas fa-chevron-right"></i></div>
         </div>
-        <!-- Reporte de Producto (Invoice for Replacement Parts) -->
-        <a href="../contract_generator/product_report_editor.php" target="_blank" class="report-tile" id="tileProductReport">
+        <!-- Product Report -->
+        <div class="report-tile" id="tileProductReport" data-report="product">
             <div class="report-tile-icon" style="background: linear-gradient(135deg, #6f42c1, #8257d8);">
                 <i class="fas fa-box-open"></i>
             </div>
@@ -78,10 +78,24 @@ ob_start();
                 <p><?= $t['wr_report_product_desc'] ?? 'Invoice for replacement parts' ?></p>
             </div>
             <div class="report-tile-arrow"><i class="fas fa-chevron-right"></i></div>
-        </a>
+        </div>
     </div>
 </div>
 
+<!-- BACK TO REPORTS BUTTON (hidden by default) -->
+<div id="backToReportsBar" style="display:none; margin-bottom:20px;">
+    <button type="button" id="btnBackToReports" class="btn-back-to-reports">
+        <i class="fas fa-arrow-left"></i>
+        <?= ($lang === 'es') ? 'Volver a Reportes' : 'Back to Reports' ?>
+    </button>
+</div>
+
+<!-- EDITOR CONTAINER: iframe for Service Report / Product Report -->
+<div id="editorContainer" style="display:none;">
+    <iframe id="editorFrame" src="about:blank" style="width:100%; border:none; border-radius:10px; background:#525659;"></iframe>
+</div>
+
+<!-- PHOTO REPORT CONTENT (inline form) -->
 <div class="form-content" id="photoReportContent" style="display:none;">
 <form id="main_form" action="enviar_correo.php" method="POST" enctype="multipart/form-data">
 
@@ -384,6 +398,30 @@ ob_start();
     white-space: nowrap;
     flex-shrink: 0;
 }
+/* Back to Reports Button */
+.btn-back-to-reports {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #001f54;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-back-to-reports:hover {
+    background: #003080;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,31,84,0.2);
+}
+/* Editor iframe container */
+#editorFrame {
+    min-height: 85vh;
+}
 @media (max-width: 480px) {
     .report-tile {
         padding: 12px 14px;
@@ -402,6 +440,90 @@ ob_start();
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
+    // =============================================
+    // SPA NAVIGATION STATE
+    // =============================================
+    var reportsHub = document.getElementById("reportsHub");
+    var backBar = document.getElementById("backToReportsBar");
+    var editorContainer = document.getElementById("editorContainer");
+    var editorFrame = document.getElementById("editorFrame");
+    var photoContent = document.getElementById("photoReportContent");
+    var activeReport = null;
+
+    var editorUrls = {
+        service: "../contract_generator/vent_hood_editor.php?embedded=1",
+        product: "../contract_generator/product_report_editor.php?embedded=1"
+    };
+
+    /**
+     * Open a report editor: hide hub, show back button and content
+     */
+    function openReport(type) {
+        activeReport = type;
+
+        // Hide the reports hub
+        reportsHub.style.display = "none";
+
+        // Show back button
+        backBar.style.display = "block";
+
+        if (type === "photo") {
+            // Show inline photo report form
+            photoContent.style.display = "block";
+            editorContainer.style.display = "none";
+            editorFrame.src = "about:blank";
+            photoContent.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+            // Load editor in iframe
+            photoContent.style.display = "none";
+            editorContainer.style.display = "block";
+            editorFrame.src = editorUrls[type];
+            editorContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    }
+
+    /**
+     * Return to the reports hub: hide editors, show hub
+     */
+    function backToReports() {
+        activeReport = null;
+
+        // Show the reports hub
+        reportsHub.style.display = "";
+
+        // Hide back button
+        backBar.style.display = "none";
+
+        // Hide editors
+        editorContainer.style.display = "none";
+        editorFrame.src = "about:blank";
+        photoContent.style.display = "none";
+
+        // Scroll to top of hub
+        reportsHub.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    // =============================================
+    // TILE CLICK HANDLERS
+    // =============================================
+    document.getElementById("tileServiceReport").addEventListener("click", function() {
+        openReport("service");
+    });
+
+    document.getElementById("tilePhotoReport").addEventListener("click", function() {
+        openReport("photo");
+    });
+
+    document.getElementById("tileProductReport").addEventListener("click", function() {
+        openReport("product");
+    });
+
+    // Back button
+    document.getElementById("btnBackToReports").addEventListener("click", backToReports);
+
+    // =============================================
+    // PHOTO REPORT: Report Type Buttons
+    // =============================================
     var section2Title = document.getElementById("section2-title");
     var section2TitleText = document.getElementById("section2-title-text");
 
@@ -427,27 +549,9 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // Photo Report tile: toggle form visibility
-    var tilePhoto = document.getElementById("tilePhotoReport");
-    var photoContent = document.getElementById("photoReportContent");
-    if (tilePhoto && photoContent) {
-        tilePhoto.addEventListener("click", function() {
-            var isActive = tilePhoto.classList.contains("active");
-            if (isActive) {
-                // Collapse
-                tilePhoto.classList.remove("active");
-                tilePhoto.querySelector(".report-tile-arrow i").className = "fas fa-chevron-right";
-                photoContent.style.display = "none";
-            } else {
-                // Expand
-                tilePhoto.classList.add("active");
-                tilePhoto.querySelector(".report-tile-arrow i").className = "fas fa-chevron-down";
-                photoContent.style.display = "block";
-                photoContent.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
-        });
-    }
-
+    // =============================================
+    // COLLAPSIBLE SECTIONS
+    // =============================================
     document.querySelectorAll(".section-title").forEach(function(section) {
         var content = section.nextElementSibling;
         content.classList.add("hidden");
@@ -459,6 +563,9 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
+    // =============================================
+    // PREVIEW / SEND MODAL
+    // =============================================
     document.getElementById("btnPreview").addEventListener("click", function() {
         var form = document.getElementById("main_form");
         var data = new FormData(form);

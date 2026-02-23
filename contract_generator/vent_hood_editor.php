@@ -782,68 +782,6 @@ if (file_exists($logo_path)) {
         }
 
         /* =============================================
-           SERVICE TYPE SELECTOR (toolbar)
-           ============================================= */
-        .toolbar-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0 20px;
-        }
-
-        .service-type-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .service-type-wrapper label {
-            font-size: 11px;
-            font-weight: 600;
-            color: rgba(255,255,255,0.85);
-            white-space: nowrap;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .service-type-select {
-            appearance: none;
-            -webkit-appearance: none;
-            background: rgba(255,255,255,0.12);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 6px;
-            padding: 7px 36px 7px 14px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.2s;
-            min-width: 260px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-        }
-
-        .service-type-select:hover {
-            background-color: rgba(255,255,255,0.2);
-            border-color: rgba(255,255,255,0.5);
-        }
-
-        .service-type-select:focus {
-            background-color: rgba(255,255,255,0.25);
-            border-color: rgba(255,255,255,0.7);
-            box-shadow: 0 0 0 2px rgba(255,255,255,0.15);
-        }
-
-        .service-type-select option {
-            background: #001f54;
-            color: #fff;
-            padding: 8px;
-        }
-
-        /* =============================================
            SIDE PANEL - PRODUCT CATALOG
            ============================================= */
         .app-layout {
@@ -1009,6 +947,17 @@ if (file_exists($logo_path)) {
         }
 
         /* =============================================
+           EMBEDDED MODE (inside iframe)
+           ============================================= */
+        body.embedded .toolbar {
+            position: sticky;
+        }
+
+        body.embedded .pages-container {
+            padding-top: 20px;
+        }
+
+        /* =============================================
            PRINT STYLES
            ============================================= */
         @media print {
@@ -1113,7 +1062,7 @@ if (file_exists($logo_path)) {
         }
     </style>
 </head>
-<body>
+<body<?php if (isset($_GET['embedded'])) echo ' class="embedded"'; ?>>
 
 <!-- =============================================
      TOOLBAR
@@ -1122,26 +1071,12 @@ if (file_exists($logo_path)) {
     <div class="toolbar-title">
         VENT HOOD REPORT EDITOR
     </div>
-    <div class="toolbar-center">
-        <div class="service-type-wrapper">
-            <label for="serviceTypeSelect">Report Type:</label>
-            <select class="service-type-select" id="serviceTypeSelect" onchange="handleServiceTypeChange(this.value)">
-                <option value="kitchen_exhaust_cleaning">Kitchen Exhaust Cleaning Service</option>
-                <option value="roof_exterior">Roof &amp; Exterior Service</option>
-                <option value="kitchen_deep_cleaning">Kitchen Deep Cleaning Service</option>
-                <option value="equipment_cleaning">Equipment Cleaning Service</option>
-                <option value="preventive_maintenance">Preventive Maintenance Service</option>
-                <option value="repair_corrections">Repair &amp; Corrections Service</option>
-                <option value="emergency_service">Emergency Service</option>
-            </select>
-        </div>
-    </div>
     <div class="toolbar-actions">
         <button class="toolbar-btn btn-add-products" id="btnToggleProducts" onclick="toggleProductsSection()">Add Products Section</button>
         <button class="toolbar-btn btn-clear" onclick="clearAllFields()">Clear All</button>
         <button class="toolbar-btn btn-print" onclick="window.print()">Print Report</button>
         <?php if ($request_id): ?>
-        <button class="toolbar-btn btn-download-pdf" onclick="window.open('controllers/generate_vent_hood_report.php?id=<?php echo htmlspecialchars($request_id); ?>&service_type=' + encodeURIComponent(document.getElementById('serviceTypeSelect').value), '_blank')">Download PDF</button>
+        <button class="toolbar-btn btn-download-pdf" onclick="window.open('controllers/generate_vent_hood_report.php?id=<?php echo htmlspecialchars($request_id); ?>&service_type=' + encodeURIComponent(window.selectedServiceType || 'kitchen_exhaust_cleaning'), '_blank')">Download PDF</button>
         <?php endif; ?>
     </div>
 </div>
@@ -2016,12 +1951,8 @@ if (file_exists($logo_path)) {
         document.getElementById('section7Detail').classList.remove('visible');
         updatePanelCount();
 
-        // Reset service type selector to default
-        var selector = document.getElementById('serviceTypeSelect');
-        if (selector) {
-            selector.value = 'kitchen_exhaust_cleaning';
-            handleServiceTypeChange('kitchen_exhaust_cleaning');
-        }
+        // Reset service type to default
+        handleServiceTypeChange('kitchen_exhaust_cleaning');
     };
 
     // =============================================
