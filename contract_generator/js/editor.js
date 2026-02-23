@@ -57,27 +57,6 @@
         document.querySelectorAll('.editor-svc-header-freq').forEach(function(el) { el.textContent = l.freq; });
         document.querySelectorAll('.editor-svc-header-desc').forEach(function(el) { el.textContent = l.desc; });
 
-        // Product mode: make subtotal readonly (auto-calculated) and recalculate existing rows
-        var isProduct = mode === 'product';
-        document.querySelectorAll('.svc-subtotal').forEach(function(input) {
-            input.readOnly = isProduct;
-            input.style.backgroundColor = isProduct ? '#f0f0f0' : '';
-        });
-        // Recalculate subtotals for existing rows when switching to product mode
-        if (isProduct) {
-            document.querySelectorAll('tr.editor-service-row').forEach(function(tr) {
-                var qty = parseFloat(tr.querySelector('.svc-time') ? tr.querySelector('.svc-time').value : 0) || 0;
-                var unitPrice = parseFloat(tr.querySelector('.svc-freq') ? tr.querySelector('.svc-freq').value : 0) || 0;
-                var subtotalEl = tr.querySelector('.svc-subtotal');
-                if (subtotalEl && qty > 0 && unitPrice > 0) {
-                    subtotalEl.value = (qty * unitPrice).toFixed(2);
-                }
-            });
-            // Recalculate totals for both sections
-            recalcServiceTotals('janitorial');
-            recalcServiceTotals('kitchen');
-        }
-
         // Persist per request
         var reqId = document.getElementById('request_id');
         if (reqId && reqId.value) {
@@ -618,22 +597,6 @@
             recalcServiceTotals(sectionType);
         });
 
-        // Product mode: auto-calculate subtotal = Quantity × Unit Price
-        var timeInput = tr.querySelector('.svc-time');
-        var freqInput = tr.querySelector('.svc-freq');
-
-        function autoCalcProductSubtotal() {
-            if (editorSalesMode !== 'product') return;
-            var qty = parseFloat(timeInput.value) || 0;
-            var unitPrice = parseFloat(freqInput.value) || 0;
-            var calc = qty * unitPrice;
-            subtotalInput.value = calc > 0 ? calc.toFixed(2) : '';
-            recalcServiceTotals(sectionType);
-        }
-
-        timeInput.addEventListener('input', autoCalcProductSubtotal);
-        freqInput.addEventListener('input', autoCalcProductSubtotal);
-
         // Event: remove row
         tr.querySelector('.btn-remove-row').addEventListener('click', function() {
             tr.remove();
@@ -1150,9 +1113,6 @@
             if (serviceReportConfig && formData.Service_Type && serviceReportConfig[formData.Service_Type]) {
                 formData._serviceConfig = serviceReportConfig[formData.Service_Type];
             }
-
-            // Attach sales mode so preview can render the correct template
-            formData._salesMode = editorSalesMode;
 
             window.PreviewModule.render(formData);
         }
