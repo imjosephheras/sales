@@ -140,9 +140,9 @@ function updatePriceLabel() {
             </div>
           </td>
 
-          <!-- SERVICE TIME -->
-          <td>
-            <select class="time18" name="time18[]">
+          <!-- SERVICE TIME / QUANTITY -->
+          <td class="td-time">
+            <select class="time18 svc-mode-field" name="time18[]">
               <option value="">
                 <?= ($lang=='en') ? "-- Select Time --" : "-- Seleccione tiempo --"; ?>
               </option>
@@ -154,11 +154,16 @@ function updatePriceLabel() {
               <option><?= ($lang=='en') ? "6 Days" : "6 Dias"; ?></option>
               <option><?= ($lang=='en') ? "7 Days" : "7 Dias"; ?></option>
             </select>
+            <input type="number" class="time18 prod-mode-field" name="time18[]"
+              min="1" step="1"
+              placeholder="<?= ($lang=='en') ? 'Qty' : 'Cant'; ?>"
+              style="display:none" disabled
+              oninput="autoCalcSubtotal18(this)">
           </td>
 
-          <!-- FREQUENCY -->
-          <td>
-            <select class="freq18" name="freq18[]">
+          <!-- FREQUENCY / UNIT PRICE -->
+          <td class="td-freq">
+            <select class="freq18 svc-mode-field" name="freq18[]">
               <option value="">
                 <?= ($lang=='en') ? "-- Select Period --" : "-- Seleccione periodo --"; ?>
               </option>
@@ -173,6 +178,11 @@ function updatePriceLabel() {
               <option><?= ($lang=='en') ? "Semiannual" : "Semestral"; ?></option>
               <option><?= ($lang=='en') ? "Annual" : "Anual"; ?></option>
             </select>
+            <input type="number" class="freq18 prod-mode-field" name="freq18[]"
+              min="0" step="0.01"
+              placeholder="<?= ($lang=='en') ? 'Unit Price' : 'Precio'; ?>"
+              style="display:none" disabled
+              oninput="autoCalcSubtotal18(this)">
           </td>
 
           <!-- DESCRIPTION -->
@@ -729,10 +739,18 @@ function addRow18() {
     const lbl = subtotalCell.querySelector(".bundle-included-label");
     if (lbl) lbl.remove();
     const inp = subtotalCell.querySelector(".subtotal18");
-    if (inp) inp.style.display = "";
+    if (inp) {
+      inp.style.display = "";
+      inp.readOnly = false;
+      inp.style.backgroundColor = "";
+    }
   }
 
   tbody.appendChild(newRow);
+
+  // Apply current sales mode to the new row
+  var currentMode = (typeof getSalesMode === 'function') ? getSalesMode() : 'service';
+  applyProductModeToRows(currentMode);
 }
 
 // ===== REMOVE ROW =====
@@ -972,6 +990,95 @@ function applyBundleVisuals18() {
     });
   }
 }
+
+// ===== PRODUCT MODE: Apply to all rows in table 18 and 19 =====
+function applyProductModeToRows(mode) {
+  var isProduct = (mode === 'product');
+
+  ['18', '19'].forEach(function(tbl) {
+    var tbody = document.getElementById('table' + tbl + 'body');
+    if (!tbody) return;
+
+    Array.from(tbody.querySelectorAll('tr')).forEach(function(row) {
+      // Toggle service-mode and product-mode fields
+      row.querySelectorAll('.svc-mode-field').forEach(function(el) {
+        if (isProduct) {
+          el.style.display = 'none';
+          el.disabled = true;
+        } else {
+          el.style.display = '';
+          el.disabled = false;
+        }
+      });
+
+      row.querySelectorAll('.prod-mode-field').forEach(function(el) {
+        if (isProduct) {
+          el.style.display = '';
+          el.disabled = false;
+        } else {
+          el.style.display = 'none';
+          el.disabled = true;
+        }
+      });
+
+      // In product mode: make subtotal readonly (auto-calculated)
+      var subtotalInput = row.querySelector('.subtotal' + tbl);
+      if (subtotalInput) {
+        if (isProduct) {
+          subtotalInput.readOnly = true;
+          subtotalInput.style.backgroundColor = '#f0f0f0';
+          // Calculate row subtotal inline (qty * unit_price)
+          var qtyInput = row.querySelector('input.prod-mode-field.time' + tbl);
+          var priceInput = row.querySelector('input.prod-mode-field.freq' + tbl);
+          if (qtyInput && priceInput) {
+            var qty = parseFloat(qtyInput.value) || 0;
+            var price = parseFloat(priceInput.value) || 0;
+            var sub = qty * price;
+            subtotalInput.value = sub > 0 ? sub.toFixed(2) : (subtotalInput.value || '');
+          }
+        } else {
+          subtotalInput.readOnly = false;
+          subtotalInput.style.backgroundColor = '';
+        }
+      }
+    });
+  });
+
+  // Recalculate grand totals once
+  if (typeof calcTotals18 === 'function') calcTotals18();
+  if (typeof calcTotals19 === 'function') calcTotals19();
+}
+
+// ===== Auto-calculate subtotal for a single row =====
+function autoCalcSubtotalRow(row, tbl) {
+  var qtyInput = row.querySelector('input.prod-mode-field.time' + tbl);
+  var priceInput = row.querySelector('input.prod-mode-field.freq' + tbl);
+  var subtotalInput = row.querySelector('.subtotal' + tbl);
+
+  if (!qtyInput || !priceInput || !subtotalInput) return;
+
+  var qty = parseFloat(qtyInput.value) || 0;
+  var price = parseFloat(priceInput.value) || 0;
+  var subtotal = qty * price;
+
+  subtotalInput.value = subtotal > 0 ? subtotal.toFixed(2) : '';
+
+  // Recalculate grand totals
+  if (tbl === '18' && typeof calcTotals18 === 'function') calcTotals18();
+  if (tbl === '19' && typeof calcTotals19 === 'function') calcTotals19();
+}
+
+// ===== Auto-calc triggers for Q18 =====
+function autoCalcSubtotal18(el) {
+  var row = el.closest('tr');
+  if (row) autoCalcSubtotalRow(row, '18');
+}
+
+// ===== Auto-calc triggers for Q19 =====
+function autoCalcSubtotal19(el) {
+  var row = el.closest('tr');
+  if (row) autoCalcSubtotalRow(row, '19');
+}
 </script>
 
 <!-- Load Services Catalog (for Q19) -->
@@ -1048,9 +1155,9 @@ function applyBundleVisuals18() {
             </div>
           </td>
 
-          <!-- SERVICE TIME -->
-          <td>
-            <select class="time19" name="time19[]">
+          <!-- SERVICE TIME / QUANTITY -->
+          <td class="td-time">
+            <select class="time19 svc-mode-field" name="time19[]">
               <option value="">
                 <?= ($lang=='en') ? "-- Select Time --" : "-- Seleccione tiempo --"; ?>
               </option>
@@ -1062,11 +1169,16 @@ function applyBundleVisuals18() {
               <option><?= ($lang=='en') ? "6 Days" : "6 Dias"; ?></option>
               <option><?= ($lang=='en') ? "7 Days" : "7 Dias"; ?></option>
             </select>
+            <input type="number" class="time19 prod-mode-field" name="time19[]"
+              min="1" step="1"
+              placeholder="<?= ($lang=='en') ? 'Qty' : 'Cant'; ?>"
+              style="display:none" disabled
+              oninput="autoCalcSubtotal19(this)">
           </td>
 
-          <!-- FREQUENCY -->
-          <td>
-            <select class="freq19" name="freq19[]">
+          <!-- FREQUENCY / UNIT PRICE -->
+          <td class="td-freq">
+            <select class="freq19 svc-mode-field" name="freq19[]">
               <option value="">
                 <?= ($lang=='en') ? "-- Select Period --" : "-- Seleccione periodo --"; ?>
               </option>
@@ -1081,6 +1193,11 @@ function applyBundleVisuals18() {
               <option><?= ($lang=='en') ? "Semiannual" : "Semestral"; ?></option>
               <option><?= ($lang=='en') ? "Annual" : "Anual"; ?></option>
             </select>
+            <input type="number" class="freq19 prod-mode-field" name="freq19[]"
+              min="0" step="0.01"
+              placeholder="<?= ($lang=='en') ? 'Unit Price' : 'Precio'; ?>"
+              style="display:none" disabled
+              oninput="autoCalcSubtotal19(this)">
           </td>
 
           <!-- DESCRIPTION -->
@@ -1576,10 +1693,18 @@ function addRow19() {
     const lbl = subtotalCell.querySelector(".bundle-included-label");
     if (lbl) lbl.remove();
     const inp = subtotalCell.querySelector(".subtotal19");
-    if (inp) inp.style.display = "";
+    if (inp) {
+      inp.style.display = "";
+      inp.readOnly = false;
+      inp.style.backgroundColor = "";
+    }
   }
 
   tbody.appendChild(newRow);
+
+  // Apply current sales mode to the new row
+  var currentMode = (typeof getSalesMode === 'function') ? getSalesMode() : 'service';
+  applyProductModeToRows(currentMode);
 }
 
 // ===== REMOVE ROW =====
