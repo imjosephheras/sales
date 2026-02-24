@@ -81,12 +81,6 @@ try {
     $stmtItems->execute([$request_id]);
     $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
-    // Get scope of work
-    $stmtScope = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
-    $stmtScope->execute([$request_id]);
-    $scopeTasks = $stmtScope->fetchAll(PDO::FETCH_COLUMN);
-    $request['Scope_Of_Work'] = $scopeTasks;
-
     // Parse task_tracking JSON
     if (!empty($request['task_tracking'])) {
         $decoded = json_decode($request['task_tracking'], true);

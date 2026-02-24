@@ -46,11 +46,6 @@ try {
         }
     }
 
-    // Get scope of work
-    $stmtS = $pdo->prepare("SELECT task_name FROM scope_of_work WHERE form_id = ?");
-    $stmtS->execute([$id]);
-    $scopeOfWorkTasks = $stmtS->fetchAll(PDO::FETCH_COLUMN);
-
     // Get scope sections
     $stmtSS = $pdo->prepare("SELECT title, scope_content FROM scope_sections WHERE form_id = ? ORDER BY section_order ASC");
     $stmtSS->execute([$id]);
@@ -87,7 +82,6 @@ try {
         'startDateServices' => $form['start_date_services'],
         'Site_Observation' => $form['site_observation'],
         'Additional_Comments' => $form['additional_comments'],
-        'Scope_Of_Work' => $scopeOfWorkTasks,
         'status' => $form['status'],
         'docnum' => $form['docnum'] ?? $form['Order_Nomenclature'],
         'Document_Date' => $form['Document_Date'],

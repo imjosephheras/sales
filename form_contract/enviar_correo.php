@@ -150,11 +150,6 @@ $site_observation     = $_POST['Site_Observation']    ?? '';
 $additional_comments  = $_POST['Additional_Comments'] ?? '';
 $email_info_sent      = $_POST['Email_Information_Sent'] ?? '';
 
-// SECTION 7
-$scope_of_work = isset($_POST['Scope_Of_Work']) 
-                 ? implode(', ', $_POST['Scope_Of_Work']) 
-                 : '';
-
 // SECTION 9 — Document & Work Dates
 $document_date = $_POST['Document_Date'] ?? '';
 $work_date     = $_POST['Work_Date']     ?? '';
@@ -203,7 +198,6 @@ try {
 
     // Preparar datos para guardar
     $week_days_json = !empty($week_days) ? json_encode($week_days) : null;
-    $scope_json = !empty($_POST['Scope_Of_Work']) ? json_encode($_POST['Scope_Of_Work']) : null;
     $photos_json = !empty($uploaded_photos) ? json_encode($uploaded_photos) : null;
 
     // Arrays de la sección 18 (Janitorial)
@@ -711,23 +705,6 @@ foreach ($base_staff as $key => $value) {
 <div class="field"><span class="label">Email Info Sent:</span><?= htmlspecialchars($email_info_sent) ?></div>
 </div>
 
-<!-- ============================== -->
-<!-- SECTION 7 — SCOPE OF WORK -->
-<!-- ============================== -->
-<div class="section">
-<h2>Section 7: Scope of Work</h2>
-
-<?php if (!empty($_POST['Scope_Of_Work'])): ?>
-<ul style="margin-left:25px; line-height:1.6;">
-<?php foreach ($_POST['Scope_Of_Work'] as $item): ?>
-<li><?= htmlspecialchars($item) ?></li>
-<?php endforeach; ?>
-</ul>
-<?php else: ?>
-<p style="color:#777;">No scope of work items were selected.</p>
-<?php endif; ?>
-
-</div>
 
 <!-- ============================== -->
 <!-- SECTION 8 — PHOTOS -->

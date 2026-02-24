@@ -234,38 +234,7 @@ try {
     $saved_form_id = $form_id ?: $pdo->lastInsertId();
 
     // ============================================================
-    // PASO 2: GUARDAR SCOPE OF WORK (Q28 + Q19 service scopes)
-    // ============================================================
-    $pdo->prepare("DELETE FROM scope_of_work WHERE form_id = ?")->execute([$saved_form_id]);
-    $stmtScope = $pdo->prepare("INSERT INTO scope_of_work (form_id, task_name) VALUES (?, ?)");
-
-    // 2a: Save Q28 manual scope of work checkboxes
-    if (isset($_POST['Scope_Of_Work']) && is_array($_POST['Scope_Of_Work'])) {
-        foreach ($_POST['Scope_Of_Work'] as $task) {
-            if (!empty($task)) {
-                $stmtScope->execute([$saved_form_id, $task]);
-            }
-        }
-    }
-
-    // 2b: Save scope items from Q19 service catalog selections
-    if (isset($_POST['scope19']) && is_array($_POST['scope19'])) {
-        foreach ($_POST['scope19'] as $scopeJson) {
-            if (!empty($scopeJson)) {
-                $scopeItems = json_decode($scopeJson, true);
-                if (is_array($scopeItems)) {
-                    foreach ($scopeItems as $item) {
-                        if (!empty($item)) {
-                            $stmtScope->execute([$saved_form_id, $item]);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // ============================================================
-    // PASO 2b: GUARDAR SCOPE SECTIONS (dynamic blocks)
+    // PASO 2: GUARDAR SCOPE SECTIONS (dynamic blocks)
     // ============================================================
     $pdo->prepare("DELETE FROM scope_sections WHERE form_id = ?")->execute([$saved_form_id]);
 
