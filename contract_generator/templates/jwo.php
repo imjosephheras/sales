@@ -682,6 +682,70 @@
 
         <div class="terms-main-title">TERMS AND CONDITIONS</div>
 
+        <?php if ($isProductMode): ?>
+        <!-- PRODUCT TERMS AND CONDITIONS -->
+        <div class="term-box">
+            <div class="term-title">1. PRODUCT AVAILABILITY</div>
+            <ul>
+                <li>All products are subject to availability at the time of order confirmation.</li>
+                <li>Prime Facility Services Group reserves the right to substitute products of equal or greater quality if necessary, with prior notice to the Client.</li>
+            </ul>
+        </div>
+
+        <div class="term-box">
+            <div class="term-title">2. PROPOSAL VALIDITY PERIOD</div>
+            <p>The proposal issued for this Order will be valid for fourteen (14) days from the date of issuance. Prime Facility Services Group may revise pricing, availability, or terms if approval is not received within this period.</p>
+            <p>Prices are subject to change due to manufacturer adjustments, supply chain variations, or material cost fluctuations.</p>
+        </div>
+
+        <div class="term-box">
+            <div class="term-title">3. ORDER CONFIRMATION</div>
+            <ul>
+                <li>Orders are considered confirmed only upon written approval and receipt of any required deposit.</li>
+                <li>Prime Facility Services Group is not responsible for delays caused by manufacturers, suppliers, or shipping carriers.</li>
+            </ul>
+        </div>
+
+        <div class="term-box">
+            <div class="term-title">4. SHIPPING AND DELIVERY</div>
+            <ul>
+                <li>Delivery dates are estimates and are not guaranteed unless expressly stated in writing.</li>
+                <li>The Client is responsible for providing accurate delivery information and ensuring proper access for product delivery.</li>
+                <li>Any visible damage to products must be noted at the time of delivery. Concealed damage must be reported within forty-eight (48) hours of receipt.</li>
+            </ul>
+        </div>
+
+        <div class="term-box">
+            <div class="term-title">5. RETURNS AND CANCELLATIONS</div>
+            <ul>
+                <li>Orders for stocked items may be canceled prior to shipment without penalty unless otherwise specified.</li>
+                <li>Special-order, custom, or non-stock items are non-cancelable and non-refundable once production or procurement has begun.</li>
+                <li>Approved returns may be subject to restocking fees.</li>
+            </ul>
+        </div>
+
+        <div class="term-box">
+            <div class="term-title">6. WARRANTY</div>
+            <ul>
+                <li>Products are subject only to the manufacturer's warranty, if applicable.</li>
+                <li>Prime Facility Services Group does not provide additional warranties beyond those offered by the manufacturer unless expressly stated in writing.</li>
+            </ul>
+        </div>
+
+        <div class="term-box">
+            <div class="term-title">7. LIMITATION OF LIABILITY</div>
+            <ul>
+                <li>Prime Facility Services Group shall not be liable for indirect, incidental, or consequential damages arising from the use or inability to use the product.</li>
+                <li>Liability, if any, shall be limited to the purchase price of the product.</li>
+            </ul>
+        </div>
+
+        <?php else: ?>
+        <!-- SERVICE TERMS AND CONDITIONS -->
+        <?php
+        $requested_service = strtolower($data['Requested_Service'] ?? '');
+        $is_kitchen_service = (strpos($requested_service, 'kitchen') !== false || strpos($requested_service, 'hood') !== false);
+        ?>
         <div class="term-box">
             <div class="term-title">1. SERVICE LIMITATIONS</div>
             <ul>
@@ -691,12 +755,7 @@
             </ul>
         </div>
 
-        <?php
-        $requested_service = strtolower($data['Requested_Service'] ?? '');
-        $is_kitchen_service = (strpos($requested_service, 'kitchen') !== false || strpos($requested_service, 'hood') !== false);
-
-        if ($is_kitchen_service):
-        ?>
+        <?php if ($is_kitchen_service): ?>
         <div class="term-box">
             <div class="term-title">2. AREA PREPARATION</div>
             <ul>
@@ -762,6 +821,7 @@
                 <li>The Client must provide clear instructions and prior authorization to security or access-control personnel to allow entry for the service team.</li>
             </ul>
         </div>
+        <?php endif; ?>
 
         <!-- ACCEPTANCE / SIGNATURES SECTION -->
         <div class="terms-main-title" style="margin-top: 8px;">ACCEPTANCE / SIGNATURES</div>
