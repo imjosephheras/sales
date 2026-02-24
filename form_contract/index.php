@@ -1417,6 +1417,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (label) th.textContent = label;
     });
 
+    // Apply product mode field transformations to all table rows
+    if (typeof applyProductModeToRows === 'function') {
+      applyProductModeToRows(mode);
+    }
+
     // Persist per form in localStorage
     if (currentFormId) {
       localStorage.setItem('sales_mode_' + currentFormId, mode);
@@ -1940,8 +1945,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="janitorial-selector-icon">&#9662;</span>
           </div>
         </td>
-        <td>
-          <select class="time18" name="time18[]">
+        <td class="td-time">
+          <select class="time18 svc-mode-field" name="time18[]">
             <option value="">-- Select Time --</option>
             <option>1 Day</option>
             <option>1-2 Days</option>
@@ -1951,9 +1956,13 @@ document.addEventListener("DOMContentLoaded", () => {
             <option>6 Days</option>
             <option>7 Days</option>
           </select>
+          <input type="number" class="time18 prod-mode-field" name="time18[]"
+            min="1" step="1" placeholder="Qty"
+            style="display:none" disabled
+            oninput="autoCalcSubtotal18(this)">
         </td>
-        <td>
-          <select class="freq18" name="freq18[]">
+        <td class="td-freq">
+          <select class="freq18 svc-mode-field" name="freq18[]">
             <option value="">-- Select Period --</option>
             <option>One Time</option>
             <option>Weekly</option>
@@ -1966,6 +1975,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <option>Semiannual</option>
             <option>Annual</option>
           </select>
+          <input type="number" class="freq18 prod-mode-field" name="freq18[]"
+            min="0" step="0.01" placeholder="Unit Price"
+            style="display:none" disabled
+            oninput="autoCalcSubtotal18(this)">
         </td>
         <td>
           <input type="text" class="desc18" name="desc18[]" placeholder="Write description...">
@@ -1977,13 +1990,18 @@ document.addEventListener("DOMContentLoaded", () => {
       tbody.appendChild(newRow);
 
       // Set the remaining values
-      const timeSelect = newRow.querySelector('.time18');
-      const freqSelect = newRow.querySelector('.freq18');
+      const timeSelect = newRow.querySelector('select.time18');
+      const freqSelect = newRow.querySelector('select.freq18');
+      const timeProdInput = newRow.querySelector('input.prod-mode-field.time18');
+      const freqProdInput = newRow.querySelector('input.prod-mode-field.freq18');
       const descInput = newRow.querySelector('.desc18');
       const subtotalInput = newRow.querySelector('.subtotal18');
 
       if (timeSelect) timeSelect.value = cost.service_time || '';
       if (freqSelect) freqSelect.value = cost.frequency || '';
+      // Also set product mode values (for when mode is switched)
+      if (timeProdInput) timeProdInput.value = cost.service_time || '';
+      if (freqProdInput) freqProdInput.value = cost.frequency || '';
       if (descInput) descInput.value = cost.description || '';
       if (subtotalInput) subtotalInput.value = cost.subtotal || '';
     });
@@ -1991,6 +2009,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Apply bundle visuals for grouped rows
     if (typeof applyBundleVisuals18 === 'function') {
       applyBundleVisuals18();
+    }
+
+    // Apply current sales mode to rows
+    var currentMode = (typeof getSalesMode === 'function') ? getSalesMode() : 'service';
+    if (typeof applyProductModeToRows === 'function') {
+      applyProductModeToRows(currentMode);
     }
 
     // Recalculate totals
@@ -2067,8 +2091,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="service-selector-icon">&#9662;</span>
           </div>
         </td>
-        <td>
-          <select class="time19" name="time19[]">
+        <td class="td-time">
+          <select class="time19 svc-mode-field" name="time19[]">
             <option value="">-- Select Time --</option>
             <option>1 Day</option>
             <option>1-2 Days</option>
@@ -2078,9 +2102,13 @@ document.addEventListener("DOMContentLoaded", () => {
             <option>6 Days</option>
             <option>7 Days</option>
           </select>
+          <input type="number" class="time19 prod-mode-field" name="time19[]"
+            min="1" step="1" placeholder="Qty"
+            style="display:none" disabled
+            oninput="autoCalcSubtotal19(this)">
         </td>
-        <td>
-          <select class="freq19" name="freq19[]">
+        <td class="td-freq">
+          <select class="freq19 svc-mode-field" name="freq19[]">
             <option value="">-- Select Period --</option>
             <option>One Time</option>
             <option>Weekly</option>
@@ -2093,6 +2121,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <option>Semiannual</option>
             <option>Annual</option>
           </select>
+          <input type="number" class="freq19 prod-mode-field" name="freq19[]"
+            min="0" step="0.01" placeholder="Unit Price"
+            style="display:none" disabled
+            oninput="autoCalcSubtotal19(this)">
         </td>
         <td>
           <input type="text" class="desc19" name="desc19[]" placeholder="Write description...">
@@ -2104,13 +2136,18 @@ document.addEventListener("DOMContentLoaded", () => {
       tbody.appendChild(newRow);
 
       // Set the remaining values
-      const timeSelect = newRow.querySelector('.time19');
-      const freqSelect = newRow.querySelector('.freq19');
+      const timeSelect = newRow.querySelector('select.time19');
+      const freqSelect = newRow.querySelector('select.freq19');
+      const timeProdInput = newRow.querySelector('input.prod-mode-field.time19');
+      const freqProdInput = newRow.querySelector('input.prod-mode-field.freq19');
       const descInput = newRow.querySelector('.desc19');
       const subtotalInput = newRow.querySelector('.subtotal19');
 
       if (timeSelect) timeSelect.value = cost.service_time || '';
       if (freqSelect) freqSelect.value = cost.frequency || '';
+      // Also set product mode values (for when mode is switched)
+      if (timeProdInput) timeProdInput.value = cost.service_time || '';
+      if (freqProdInput) freqProdInput.value = cost.frequency || '';
       if (descInput) descInput.value = cost.description || '';
       if (subtotalInput) subtotalInput.value = cost.subtotal || '';
     });
@@ -2118,6 +2155,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Apply bundle visuals for grouped rows
     if (typeof applyBundleVisuals19 === 'function') {
       applyBundleVisuals19();
+    }
+
+    // Apply current sales mode to rows
+    var currentMode = (typeof getSalesMode === 'function') ? getSalesMode() : 'service';
+    if (typeof applyProductModeToRows === 'function') {
+      applyProductModeToRows(currentMode);
     }
 
     // Recalculate totals
