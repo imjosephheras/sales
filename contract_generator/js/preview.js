@@ -532,6 +532,9 @@
     }
 
     function renderJWO(data) {
+        // Sales mode
+        const isProductMode = window.editorSalesMode === 'product';
+
         // Use Company_Address or fallback (matching PDF template)
         const companyAddress = data.Company_Address || 'N/A';
 
