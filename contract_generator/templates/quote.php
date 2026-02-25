@@ -409,6 +409,26 @@ $tax_rate = 0.0825;
     <div class="section-title">Quotation</div>
     <div class="subsection-title">Scope of Service</div>
 
+    <?php // Auto-generated scope from services catalog (linked to service types) ?>
+    <?php $autoScope = $data['auto_scope_sections'] ?? []; ?>
+    <?php if (!empty($autoScope)): ?>
+        <?php foreach ($autoScope as $section): ?>
+        <div class="scope-block no-break">
+            <div class="scope-title"><?php echo htmlspecialchars($section['title'] ?? ''); ?></div>
+            <div class="scope-content">
+                <ul>
+                <?php foreach (explode("\n", $section['scope_content'] ?? '') as $task): ?>
+                    <?php if (trim($task) !== ''): ?>
+                    <li><?php echo htmlspecialchars(trim($task)); ?></li>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+                </ul>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+    <?php // Manual/custom scope sections ?>
     <?php if (!empty($scopeSections)): ?>
         <?php foreach ($scopeSections as $section): ?>
         <div class="scope-block no-break">
@@ -418,7 +438,7 @@ $tax_rate = 0.0825;
             </div>
         </div>
         <?php endforeach; ?>
-    <?php else: ?>
+    <?php elseif (empty($autoScope)): ?>
         <?php if (!empty($data['Site_Observation'])): ?>
         <div class="scope-block">
             <div class="scope-content">
