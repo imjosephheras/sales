@@ -654,7 +654,27 @@
         </tr>
     </table>
 
-    <?php // Dynamic scope sections (manual/custom blocks) ?>
+    <?php // Auto-generated scope sections from services catalog (linked to service types) ?>
+    <?php $autoScope = $data['auto_scope_sections'] ?? []; ?>
+    <?php if (!empty($autoScope)): ?>
+        <?php foreach ($autoScope as $section): ?>
+        <div class="scope-section">
+            <div class="scope-header"><?php echo strtoupper(htmlspecialchars($section['title'] ?? '')); ?></div>
+            <div class="scope-content">
+                <h4>WORK TO BE PERFORMED:</h4>
+                <ul>
+                <?php foreach (explode("\n", $section['scope_content'] ?? '') as $task): ?>
+                    <?php if (trim($task) !== ''): ?>
+                    <li><?php echo htmlspecialchars(trim($task)); ?></li>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+                </ul>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+    <?php // Manual/custom scope sections (complement the auto-generated ones) ?>
     <?php if (!empty($scopeSections)): ?>
         <?php foreach ($scopeSections as $section): ?>
         <div class="scope-section">

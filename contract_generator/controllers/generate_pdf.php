@@ -51,10 +51,31 @@ try {
     $stmtS->execute([$id]);
     $scopeOfWorkTasks = $stmtS->fetchAll(PDO::FETCH_COLUMN);
 
-    // Get scope sections
+    // Get scope sections (manual)
     $stmtSS = $pdo->prepare("SELECT title, scope_content FROM scope_sections WHERE form_id = ? ORDER BY section_order ASC");
     $stmtSS->execute([$id]);
     $scopeSections = $stmtSS->fetchAll(PDO::FETCH_ASSOC);
+
+    // --- Auto-generate scope sections from services catalog ---
+    // Load the services catalog (maps service names to scope task arrays)
+    require_once __DIR__ . '/../templates/services_catalog.php';
+
+    // Collect unique service type names from contract_items
+    $autoScopeSections = [];
+    $seenServiceTypes = [];
+    foreach ($allItems as $item) {
+        $svcType = trim($item['service_type'] ?? '');
+        if ($svcType !== '' && !isset($seenServiceTypes[$svcType])) {
+            $seenServiceTypes[$svcType] = true;
+            // Look up scope in the catalog by service name
+            if (isset($servicesCatalog[$svcType])) {
+                $autoScopeSections[] = [
+                    'title' => $svcType,
+                    'scope_content' => implode("\n", $servicesCatalog[$svcType]),
+                ];
+            }
+        }
+    }
 
     // Get contract staff positions
     $stmtStaff = $pdo->prepare("SELECT * FROM contract_staff WHERE form_id = ? ORDER BY department ASC, id ASC");
@@ -97,6 +118,7 @@ try {
         'total_cost' => $form['total_cost'],
         'contract_staff' => $contractStaff,
         'scope_sections' => $scopeSections,
+        'auto_scope_sections' => $autoScopeSections,
     ];
 
     // Sales mode: 'service' (default) or 'product' — affects only visible headers
