@@ -234,45 +234,14 @@ try {
     $saved_form_id = $form_id ?: $pdo->lastInsertId();
 
     // ============================================================
-    // PASO 2: GUARDAR SCOPE OF WORK (Q28 + Q19 service scopes)
-    // ============================================================
-    $pdo->prepare("DELETE FROM scope_of_work WHERE form_id = ?")->execute([$saved_form_id]);
-    $stmtScope = $pdo->prepare("INSERT INTO scope_of_work (form_id, task_name) VALUES (?, ?)");
-
-    // 2a: Save Q28 manual scope of work checkboxes
-    if (isset($_POST['Scope_Of_Work']) && is_array($_POST['Scope_Of_Work'])) {
-        foreach ($_POST['Scope_Of_Work'] as $task) {
-            if (!empty($task)) {
-                $stmtScope->execute([$saved_form_id, $task]);
-            }
-        }
-    }
-
-    // 2b: Save scope items from Q19 service catalog selections
-    if (isset($_POST['scope19']) && is_array($_POST['scope19'])) {
-        foreach ($_POST['scope19'] as $scopeJson) {
-            if (!empty($scopeJson)) {
-                $scopeItems = json_decode($scopeJson, true);
-                if (is_array($scopeItems)) {
-                    foreach ($scopeItems as $item) {
-                        if (!empty($item)) {
-                            $stmtScope->execute([$saved_form_id, $item]);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // ============================================================
-    // PASO 2b: GUARDAR SCOPE SECTIONS (dynamic blocks)
+    // PASO 2: GUARDAR SCOPE SECTIONS (dynamic blocks)
     // ============================================================
     $pdo->prepare("DELETE FROM scope_sections WHERE form_id = ?")->execute([$saved_form_id]);
 
     $stmtScopeSec = $pdo->prepare("INSERT INTO scope_sections (form_id, section_order, title, scope_content) VALUES (?, ?, ?, ?)");
     $scopeSectionOrder = 0;
 
-    // 2b-i: Save manually created scope sections
+    // Save manually created scope sections
     if (isset($_POST['Scope_Sections_Title']) && is_array($_POST['Scope_Sections_Title'])) {
         $titles = $_POST['Scope_Sections_Title'];
         $contents = $_POST['Scope_Sections_Content'] ?? [];
@@ -282,30 +251,6 @@ try {
             $secContent = trim($contents[$i] ?? '');
             if (!empty($secTitle) || !empty($secContent)) {
                 $stmtScopeSec->execute([$saved_form_id, $scopeSectionOrder, $secTitle, $secContent]);
-                $scopeSectionOrder++;
-            }
-        }
-    }
-
-    // 2b-ii: Save selected catalog products as scope sections
-    // When a service type from the catalog is selected (has predefined scope),
-    // it is automatically saved as a scope section with its title and scope items.
-    if (isset($_POST['Selected_Products_Name']) && is_array($_POST['Selected_Products_Name'])) {
-        $productNames = $_POST['Selected_Products_Name'];
-        $productScopes = $_POST['Selected_Products_Scope'] ?? [];
-
-        for ($i = 0; $i < count($productNames); $i++) {
-            $prodTitle = trim($productNames[$i] ?? '');
-            $prodScopeJson = $productScopes[$i] ?? '[]';
-            $prodScopeItems = json_decode($prodScopeJson, true);
-
-            if (!empty($prodTitle) && is_array($prodScopeItems) && !empty($prodScopeItems)) {
-                // Join scope items into a readable text block with bullet points
-                $prodScopeContent = implode("\n", array_map(function($item) {
-                    return "• " . trim($item);
-                }, $prodScopeItems));
-
-                $stmtScopeSec->execute([$saved_form_id, $scopeSectionOrder, $prodTitle, $prodScopeContent]);
                 $scopeSectionOrder++;
             }
         }

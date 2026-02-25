@@ -38,12 +38,6 @@ try {
         throw new Exception('Form not found');
     }
 
-    // Cargar scope of work
-    $sql_scope = "SELECT task_name FROM scope_of_work WHERE form_id = ?";
-    $stmt_scope = $pdo->prepare($sql_scope);
-    $stmt_scope->execute([$form_id]);
-    $scope_tasks = $stmt_scope->fetchAll(PDO::FETCH_COLUMN);
-
     // Cargar contract items (unified) and split by category for frontend compatibility
     $sql_items = "SELECT * FROM contract_items WHERE form_id = ? ORDER BY category, position";
     $stmt_items = $pdo->prepare($sql_items);
@@ -153,7 +147,6 @@ try {
         'success' => true,
         'form' => $formData,
         'can_edit' => $canEdit,
-        'scope_tasks' => $scope_tasks,
         'scope_sections' => $scope_sections,
         'contract_items' => $all_items,
         'kitchen_costs' => $kitchen_costs,
