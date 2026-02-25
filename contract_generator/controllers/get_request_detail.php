@@ -51,6 +51,24 @@ try {
     $stmtSections->execute([$id]);
     $scopeSections = $stmtSections->fetchAll(PDO::FETCH_ASSOC);
 
+    // --- Auto-generate scope sections from services catalog (same logic as generate_pdf.php) ---
+    require_once __DIR__ . '/../templates/services_catalog.php';
+
+    $autoScopeSections = [];
+    $seenServiceTypes = [];
+    foreach ($contractItems as $item) {
+        $svcType = trim($item['service_type'] ?? '');
+        if ($svcType !== '' && !isset($seenServiceTypes[$svcType])) {
+            $seenServiceTypes[$svcType] = true;
+            if (isset($servicesCatalog[$svcType])) {
+                $autoScopeSections[] = [
+                    'title' => $svcType,
+                    'scope_content' => implode("\n", $servicesCatalog[$svcType]),
+                ];
+            }
+        }
+    }
+
     // Get contract staff positions
     $stmtStaff = $pdo->prepare("SELECT * FROM contract_staff WHERE form_id = ? ORDER BY id ASC");
     $stmtStaff->execute([$id]);
@@ -110,6 +128,7 @@ try {
         'hood_vent_services' => $hoodVentServices,
         'contract_staff' => $contractStaff,
         'scope_sections' => $scopeSections,
+        'auto_scope_sections' => $autoScopeSections,
     ];
 
     echo json_encode([
