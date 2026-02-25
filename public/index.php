@@ -30,6 +30,18 @@ switch ($action) {
         AuthController::logout();
         break;
 
+    case 'force_password_change':
+        AuthController::showForcePasswordChange();
+        break;
+
+    case 'process_force_password_change':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . url('/public/index.php?action=force_password_change'));
+            exit;
+        }
+        AuthController::processForcePasswordChange();
+        break;
+
     case 'dashboard':
     default:
         AuthController::dashboard();

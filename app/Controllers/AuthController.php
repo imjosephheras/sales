@@ -25,6 +25,24 @@ class AuthController
     {
         Csrf::validateOrFail();
 
+        // ─── Rate limiting: max 5 attempts per IP in 15 minutes ──────
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $pdo = getDBConnection();
+
+        // Purge old attempts (older than 15 minutes)
+        $pdo->prepare("DELETE FROM login_attempts WHERE attempted_at < DATE_SUB(NOW(), INTERVAL 15 MINUTE)")->execute();
+
+        // Count recent attempts from this IP
+        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = :ip AND attempted_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+        $countStmt->execute([':ip' => $ip]);
+        $attempts = (int) $countStmt->fetchColumn();
+
+        if ($attempts >= 5) {
+            $_SESSION['login_error'] = 'Too many login attempts. Please try again in 15 minutes.';
+            header('Location: ' . url('/public/index.php?action=login'));
+            exit;
+        }
+
         $identity = trim($_POST['identity'] ?? '');
         $password = $_POST['password'] ?? '';
 
@@ -37,6 +55,8 @@ class AuthController
         $user = Auth::login($identity, $password);
 
         if (!$user) {
+            // Record failed attempt
+            $pdo->prepare("INSERT INTO login_attempts (ip_address) VALUES (:ip)")->execute([':ip' => $ip]);
             $_SESSION['login_error'] = 'Invalid credentials.';
             header('Location: ' . url('/public/index.php?action=login'));
             exit;
@@ -45,9 +65,28 @@ class AuthController
         // Regenerate CSRF token after login
         Csrf::regenerate();
 
+        // Check if user must change their default password
+        $mustChange = $pdo->prepare("SELECT must_change_password FROM users WHERE user_id = :id");
+        $mustChange->execute([':id' => $user['user_id']]);
+        if ((int)$mustChange->fetchColumn() === 1) {
+            header('Location: ' . url('/public/index.php?action=force_password_change'));
+            exit;
+        }
+
         // Redirect to intended URL or main dashboard (root index.php)
         $redirect = $_SESSION['intended_url'] ?? url('/');
         unset($_SESSION['intended_url']);
+
+        // Validate redirect URL: must be a local path (prevent open redirect)
+        $parsed = parse_url($redirect);
+        if (
+            !empty($parsed['host']) ||
+            !empty($parsed['scheme']) ||
+            !str_starts_with($redirect, '/')
+        ) {
+            $redirect = url('/');
+        }
+
         header('Location: ' . $redirect);
         exit;
     }
@@ -63,6 +102,57 @@ class AuthController
     }
 
     /**
+     * Show the forced password change form
+     */
+    public static function showForcePasswordChange(): void
+    {
+        Middleware::auth();
+
+        $error = $_SESSION['password_change_error'] ?? null;
+        unset($_SESSION['password_change_error']);
+        self::renderForcePasswordChange($error);
+    }
+
+    /**
+     * Process the forced password change
+     */
+    public static function processForcePasswordChange(): void
+    {
+        Middleware::auth();
+        Csrf::validateOrFail();
+
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+
+        if (strlen($newPassword) < 8) {
+            $_SESSION['password_change_error'] = 'Password must be at least 8 characters long.';
+            header('Location: ' . url('/public/index.php?action=force_password_change'));
+            exit;
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            $_SESSION['password_change_error'] = 'Passwords do not match.';
+            header('Location: ' . url('/public/index.php?action=force_password_change'));
+            exit;
+        }
+
+        // Reject the default password
+        if ($newPassword === 'admin123') {
+            $_SESSION['password_change_error'] = 'You cannot reuse the default password.';
+            header('Location: ' . url('/public/index.php?action=force_password_change'));
+            exit;
+        }
+
+        $pdo = getDBConnection();
+        $hash = Auth::hashPassword($newPassword);
+        $stmt = $pdo->prepare("UPDATE users SET password_hash = :hash, must_change_password = 0 WHERE user_id = :id");
+        $stmt->execute([':hash' => $hash, ':id' => Auth::id()]);
+
+        header('Location: ' . url('/'));
+        exit;
+    }
+
+    /**
      * Show protected dashboard
      */
     public static function dashboard(): void
@@ -74,6 +164,93 @@ class AuthController
     }
 
     // ─── Views ────────────────────────────────────────────────
+
+    private static function renderForcePasswordChange(?string $error): void
+    {
+        ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Password - Sales Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #001f54 0%, #a30000 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .card h1 { text-align: center; color: #333; margin-bottom: 8px; font-size: 1.6rem; }
+        .card .subtitle { text-align: center; color: #888; margin-bottom: 30px; font-size: 0.9rem; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #444; font-size: 0.9rem; }
+        .form-group input {
+            width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0;
+            border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s;
+        }
+        .form-group input:focus { border-color: #001f54; }
+        .btn-submit {
+            width: 100%; padding: 14px; background: linear-gradient(135deg, #001f54, #003080);
+            color: white; border: none; border-radius: 10px; font-size: 1.1rem;
+            font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,31,84,0.4); }
+        .error-msg {
+            background: #fee; color: #c00; padding: 10px 14px; border-radius: 8px;
+            margin-bottom: 20px; font-size: 0.9rem; border-left: 4px solid #c00;
+        }
+        .warning {
+            background: #fff3cd; color: #856404; padding: 12px 14px; border-radius: 8px;
+            margin-bottom: 20px; font-size: 0.88rem; border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Change Password</h1>
+        <p class="subtitle">Your account requires a password change before continuing.</p>
+
+        <div class="warning">
+            For security reasons, you must set a new password. It must be at least 8 characters long.
+        </div>
+
+        <?php if ($error): ?>
+            <div class="error-msg"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></div>
+        <?php endif; ?>
+
+        <form method="POST" action="<?= url('/public/index.php?action=process_force_password_change') ?>">
+            <?= Csrf::field() ?>
+
+            <div class="form-group">
+                <label for="new_password">New Password</label>
+                <input type="password" id="new_password" name="new_password" required minlength="8" autocomplete="new-password">
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm New Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required minlength="8" autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="btn-submit">Update Password</button>
+        </form>
+    </div>
+</body>
+</html>
+        <?php
+    }
 
     private static function renderLoginForm(?string $error): void
     {

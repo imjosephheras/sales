@@ -157,14 +157,16 @@ try {
     ]);
 
 } catch (PDOException $e) {
+    error_log("load_form_data DB error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Database error: ' . $e->getMessage()
+        'message' => 'A database error occurred. Please try again later.'
     ]);
 } catch (Exception $e) {
+    error_log("load_form_data error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => $e->getMessage()
+        'message' => 'An error occurred. Please try again later.'
     ]);
 }
 ?>

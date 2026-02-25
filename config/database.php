@@ -57,7 +57,7 @@ function getDBConnection() {
             header('Content-Type: application/json');
             echo json_encode([
                 'success' => false,
-                'message' => 'Database connection error: ' . $e->getMessage()
+                'message' => 'Database connection error. Please try again later.'
             ]);
             exit;
         }

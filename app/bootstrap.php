@@ -11,10 +11,19 @@ ini_set('session.use_strict_mode', '1');      // Reject uninitialized session ID
 ini_set('session.use_only_cookies', '1');      // No session ID in URLs
 ini_set('session.cookie_httponly', '1');        // JS can't access session cookie
 ini_set('session.cookie_samesite', 'Lax');     // CSRF protection at cookie level
+ini_set('session.cookie_secure', '1');         // Cookie only sent over HTTPS
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// ─── Security headers ────────────────────────────────────────
+header('X-Frame-Options: SAMEORIGIN');              // Prevent clickjacking
+header('X-Content-Type-Options: nosniff');          // Prevent MIME-type sniffing
+header('X-XSS-Protection: 1; mode=block');          // Legacy XSS filter
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 
 // ─── Detect application base path ─────────────────────────
 // Auto-detect the URL prefix when the app lives in a subdirectory.
@@ -304,4 +313,26 @@ if ((int)$permCount === 0) {
         INSERT IGNORE INTO `role_permission` (`role_id`, `permission_id`)
         SELECT 1, `permission_id` FROM `permissions`
     ");
+}
+
+// ─── Login rate-limiting table ──────────────────────────────────
+$pdo->exec("
+    CREATE TABLE IF NOT EXISTS `login_attempts` (
+        `id`         INT AUTO_INCREMENT PRIMARY KEY,
+        `ip_address` VARCHAR(45) NOT NULL,
+        `attempted_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        INDEX `idx_ip_time` (`ip_address`, `attempted_at`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+");
+
+// ─── Add must_change_password column to users if missing ──────────
+try {
+    $cols = $pdo->query("SHOW COLUMNS FROM `users` LIKE 'must_change_password'")->fetchAll();
+    if (empty($cols)) {
+        $pdo->exec("ALTER TABLE `users` ADD COLUMN `must_change_password` TINYINT(1) DEFAULT 0 AFTER `role_id`");
+        // Mark the seeded admin user so they are forced to change on first login
+        $pdo->exec("UPDATE `users` SET `must_change_password` = 1 WHERE `username` = 'admin' AND `password_hash` != ''");
+    }
+} catch (PDOException $e) {
+    // skip
 }

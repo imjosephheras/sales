@@ -37,15 +37,17 @@ try {
     ]);
     
 } catch (PDOException $e) {
+    error_log("load_drafts DB error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Database error: ' . $e->getMessage(),
+        'message' => 'A database error occurred. Please try again later.',
         'forms' => []
     ]);
 } catch (Exception $e) {
+    error_log("load_drafts error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Error: ' . $e->getMessage(),
+        'message' => 'An error occurred. Please try again later.',
         'forms' => []
     ]);
 }

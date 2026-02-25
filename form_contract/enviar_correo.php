@@ -667,9 +667,9 @@ foreach ($base_staff as $key => $value) {
             <?php $positionName = ucwords(str_replace("_", " ", $slug)); ?>
             <tr>
                 <td style="border:1px solid #ddd; padding:6px;"><?= htmlspecialchars($positionName) ?></td>
-                <td style="border:1px solid #ddd; padding:6px;"><?= $info["base"] ?></td>
-                <td style="border:1px solid #ddd; padding:6px;"><?= $info["increase"] ?></td>
-                <td style="border:1px solid #ddd; padding:6px;"><?= $info["bill"] ?></td>
+                <td style="border:1px solid #ddd; padding:6px;"><?= htmlspecialchars($info["base"]) ?></td>
+                <td style="border:1px solid #ddd; padding:6px;"><?= htmlspecialchars($info["increase"]) ?></td>
+                <td style="border:1px solid #ddd; padding:6px;"><?= htmlspecialchars($info["bill"]) ?></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
@@ -811,7 +811,7 @@ try {
         // CASE A: With Photos
         // Send complete PDF + photos attached
         // ===============================
-        $mailer->Subject = "New Request Form - $company_name (With Photos)";
+        $mailer->Subject = "New Request Form - " . htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') . " (With Photos)";
 
         // Attach PDF
         $pdf_content = $dompdf->output();
@@ -846,14 +846,14 @@ try {
             </div>
             <div class='content'>
                 <div class='info-box'>
-                    <p><span class='label'>Company:</span> $company_name</p>
-                    <p><span class='label'>Client:</span> $client_name</p>
-                    <p><span class='label'>Email:</span> $email</p>
-                    <p><span class='label'>Phone:</span> $number_phone</p>
-                    <p><span class='label'>Service Type:</span> $service_type</p>
-                    <p><span class='label'>Request Type:</span> $request_type</p>
-                    <p><span class='label'>Seller:</span> $Seller</p>
-                    <p><span class='label'>Price:</span> " . ($PriceInput ?: 'Pending confirmation') . "</p>
+                    <p><span class='label'>Company:</span> " . htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Client:</span> " . htmlspecialchars($client_name, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Email:</span> " . htmlspecialchars($email, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Phone:</span> " . htmlspecialchars($number_phone, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Service Type:</span> " . htmlspecialchars($service_type, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Request Type:</span> " . htmlspecialchars($request_type, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Seller:</span> " . htmlspecialchars($Seller, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Price:</span> " . htmlspecialchars($PriceInput ?: 'Pending confirmation', ENT_QUOTES, 'UTF-8') . "</p>
                 </div>
                 <p><strong>Attachments:</strong></p>
                 <ul>
@@ -873,7 +873,7 @@ try {
         // CASE B: No Photos
         // Send brief notification only
         // ===============================
-        $mailer->Subject = "Request Form Submitted - Price Confirmation Needed - $company_name";
+        $mailer->Subject = "Request Form Submitted - Price Confirmation Needed - " . htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8');
 
         $mailer->isHTML(true);
         $mailer->Body = "
@@ -900,12 +900,12 @@ try {
                     <strong>Note:</strong> A new Request Form has been submitted and requires price confirmation.
                 </div>
                 <div class='info-box'>
-                    <p><span class='label'>Company:</span> $company_name</p>
-                    <p><span class='label'>Client:</span> $client_name</p>
-                    <p><span class='label'>Service Type:</span> $service_type</p>
-                    <p><span class='label'>Request Type:</span> $request_type</p>
-                    <p><span class='label'>Seller:</span> $Seller</p>
-                    <p><span class='label'>Current Price:</span> " . ($PriceInput ?: '<em>Not set - needs confirmation</em>') . "</p>
+                    <p><span class='label'>Company:</span> " . htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Client:</span> " . htmlspecialchars($client_name, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Service Type:</span> " . htmlspecialchars($service_type, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Request Type:</span> " . htmlspecialchars($request_type, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Seller:</span> " . htmlspecialchars($Seller, ENT_QUOTES, 'UTF-8') . "</p>
+                    <p><span class='label'>Current Price:</span> " . ($PriceInput ? htmlspecialchars($PriceInput, ENT_QUOTES, 'UTF-8') : '<em>Not set - needs confirmation</em>') . "</p>
                 </div>
                 <p>All form details are available in the database. Please access the Contract Generator to review and confirm the pricing.</p>
                 <p style='text-align:center;'>
@@ -932,7 +932,7 @@ try {
 // Set success status for redirect
 if (isset($db_error)) {
     $email_status = 'error';
-    $email_message = 'Database error: ' . $db_error;
+    $email_message = 'An error occurred while saving the form. Please try again later.';
 } elseif ($request_id) {
     $email_status = 'success';
     if ($email_sent) {
@@ -942,11 +942,11 @@ if (isset($db_error)) {
             $email_message = 'Form submitted successfully! Notification email sent for price confirmation.';
         }
     } else {
-        $email_message = 'Form submitted successfully! (Email notification could not be sent: ' . $email_error . ')';
+        $email_message = 'Form submitted successfully! (Email notification could not be sent.)';
     }
 } else {
     $email_status = 'error';
-    $email_message = 'Unknown error: Form could not be saved to database.';
+    $email_message = 'An error occurred. Please try again later.';
 }
 
 ?>

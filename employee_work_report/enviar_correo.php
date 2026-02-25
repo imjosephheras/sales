@@ -600,8 +600,8 @@ try {
     $mail->setFrom($mail_config['from_email'], $mail_config['from_name']);
     $mail->addAddress($mail_config['to_email']);
 
-    $mail->Subject = "Service Completion Photo Report - JWO $jwo_number";
-    $email_body = "Attached is the Service Completion Photo Report.<br><br>JWO: $jwo_number";
+    $mail->Subject = "Service Completion Photo Report - JWO " . htmlspecialchars($jwo_number, ENT_QUOTES, 'UTF-8');
+    $email_body = "Attached is the Service Completion Photo Report.<br><br>JWO: " . htmlspecialchars($jwo_number, ENT_QUOTES, 'UTF-8');
     if (trim($note_title) !== '' || trim($note_description) !== '') {
         $email_body .= "<br><br><strong>Notes:</strong>";
         if (trim($note_title) !== '') {
@@ -620,8 +620,8 @@ try {
     $mail->send();
 
 } catch (Exception $e) {
-    echo "Email error: " . $mail->ErrorInfo . "<br>";
-    echo "Could not access file: $pdf_path";
+    error_log("Email sending failed: " . $mail->ErrorInfo);
+    echo "<p style='text-align:center;font-family:Arial;color:#c00;'>An error occurred while sending the email. Please try again later.</p>";
     exit;
 }
 
