@@ -42,7 +42,7 @@ if (file_exists($logo_path)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vent Hood Report Editor</title>
+    <title>Service Report Editor</title>
     <style>
         /* =============================================
            RESET & BASE
@@ -1196,15 +1196,15 @@ if (file_exists($logo_path)) {
      TOOLBAR
      ============================================= -->
 <div class="toolbar">
-    <div class="toolbar-title">
-        VENT HOOD REPORT EDITOR
+    <div class="toolbar-title" id="toolbarTitle">
+        Select Report Type
     </div>
     <div class="toolbar-actions">
         <div class="template-selector-wrapper">
             <button class="toolbar-btn btn-template" id="btnTemplate" onclick="toggleTemplateDropdown()">Report Type</button>
             <div class="template-dropdown" id="templateDropdown">
                 <div class="template-dropdown-header">Select Report Type</div>
-                <button class="template-dropdown-item active" data-key="kitchen_exhaust_cleaning" onclick="selectTemplate(this)">Kitchen Exhaust Cleaning Service</button>
+                <button class="template-dropdown-item" data-key="kitchen_exhaust_cleaning" onclick="selectTemplate(this)">Kitchen Exhaust Cleaning Service</button>
                 <button class="template-dropdown-item" data-key="roof_exterior" onclick="selectTemplate(this)">Roof &amp; Exterior Service</button>
                 <button class="template-dropdown-item" data-key="kitchen_deep_cleaning" onclick="selectTemplate(this)">Kitchen Deep Cleaning Service</button>
                 <button class="template-dropdown-item" data-key="equipment_cleaning" onclick="selectTemplate(this)">Equipment Cleaning Service</button>
@@ -1217,7 +1217,7 @@ if (file_exists($logo_path)) {
         <button class="toolbar-btn btn-clear" onclick="clearAllFields()">Clear All</button>
         <button class="toolbar-btn btn-print" onclick="window.print()">Print Report</button>
         <?php if ($request_id): ?>
-        <button class="toolbar-btn btn-download-pdf" onclick="window.open('controllers/generate_vent_hood_report.php?id=<?php echo htmlspecialchars($request_id); ?>&service_type=' + encodeURIComponent(window.selectedServiceType || 'kitchen_exhaust_cleaning'), '_blank')">Download PDF</button>
+        <button class="toolbar-btn btn-download-pdf" onclick="if(!window.selectedServiceType){alert('Please select a Report Type first.');return;}window.open('controllers/generate_vent_hood_report.php?id=<?php echo htmlspecialchars($request_id); ?>&service_type=' + encodeURIComponent(window.selectedServiceType), '_blank')">Download PDF</button>
         <?php endif; ?>
     </div>
 </div>
@@ -1329,7 +1329,7 @@ if (file_exists($logo_path)) {
             <?php if ($logo_base64): ?>
                 <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Prime Facility Services Group">
             <?php endif; ?>
-            <div class="report-title dynamic-report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
+            <div class="report-title dynamic-report-title">SERVICE REPORT</div>
         </div>
 
         <!-- SERVICE REPORT / WORK ORDER -->
@@ -1598,7 +1598,7 @@ if (file_exists($logo_path)) {
             <?php if ($logo_base64): ?>
                 <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Prime Facility Services Group">
             <?php endif; ?>
-            <div class="report-title dynamic-report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
+            <div class="report-title dynamic-report-title">SERVICE REPORT</div>
         </div>
 
         <!-- 5. TECHNICAL SYSTEM DATA (moved to page 2) -->
@@ -1719,7 +1719,7 @@ if (file_exists($logo_path)) {
             <?php if ($logo_base64): ?>
                 <img src="<?php echo $logo_base64; ?>" class="company-logo" alt="Prime Facility Services Group">
             <?php endif; ?>
-            <div class="report-title dynamic-report-title">KITCHEN EXHAUST CLEANING AND GREASE GUTTER SERVICE REPORT</div>
+            <div class="report-title dynamic-report-title">SERVICE REPORT</div>
         </div>
 
         <!-- 7. ACCEPTANCE OF REPAIR PARTS AND AUTHORIZATION (appears when products selected from side panel) -->
@@ -2103,8 +2103,17 @@ if (file_exists($logo_path)) {
         document.getElementById('section7Detail').classList.remove('visible');
         updatePanelCount();
 
-        // Reset service type to default
-        handleServiceTypeChange('kitchen_exhaust_cleaning');
+        // Reset service type to initial state
+        window.selectedServiceType = null;
+        var toolbarTitle = document.getElementById('toolbarTitle');
+        if (toolbarTitle) toolbarTitle.textContent = 'Select Report Type';
+        document.getElementById('btnTemplate').textContent = 'Report Type';
+        document.querySelectorAll('.dynamic-report-title').forEach(function(el) {
+            el.textContent = 'SERVICE REPORT';
+        });
+        document.querySelectorAll('.template-dropdown-item').forEach(function(item) {
+            item.classList.remove('active');
+        });
     };
 
     // =============================================
@@ -2182,7 +2191,7 @@ if (file_exists($logo_path)) {
     // SERVICE TYPE STATE & CACHE
     // =============================================
     // Global state — accessible from anywhere; sent to backend on PDF generation
-    window.selectedServiceType = 'kitchen_exhaust_cleaning';
+    window.selectedServiceType = null;
     var serviceConfigCache = {};
 
     // =============================================
@@ -2221,6 +2230,12 @@ if (file_exists($logo_path)) {
         var titles = document.querySelectorAll('.dynamic-report-title');
         var titleText = (cfg.title || 'SERVICE REPORT').toUpperCase();
         titles.forEach(function(el) { el.textContent = titleText; });
+
+        // --- 1b. Update toolbar title to match selected service ---
+        var toolbarTitle = document.getElementById('toolbarTitle');
+        if (toolbarTitle) {
+            toolbarTitle.textContent = titleText;
+        }
 
         // --- 2. Rebuild Section 2: Scope of Work ---
         var sec2 = document.getElementById('sectionScopeOfWork');
