@@ -185,12 +185,12 @@
         viewerClientName.textContent = doc.client_name && doc.company_name ? doc.client_name : '';
         viewerServiceName.textContent = doc.service_name || '';
 
-        // Load PDF in iframe
+        // Load PDF in iframe via secure serve.php endpoint
         if (doc.pdf_path) {
-            // Build absolute URL to the PDF, encoding each path segment for special characters/spaces
             const basePath = window.location.pathname.replace(/\/billing\/.*/i, '');
-            const encodedPath = doc.pdf_path.split('/').map(segment => encodeURIComponent(segment)).join('/');
-            pdfViewer.src = basePath + '/' + encodedPath;
+            // Strip leading 'storage/' prefix since serve.php resolves paths relative to the storage directory
+            const fileParam = doc.pdf_path.replace(/^storage\//, '');
+            pdfViewer.src = basePath + '/storage/serve.php?file=' + encodeURIComponent(fileParam);
         } else {
             pdfViewer.src = '';
         }
