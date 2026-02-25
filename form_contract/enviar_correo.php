@@ -150,11 +150,6 @@ $site_observation     = $_POST['Site_Observation']    ?? '';
 $additional_comments  = $_POST['Additional_Comments'] ?? '';
 $email_info_sent      = $_POST['Email_Information_Sent'] ?? '';
 
-// SECTION 7
-$scope_of_work = isset($_POST['Scope_Of_Work']) 
-                 ? implode(', ', $_POST['Scope_Of_Work']) 
-                 : '';
-
 // SECTION 9 — Document & Work Dates
 $document_date = $_POST['Document_Date'] ?? '';
 $work_date     = $_POST['Work_Date']     ?? '';
@@ -203,7 +198,7 @@ try {
 
     // Preparar datos para guardar
     $week_days_json = !empty($week_days) ? json_encode($week_days) : null;
-    $scope_json = !empty($_POST['Scope_Of_Work']) ? json_encode($_POST['Scope_Of_Work']) : null;
+    $scope_json = null;
     $photos_json = !empty($uploaded_photos) ? json_encode($uploaded_photos) : null;
 
     // Arrays de la sección 18 (Janitorial)
@@ -717,14 +712,25 @@ foreach ($base_staff as $key => $value) {
 <div class="section">
 <h2>Section 7: Scope of Work</h2>
 
-<?php if (!empty($_POST['Scope_Of_Work'])): ?>
-<ul style="margin-left:25px; line-height:1.6;">
-<?php foreach ($_POST['Scope_Of_Work'] as $item): ?>
-<li><?= htmlspecialchars($item) ?></li>
-<?php endforeach; ?>
-</ul>
-<?php else: ?>
-<p style="color:#777;">No scope of work items were selected.</p>
+<?php
+$scopeTitles = $_POST['Scope_Sections_Title'] ?? [];
+$scopeContents = $_POST['Scope_Sections_Content'] ?? [];
+if (!empty($scopeTitles)):
+  for ($i = 0; $i < count($scopeTitles); $i++):
+    $secTitle = trim($scopeTitles[$i] ?? '');
+    $secContent = trim($scopeContents[$i] ?? '');
+    if (!empty($secTitle) || !empty($secContent)):
+?>
+<div style="margin-bottom:12px;">
+  <?php if (!empty($secTitle)): ?><div style="font-weight:bold;"><?= htmlspecialchars($secTitle) ?></div><?php endif; ?>
+  <?php if (!empty($secContent)): ?><div style="white-space:pre-line;"><?= htmlspecialchars($secContent) ?></div><?php endif; ?>
+</div>
+<?php
+    endif;
+  endfor;
+else:
+?>
+<p style="color:#777;">No scope sections were added.</p>
 <?php endif; ?>
 
 </div>
