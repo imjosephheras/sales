@@ -142,7 +142,7 @@ try {
     error_log("Error updating service status: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Error updating status: ' . $e->getMessage()
+        'message' => 'An error occurred while updating the status. Please try again later.'
     ]);
 }
 

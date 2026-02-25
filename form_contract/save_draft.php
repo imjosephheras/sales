@@ -454,11 +454,10 @@ try {
         $pdo->rollBack();
     }
 
+    error_log("save_draft DB error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Database error: ' . $e->getMessage(),
-        'error_code' => $e->getCode(),
-        'error_line' => $e->getLine()
+        'message' => 'A database error occurred. Please try again later.'
     ]);
 
 } catch (Exception $e) {
@@ -466,10 +465,10 @@ try {
         $pdo->rollBack();
     }
 
+    error_log("save_draft error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Error: ' . $e->getMessage(),
-        'error_line' => $e->getLine()
+        'message' => 'An error occurred. Please try again later.'
     ]);
 }
 ?>

@@ -114,6 +114,6 @@ try {
 
 } catch (Exception $e) {
     error_log("update_event error: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'A server error occurred. Please try again later.']);
 }
 ?>

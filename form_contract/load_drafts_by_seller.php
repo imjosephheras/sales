@@ -104,16 +104,18 @@ try {
     ]);
 
 } catch (PDOException $e) {
+    error_log("load_drafts_by_seller DB error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Database error: ' . $e->getMessage(),
+        'message' => 'A database error occurred. Please try again later.',
         'forms' => [],
         'pagination' => ['page' => 1, 'limit' => 20, 'total_count' => 0, 'total_pages' => 1]
     ]);
 } catch (Exception $e) {
+    error_log("load_drafts_by_seller error: " . $e->getMessage());
     echo json_encode([
         'success' => false,
-        'message' => 'Error: ' . $e->getMessage(),
+        'message' => 'An error occurred. Please try again later.',
         'forms' => [],
         'pagination' => ['page' => 1, 'limit' => 20, 'total_count' => 0, 'total_pages' => 1]
     ]);

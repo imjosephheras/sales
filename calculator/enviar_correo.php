@@ -462,9 +462,9 @@ foreach ($base_staff as $key => $value) {
             <?php $positionName = ucwords(str_replace("_", " ", $slug)); ?>
             <tr>
                 <td style="border:1px solid #ddd; padding:6px;"><?= htmlspecialchars($positionName) ?></td>
-                <td style="border:1px solid #ddd; padding:6px;"><?= $info["base"] ?></td>
-                <td style="border:1px solid #ddd; padding:6px;"><?= $info["increase"] ?></td>
-                <td style="border:1px solid #ddd; padding:6px;"><?= $info["bill"] ?></td>
+                <td style="border:1px solid #ddd; padding:6px;"><?= htmlspecialchars($info["base"]) ?></td>
+                <td style="border:1px solid #ddd; padding:6px;"><?= htmlspecialchars($info["increase"]) ?></td>
+                <td style="border:1px solid #ddd; padding:6px;"><?= htmlspecialchars($info["bill"]) ?></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
@@ -591,9 +591,9 @@ try {
 
     $mail->Body = "
     <h3>A new request form has been submitted.</h3>
-    <p>Company: <strong>{$company_name}</strong></p>
-    <p>Client: {$client_name}</p>
-    <p>Email: {$email}</p>
+    <p>Company: <strong>" . htmlspecialchars($company_name, ENT_QUOTES, 'UTF-8') . "</strong></p>
+    <p>Client: " . htmlspecialchars($client_name, ENT_QUOTES, 'UTF-8') . "</p>
+    <p>Email: " . htmlspecialchars($email, ENT_QUOTES, 'UTF-8') . "</p>
     <p>PDF is attached.</p>
     ";
 
@@ -611,8 +611,9 @@ try {
     $email_message = 'Form submitted and email sent successfully!';
 
 } catch (Exception $e) {
+    error_log("Email sending failed: " . $mail->ErrorInfo);
     $email_status = 'error';
-    $email_message = "Error sending form: {$mail->ErrorInfo}";
+    $email_message = "An error occurred while sending the email. Please try again later.";
 }
 
 if (file_exists($pdf_path)) unlink($pdf_path);

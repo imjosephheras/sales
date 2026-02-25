@@ -247,8 +247,9 @@ try {
     $email_message = 'Email sent successfully!';
 
 } catch (Exception $e) {
+    error_log("Email sending failed: " . $mail->ErrorInfo);
     $email_status = 'error';
-    $email_message = "Email could not be sent. Error: {$mail->ErrorInfo}";
+    $email_message = "An error occurred while sending the email. Please try again later.";
 }
 
 // Clean up temporary PDF file
