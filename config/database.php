@@ -6,16 +6,22 @@
 // de la base de datos. Todos los modulos deben incluir este archivo
 // en lugar de definir sus propias conexiones.
 // ============================================================
+// Las credenciales se leen desde el archivo .env en la raiz del
+// proyecto. Ver .env.example para referencia.
+// ============================================================
+
+// Cargar variables de entorno desde .env
+require_once __DIR__ . '/env_loader.php';
 
 // Zona horaria
 date_default_timezone_set('America/Chicago');
 
-// Configuracion de la base de datos
-if (!defined('DB_HOST'))    define('DB_HOST', 'localhost');
-if (!defined('DB_NAME'))    define('DB_NAME', 'form');
-if (!defined('DB_USER'))    define('DB_USER', 'root');
-if (!defined('DB_PASS'))    define('DB_PASS', '');
-if (!defined('DB_CHARSET')) define('DB_CHARSET', 'utf8mb4');
+// Configuracion de la base de datos (lee desde variables de entorno)
+if (!defined('DB_HOST'))    define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+if (!defined('DB_NAME'))    define('DB_NAME', getenv('DB_NAME') ?: 'form');
+if (!defined('DB_USER'))    define('DB_USER', getenv('DB_USER') ?: 'root');
+if (!defined('DB_PASS'))    define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : '');
+if (!defined('DB_CHARSET')) define('DB_CHARSET', getenv('DB_CHARSET') ?: 'utf8mb4');
 
 /**
  * Obtener conexion PDO (singleton).
