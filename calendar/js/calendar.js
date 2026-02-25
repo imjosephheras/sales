@@ -47,12 +47,20 @@ class Calendar {
         this.allEvents = {};       // all events keyed by day (unfiltered)
         this.events = {};          // filtered events keyed by day
         this.rawEvents = [];       // flat array of all events for the month
-        this.selectedClients = new Set();
-        this.allClients = [];
 
-        // Service type filter state
-        this.selectedServiceTypes = new Set();
-        this.allServiceTypes = [];
+        // Unified filter state
+        this.filterCriterion = localStorage.getItem('calendar-filter-criterion') || 'requested_service';
+        this.selectedValues = new Set();
+        this.allValues = [];
+
+        // Filter criteria configuration: maps dropdown value → event property
+        this.filterCriteria = {
+            'requested_service': { label: 'Requested Service', prop: 'requestedService', isArray: false },
+            'company_name':      { label: 'Company Name',      prop: 'company',          isArray: false },
+            'contact_name':      { label: 'Contact Name',      prop: 'client',            isArray: false },
+            'order_nomenclature':{ label: 'Order Nomenclature',prop: 'nomenclature',      isArray: false },
+            'service_type':      { label: 'Type of Services',  prop: 'serviceTypesList',  isArray: true  }
+        };
 
         // Drag state
         this.draggedEvent = null;
@@ -108,8 +116,7 @@ class Calendar {
         }
 
         // Sidebar controls
-        this.initSidebar();
-        this.initServiceSidebar();
+        this.initFilterSidebar();
         this.initNavToggles();
         this.initViewModeToggle();
         this.initDayModal();
@@ -258,29 +265,42 @@ class Calendar {
     }
 
     /**
-     * Initialize sidebar elements and event listeners
+     * Initialize unified filter sidebar elements and event listeners
      */
-    initSidebar() {
+    initFilterSidebar() {
         this.sidebarEl = document.getElementById('filter-sidebar');
-        this.clientListEl = document.getElementById('client-list');
-        this.clientSearchEl = document.getElementById('client-search');
+        this.filterListEl = document.getElementById('filter-list');
+        this.filterSearchEl = document.getElementById('filter-search');
+        this.filterCriterionEl = document.getElementById('filter-criterion');
         this.selectAllBtn = document.getElementById('select-all-btn');
         this.deselectAllBtn = document.getElementById('deselect-all-btn');
         this.filterCountEl = document.getElementById('filter-count');
         this.collapseBtn = document.getElementById('sidebar-collapse-btn');
         this.expandBtn = document.getElementById('sidebar-expand-btn');
 
-        this.clientSearchEl.addEventListener('input', () => this.renderClientList());
+        // Set saved criterion in dropdown
+        this.filterCriterionEl.value = this.filterCriterion;
+
+        // Criterion change: re-extract values and re-apply filter
+        this.filterCriterionEl.addEventListener('change', () => {
+            this.filterCriterion = this.filterCriterionEl.value;
+            localStorage.setItem('calendar-filter-criterion', this.filterCriterion);
+            this.filterSearchEl.value = '';
+            this.extractFilterValues();
+            this.applyFilter();
+        });
+
+        this.filterSearchEl.addEventListener('input', () => this.renderFilterList());
 
         this.selectAllBtn.addEventListener('click', () => {
-            this.allClients.forEach(c => this.selectedClients.add(c));
-            this.renderClientList();
+            this.allValues.forEach(v => this.selectedValues.add(v));
+            this.renderFilterList();
             this.applyFilter();
         });
 
         this.deselectAllBtn.addEventListener('click', () => {
-            this.selectedClients.clear();
-            this.renderClientList();
+            this.selectedValues.clear();
+            this.renderFilterList();
             this.applyFilter();
         });
 
@@ -294,110 +314,40 @@ class Calendar {
             this.sidebarEl.classList.add('collapsed');
             this.expandBtn.classList.add('visible');
             localStorage.setItem('calendar-sidebar', 'collapsed');
-            if (this.toggleClientBtn) this.toggleClientBtn.classList.remove('active');
+            if (this.toggleFilterBtn) this.toggleFilterBtn.classList.remove('active');
         });
 
         this.expandBtn.addEventListener('click', () => {
             this.sidebarEl.classList.remove('collapsed');
             this.expandBtn.classList.remove('visible');
             localStorage.setItem('calendar-sidebar', 'expanded');
-            if (this.toggleClientBtn) this.toggleClientBtn.classList.add('active');
+            if (this.toggleFilterBtn) this.toggleFilterBtn.classList.add('active');
         });
     }
 
     /**
-     * Initialize service type filter sidebar elements and event listeners
-     */
-    initServiceSidebar() {
-        this.serviceSidebarEl = document.getElementById('service-filter-sidebar');
-        this.serviceTypeListEl = document.getElementById('service-type-list');
-        this.serviceSearchEl = document.getElementById('service-search');
-        this.serviceSelectAllBtn = document.getElementById('service-select-all-btn');
-        this.serviceDeselectAllBtn = document.getElementById('service-deselect-all-btn');
-        this.serviceFilterCountEl = document.getElementById('service-filter-count');
-        this.serviceCollapseBtn = document.getElementById('service-sidebar-collapse-btn');
-        this.serviceExpandBtn = document.getElementById('service-sidebar-expand-btn');
-
-        this.serviceSearchEl.addEventListener('input', () => this.renderServiceTypeList());
-
-        this.serviceSelectAllBtn.addEventListener('click', () => {
-            this.allServiceTypes.forEach(s => this.selectedServiceTypes.add(s));
-            this.renderServiceTypeList();
-            this.applyFilter();
-        });
-
-        this.serviceDeselectAllBtn.addEventListener('click', () => {
-            this.selectedServiceTypes.clear();
-            this.renderServiceTypeList();
-            this.applyFilter();
-        });
-
-        const savedServiceSidebar = localStorage.getItem('calendar-service-sidebar');
-        if (savedServiceSidebar === 'collapsed') {
-            this.serviceSidebarEl.classList.add('collapsed');
-            this.serviceExpandBtn.classList.add('visible');
-        }
-
-        this.serviceCollapseBtn.addEventListener('click', () => {
-            this.serviceSidebarEl.classList.add('collapsed');
-            this.serviceExpandBtn.classList.add('visible');
-            localStorage.setItem('calendar-service-sidebar', 'collapsed');
-            if (this.toggleServiceBtn) this.toggleServiceBtn.classList.remove('active');
-        });
-
-        this.serviceExpandBtn.addEventListener('click', () => {
-            this.serviceSidebarEl.classList.remove('collapsed');
-            this.serviceExpandBtn.classList.remove('visible');
-            localStorage.setItem('calendar-service-sidebar', 'expanded');
-            if (this.toggleServiceBtn) this.toggleServiceBtn.classList.add('active');
-        });
-    }
-
-    /**
-     * Initialize nav toggle buttons for sidebar visibility
+     * Initialize nav toggle button for sidebar visibility
      */
     initNavToggles() {
-        this.toggleClientBtn = document.getElementById('toggle-client-sidebar');
-        this.toggleServiceBtn = document.getElementById('toggle-service-sidebar');
+        this.toggleFilterBtn = document.getElementById('toggle-filter-sidebar');
 
-        // Sync initial state from localStorage
-        const clientCollapsed = localStorage.getItem('calendar-sidebar') === 'collapsed';
-        const serviceCollapsed = localStorage.getItem('calendar-service-sidebar') === 'collapsed';
-
-        if (clientCollapsed) {
-            this.toggleClientBtn.classList.remove('active');
-        }
-        if (serviceCollapsed) {
-            this.toggleServiceBtn.classList.remove('active');
+        const sidebarCollapsed = localStorage.getItem('calendar-sidebar') === 'collapsed';
+        if (sidebarCollapsed) {
+            this.toggleFilterBtn.classList.remove('active');
         }
 
-        this.toggleClientBtn.addEventListener('click', () => {
+        this.toggleFilterBtn.addEventListener('click', () => {
             const isCollapsed = this.sidebarEl.classList.contains('collapsed');
             if (isCollapsed) {
                 this.sidebarEl.classList.remove('collapsed');
                 this.expandBtn.classList.remove('visible');
-                this.toggleClientBtn.classList.add('active');
+                this.toggleFilterBtn.classList.add('active');
                 localStorage.setItem('calendar-sidebar', 'expanded');
             } else {
                 this.sidebarEl.classList.add('collapsed');
                 this.expandBtn.classList.add('visible');
-                this.toggleClientBtn.classList.remove('active');
+                this.toggleFilterBtn.classList.remove('active');
                 localStorage.setItem('calendar-sidebar', 'collapsed');
-            }
-        });
-
-        this.toggleServiceBtn.addEventListener('click', () => {
-            const isCollapsed = this.serviceSidebarEl.classList.contains('collapsed');
-            if (isCollapsed) {
-                this.serviceSidebarEl.classList.remove('collapsed');
-                this.serviceExpandBtn.classList.remove('visible');
-                this.toggleServiceBtn.classList.add('active');
-                localStorage.setItem('calendar-service-sidebar', 'expanded');
-            } else {
-                this.serviceSidebarEl.classList.add('collapsed');
-                this.serviceExpandBtn.classList.add('visible');
-                this.toggleServiceBtn.classList.remove('active');
-                localStorage.setItem('calendar-service-sidebar', 'collapsed');
             }
         });
     }
@@ -423,8 +373,7 @@ class Calendar {
 
     async loadAndRender() {
         await this.fetchEvents();
-        this.extractClients();
-        await this.fetchServiceTypes();
+        this.extractFilterValues();
         this.applyFilter();
 
         // Handle pending navigation from URL params (cross-nav from Request Form)
@@ -532,186 +481,112 @@ class Calendar {
         }
     }
 
-    extractClients() {
-        const clientSet = new Set();
+    /**
+     * Extract unique values from events based on the current filter criterion.
+     * Populates this.allValues and this.selectedValues, then renders the list.
+     */
+    extractFilterValues() {
+        const config = this.filterCriteria[this.filterCriterion];
+        const valueSet = new Set();
+
         Object.values(this.allEvents).forEach(dayEvents => {
-            dayEvents.forEach(ev => clientSet.add(ev.client));
+            dayEvents.forEach(ev => {
+                if (config.isArray) {
+                    // Array property (e.g. serviceTypesList)
+                    const arr = ev[config.prop];
+                    if (arr && arr.length) {
+                        arr.forEach(v => { if (v) valueSet.add(v); });
+                    }
+                } else {
+                    // Scalar property
+                    const val = ev[config.prop];
+                    if (val) valueSet.add(val);
+                }
+            });
         });
 
-        this.allClients = Array.from(clientSet).sort((a, b) =>
+        this.allValues = Array.from(valueSet).sort((a, b) =>
             a.localeCompare(b, undefined, { sensitivity: 'base' })
         );
 
-        this.selectedClients = new Set(this.allClients);
-        this.clientSearchEl.value = '';
-        this.renderClientList();
+        this.selectedValues = new Set(this.allValues);
+        this.filterSearchEl.value = '';
+        this.renderFilterList();
     }
 
     /**
-     * Fetch all distinct service types from the database
-     * (hood_vent_costs, janitorial_services_costs, kitchen_cleaning_costs)
+     * Render filter value checkboxes in the sidebar
      */
-    async fetchServiceTypes() {
-        try {
-            const resp = await fetch('get_service_types.php');
-            const data = await resp.json();
-            if (data.success && data.service_types) {
-                this.allServiceTypes = data.service_types;
-            } else {
-                this.allServiceTypes = [];
-            }
-        } catch (err) {
-            console.error('Error fetching service types:', err);
-            this.allServiceTypes = [];
-        }
-
-        this.selectedServiceTypes = new Set(this.allServiceTypes);
-        this.serviceSearchEl.value = '';
-        this.renderServiceTypeList();
-    }
-
-    /**
-     * Render service type checkboxes in the service sidebar
-     */
-    renderServiceTypeList() {
-        const searchTerm = this.serviceSearchEl.value.toLowerCase().trim();
+    renderFilterList() {
+        const searchTerm = this.filterSearchEl.value.toLowerCase().trim();
         const filtered = searchTerm
-            ? this.allServiceTypes.filter(s => s.toLowerCase().includes(searchTerm))
-            : this.allServiceTypes;
+            ? this.allValues.filter(v => v.toLowerCase().includes(searchTerm))
+            : this.allValues;
 
-        if (this.allServiceTypes.length === 0) {
-            this.serviceTypeListEl.innerHTML = `
+        if (this.allValues.length === 0) {
+            this.filterListEl.innerHTML = `
                 <div class="client-list-empty">
-                    <i class="fas fa-concierge-bell"></i>
-                    <span>No services this month</span>
-                </div>`;
-            this.updateServiceFilterCount();
-            return;
-        }
-
-        if (filtered.length === 0) {
-            this.serviceTypeListEl.innerHTML = `
-                <div class="client-list-empty">
-                    <i class="fas fa-search"></i>
-                    <span>No matching services</span>
-                </div>`;
-            return;
-        }
-
-        // Count events per service type
-        const serviceCounts = {};
-        Object.values(this.allEvents).forEach(dayEvents => {
-            dayEvents.forEach(ev => {
-                if (ev.serviceTypesList) {
-                    ev.serviceTypesList.forEach(s => {
-                        serviceCounts[s] = (serviceCounts[s] || 0) + 1;
-                    });
-                }
-            });
-        });
-
-        let html = '';
-        filtered.forEach(service => {
-            const isChecked = this.selectedServiceTypes.has(service);
-            const count = serviceCounts[service] || 0;
-            html += `
-                <label class="client-item ${isChecked ? 'active' : ''}">
-                    <input type="checkbox" value="${this.escapeHtml(service)}" ${isChecked ? 'checked' : ''}>
-                    <span class="client-checkbox-custom">
-                        <i class="fas fa-check"></i>
-                    </span>
-                    <span class="client-name">${this.escapeHtml(service)}</span>
-                    <span class="client-count">${count}</span>
-                </label>`;
-        });
-
-        this.serviceTypeListEl.innerHTML = html;
-
-        this.serviceTypeListEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-            cb.addEventListener('change', (e) => {
-                const serviceName = e.target.value;
-                if (e.target.checked) {
-                    this.selectedServiceTypes.add(serviceName);
-                } else {
-                    this.selectedServiceTypes.delete(serviceName);
-                }
-                e.target.closest('.client-item').classList.toggle('active', e.target.checked);
-                this.applyFilter();
-            });
-        });
-
-        this.updateServiceFilterCount();
-    }
-
-    /**
-     * Update the service filter count display in the sidebar footer
-     */
-    updateServiceFilterCount() {
-        const total = this.allServiceTypes.length;
-        const selected = this.selectedServiceTypes.size;
-        if (selected === total) {
-            this.serviceFilterCountEl.textContent = `Showing all (${total})`;
-        } else {
-            this.serviceFilterCountEl.textContent = `${selected} of ${total} selected`;
-        }
-    }
-
-    renderClientList() {
-        const searchTerm = this.clientSearchEl.value.toLowerCase().trim();
-        const filtered = searchTerm
-            ? this.allClients.filter(c => c.toLowerCase().includes(searchTerm))
-            : this.allClients;
-
-        if (this.allClients.length === 0) {
-            this.clientListEl.innerHTML = `
-                <div class="client-list-empty">
-                    <i class="fas fa-calendar-xmark"></i>
-                    <span>No clients this month</span>
+                    <i class="fas fa-filter"></i>
+                    <span>No data this month</span>
                 </div>`;
             this.updateFilterCount();
             return;
         }
 
         if (filtered.length === 0) {
-            this.clientListEl.innerHTML = `
+            this.filterListEl.innerHTML = `
                 <div class="client-list-empty">
                     <i class="fas fa-search"></i>
-                    <span>No matching clients</span>
+                    <span>No matches found</span>
                 </div>`;
             return;
         }
 
-        const eventCounts = {};
+        // Count events per value
+        const config = this.filterCriteria[this.filterCriterion];
+        const valueCounts = {};
         Object.values(this.allEvents).forEach(dayEvents => {
             dayEvents.forEach(ev => {
-                eventCounts[ev.client] = (eventCounts[ev.client] || 0) + 1;
+                if (config.isArray) {
+                    const arr = ev[config.prop];
+                    if (arr && arr.length) {
+                        arr.forEach(v => {
+                            valueCounts[v] = (valueCounts[v] || 0) + 1;
+                        });
+                    }
+                } else {
+                    const val = ev[config.prop];
+                    if (val) {
+                        valueCounts[val] = (valueCounts[val] || 0) + 1;
+                    }
+                }
             });
         });
 
         let html = '';
-        filtered.forEach(client => {
-            const isChecked = this.selectedClients.has(client);
-            const count = eventCounts[client] || 0;
+        filtered.forEach(value => {
+            const isChecked = this.selectedValues.has(value);
+            const count = valueCounts[value] || 0;
             html += `
                 <label class="client-item ${isChecked ? 'active' : ''}">
-                    <input type="checkbox" value="${this.escapeHtml(client)}" ${isChecked ? 'checked' : ''}>
+                    <input type="checkbox" value="${this.escapeHtml(value)}" ${isChecked ? 'checked' : ''}>
                     <span class="client-checkbox-custom">
                         <i class="fas fa-check"></i>
                     </span>
-                    <span class="client-name">${this.escapeHtml(client)}</span>
+                    <span class="client-name">${this.escapeHtml(value)}</span>
                     <span class="client-count">${count}</span>
                 </label>`;
         });
 
-        this.clientListEl.innerHTML = html;
+        this.filterListEl.innerHTML = html;
 
-        this.clientListEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        this.filterListEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
             cb.addEventListener('change', (e) => {
-                const clientName = e.target.value;
+                const val = e.target.value;
                 if (e.target.checked) {
-                    this.selectedClients.add(clientName);
+                    this.selectedValues.add(val);
                 } else {
-                    this.selectedClients.delete(clientName);
+                    this.selectedValues.delete(val);
                 }
                 e.target.closest('.client-item').classList.toggle('active', e.target.checked);
                 this.applyFilter();
@@ -722,8 +597,8 @@ class Calendar {
     }
 
     updateFilterCount() {
-        const total = this.allClients.length;
-        const selected = this.selectedClients.size;
+        const total = this.allValues.length;
+        const selected = this.selectedValues.size;
         if (selected === total) {
             this.filterCountEl.textContent = `Showing all (${total})`;
         } else {
@@ -733,27 +608,24 @@ class Calendar {
 
     applyFilter() {
         this.events = {};
-
-        const allClientsSelected = this.selectedClients.size === this.allClients.length;
-        const allServicesSelected = this.selectedServiceTypes.size === this.allServiceTypes.length;
+        const config = this.filterCriteria[this.filterCriterion];
+        const allSelected = this.selectedValues.size === this.allValues.length;
 
         Object.entries(this.allEvents).forEach(([day, dayEvents]) => {
             const filtered = dayEvents.filter(ev => {
-                // Client filter
-                const clientPass = allClientsSelected || this.selectedClients.has(ev.client);
+                if (allSelected) return true;
 
-                // Service type filter: at least one event service must be selected
-                let servicePass;
-                if (allServicesSelected) {
-                    servicePass = true;
-                } else if (!ev.serviceTypesList || ev.serviceTypesList.length === 0) {
-                    // Events with no service types pass only when all services are selected
-                    servicePass = false;
+                if (config.isArray) {
+                    // Array property: at least one value must be selected
+                    const arr = ev[config.prop];
+                    if (!arr || arr.length === 0) return false;
+                    return arr.some(v => this.selectedValues.has(v));
                 } else {
-                    servicePass = ev.serviceTypesList.some(s => this.selectedServiceTypes.has(s));
+                    // Scalar property: value must be selected
+                    const val = ev[config.prop];
+                    if (!val) return false;
+                    return this.selectedValues.has(val);
                 }
-
-                return clientPass && servicePass;
             });
             if (filtered.length > 0) {
                 this.events[day] = filtered;
@@ -761,7 +633,6 @@ class Calendar {
         });
 
         this.updateFilterCount();
-        this.updateServiceFilterCount();
         this.render();
     }
 

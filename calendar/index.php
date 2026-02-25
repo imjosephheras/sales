@@ -31,18 +31,28 @@ ob_start();
     <!-- Calendar Layout -->
     <div class="calendar-layout">
 
-        <!-- Client Filter Sidebar -->
+        <!-- Unified Filter Sidebar -->
         <aside class="filter-sidebar" id="filter-sidebar">
             <div class="sidebar-header">
-                <h3><i class="fas fa-filter"></i> Filter by Client</h3>
+                <h3><i class="fas fa-filter"></i> Filter By</h3>
                 <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Collapse sidebar">
                     <i class="fas fa-chevron-left"></i>
                 </button>
             </div>
 
+            <div class="sidebar-criterion">
+                <select id="filter-criterion">
+                    <option value="requested_service">Requested Service</option>
+                    <option value="company_name">Company Name</option>
+                    <option value="contact_name">Contact Name</option>
+                    <option value="order_nomenclature">Order Nomenclature</option>
+                    <option value="service_type">Type of Services</option>
+                </select>
+            </div>
+
             <div class="sidebar-search">
                 <i class="fas fa-search"></i>
-                <input type="text" id="client-search" placeholder="Search clients...">
+                <input type="text" id="filter-search" placeholder="Search...">
             </div>
 
             <div class="sidebar-actions">
@@ -50,10 +60,10 @@ ob_start();
                 <button class="sidebar-action-btn" id="deselect-all-btn">Deselect All</button>
             </div>
 
-            <div class="client-list" id="client-list">
+            <div class="client-list" id="filter-list">
                 <div class="client-list-empty">
-                    <i class="fas fa-calendar-xmark"></i>
-                    <span>No clients this month</span>
+                    <i class="fas fa-filter"></i>
+                    <span>No data this month</span>
                 </div>
             </div>
 
@@ -62,45 +72,9 @@ ob_start();
             </div>
         </aside>
 
-        <!-- Collapsed client sidebar toggle -->
-        <button class="sidebar-expand-btn" id="sidebar-expand-btn" title="Show client filter">
+        <!-- Collapsed sidebar toggle -->
+        <button class="sidebar-expand-btn" id="sidebar-expand-btn" title="Show filter">
             <i class="fas fa-filter"></i>
-        </button>
-
-        <!-- Service Type Filter Sidebar -->
-        <aside class="filter-sidebar service-filter-sidebar" id="service-filter-sidebar">
-            <div class="sidebar-header">
-                <h3><i class="fas fa-concierge-bell"></i> Type of Services</h3>
-                <button class="sidebar-collapse-btn" id="service-sidebar-collapse-btn" title="Collapse sidebar">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            </div>
-
-            <div class="sidebar-search">
-                <i class="fas fa-search"></i>
-                <input type="text" id="service-search" placeholder="Search services...">
-            </div>
-
-            <div class="sidebar-actions">
-                <button class="sidebar-action-btn" id="service-select-all-btn">Select All</button>
-                <button class="sidebar-action-btn" id="service-deselect-all-btn">Deselect All</button>
-            </div>
-
-            <div class="client-list" id="service-type-list">
-                <div class="client-list-empty">
-                    <i class="fas fa-concierge-bell"></i>
-                    <span>No services this month</span>
-                </div>
-            </div>
-
-            <div class="sidebar-footer" id="service-sidebar-footer">
-                <span id="service-filter-count">Showing all</span>
-            </div>
-        </aside>
-
-        <!-- Collapsed service sidebar toggle -->
-        <button class="sidebar-expand-btn" id="service-sidebar-expand-btn" title="Show service filter">
-            <i class="fas fa-concierge-bell"></i>
         </button>
 
         <!-- Calendar -->
@@ -131,13 +105,9 @@ ob_start();
                     </button>
 
                     <div class="calendar-nav-toggles">
-                        <button class="nav-toggle-btn active" id="toggle-client-sidebar" title="Toggle Client Filter">
+                        <button class="nav-toggle-btn active" id="toggle-filter-sidebar" title="Toggle Filter">
                             <i class="fas fa-filter"></i>
-                            <span>Clients</span>
-                        </button>
-                        <button class="nav-toggle-btn active" id="toggle-service-sidebar" title="Toggle Service Filter">
-                            <i class="fas fa-concierge-bell"></i>
-                            <span>Services</span>
+                            <span>Filters</span>
                         </button>
                         <button class="nav-toggle-btn" id="toggle-view-mode" title="Toggle Compact/Expanded view">
                             <i class="fas fa-compress-alt" id="view-mode-icon"></i>
