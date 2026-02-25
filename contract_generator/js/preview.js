@@ -208,9 +208,23 @@
             `;
         });
 
-        // Build scope sections HTML
+        // Build scope sections HTML (auto-generated from services catalog + manual)
+        const autoScopeSections = data.auto_scope_sections || [];
         const scopeSections = data.scope_sections || data.Scope_Sections || [];
         let scopeHtml = '';
+        if (autoScopeSections.length > 0) {
+            autoScopeSections.forEach(function(section) {
+                var tasksHtml = (section.scope_content || '').split('\n').filter(function(t) { return t.trim() !== ''; }).map(function(t) {
+                    return '<li>' + escapeHtml(t.trim()) + '</li>';
+                }).join('');
+                scopeHtml += `
+                    <div class="quote-scope-block">
+                        <div class="quote-scope-title">${escapeHtml(section.title || '').toUpperCase()}</div>
+                        <div class="quote-scope-content"><ul style="margin:4px 0 4px 20px;padding:0;">${tasksHtml}</ul></div>
+                    </div>
+                `;
+            });
+        }
         if (scopeSections.length > 0) {
             scopeSections.forEach(function(section) {
                 scopeHtml += `
@@ -220,7 +234,8 @@
                     </div>
                 `;
             });
-        } else if (data.Site_Observation) {
+        }
+        if (scopeHtml === '' && data.Site_Observation) {
             scopeHtml = `
                 <div class="quote-scope-block">
                     <div class="quote-scope-content">${escapeHtml(data.Site_Observation).replace(/\n/g, '<br>')}</div>
@@ -686,9 +701,10 @@
         });
 
         // ========================================
-        // BUILD SCOPE OF WORK (dynamic sections only)
+        // BUILD SCOPE OF WORK (auto-generated + manual)
         // ========================================
         var dynamicScopeSections = data.scope_sections || data.Scope_Sections || [];
+        var jwoAutoScopeSections = data.auto_scope_sections || [];
 
         // Determine logo based on Service_Type (same as PDF)
         const deptLower = (data.Service_Type || '').toLowerCase();
@@ -1044,7 +1060,24 @@
                     </tr>
                 </table>
 
-                <!-- SCOPE OF WORK - Dynamic sections only -->
+                <!-- SCOPE OF WORK - Auto-generated from services catalog -->
+                ${jwoAutoScopeSections.length > 0 ? jwoAutoScopeSections.map(function(section) {
+                    var tasksHtml = (section.scope_content || '').split('\n').filter(function(t) { return t.trim() !== ''; }).map(function(t) {
+                        return '<li>' + escapeHtml(t.trim()) + '</li>';
+                    }).join('');
+                    return `
+                    <div class="jwo-scope-exact">
+                        <div class="jwo-scope-header-exact">
+                            ${escapeHtml(section.title || '').toUpperCase()}
+                        </div>
+                        <div class="jwo-scope-content-exact">
+                            <h4>WORK TO BE PERFORMED:</h4>
+                            <ul>${tasksHtml}</ul>
+                        </div>
+                    </div>`;
+                }).join('') : ''}
+
+                <!-- SCOPE OF WORK - Manual/custom sections -->
                 ${dynamicScopeSections.length > 0 ? dynamicScopeSections.map(function(section) {
                     return `
                     <div class="jwo-scope-exact">
@@ -2173,6 +2206,40 @@
                 <div class="contract-appendix-content">
                     ${appendixAHtml}
                 </div>
+
+                <!-- SCOPE OF WORK (Auto-generated + Manual — mirrors page9b_scope_sections.php) -->
+                ${(function() {
+                    var autoScope = data.auto_scope_sections || [];
+                    var manualScope = data.scope_sections || data.Scope_Sections || [];
+                    if (autoScope.length === 0 && manualScope.length === 0) return '';
+                    var html = '';
+                    html += '<div class="contract-footer-wrapper"><div class="contract-footer-top">PRIME HOSPITALITY SERVICES OF TEXAS</div><div class="contract-footer-bottom"><strong>8303 Westglen Dr - Houston, TX 77063 - Phone 713-338-2553 - Fax 713-574-3065</strong><br>www.primefacilityservicesgroup.com</div></div>';
+                    html += '<hr class="contract-page-sep">';
+                    html += '<div class="contract-header"><img src="' + logoSrc + '" alt="Prime Hospitality Services" onerror="this.style.display=\'none\'"><div class="title-section"><div class="doc-title">Temporary Staff</div><div class="doc-subtitle">SERVICES AGREEMENT</div></div></div>';
+                    html += '<div class="contract-appendix-title">SCOPE OF WORK</div>';
+                    html += '<div class="contract-appendix-subtitle">Detailed Service Descriptions</div>';
+                    html += '<div class="contract-appendix-content">';
+                    autoScope.forEach(function(section) {
+                        html += '<div style="margin-bottom:18px;">';
+                        html += '<div class="contract-section-num" style="margin-top:10px;">' + escapeHtml(section.title || '').toUpperCase() + '</div>';
+                        html += '<div class="contract-subsection"><p><strong>WORK TO BE PERFORMED:</strong></p><ul>';
+                        (section.scope_content || '').split('\n').forEach(function(task) {
+                            if (task.trim() !== '') {
+                                html += '<li>' + escapeHtml(task.trim()) + '</li>';
+                            }
+                        });
+                        html += '</ul></div></div>';
+                    });
+                    manualScope.forEach(function(section) {
+                        html += '<div style="margin-bottom:18px;">';
+                        html += '<div class="contract-section-num" style="margin-top:10px;">' + escapeHtml(section.title || '').toUpperCase() + '</div>';
+                        html += '<div class="contract-subsection"><p><strong>WORK TO BE PERFORMED:</strong></p>';
+                        html += '<p>' + escapeHtml(section.scope_content || section.content || '').replace(/\n/g, '<br>') + '</p>';
+                        html += '</div></div>';
+                    });
+                    html += '</div>';
+                    return html;
+                })()}
 
                 <!-- APPENDIX B -->
                 <div class="contract-footer-wrapper">
