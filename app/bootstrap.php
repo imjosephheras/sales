@@ -23,7 +23,7 @@ header('X-Content-Type-Options: nosniff');          // Prevent MIME-type sniffin
 header('X-XSS-Protection: 1; mode=block');          // Legacy XSS filter
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data:;");
 
 // ─── Detect application base path ─────────────────────────
 // Auto-detect the URL prefix when the app lives in a subdirectory.
