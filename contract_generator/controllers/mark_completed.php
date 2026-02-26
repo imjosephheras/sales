@@ -190,6 +190,24 @@ try {
     // 2. UPDATE FORM STATUS TO COMPLETED
     // ========================================
 
+    // Ensure document_attachments table exists BEFORE starting transaction.
+    // DDL statements (CREATE TABLE) cause an implicit COMMIT in MySQL,
+    // which would break any active transaction.
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `document_attachments` (
+          `id` INT AUTO_INCREMENT PRIMARY KEY,
+          `document_id` INT NOT NULL,
+          `document_type` VARCHAR(50) NOT NULL,
+          `file_type` VARCHAR(50) NOT NULL,
+          `file_name` VARCHAR(255) NOT NULL,
+          `file_path` VARCHAR(500) NOT NULL,
+          `uploaded_by` VARCHAR(200) DEFAULT NULL,
+          `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX `idx_document` (`document_id`, `document_type`),
+          INDEX `idx_file_type` (`file_type`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
     $pdo->beginTransaction();
 
     session_start();
@@ -255,22 +273,6 @@ try {
     // ========================================
     // 4. AUTO-ATTACH FINAL PDF AS DOCUMENT ATTACHMENT
     // ========================================
-
-    // Ensure document_attachments table exists (billing db_config creates it)
-    $pdo->exec("
-        CREATE TABLE IF NOT EXISTS `document_attachments` (
-          `id` INT AUTO_INCREMENT PRIMARY KEY,
-          `document_id` INT NOT NULL,
-          `document_type` VARCHAR(50) NOT NULL,
-          `file_type` VARCHAR(50) NOT NULL,
-          `file_name` VARCHAR(255) NOT NULL,
-          `file_path` VARCHAR(500) NOT NULL,
-          `uploaded_by` VARCHAR(200) DEFAULT NULL,
-          `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          INDEX `idx_document` (`document_id`, `document_type`),
-          INDEX `idx_file_type` (`file_type`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-    ");
 
     if ($billingDocId) {
         $documentType = $form['request_type'] ?? 'Contract';
