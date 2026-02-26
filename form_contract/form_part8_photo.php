@@ -216,11 +216,11 @@
                 }
             });
             
-            // Update input files
-            photoInput.files = photoFiles.files;
-            
-            // Clear the input value to allow re-selecting the same file
+            // Clear the input value first to allow re-selecting the same file
             e.target.value = '';
+
+            // Then update input files from DataTransfer (must be after clearing value)
+            photoInput.files = photoFiles.files;
         });
         
         function addPhotoPreview(file) {
