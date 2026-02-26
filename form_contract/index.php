@@ -1015,6 +1015,9 @@ ob_start();
   <button type="button" id="btnViewInCalendar" class="clipboard-btn clipboard-calendar" style="display:none;">
     📅 <?= ($lang=='en') ? "View in Calendar" : "Ver en Calendario"; ?>
   </button>
+  <button type="button" id="btnGenerateTimesheet" class="clipboard-btn clipboard-timesheet">
+    ⏱ <?= ($lang=='en') ? "Generate Timesheet" : "Generar Timesheet"; ?>
+  </button>
 </div>
 
 <style>
@@ -1082,6 +1085,16 @@ ob_start();
 .clipboard-calendar:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(26,115,232,0.3);
+}
+
+.clipboard-timesheet {
+  background: linear-gradient(135deg, #e65100 0%, #bf360c 100%);
+  color: white;
+}
+
+.clipboard-timesheet:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(230,81,0,0.3);
 }
 
 @media (max-width: 768px) {
@@ -3187,6 +3200,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener('afterprint', restorePrintFields);
 })();
 </script>
+
+<?php include __DIR__ . '/timesheet_modal.php'; ?>
 
 <?php
 $page_content = ob_get_clean();
