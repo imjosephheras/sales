@@ -4,11 +4,24 @@
  *
  * Handles file validation, sanitization, storage, and retrieval
  * for all modules (form photos, work reports, profile photos, documents).
+ *
+ * Supports two storage disks:
+ *   - 'local' : files stored on the local filesystem (default)
+ *   - 'ftp'   : files uploaded to a remote FTP server
  */
 class FileStorageService
 {
-    /** Base storage directory */
+    /** Base storage directory (local) */
     private string $storageRoot;
+
+    /** Active storage disk: 'local' or 'ftp' */
+    private string $disk;
+
+    /** FTP connection resource */
+    private $ftpConn = null;
+
+    /** FTP configuration */
+    private array $ftpConfig = [];
 
     /** Allowed MIME types grouped by category */
     private const ALLOWED_TYPES = [
@@ -53,6 +66,25 @@ class FileStorageService
             }
             $this->storageRoot = realpath($fallback);
         }
+
+        // Determine storage disk from environment
+        $this->disk = strtolower(getenv('STORAGE_DISK') ?: 'local');
+
+        if ($this->disk === 'ftp') {
+            $this->ftpConfig = [
+                'host'     => getenv('FTP_HOST') ?: '',
+                'port'     => (int)(getenv('FTP_PORT') ?: 21),
+                'username' => getenv('FTP_USERNAME') ?: '',
+                'password' => getenv('FTP_PASSWORD') ?: '',
+                'root'     => rtrim(getenv('FTP_ROOT') ?: '/', '/'),
+                'passive'  => filter_var(getenv('FTP_PASSIVE') ?: 'true', FILTER_VALIDATE_BOOLEAN),
+            ];
+        }
+    }
+
+    public function __destruct()
+    {
+        $this->ftpDisconnect();
     }
 
     /**
@@ -93,35 +125,36 @@ class FileStorageService
             return ['success' => false, 'error' => 'El archivo no es una carga válida.'];
         }
 
-        // Get destination directory
-        $destDir = $this->getStoragePath($context);
-        if (!$destDir) {
-            return ['success' => false, 'error' => "Contexto de almacenamiento no válido: {$context}"];
-        }
-
-        // Ensure directory exists
-        if (!is_dir($destDir)) {
-            mkdir($destDir, 0755, true);
-        }
-
         // Generate safe filename
         $extension = $this->getSafeExtension($file['name'], $mimeType);
         $safeName = $this->sanitizeFilename($file['name']);
         $timestamp = time() . '_' . bin2hex(random_bytes(4));
         $newFilename = ($prefix ? $prefix . '_' : '') . $timestamp . '_' . $safeName . '.' . $extension;
 
-        $destination = $destDir . '/' . $newFilename;
-
-        // Move file
-        if (!move_uploaded_file($file['tmp_name'], $destination)) {
-            return ['success' => false, 'error' => 'Error al mover el archivo al destino.'];
-        }
-
-        // Set proper permissions
-        chmod($destination, 0644);
-
         // Build relative path for database storage
         $relativePath = (self::STORAGE_PATHS[$context] ?? $context) . '/' . $newFilename;
+
+        // Upload based on active disk
+        if ($this->disk === 'ftp') {
+            $result = $this->ftpUpload($file['tmp_name'], $relativePath);
+            if (!$result) {
+                return ['success' => false, 'error' => 'Error al subir el archivo al servidor FTP.'];
+            }
+        } else {
+            // Local storage
+            $destDir = $this->getStoragePath($context);
+            if (!$destDir) {
+                return ['success' => false, 'error' => "Contexto de almacenamiento no válido: {$context}"];
+            }
+            if (!is_dir($destDir)) {
+                mkdir($destDir, 0755, true);
+            }
+            $destination = $destDir . '/' . $newFilename;
+            if (!move_uploaded_file($file['tmp_name'], $destination)) {
+                return ['success' => false, 'error' => 'Error al mover el archivo al destino.'];
+            }
+            chmod($destination, 0644);
+        }
 
         return [
             'success'  => true,
@@ -187,6 +220,10 @@ class FileStorageService
      */
     public function deleteFile(string $relativePath): bool
     {
+        if ($this->disk === 'ftp') {
+            return $this->ftpDelete($relativePath);
+        }
+
         $fullPath = $this->storageRoot . '/' . $relativePath;
 
         // Prevent directory traversal
@@ -210,6 +247,11 @@ class FileStorageService
      */
     public function getFullPath(string $relativePath): ?string
     {
+        if ($this->disk === 'ftp') {
+            // For FTP, return the FTP root-based path
+            return $this->ftpConfig['root'] . '/' . $relativePath;
+        }
+
         $fullPath = $this->storageRoot . '/' . $relativePath;
         $realPath = realpath($fullPath);
 
@@ -225,8 +267,39 @@ class FileStorageService
      */
     public function fileExists(string $relativePath): bool
     {
+        if ($this->disk === 'ftp') {
+            return $this->ftpFileExists($relativePath);
+        }
+
         $fullPath = $this->getFullPath($relativePath);
         return $fullPath !== null && file_exists($fullPath);
+    }
+
+    /**
+     * Download a file from FTP to a local temporary path for serving
+     *
+     * @param string $relativePath Path as stored in database
+     * @return string|null Local temp file path, or null on failure
+     */
+    public function downloadToTemp(string $relativePath): ?string
+    {
+        if ($this->disk !== 'ftp') {
+            return $this->getFullPath($relativePath);
+        }
+
+        $conn = $this->ftpConnect();
+        if (!$conn) {
+            return null;
+        }
+
+        $remotePath = $this->ftpConfig['root'] . '/' . $relativePath;
+        $tempFile = sys_get_temp_dir() . '/ftp_' . md5($relativePath) . '_' . basename($relativePath);
+
+        if (ftp_get($conn, $tempFile, $remotePath, FTP_BINARY)) {
+            return $tempFile;
+        }
+
+        return null;
     }
 
     /**
@@ -247,6 +320,141 @@ class FileStorageService
     public function getStorageRoot(): string
     {
         return $this->storageRoot;
+    }
+
+    /**
+     * Get the active storage disk name
+     */
+    public function getDisk(): string
+    {
+        return $this->disk;
+    }
+
+    // ─── FTP methods ────────────────────────────────────────────
+
+    /**
+     * Establish FTP connection
+     *
+     * @return resource|false FTP connection or false on failure
+     */
+    private function ftpConnect()
+    {
+        if ($this->ftpConn !== null) {
+            // Test if connection is still alive
+            if (@ftp_systype($this->ftpConn) !== false) {
+                return $this->ftpConn;
+            }
+            $this->ftpDisconnect();
+        }
+
+        $conn = @ftp_connect($this->ftpConfig['host'], $this->ftpConfig['port'], 30);
+        if (!$conn) {
+            error_log("FTP: No se pudo conectar a {$this->ftpConfig['host']}:{$this->ftpConfig['port']}");
+            return false;
+        }
+
+        if (!@ftp_login($conn, $this->ftpConfig['username'], $this->ftpConfig['password'])) {
+            error_log("FTP: Autenticación fallida para usuario {$this->ftpConfig['username']}");
+            ftp_close($conn);
+            return false;
+        }
+
+        if ($this->ftpConfig['passive']) {
+            ftp_pasv($conn, true);
+        }
+
+        $this->ftpConn = $conn;
+        return $conn;
+    }
+
+    /**
+     * Close FTP connection
+     */
+    private function ftpDisconnect(): void
+    {
+        if ($this->ftpConn !== null) {
+            @ftp_close($this->ftpConn);
+            $this->ftpConn = null;
+        }
+    }
+
+    /**
+     * Upload a local file to the FTP server
+     */
+    private function ftpUpload(string $localPath, string $relativePath): bool
+    {
+        $conn = $this->ftpConnect();
+        if (!$conn) {
+            return false;
+        }
+
+        $remotePath = $this->ftpConfig['root'] . '/' . $relativePath;
+        $remoteDir = dirname($remotePath);
+
+        // Create remote directory tree if it doesn't exist
+        $this->ftpMkdirRecursive($conn, $remoteDir);
+
+        if (ftp_put($conn, $remotePath, $localPath, FTP_BINARY)) {
+            return true;
+        }
+
+        error_log("FTP: Error al subir archivo a {$remotePath}");
+        return false;
+    }
+
+    /**
+     * Delete a file from the FTP server
+     */
+    private function ftpDelete(string $relativePath): bool
+    {
+        $conn = $this->ftpConnect();
+        if (!$conn) {
+            return false;
+        }
+
+        $remotePath = $this->ftpConfig['root'] . '/' . $relativePath;
+        return @ftp_delete($conn, $remotePath);
+    }
+
+    /**
+     * Check if a file exists on the FTP server
+     */
+    private function ftpFileExists(string $relativePath): bool
+    {
+        $conn = $this->ftpConnect();
+        if (!$conn) {
+            return false;
+        }
+
+        $remotePath = $this->ftpConfig['root'] . '/' . $relativePath;
+        $size = @ftp_size($conn, $remotePath);
+        return $size >= 0;
+    }
+
+    /**
+     * Recursively create directories on the FTP server
+     */
+    private function ftpMkdirRecursive($conn, string $dir): void
+    {
+        if ($dir === '/' || $dir === '.' || $dir === '') {
+            return;
+        }
+
+        // Check if directory already exists
+        $originalDir = @ftp_pwd($conn);
+        if (@ftp_chdir($conn, $dir)) {
+            @ftp_chdir($conn, $originalDir);
+            return;
+        }
+
+        // Create parent first
+        $parent = dirname($dir);
+        if ($parent !== $dir) {
+            $this->ftpMkdirRecursive($conn, $parent);
+        }
+
+        @ftp_mkdir($conn, $dir);
+        @ftp_chdir($conn, $originalDir);
     }
 
     // ─── Private helpers ─────────────────────────────────────
