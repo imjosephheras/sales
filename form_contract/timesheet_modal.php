@@ -145,6 +145,15 @@
           </div>
         </div>
 
+        <!-- Informational Text (print only) -->
+        <div class="ts-print-info-text">
+          Prime kindly ask for the timesheet to be sent via email to
+          <strong>accounting@primefacilityservicesgroup.com</strong>
+          and <strong>customerservice@primefacilityservicesgroup.com</strong>
+          or via fax to <strong>713-574-3065</strong>.<br>
+          This will help expedite our payroll and billing. Thank you for your cooperation.
+        </div>
+
         <!-- Day Info -->
         <div class="ts-info-row">
           <div class="ts-info-field">
@@ -652,8 +661,19 @@
   }
 }
 
+/* Informational text - hidden on screen, shown in print */
+.ts-print-info-text {
+  display: none;
+}
+
 /* ============ PRINT STYLES (Timesheet) ============ */
 @media print {
+  /* Landscape orientation for Multi Employee timesheet */
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
   /* Hide everything except the print area */
   body > *:not(#tsPrintContainer) {
     display: none !important;
@@ -664,12 +684,40 @@
     position: absolute;
     top: 0; left: 0;
     width: 100%;
-    padding: 20px;
+    padding: 10px;
     background: #fff;
   }
 
   .ts-no-print {
     display: none !important;
+  }
+
+  /* Show informational text in print */
+  .ts-print-info-text {
+    display: block !important;
+    font-size: 10px;
+    color: #333;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .ts-print-info-text strong {
+    color: #001f54;
+  }
+
+  /* Ensure logo prints correctly */
+  .ts-logo {
+    height: 55px;
+    width: auto;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .ts-company-header {
+    margin-bottom: 8px;
+    padding-bottom: 10px;
   }
 
   .ts-table input[type="time"],
@@ -693,6 +741,15 @@
 
   .ts-table {
     box-shadow: none;
+    width: 100%;
+  }
+
+  .ts-table th {
+    padding: 8px 6px;
+  }
+
+  .ts-table td {
+    padding: 5px 4px;
   }
 
   .ts-table thead {
@@ -717,6 +774,16 @@
     color: #c70734 !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  /* Optimize signatures for landscape */
+  .ts-signatures {
+    margin-top: 20px;
+    padding-top: 15px;
+  }
+
+  .ts-sig-line {
+    height: 40px;
   }
 }
 </style>
