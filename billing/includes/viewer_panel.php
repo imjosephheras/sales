@@ -25,8 +25,17 @@
 
             <!-- Card 2: Action Buttons -->
             <div class="viewer-action-card" id="viewer-actions">
-                <button class="btn btn-attach-doc" id="btn-attach-document" title="Attach Document">
-                    <i class="fas fa-paperclip"></i> + Document
+                <button class="btn btn-doc-type btn-doc-timesheet" data-file-type="timesheet" title="Attach Timesheet">
+                    <i class="fas fa-clock"></i> Timesheet
+                </button>
+                <button class="btn btn-doc-type btn-doc-invoice" data-file-type="invoice" title="Attach Invoice">
+                    <i class="fas fa-file-invoice-dollar"></i> Invoice
+                </button>
+                <button class="btn btn-doc-type btn-doc-po" data-file-type="po" title="Attach PO">
+                    <i class="fas fa-shopping-cart"></i> PO
+                </button>
+                <button class="btn btn-doc-type btn-doc-other" data-file-type="other" title="Attach Other Document">
+                    <i class="fas fa-file-alt"></i> Other
                 </button>
                 <button class="btn btn-action-completed" id="btn-mark-completed" title="Mark as Completed">
                     <i class="fas fa-check-circle"></i> Mark as Completed
@@ -63,21 +72,11 @@
 <div class="modal-overlay" id="attachment-modal">
     <div class="modal-box attachment-modal-box">
         <div class="attachment-modal-header">
-            <h3><i class="fas fa-paperclip"></i> Attach Document</h3>
+            <h3><i class="fas fa-paperclip"></i> <span id="attachment-modal-title">Attach Document</span></h3>
             <button class="btn-modal-close" id="btn-close-attachment-modal">&times;</button>
         </div>
         <form id="attachment-upload-form" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="attachment-file-type">Document Type</label>
-                <select id="attachment-file-type" name="file_type" required>
-                    <option value="">-- Select type --</option>
-                    <option value="timesheet">Timesheet</option>
-                    <option value="invoice">Invoice</option>
-                    <option value="po">PO (Purchase Order)</option>
-                    <option value="jwo_pdf">JWO PDF</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
+            <input type="hidden" id="attachment-file-type" name="file_type" value="">
             <div class="form-group">
                 <label for="attachment-file">Select File</label>
                 <div class="file-upload-area" id="file-upload-area">
