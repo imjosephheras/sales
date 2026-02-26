@@ -19,8 +19,10 @@
 
     let selectedDocId = null;
     let selectedDocSource = null; // 'pending' or 'history'
+    let selectedDocType = null;
     let pendingDocs = [];
     let historyDocs = [];
+    let attachmentsExpanded = true;
 
     // ==========================================
     // DOM ELEMENTS
@@ -42,6 +44,28 @@
     const pdfViewer = document.getElementById('pdf-viewer');
     const btnMarkCompleted = document.getElementById('btn-mark-completed');
     const btnMarkPending = document.getElementById('btn-mark-pending');
+
+    // Attachment elements
+    const btnAttachDocument = document.getElementById('btn-attach-document');
+    const attachmentsSection = document.getElementById('attachments-section');
+    const attachmentsList = document.getElementById('attachments-list');
+    const attachmentsCount = document.getElementById('attachments-count');
+    const btnToggleAttachments = document.getElementById('btn-toggle-attachments');
+
+    // Modal elements
+    const attachmentModal = document.getElementById('attachment-modal');
+    const attachmentForm = document.getElementById('attachment-upload-form');
+    const btnCloseModal = document.getElementById('btn-close-attachment-modal');
+    const btnCancelUpload = document.getElementById('btn-cancel-upload');
+    const btnSubmitUpload = document.getElementById('btn-submit-upload');
+    const fileInput = document.getElementById('attachment-file');
+    const fileUploadArea = document.getElementById('file-upload-area');
+    const fileSelected = document.getElementById('file-selected');
+    const fileSelectedName = document.getElementById('file-selected-name');
+    const btnRemoveFile = document.getElementById('btn-remove-file');
+    const uploadProgress = document.getElementById('upload-progress');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
 
     // ==========================================
     // LOAD DATA
@@ -172,6 +196,8 @@
 
         if (!doc) return;
 
+        selectedDocType = doc.document_type || 'Contract';
+
         // Re-render lists to update active states
         renderPendingList();
         renderHistoryList();
@@ -204,6 +230,9 @@
             btnMarkCompleted.style.display = 'none';
             btnMarkPending.style.display = 'flex';
         }
+
+        // Load attachments for this document
+        loadAttachments();
     }
 
     // ==========================================
@@ -231,9 +260,11 @@
                 // Reset viewer
                 selectedDocId = null;
                 selectedDocSource = null;
+                selectedDocType = null;
                 viewerEmptyState.style.display = 'flex';
                 viewerActiveState.style.display = 'none';
                 pdfViewer.src = '';
+                attachmentsSection.style.display = 'none';
 
                 // Reload both panels
                 loadPending();
@@ -277,9 +308,11 @@
                 // Reset viewer
                 selectedDocId = null;
                 selectedDocSource = null;
+                selectedDocType = null;
                 viewerEmptyState.style.display = 'flex';
                 viewerActiveState.style.display = 'none';
                 pdfViewer.src = '';
+                attachmentsSection.style.display = 'none';
 
                 // Reload both panels
                 loadPending();
@@ -295,6 +328,275 @@
             alert('Network error. Please try again.');
             btnMarkPending.disabled = false;
             btnMarkPending.innerHTML = '<i class="fas fa-clock"></i> Mark as Pending';
+        });
+    }
+
+    // ==========================================
+    // ATTACHMENTS: LOAD & RENDER
+    // ==========================================
+
+    function loadAttachments() {
+        if (!selectedDocId) return;
+
+        const docType = selectedDocType || 'Contract';
+        const url = 'controllers/get_attachments.php?document_id=' + selectedDocId + '&document_type=' + encodeURIComponent(docType);
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.data.length > 0) {
+                    attachmentsSection.style.display = 'block';
+                    attachmentsCount.textContent = data.data.length;
+                    renderAttachments(data.data);
+                } else {
+                    attachmentsSection.style.display = 'none';
+                    attachmentsCount.textContent = '0';
+                    attachmentsList.innerHTML = '';
+                }
+            })
+            .catch(() => {
+                attachmentsSection.style.display = 'none';
+            });
+    }
+
+    function renderAttachments(attachments) {
+        attachmentsList.innerHTML = attachments.map(att => {
+            const icon = getFileIcon(att.file_name);
+            const typeBadge = getFileTypeBadge(att.file_type);
+            return `
+                <div class="attachment-item" data-id="${att.id}">
+                    <div class="attachment-icon">
+                        <i class="${icon}"></i>
+                    </div>
+                    <div class="attachment-info">
+                        <span class="attachment-name" title="${escapeHtml(att.file_name)}">${escapeHtml(att.file_name)}</span>
+                        <div class="attachment-meta">
+                            <span class="attachment-type-badge ${typeBadge.cls}">${typeBadge.label}</span>
+                            <span class="attachment-date">${att.created_at_formatted || formatDate(att.created_at)}</span>
+                            ${att.uploaded_by ? `<span class="attachment-uploader"><i class="fas fa-user"></i> ${escapeHtml(att.uploaded_by)}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="attachment-actions">
+                        <button class="btn-att-download" onclick="BillingApp.downloadAttachment(${att.id})" title="Download">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="btn-att-delete" onclick="BillingApp.deleteAttachment(${att.id})" title="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function getFileIcon(filename) {
+        if (!filename) return 'fas fa-file';
+        const ext = filename.split('.').pop().toLowerCase();
+        const icons = {
+            'pdf': 'fas fa-file-pdf',
+            'jpg': 'fas fa-file-image', 'jpeg': 'fas fa-file-image', 'png': 'fas fa-file-image',
+            'doc': 'fas fa-file-word', 'docx': 'fas fa-file-word',
+            'xls': 'fas fa-file-excel', 'xlsx': 'fas fa-file-excel', 'csv': 'fas fa-file-csv',
+            'txt': 'fas fa-file-alt',
+        };
+        return icons[ext] || 'fas fa-file';
+    }
+
+    function getFileTypeBadge(fileType) {
+        const types = {
+            'timesheet': { label: 'Timesheet', cls: 'badge-timesheet' },
+            'invoice':   { label: 'Invoice', cls: 'badge-invoice' },
+            'po':        { label: 'PO', cls: 'badge-po' },
+            'jwo_pdf':   { label: 'JWO PDF', cls: 'badge-jwo' },
+            'other':     { label: 'Other', cls: 'badge-other' },
+        };
+        return types[fileType] || { label: fileType || 'Other', cls: 'badge-other' };
+    }
+
+    // ==========================================
+    // ATTACHMENTS: UPLOAD
+    // ==========================================
+
+    function openUploadModal() {
+        if (!selectedDocId) {
+            alert('Please select a document first.');
+            return;
+        }
+        attachmentModal.classList.add('active');
+        attachmentForm.reset();
+        fileSelected.style.display = 'none';
+        fileUploadArea.style.display = 'flex';
+        uploadProgress.style.display = 'none';
+        btnSubmitUpload.disabled = false;
+        btnSubmitUpload.innerHTML = '<i class="fas fa-upload"></i> Upload';
+    }
+
+    function closeUploadModal() {
+        attachmentModal.classList.remove('active');
+        attachmentForm.reset();
+    }
+
+    function handleFileSelect() {
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            fileSelectedName.textContent = file.name;
+            fileSelected.style.display = 'flex';
+            fileUploadArea.style.display = 'none';
+        }
+    }
+
+    function removeSelectedFile() {
+        fileInput.value = '';
+        fileSelected.style.display = 'none';
+        fileUploadArea.style.display = 'flex';
+    }
+
+    function submitUpload(e) {
+        e.preventDefault();
+
+        if (!selectedDocId) return;
+
+        const fileType = document.getElementById('attachment-file-type').value;
+        if (!fileType) {
+            alert('Please select a document type.');
+            return;
+        }
+        if (!fileInput.files.length) {
+            alert('Please select a file.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        formData.append('document_id', selectedDocId);
+        formData.append('document_type', selectedDocType || 'Contract');
+        formData.append('file_type', fileType);
+
+        // Show progress
+        btnSubmitUpload.disabled = true;
+        btnSubmitUpload.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        uploadProgress.style.display = 'block';
+        progressFill.style.width = '0%';
+        progressText.textContent = 'Uploading...';
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'controllers/upload_attachment.php', true);
+
+        xhr.upload.onprogress = function (e) {
+            if (e.lengthComputable) {
+                const pct = Math.round((e.loaded / e.total) * 100);
+                progressFill.style.width = pct + '%';
+                progressText.textContent = pct + '% uploaded';
+            }
+        };
+
+        xhr.onload = function () {
+            try {
+                const data = JSON.parse(xhr.responseText);
+                if (data.success) {
+                    progressFill.style.width = '100%';
+                    progressText.textContent = 'Upload complete!';
+                    setTimeout(() => {
+                        closeUploadModal();
+                        loadAttachments();
+                    }, 500);
+                } else {
+                    alert('Upload failed: ' + (data.error || 'Unknown error'));
+                    uploadProgress.style.display = 'none';
+                    btnSubmitUpload.disabled = false;
+                    btnSubmitUpload.innerHTML = '<i class="fas fa-upload"></i> Upload';
+                }
+            } catch (err) {
+                alert('Upload failed: Invalid server response');
+                uploadProgress.style.display = 'none';
+                btnSubmitUpload.disabled = false;
+                btnSubmitUpload.innerHTML = '<i class="fas fa-upload"></i> Upload';
+            }
+        };
+
+        xhr.onerror = function () {
+            alert('Network error. Please try again.');
+            uploadProgress.style.display = 'none';
+            btnSubmitUpload.disabled = false;
+            btnSubmitUpload.innerHTML = '<i class="fas fa-upload"></i> Upload';
+        };
+
+        xhr.send(formData);
+    }
+
+    // ==========================================
+    // ATTACHMENTS: DOWNLOAD
+    // ==========================================
+
+    function downloadAttachment(id) {
+        window.open('controllers/download_attachment.php?id=' + id, '_blank');
+    }
+
+    // ==========================================
+    // ATTACHMENTS: DELETE
+    // ==========================================
+
+    function deleteAttachment(id) {
+        if (!confirm('Are you sure you want to delete this attachment?')) return;
+
+        fetch('controllers/delete_attachment.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                loadAttachments();
+            } else {
+                alert('Error: ' + (data.error || 'Could not delete attachment'));
+            }
+        })
+        .catch(() => {
+            alert('Network error. Please try again.');
+        });
+    }
+
+    // ==========================================
+    // ATTACHMENTS: TOGGLE EXPAND/COLLAPSE
+    // ==========================================
+
+    function toggleAttachments() {
+        attachmentsExpanded = !attachmentsExpanded;
+        if (attachmentsExpanded) {
+            attachmentsList.style.display = 'block';
+            btnToggleAttachments.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        } else {
+            attachmentsList.style.display = 'none';
+            btnToggleAttachments.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        }
+    }
+
+    // ==========================================
+    // DRAG & DROP
+    // ==========================================
+
+    if (fileUploadArea) {
+        fileUploadArea.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+        fileUploadArea.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            fileUploadArea.classList.add('drag-over');
+        });
+
+        fileUploadArea.addEventListener('dragleave', function () {
+            fileUploadArea.classList.remove('drag-over');
+        });
+
+        fileUploadArea.addEventListener('drop', function (e) {
+            e.preventDefault();
+            fileUploadArea.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect();
+            }
         });
     }
 
@@ -338,12 +640,28 @@
     btnMarkCompleted.addEventListener('click', markAsCompleted);
     btnMarkPending.addEventListener('click', markAsPending);
 
+    // Attachment events
+    btnAttachDocument.addEventListener('click', openUploadModal);
+    btnCloseModal.addEventListener('click', closeUploadModal);
+    btnCancelUpload.addEventListener('click', closeUploadModal);
+    attachmentForm.addEventListener('submit', submitUpload);
+    fileInput.addEventListener('change', handleFileSelect);
+    btnRemoveFile.addEventListener('click', removeSelectedFile);
+    btnToggleAttachments.addEventListener('click', toggleAttachments);
+
+    // Close modal on overlay click
+    attachmentModal.addEventListener('click', function (e) {
+        if (e.target === attachmentModal) closeUploadModal();
+    });
+
     // ==========================================
     // PUBLIC API
     // ==========================================
 
     window.BillingApp = {
-        selectDocument: selectDocument
+        selectDocument: selectDocument,
+        downloadAttachment: downloadAttachment,
+        deleteAttachment: deleteAttachment
     };
 
     // ==========================================

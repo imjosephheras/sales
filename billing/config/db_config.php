@@ -70,6 +70,28 @@ function initializeBillingDocuments($pdo) {
     }
 }
 
+/**
+ * Initialize document_attachments table
+ * Stores additional file attachments for any billing document (JWO, Contract, Proposal, etc.)
+ */
+function initializeDocumentAttachments($pdo) {
+    $pdo->exec("
+    CREATE TABLE IF NOT EXISTS `document_attachments` (
+      `id` INT AUTO_INCREMENT PRIMARY KEY,
+      `document_id` INT NOT NULL,
+      `document_type` VARCHAR(50) NOT NULL COMMENT 'JWO, Contract, Proposal, Quote, etc.',
+      `file_type` VARCHAR(50) NOT NULL COMMENT 'timesheet, invoice, po, other',
+      `file_name` VARCHAR(255) NOT NULL,
+      `file_path` VARCHAR(500) NOT NULL,
+      `uploaded_by` VARCHAR(200) DEFAULT NULL,
+      `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX `idx_document` (`document_id`, `document_type`),
+      INDEX `idx_file_type` (`file_type`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+}
+
 $pdo = getDBConnection();
 initializeBillingDocuments($pdo);
+initializeDocumentAttachments($pdo);
 ?>
