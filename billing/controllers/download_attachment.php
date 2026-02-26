@@ -1,7 +1,11 @@
 <?php
 /**
  * Download a document attachment by ID
+ * Serves file via FileStorageService (local or FTP).
  */
+require_once __DIR__ . '/../../app/bootstrap.php';
+Middleware::auth();
+
 require_once __DIR__ . '/../config/db_config.php';
 
 try {
@@ -25,32 +29,34 @@ try {
         exit;
     }
 
-    $file_path = realpath(__DIR__ . '/../../' . $attachment['file_path']);
+    $storage = new FileStorageService();
 
-    if (!$file_path || !file_exists($file_path)) {
+    // Get file path (downloads from FTP to temp if needed)
+    $filePath = $storage->downloadToTemp($attachment['file_path']);
+
+    if (!$filePath || !file_exists($filePath)) {
         http_response_code(404);
         header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'error' => 'File not found on disk']);
+        echo json_encode(['success' => false, 'error' => 'File not found on server']);
         exit;
     }
 
-    // Security: ensure the file is within the uploads directory
-    $uploads_dir = realpath(__DIR__ . '/../../uploads/documents');
-    if (strpos($file_path, $uploads_dir) !== 0) {
-        http_response_code(403);
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'error' => 'Access denied']);
-        exit;
-    }
+    // Detect MIME type
+    $mime = mime_content_type($filePath) ?: 'application/octet-stream';
 
     // Serve the file
-    $mime = mime_content_type($file_path) ?: 'application/octet-stream';
     header('Content-Type: ' . $mime);
     header('Content-Disposition: attachment; filename="' . basename($attachment['file_name']) . '"');
-    header('Content-Length: ' . filesize($file_path));
+    header('Content-Length: ' . filesize($filePath));
     header('Cache-Control: no-cache, must-revalidate');
 
-    readfile($file_path);
+    readfile($filePath);
+
+    // Clean up temp file if it was downloaded from FTP
+    if ($storage->getDisk() === 'ftp') {
+        @unlink($filePath);
+    }
+
     exit;
 
 } catch (Exception $e) {

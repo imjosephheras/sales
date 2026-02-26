@@ -1,7 +1,11 @@
 <?php
 /**
  * Delete a document attachment
+ * Removes file via FileStorageService (local or FTP) and deletes DB record.
  */
+require_once __DIR__ . '/../../app/bootstrap.php';
+Middleware::auth();
+
 require_once __DIR__ . '/../config/db_config.php';
 header('Content-Type: application/json');
 
@@ -30,14 +34,10 @@ try {
         exit;
     }
 
-    // Delete file from disk
-    $file_path = realpath(__DIR__ . '/../../' . $attachment['file_path']);
-    if ($file_path && file_exists($file_path)) {
-        // Security: ensure the file is within the uploads directory
-        $uploads_dir = realpath(__DIR__ . '/../../uploads/documents');
-        if (strpos($file_path, $uploads_dir) === 0) {
-            unlink($file_path);
-        }
+    // Delete file from storage (local or FTP) via FileStorageService
+    if (!empty($attachment['file_path'])) {
+        $storage = new FileStorageService();
+        $storage->deleteFile($attachment['file_path']);
     }
 
     // Delete from database

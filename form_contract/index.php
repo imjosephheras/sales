@@ -1298,103 +1298,6 @@ ob_start();
 </div>
 
 <!-- ====================================================== -->
-<!-- SCRIPT DE FOTOS -->
-<!-- ====================================================== -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const addBox = document.getElementById("add-photo-box");
-    const input = document.getElementById("photo-input");
-    const container = document.getElementById("photo-container");
-
-    if (!addBox || !input || !container) return;
-
-    let photoFiles = [];
-
-    addBox.addEventListener("click", () => {
-        input.click();
-    });
-
-    input.addEventListener("change", (event) => {
-        const files = Array.from(event.target.files);
-
-        files.forEach(file => {
-            photoFiles.push(file);
-            renderPhoto(file);
-        });
-
-        updateRealInput();
-    });
-
-    function renderPhoto(file) {
-        const reader = new FileReader();
-
-        reader.onload = (e) => {
-            const card = document.createElement("div");
-            card.style.cssText = `
-                width:120px; height:160px; position:relative;
-                border-radius:12px; overflow:hidden;
-                box-shadow:0 4px 12px rgba(0,0,0,0.15);
-                transition: all 0.3s ease;
-            `;
-
-            card.onmouseover = () => {
-                card.style.transform = 'translateY(-5px)';
-                card.style.boxShadow = '0 6px 20px rgba(0,0,0,0.25)';
-            };
-
-            card.onmouseout = () => {
-                card.style.transform = 'translateY(0)';
-                card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-            };
-
-            const img = document.createElement("img");
-            img.src = e.target.result;
-            img.style.cssText = `width:100%; height:100%; object-fit:cover;`;
-
-            const del = document.createElement("div");
-            del.textContent = "×";
-            del.style.cssText = `
-                position:absolute; top:8px; right:8px; width:28px; height:28px;
-                background:rgba(220,53,69,0.95); color:white; font-size:20px; font-weight:bold;
-                display:flex; align-items:center; justify-content:center;
-                border-radius:50%; cursor:pointer;
-                transition: all 0.2s ease;
-            `;
-
-            del.onmouseover = () => {
-                del.style.background = '#c82333';
-                del.style.transform = 'scale(1.1)';
-            };
-
-            del.onmouseout = () => {
-                del.style.background = 'rgba(220,53,69,0.95)';
-                del.style.transform = 'scale(1)';
-            };
-
-            del.addEventListener("click", () => {
-                const index = Array.from(container.children).indexOf(card);
-                photoFiles.splice(index, 1);
-                card.remove();
-                updateRealInput();
-            });
-
-            card.appendChild(img);
-            card.appendChild(del);
-            container.insertBefore(card, addBox);
-        };
-
-        reader.readAsDataURL(file);
-    }
-
-    function updateRealInput() {
-        const dataTransfer = new DataTransfer();
-        photoFiles.forEach(file => dataTransfer.items.add(file));
-        input.files = dataTransfer.files;
-    }
-});
-</script>
-
-<!-- ====================================================== -->
 <!-- SCRIPT PRINCIPAL (ACCORDION AUTOMÁTICO + PREVIEW + DRAFTS) -->
 <!-- ====================================================== -->
 <script>
@@ -1815,8 +1718,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle photos if present
     if (additionalData.photos && additionalData.photos.length > 0) {
       console.log('📸 Loading photos:', additionalData.photos);
-      // If you have a specific function to handle photos, call it here
-      // populatePhotos(additionalData.photos);
+      populatePhotos(additionalData.photos);
+    } else {
+      // Clear any existing photos when loading a form with no photos
+      const photoContainer = document.getElementById('photo-container');
+      if (photoContainer) photoContainer.innerHTML = '';
     }
 
     // Handle service status (Section 10) - single source of truth: service_status
@@ -1830,6 +1736,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log('✅ Form populated successfully');
   };
+
+  /* ===============================
+     POPULATE PHOTOS (Section 8 - from server)
+     =============================== */
+  window.populatePhotos = function(photos) {
+    const photoContainer = document.getElementById('photo-container');
+    if (!photoContainer) return;
+    photoContainer.innerHTML = '';
+
+    const basePath = window.location.pathname.replace(/\/form_contract\/.*/i, '');
+
+    photos.forEach(function(photo) {
+      const imgSrc = basePath + '/storage/serve.php?file=' + encodeURIComponent(photo.photo_path);
+
+      const photoCard = document.createElement('div');
+      photoCard.className = 'photo-card';
+      photoCard.dataset.photoId = photo.id;
+      photoCard.dataset.serverPhoto = 'true';
+
+      photoCard.innerHTML = `
+        <img src="${imgSrc}" alt="${photo.photo_filename || 'Photo'}" loading="lazy">
+        <div class="photo-card-actions">
+          <button type="button" class="photo-card-btn delete" data-photo-id="${photo.id}">
+            🗑️
+          </button>
+        </div>
+        <div class="photo-info">
+          <div class="photo-filename" title="${photo.photo_filename || ''}">${photo.photo_filename || 'Photo'}</div>
+          <div class="photo-size">${photo.photo_size ? formatPhotoFileSize(photo.photo_size) : ''}</div>
+        </div>
+      `;
+
+      // Delete handler for server photos
+      const deleteBtn = photoCard.querySelector('.photo-card-btn.delete');
+      deleteBtn.addEventListener('click', function() {
+        if (!confirm('Are you sure you want to delete this photo?')) return;
+
+        const photoId = this.dataset.photoId;
+        fetch('delete_photo.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ photo_id: parseInt(photoId), form_id: currentFormId })
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            photoCard.remove();
+          } else {
+            alert('Error: ' + (data.message || 'Could not delete photo'));
+          }
+        })
+        .catch(() => alert('Network error deleting photo.'));
+      });
+
+      photoContainer.appendChild(photoCard);
+    });
+  };
+
+  function formatPhotoFileSize(bytes) {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
 
   /* ===============================
      POPULATE SCOPE SECTIONS (dynamic blocks)

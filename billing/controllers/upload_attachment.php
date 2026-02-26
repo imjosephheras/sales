@@ -1,8 +1,12 @@
 <?php
 /**
  * Upload a document attachment
- * Handles file upload and saves metadata to document_attachments table.
+ * Handles file upload via FileStorageService (local or FTP)
+ * and saves metadata to document_attachments table.
  */
+require_once __DIR__ . '/../../app/bootstrap.php';
+Middleware::auth();
+
 require_once __DIR__ . '/../config/db_config.php';
 header('Content-Type: application/json');
 
@@ -47,48 +51,17 @@ try {
         exit;
     }
 
-    // Validate file size (max 20MB)
-    $max_size = 20 * 1024 * 1024;
-    if ($_FILES['file']['size'] > $max_size) {
-        echo json_encode(['success' => false, 'error' => 'File size exceeds 20MB limit']);
+    // Upload via FileStorageService (supports local + FTP)
+    $storage = new FileStorageService();
+    $prefix = preg_replace('/[^a-zA-Z0-9_-]/', '_', $document_type) . '_' . intval($document_id);
+    $result = $storage->uploadFile($_FILES['file'], 'documents', 'documents', $prefix);
+
+    if (!$result['success']) {
+        echo json_encode(['success' => false, 'error' => $result['error'] ?? 'Failed to upload file']);
         exit;
     }
 
-    // Validate file extension
-    $allowed_extensions = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'txt'];
     $original_name = $_FILES['file']['name'];
-    $extension = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
-    if (!in_array($extension, $allowed_extensions)) {
-        echo json_encode(['success' => false, 'error' => 'File type not allowed. Allowed: ' . implode(', ', $allowed_extensions)]);
-        exit;
-    }
-
-    // Build upload path: /uploads/documents/{document_type}_{document_id}/
-    $upload_base = realpath(__DIR__ . '/../../uploads/documents');
-    if (!$upload_base) {
-        // Create directory if it doesn't exist
-        $upload_base = __DIR__ . '/../../uploads/documents';
-        mkdir($upload_base, 0755, true);
-        $upload_base = realpath($upload_base);
-    }
-
-    $sub_dir = $upload_base . '/' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $document_type) . '_' . intval($document_id);
-    if (!is_dir($sub_dir)) {
-        mkdir($sub_dir, 0755, true);
-    }
-
-    // Generate unique filename to avoid collisions
-    $safe_name = preg_replace('/[^a-zA-Z0-9._-]/', '_', pathinfo($original_name, PATHINFO_FILENAME));
-    $file_name = $safe_name . '_' . time() . '.' . $extension;
-    $full_path = $sub_dir . '/' . $file_name;
-
-    if (!move_uploaded_file($_FILES['file']['tmp_name'], $full_path)) {
-        echo json_encode(['success' => false, 'error' => 'Failed to save file']);
-        exit;
-    }
-
-    // Store relative path from project root
-    $relative_path = 'uploads/documents/' . basename($sub_dir) . '/' . $file_name;
 
     // Insert into database
     $stmt = $pdo->prepare("
@@ -100,19 +73,21 @@ try {
         'document_type' => $document_type,
         'file_type'     => $file_type,
         'file_name'     => $original_name,
-        'file_path'     => $relative_path,
+        'file_path'     => $result['path'],
         'uploaded_by'   => $uploaded_by,
     ]);
 
+    $insertId = $pdo->lastInsertId();
+
     echo json_encode([
         'success' => true,
-        'id'      => $pdo->lastInsertId(),
+        'id'      => $insertId,
         'message' => 'File uploaded successfully',
         'data'    => [
-            'id'            => $pdo->lastInsertId(),
+            'id'            => $insertId,
             'file_name'     => $original_name,
             'file_type'     => $file_type,
-            'file_path'     => $relative_path,
+            'file_path'     => $result['path'],
             'uploaded_by'   => $uploaded_by,
         ]
     ]);
