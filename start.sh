@@ -6,6 +6,13 @@ set -e
 
 echo "=== Sales Management System - Dev Server ==="
 
+# 0a. Create .env from .env.example if it doesn't exist
+if [ ! -f .env ] && [ -f .env.example ]; then
+    echo "[*] Creating .env from .env.example ..."
+    cp .env.example .env
+    echo "[OK] .env created. Edit it if you need custom database credentials."
+fi
+
 # 0. Ensure /tmp is writable (required by InnoDB for temp files)
 chmod 1777 /tmp 2>/dev/null || true
 
