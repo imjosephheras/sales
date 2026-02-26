@@ -34,6 +34,19 @@ try {
     // Get file path (downloads from FTP to temp if needed)
     $filePath = $storage->downloadToTemp($attachment['file_path']);
 
+    // Fallback: try direct path construction if downloadToTemp/getFullPath fails
+    if (!$filePath || !file_exists($filePath)) {
+        $storageRoot = $storage->getStorageRoot();
+        $candidatePath = $storageRoot . '/' . $attachment['file_path'];
+        $candidateDir = realpath(dirname($candidatePath));
+        if ($candidateDir && str_starts_with($candidateDir, $storageRoot)) {
+            $directPath = $candidateDir . '/' . basename($candidatePath);
+            if (file_exists($directPath) && is_file($directPath)) {
+                $filePath = $directPath;
+            }
+        }
+    }
+
     if (!$filePath || !file_exists($filePath)) {
         http_response_code(404);
         header('Content-Type: application/json');

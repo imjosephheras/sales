@@ -73,6 +73,35 @@ if ($storage->getDisk() === 'ftp') {
 // ─── Local storage serving ──────────────────────────────────
 $fullPath = $storage->getFullPath($requestedFile);
 
+// Fallback: if getFullPath fails (e.g. realpath returns false for new files),
+// try constructing the path directly with security validation
+if (!$fullPath || !file_exists($fullPath)) {
+    $storageRoot = $storage->getStorageRoot();
+    $candidatePath = $storageRoot . '/' . $requestedFile;
+
+    // Resolve the directory (which should exist) and append filename
+    $candidateDir = realpath(dirname($candidatePath));
+    if ($candidateDir && str_starts_with($candidateDir, $storageRoot)) {
+        $directPath = $candidateDir . '/' . basename($candidatePath);
+        if (file_exists($directPath) && is_file($directPath)) {
+            $fullPath = $directPath;
+        }
+    }
+
+    // Also try with 'storage/' prefix stripped (backward compatibility)
+    if ((!$fullPath || !file_exists($fullPath)) && str_starts_with($requestedFile, 'storage/')) {
+        $strippedPath = substr($requestedFile, 8); // Remove 'storage/'
+        $candidatePath2 = $storageRoot . '/' . $strippedPath;
+        $candidateDir2 = realpath(dirname($candidatePath2));
+        if ($candidateDir2 && str_starts_with($candidateDir2, $storageRoot)) {
+            $directPath2 = $candidateDir2 . '/' . basename($candidatePath2);
+            if (file_exists($directPath2) && is_file($directPath2)) {
+                $fullPath = $directPath2;
+            }
+        }
+    }
+}
+
 if (!$fullPath || !file_exists($fullPath)) {
     http_response_code(404);
     exit('File not found.');

@@ -216,9 +216,15 @@
         // Load PDF in iframe via secure serve.php endpoint
         if (doc.pdf_path) {
             const basePath = window.location.pathname.replace(/\/billing\/.*/i, '');
-            // Strip leading 'storage/' prefix since serve.php resolves paths relative to the storage directory
+            // Strip leading 'storage/' prefix if present (backward compatibility)
+            // New records store paths relative to storage root (e.g. 'final_pdfs/xxx.pdf')
+            // Old records may have 'storage/final_pdfs/xxx.pdf'
             const fileParam = doc.pdf_path.replace(/^storage\//, '');
             pdfViewer.src = basePath + '/storage/serve.php?file=' + encodeURIComponent(fileParam);
+        } else if (doc.form_id) {
+            // Fallback: generate PDF on-the-fly from contract generator if no stored path
+            const basePath = window.location.pathname.replace(/\/billing\/.*/i, '');
+            pdfViewer.src = basePath + '/contract_generator/controllers/generate_pdf.php?id=' + doc.form_id;
         } else {
             pdfViewer.src = '';
         }
@@ -340,6 +346,9 @@
     function loadAttachments() {
         if (!selectedDocId) return;
 
+        // Always show attachments section when a document is selected
+        attachmentsSection.style.display = 'block';
+
         const docType = selectedDocType || 'Contract';
         const url = 'controllers/get_attachments.php?document_id=' + selectedDocId + '&document_type=' + encodeURIComponent(docType);
 
@@ -347,17 +356,16 @@
             .then(r => r.json())
             .then(data => {
                 if (data.success && data.data.length > 0) {
-                    attachmentsSection.style.display = 'block';
                     attachmentsCount.textContent = data.data.length;
                     renderAttachments(data.data);
                 } else {
-                    attachmentsSection.style.display = 'none';
                     attachmentsCount.textContent = '0';
-                    attachmentsList.innerHTML = '';
+                    attachmentsList.innerHTML = '<div class="empty-attachments"><i class="fas fa-paperclip"></i><p>No documents attached yet</p><small>Use the buttons above to attach Timesheets, Invoices, POs, or other documents</small></div>';
                 }
             })
             .catch(() => {
-                attachmentsSection.style.display = 'none';
+                attachmentsCount.textContent = '0';
+                attachmentsList.innerHTML = '<div class="empty-attachments"><p>Could not load attachments</p></div>';
             });
     }
 
