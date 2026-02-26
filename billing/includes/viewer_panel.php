@@ -82,7 +82,7 @@
                 <label for="attachment-file">Select File</label>
                 <div class="file-upload-area" id="file-upload-area">
                     <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Click to select or drag & drop</p>
+                    <p>Click to select, drag & drop, or paste (Ctrl+V)</p>
                     <small>PDF, Images, Excel, Word, CSV (max 20MB)</small>
                     <input type="file" id="attachment-file" name="file" required
                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv,.txt">
