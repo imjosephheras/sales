@@ -613,6 +613,54 @@
     }
 
     // ==========================================
+    // PASTE IMAGE FROM CLIPBOARD (Ctrl+V / Cmd+V)
+    // ==========================================
+
+    document.addEventListener('paste', function (e) {
+        // Only activate when the attachment modal is open
+        if (!attachmentModal || !attachmentModal.classList.contains('active')) return;
+
+        const clipboardItems = e.clipboardData && e.clipboardData.items;
+        if (!clipboardItems) return;
+
+        for (let i = 0; i < clipboardItems.length; i++) {
+            const item = clipboardItems[i];
+
+            // Only accept image types (PNG, JPEG)
+            if (item.type === 'image/png' || item.type === 'image/jpeg') {
+                e.preventDefault();
+
+                const blob = item.getAsFile();
+                if (!blob) return;
+
+                // Validate file size (20MB max)
+                const maxSize = 20 * 1024 * 1024;
+                if (blob.size > maxSize) {
+                    alert('The pasted image exceeds the 20MB size limit.');
+                    return;
+                }
+
+                // Generate a filename based on type and timestamp
+                const ext = item.type === 'image/png' ? 'png' : 'jpg';
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                const fileName = 'pasted-image-' + timestamp + '.' + ext;
+
+                // Create a proper File from the blob
+                const file = new File([blob], fileName, { type: item.type });
+
+                // Use DataTransfer to set the file on the input
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+
+                // Show the file as selected
+                handleFileSelect();
+                return;
+            }
+        }
+    });
+
+    // ==========================================
     // UTILITIES
     // ==========================================
 
