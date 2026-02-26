@@ -146,8 +146,26 @@ try {
 
     $pdfOutput = $dompdf->output();
 
+    // Validate PDF output
+    if (empty($pdfOutput)) {
+        throw new Exception('PDF generation failed - empty output from DOMPDF');
+    }
+
     // Save PDF to disk (immutable final copy)
-    $pdfDir = __DIR__ . '/../../../storage/final_pdfs';
+    // Resolve storage root to canonical path for consistency with FileStorageService
+    $storageRoot = realpath(__DIR__ . '/../../../storage');
+    if (!$storageRoot) {
+        $storageFallback = __DIR__ . '/../../../storage';
+        if (!is_dir($storageFallback)) {
+            mkdir($storageFallback, 0755, true);
+        }
+        $storageRoot = realpath($storageFallback);
+        if (!$storageRoot) {
+            throw new Exception('Could not resolve storage directory');
+        }
+    }
+
+    $pdfDir = $storageRoot . '/final_pdfs';
     if (!is_dir($pdfDir)) {
         mkdir($pdfDir, 0755, true);
     }
@@ -155,9 +173,18 @@ try {
     $company_safe = preg_replace('/[^a-zA-Z0-9_-]/', '_', $data['Company_Name'] ?? 'Document');
     $pdf_filename = strtoupper($request_type) . "_{$docnum}_{$company_safe}_FINAL.pdf";
     $pdf_full_path = $pdfDir . '/' . $pdf_filename;
-    $pdf_relative_path = 'storage/final_pdfs/' . $pdf_filename;
+    // Store path relative to storage root (consistent with FileStorageService conventions)
+    $pdf_relative_path = 'final_pdfs/' . $pdf_filename;
 
-    file_put_contents($pdf_full_path, $pdfOutput);
+    $bytesWritten = file_put_contents($pdf_full_path, $pdfOutput);
+    if ($bytesWritten === false) {
+        throw new Exception('Failed to save PDF file to disk. Check directory permissions on storage/final_pdfs/');
+    }
+
+    // Verify file was actually written
+    if (!file_exists($pdf_full_path)) {
+        throw new Exception('PDF file verification failed - file not found after writing');
+    }
 
     // ========================================
     // 2. UPDATE FORM STATUS TO COMPLETED
@@ -193,6 +220,8 @@ try {
     $checkStmt->execute([':form_id' => $id]);
     $existingBilling = $checkStmt->fetch();
 
+    $billingDocId = null;
+
     if (!$existingBilling) {
         $totalAmount = $form['total_cost'] ?? '';
 
@@ -214,6 +243,63 @@ try {
             ':total_amount' => $totalAmount,
             ':notes' => 'Auto-generated from Contract Generator on ' . date('M d, Y g:i A')
         ]);
+
+        $billingDocId = $pdo->lastInsertId();
+    } else {
+        $billingDocId = $existingBilling['id'];
+        // Update pdf_path on existing billing record in case it was missing or outdated
+        $updateStmt = $pdo->prepare("UPDATE billing_documents SET pdf_path = :pdf_path WHERE id = :id");
+        $updateStmt->execute([':pdf_path' => $pdf_relative_path, ':id' => $billingDocId]);
+    }
+
+    // ========================================
+    // 4. AUTO-ATTACH FINAL PDF AS DOCUMENT ATTACHMENT
+    // ========================================
+
+    // Ensure document_attachments table exists (billing db_config creates it)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS `document_attachments` (
+          `id` INT AUTO_INCREMENT PRIMARY KEY,
+          `document_id` INT NOT NULL,
+          `document_type` VARCHAR(50) NOT NULL,
+          `file_type` VARCHAR(50) NOT NULL,
+          `file_name` VARCHAR(255) NOT NULL,
+          `file_path` VARCHAR(500) NOT NULL,
+          `uploaded_by` VARCHAR(200) DEFAULT NULL,
+          `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX `idx_document` (`document_id`, `document_type`),
+          INDEX `idx_file_type` (`file_type`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    if ($billingDocId) {
+        $documentType = $form['request_type'] ?? 'Contract';
+
+        // Check if this PDF was already attached
+        $checkAtt = $pdo->prepare("
+            SELECT id FROM document_attachments
+            WHERE document_id = :doc_id AND document_type = :doc_type AND file_type = 'jwo_pdf' AND file_name = :file_name
+            LIMIT 1
+        ");
+        $checkAtt->execute([
+            ':doc_id' => $billingDocId,
+            ':doc_type' => $documentType,
+            ':file_name' => $pdf_filename
+        ]);
+
+        if (!$checkAtt->fetch()) {
+            $attStmt = $pdo->prepare("
+                INSERT INTO document_attachments (document_id, document_type, file_type, file_name, file_path, uploaded_by)
+                VALUES (:document_id, :document_type, 'jwo_pdf', :file_name, :file_path, :uploaded_by)
+            ");
+            $attStmt->execute([
+                ':document_id' => $billingDocId,
+                ':document_type' => $documentType,
+                ':file_name' => $pdf_filename,
+                ':file_path' => $pdf_relative_path,
+                ':uploaded_by' => $completed_by_name
+            ]);
+        }
     }
 
     $pdo->commit();
