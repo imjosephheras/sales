@@ -37,6 +37,10 @@ class FileStorageService
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             'application/vnd.ms-excel',
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'text/csv',
+            'text/plain',
+            'image/jpeg',
+            'image/png',
         ],
     ];
 
@@ -493,6 +497,8 @@ class FileStorageService
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
             'application/vnd.ms-excel' => 'xls',
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+            'text/csv'   => 'csv',
+            'text/plain' => 'txt',
         ];
 
         return $mimeToExt[$mimeType] ?? pathinfo($originalName, PATHINFO_EXTENSION) ?: 'bin';
