@@ -213,17 +213,37 @@
         viewerClientName.textContent = doc.client_name && doc.company_name ? doc.client_name : '';
         viewerServiceName.textContent = doc.service_name || '';
 
-        // Load PDF in iframe via secure serve.php endpoint
+        // Load PDF in iframe
+        const basePath = window.location.pathname.replace(/\/billing\/.*/i, '');
+
         if (doc.pdf_path) {
-            const basePath = window.location.pathname.replace(/\/billing\/.*/i, '');
-            // Strip leading 'storage/' prefix if present (backward compatibility)
-            // New records store paths relative to storage root (e.g. 'final_pdfs/xxx.pdf')
-            // Old records may have 'storage/final_pdfs/xxx.pdf'
+            // Try serving stored PDF first
             const fileParam = doc.pdf_path.replace(/^storage\//, '');
-            pdfViewer.src = basePath + '/storage/serve.php?file=' + encodeURIComponent(fileParam);
+            const serveUrl = basePath + '/storage/serve.php?file=' + encodeURIComponent(fileParam);
+
+            // Pre-check if the stored file is accessible; fall back to on-the-fly generation
+            fetch(serveUrl, { method: 'HEAD' })
+                .then(function (resp) {
+                    if (resp.ok) {
+                        pdfViewer.src = serveUrl;
+                    } else if (doc.form_id) {
+                        // Stored PDF not found – generate on-the-fly from form data
+                        pdfViewer.src = basePath + '/contract_generator/controllers/generate_pdf.php?id=' + doc.form_id;
+                    } else {
+                        // No fallback available, try serve.php anyway (will show error)
+                        pdfViewer.src = serveUrl;
+                    }
+                })
+                .catch(function () {
+                    // Network error – try on-the-fly generation if possible
+                    if (doc.form_id) {
+                        pdfViewer.src = basePath + '/contract_generator/controllers/generate_pdf.php?id=' + doc.form_id;
+                    } else {
+                        pdfViewer.src = serveUrl;
+                    }
+                });
         } else if (doc.form_id) {
-            // Fallback: generate PDF on-the-fly from contract generator if no stored path
-            const basePath = window.location.pathname.replace(/\/billing\/.*/i, '');
+            // No stored path – generate PDF on-the-fly from contract generator
             pdfViewer.src = basePath + '/contract_generator/controllers/generate_pdf.php?id=' + doc.form_id;
         } else {
             pdfViewer.src = '';

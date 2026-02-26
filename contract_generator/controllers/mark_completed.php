@@ -153,9 +153,9 @@ try {
 
     // Save PDF to disk (immutable final copy)
     // Resolve storage root to canonical path for consistency with FileStorageService
-    $storageRoot = realpath(__DIR__ . '/../../../storage');
+    $storageRoot = realpath(__DIR__ . '/../../storage');
     if (!$storageRoot) {
-        $storageFallback = __DIR__ . '/../../../storage';
+        $storageFallback = __DIR__ . '/../../storage';
         if (!is_dir($storageFallback)) {
             mkdir($storageFallback, 0755, true);
         }

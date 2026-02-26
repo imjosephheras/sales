@@ -11,7 +11,11 @@ ini_set('session.use_strict_mode', '1');      // Reject uninitialized session ID
 ini_set('session.use_only_cookies', '1');      // No session ID in URLs
 ini_set('session.cookie_httponly', '1');        // JS can't access session cookie
 ini_set('session.cookie_samesite', 'Lax');     // CSRF protection at cookie level
-ini_set('session.cookie_secure', '1');         // Cookie only sent over HTTPS
+// Only enforce Secure cookie flag when running over HTTPS
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
+        || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+ini_set('session.cookie_secure', $isHttps ? '1' : '0');
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
