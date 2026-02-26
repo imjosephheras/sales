@@ -6,6 +6,10 @@ storage/uploads/documents/*
 storage/final_pdfs/*
 !storage/**/.gitkeep
 
+# Document attachments (keep directory structure via .gitkeep)
+uploads/documents/*
+!uploads/documents/.gitkeep
+
 # Legacy upload directories
 form_contract/Uploads/*
 employee_work_report/Uploads/*
