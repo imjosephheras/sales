@@ -79,8 +79,7 @@
                 <th><?= ($lang=='en') ? "Day" : "Día"; ?></th>
                 <th><?= ($lang=='en') ? "Date" : "Fecha"; ?></th>
                 <th><?= ($lang=='en') ? "Time In" : "Entrada"; ?></th>
-                <th><?= ($lang=='en') ? "Lunch Out" : "Salida Almuerzo"; ?></th>
-                <th><?= ($lang=='en') ? "Lunch In" : "Regreso Almuerzo"; ?></th>
+                <th><?= ($lang=='en') ? "Lunch" : "Almuerzo"; ?></th>
                 <th><?= ($lang=='en') ? "Time Out" : "Salida"; ?></th>
                 <th>OT</th>
                 <th>Total</th>
@@ -90,7 +89,7 @@
             </tbody>
             <tfoot>
               <tr class="ts-total-row">
-                <td colspan="6" style="text-align:right;font-weight:700;">
+                <td colspan="5" style="text-align:right;font-weight:700;">
                   <?= ($lang=='en') ? "WEEKLY TOTAL" : "TOTAL SEMANAL"; ?>
                 </td>
                 <td id="ts1OTTotal" class="ts-total-cell">0.00</td>
@@ -166,10 +165,8 @@
                 <th>#</th>
                 <th><?= ($lang=='en') ? "Name" : "Nombre"; ?></th>
                 <th><?= ($lang=='en') ? "Time In" : "Entrada"; ?></th>
-                <th><?= ($lang=='en') ? "Lunch Out" : "Salida Almuerzo"; ?></th>
-                <th><?= ($lang=='en') ? "Lunch In" : "Regreso Almuerzo"; ?></th>
+                <th><?= ($lang=='en') ? "Lunch" : "Almuerzo"; ?></th>
                 <th><?= ($lang=='en') ? "Time Out" : "Salida"; ?></th>
-                <th>OT</th>
                 <th>Total</th>
                 <th class="ts-no-print"><?= ($lang=='en') ? "Action" : "Acción"; ?></th>
               </tr>
@@ -178,10 +175,9 @@
             </tbody>
             <tfoot>
               <tr class="ts-total-row">
-                <td colspan="6" style="text-align:right;font-weight:700;">
+                <td colspan="5" style="text-align:right;font-weight:700;">
                   <?= ($lang=='en') ? "TOTAL" : "TOTAL GENERAL"; ?>
                 </td>
-                <td id="ts2OTTotal" class="ts-total-cell">0.00</td>
                 <td id="ts2GrandTotal" class="ts-total-cell">0.00</td>
                 <td class="ts-no-print"></td>
               </tr>
@@ -845,8 +841,7 @@
         '<td class="ts-day-label">' + DAYS[i] + '</td>' +
         '<td class="ts-date-label">' + formatDateShort(d) + '</td>' +
         '<td><input type="time" data-row="' + i + '" data-col="timeIn" onchange="calcType1Row(' + i + ')"></td>' +
-        '<td><input type="time" data-row="' + i + '" data-col="lunchOut" onchange="calcType1Row(' + i + ')"></td>' +
-        '<td><input type="time" data-row="' + i + '" data-col="lunchIn" onchange="calcType1Row(' + i + ')"></td>' +
+        '<td><input type="number" data-row="' + i + '" data-col="lunchMin" min="0" max="240" placeholder="min" style="min-width:60px;" onchange="calcType1Row(' + i + ')"></td>' +
         '<td><input type="time" data-row="' + i + '" data-col="timeOut" onchange="calcType1Row(' + i + ')"></td>' +
         '<td class="ts-ot-cell" id="ts1OT' + i + '">0.00</td>' +
         '<td class="ts-daily-total" id="ts1Total' + i + '">0.00</td>';
@@ -861,8 +856,7 @@
     };
 
     const timeIn = get('timeIn');
-    const lunchOut = get('lunchOut');
-    const lunchIn = get('lunchIn');
+    const lunchMin = parseInt(get('lunchMin'), 10) || 0;
     const timeOut = get('timeOut');
 
     let totalHours = 0;
@@ -877,20 +871,13 @@
       let worked = outMin - inMin;
 
       // Subtract lunch break
-      if (lunchOut && lunchIn) {
-        const loMin = timeToMin(lunchOut);
-        let liMin = timeToMin(lunchIn);
-        if (liMin <= loMin) liMin += 1440;
-        const lunchBreak = liMin - loMin;
-        if (lunchBreak > 0 && lunchBreak < 240) {
-          worked -= lunchBreak;
-        }
+      if (lunchMin > 0 && lunchMin < 240) {
+        worked -= lunchMin;
       }
 
       totalHours = Math.max(0, worked / 60);
     }
 
-    const regularHours = Math.min(totalHours, 8);
     const otHours = Math.max(0, totalHours - 8);
 
     document.getElementById('ts1OT' + row).textContent = otHours.toFixed(2);
@@ -941,10 +928,8 @@
       '<td style="font-weight:600;color:#001f54;">' + (tbody.children.length + 1) + '</td>' +
       '<td><input type="text" data-row="' + idx + '" data-col="name" placeholder="' + t('Employee name','Nombre del empleado') + '" style="min-width:120px;"></td>' +
       '<td><input type="time" data-row="' + idx + '" data-col="timeIn" onchange="calcType2Row(' + idx + ')"></td>' +
-      '<td><input type="time" data-row="' + idx + '" data-col="lunchOut" onchange="calcType2Row(' + idx + ')"></td>' +
-      '<td><input type="time" data-row="' + idx + '" data-col="lunchIn" onchange="calcType2Row(' + idx + ')"></td>' +
+      '<td><input type="number" data-row="' + idx + '" data-col="lunchMin" min="0" max="240" placeholder="min" style="min-width:60px;" onchange="calcType2Row(' + idx + ')"></td>' +
       '<td><input type="time" data-row="' + idx + '" data-col="timeOut" onchange="calcType2Row(' + idx + ')"></td>' +
-      '<td class="ts-ot-cell" id="ts2OT' + idx + '">0.00</td>' +
       '<td class="ts-daily-total" id="ts2Total' + idx + '">0.00</td>' +
       '<td class="ts-no-print"><button type="button" class="ts-btn ts-btn-remove" onclick="removeType2Employee(' + idx + ')">✕</button></td>';
     tbody.appendChild(tr);
@@ -973,8 +958,7 @@
     };
 
     const timeIn = get('timeIn');
-    const lunchOut = get('lunchOut');
-    const lunchIn = get('lunchIn');
+    const lunchMin = parseInt(get('lunchMin'), 10) || 0;
     const timeOut = get('timeOut');
 
     let totalHours = 0;
@@ -986,22 +970,14 @@
 
       let worked = outMin - inMin;
 
-      if (lunchOut && lunchIn) {
-        const loMin = timeToMin(lunchOut);
-        let liMin = timeToMin(lunchIn);
-        if (liMin <= loMin) liMin += 1440;
-        const lunchBreak = liMin - loMin;
-        if (lunchBreak > 0 && lunchBreak < 240) {
-          worked -= lunchBreak;
-        }
+      // Subtract lunch break
+      if (lunchMin > 0 && lunchMin < 240) {
+        worked -= lunchMin;
       }
 
       totalHours = Math.max(0, worked / 60);
     }
 
-    const otHours = Math.max(0, totalHours - 8);
-
-    document.getElementById('ts2OT' + idx).textContent = otHours.toFixed(2);
     document.getElementById('ts2Total' + idx).textContent = totalHours.toFixed(2);
 
     calcType2Totals();
@@ -1009,16 +985,12 @@
 
   function calcType2Totals() {
     let grandTotal = 0;
-    let otTotal = 0;
     document.querySelectorAll('#ts2Body tr').forEach(tr => {
       const id = tr.id.replace('ts2Row','');
       const totalEl = document.getElementById('ts2Total' + id);
-      const otEl = document.getElementById('ts2OT' + id);
       if (totalEl) grandTotal += parseFloat(totalEl.textContent) || 0;
-      if (otEl) otTotal += parseFloat(otEl.textContent) || 0;
     });
     document.getElementById('ts2GrandTotal').textContent = grandTotal.toFixed(2);
-    document.getElementById('ts2OTTotal').textContent = otTotal.toFixed(2);
   }
 
   // ═══════════════════════════════════════════
@@ -1034,30 +1006,28 @@
   // ═══════════════════════════════════════════
   window.printTimesheet = function(type) {
     const printArea = document.getElementById('tsType' + type + 'PrintArea');
-    const printContainer = document.getElementById('tsPrintContainer');
     const clone = printArea.cloneNode(true);
 
-    // Replace time inputs with their values for cleaner print
+    // Replace inputs with their display values for cleaner print
     clone.querySelectorAll('input').forEach(inp => {
-      if (inp.type === 'time' && inp.value) {
-        const span = document.createElement('span');
-        span.textContent = inp.value;
-        span.style.fontWeight = '600';
-        inp.parentNode.replaceChild(span, inp);
-      } else if (inp.value) {
-        const span = document.createElement('span');
-        span.textContent = inp.value;
-        span.style.fontWeight = '600';
-        inp.parentNode.replaceChild(span, inp);
+      const span = document.createElement('span');
+      if (inp.type === 'number' && inp.value) {
+        span.textContent = inp.value + ' min';
       } else {
-        const span = document.createElement('span');
-        span.textContent = '';
-        inp.parentNode.replaceChild(span, inp);
+        span.textContent = inp.value || '';
       }
+      span.style.fontWeight = '600';
+      inp.parentNode.replaceChild(span, inp);
     });
 
     // Remove action column cells from print
     clone.querySelectorAll('.ts-no-print').forEach(el => el.remove());
+
+    // Move print container to body so CSS selector body > *:not(#tsPrintContainer) works
+    let printContainer = document.getElementById('tsPrintContainer');
+    if (printContainer.parentNode !== document.body) {
+      document.body.appendChild(printContainer);
+    }
 
     printContainer.innerHTML = '';
     printContainer.appendChild(clone);
