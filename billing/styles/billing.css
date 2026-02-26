@@ -833,14 +833,13 @@ body {
 }
 
 /* ============================================
-   ATTACH DOCUMENT BUTTON
+   DOCUMENT TYPE BUTTONS (Timesheet, Invoice, PO, Other)
    ============================================ */
 
-.btn-attach-doc {
-    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+.btn-doc-type {
     color: white;
-    padding: 0.6rem 1.2rem;
-    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
     white-space: nowrap;
     border: none;
     border-radius: 8px;
@@ -853,22 +852,50 @@ body {
     font-weight: 600;
 }
 
-.btn-attach-doc:hover {
-    background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+.btn-doc-type:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+}
+
+.btn-doc-timesheet {
+    background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+}
+.btn-doc-timesheet:hover {
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+}
+
+.btn-doc-invoice {
+    background: linear-gradient(135deg, #e65100 0%, #f57c00 100%);
+}
+.btn-doc-invoice:hover {
+    background: linear-gradient(135deg, #bf360c 0%, #e65100 100%);
+}
+
+.btn-doc-po {
+    background: linear-gradient(135deg, #1565c0 0%, #1976d2 100%);
+}
+.btn-doc-po:hover {
+    background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
+}
+
+.btn-doc-other {
+    background: linear-gradient(135deg, #6a1b9a 0%, #8e24aa 100%);
+}
+.btn-doc-other:hover {
+    background: linear-gradient(135deg, #4a148c 0%, #6a1b9a 100%);
 }
 
 .viewer-action-card {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
     background: var(--bg-white);
     border-radius: 10px;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1rem;
     box-shadow: var(--shadow-sm);
     flex-shrink: 0;
+    flex-wrap: wrap;
 }
 
 /* ============================================

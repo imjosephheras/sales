@@ -46,7 +46,7 @@
     const btnMarkPending = document.getElementById('btn-mark-pending');
 
     // Attachment elements
-    const btnAttachDocument = document.getElementById('btn-attach-document');
+    const docTypeButtons = document.querySelectorAll('.btn-doc-type');
     const attachmentsSection = document.getElementById('attachments-section');
     const attachmentsList = document.getElementById('attachments-list');
     const attachmentsCount = document.getElementById('attachments-count');
@@ -55,6 +55,8 @@
     // Modal elements
     const attachmentModal = document.getElementById('attachment-modal');
     const attachmentForm = document.getElementById('attachment-upload-form');
+    const attachmentModalTitle = document.getElementById('attachment-modal-title');
+    const attachmentFileType = document.getElementById('attachment-file-type');
     const btnCloseModal = document.getElementById('btn-close-attachment-modal');
     const btnCancelUpload = document.getElementById('btn-cancel-upload');
     const btnSubmitUpload = document.getElementById('btn-submit-upload');
@@ -417,13 +419,23 @@
     // ATTACHMENTS: UPLOAD
     // ==========================================
 
-    function openUploadModal() {
+    const fileTypeLabels = {
+        'timesheet': 'Timesheet',
+        'invoice': 'Invoice',
+        'po': 'PO (Purchase Order)',
+        'other': 'Other'
+    };
+
+    function openUploadModal(fileType) {
         if (!selectedDocId) {
             alert('Please select a document first.');
             return;
         }
         attachmentModal.classList.add('active');
         attachmentForm.reset();
+        // Set the file type from the button clicked
+        attachmentFileType.value = fileType;
+        attachmentModalTitle.textContent = 'Attach ' + (fileTypeLabels[fileType] || 'Document');
         fileSelected.style.display = 'none';
         fileUploadArea.style.display = 'flex';
         uploadProgress.style.display = 'none';
@@ -456,7 +468,7 @@
 
         if (!selectedDocId) return;
 
-        const fileType = document.getElementById('attachment-file-type').value;
+        const fileType = attachmentFileType.value;
         if (!fileType) {
             alert('Please select a document type.');
             return;
@@ -640,8 +652,12 @@
     btnMarkCompleted.addEventListener('click', markAsCompleted);
     btnMarkPending.addEventListener('click', markAsPending);
 
-    // Attachment events
-    btnAttachDocument.addEventListener('click', openUploadModal);
+    // Attachment events - 4 document type buttons
+    docTypeButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            openUploadModal(this.dataset.fileType);
+        });
+    });
     btnCloseModal.addEventListener('click', closeUploadModal);
     btnCancelUpload.addEventListener('click', closeUploadModal);
     attachmentForm.addEventListener('submit', submitUpload);
