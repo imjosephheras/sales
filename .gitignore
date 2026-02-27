@@ -4,6 +4,7 @@ storage/uploads/work_report_photos/*
 storage/uploads/profile_photos/*
 storage/uploads/documents/*
 storage/final_pdfs/*
+storage/timesheets/*
 !storage/**/.gitkeep
 
 # Request photos (fotos_forms)

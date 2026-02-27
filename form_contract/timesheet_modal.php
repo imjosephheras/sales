@@ -129,6 +129,7 @@
     <div class="ts-modal-header">
       <h3>👥 <?= ($lang=='en') ? "Timesheet - Multi Employee (Single Day)" : "Timesheet - Múltiples Empleados (Un Día)"; ?></h3>
       <div class="ts-modal-header-actions">
+        <button type="button" class="ts-btn ts-btn-save" id="btnSaveTimesheet2" onclick="saveTimesheetPDF(2)">💾 <?= ($lang=='en') ? "Save" : "Guardar"; ?></button>
         <button type="button" class="ts-btn ts-btn-print" onclick="printTimesheet(2)">🖨 <?= ($lang=='en') ? "Print" : "Imprimir"; ?></button>
         <button type="button" class="ts-btn ts-btn-back" onclick="backToSelect(2)">← <?= ($lang=='en') ? "Back" : "Volver"; ?></button>
         <button type="button" class="ts-modal-close" onclick="closeTimesheetType(2)">&times;</button>
@@ -580,6 +581,23 @@
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
+}
+
+.ts-btn-save {
+  background: #007bff;
+  color: #fff;
+}
+
+.ts-btn-save:hover {
+  background: #0069d9;
+  transform: translateY(-1px);
+}
+
+.ts-btn-save:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 0.7;
 }
 
 .ts-btn-print {
@@ -1044,6 +1062,100 @@
       printContainer.innerHTML = '';
       document.querySelectorAll('.ts-modal-overlay').forEach(m => m.style.visibility = '');
     }, 500);
+  };
+
+  // ═══════════════════════════════════════════
+  // SAVE TIMESHEET AS PDF → BILLING
+  // ═══════════════════════════════════════════
+  window.saveTimesheetPDF = function(type) {
+    // Verify a form is loaded
+    if (typeof currentFormId === 'undefined' || !currentFormId) {
+      alert(t(
+        '⚠️ No Work Order selected. Please load a form first before saving the timesheet.',
+        '⚠️ No hay una Orden de Trabajo seleccionada. Por favor cargue un formulario antes de guardar el timesheet.'
+      ));
+      return;
+    }
+
+    const printArea = document.getElementById('tsType' + type + 'PrintArea');
+    if (!printArea) return;
+
+    const btn = document.getElementById('btnSaveTimesheet' + type);
+    const originalText = btn ? btn.innerHTML : '';
+
+    // Disable button and show loading
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '⏳ ' + t('Saving...', 'Guardando...');
+    }
+
+    // Clone the print area and replace inputs with their values
+    const clone = printArea.cloneNode(true);
+
+    clone.querySelectorAll('input').forEach(function(inp) {
+      const span = document.createElement('span');
+      if (inp.type === 'number' && inp.value) {
+        span.textContent = inp.value + ' min';
+      } else if (inp.type === 'date' && inp.value) {
+        // Format date nicely
+        var parts = inp.value.split('-');
+        span.textContent = parts[1] + '/' + parts[2] + '/' + parts[0];
+      } else {
+        span.textContent = inp.value || '';
+      }
+      span.style.fontWeight = '600';
+      inp.parentNode.replaceChild(span, inp);
+    });
+
+    // Remove action column cells (buttons)
+    clone.querySelectorAll('.ts-no-print').forEach(function(el) { el.remove(); });
+
+    var htmlContent = clone.innerHTML;
+
+    // Send to server
+    fetch('save_timesheet_pdf.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        form_id: currentFormId,
+        html_content: htmlContent,
+        timesheet_type: type
+      })
+    })
+    .then(function(response) { return response.json(); })
+    .then(function(data) {
+      if (data.success) {
+        alert(t(
+          '✅ Timesheet saved successfully!\n\n' +
+          '• PDF generated: ' + (data.data.pdf_filename || '') + '\n' +
+          '• Linked to Work Order: ' + (data.data.order_number || '') + '\n' +
+          '• Available in Billing module',
+          '✅ ¡Timesheet guardado exitosamente!\n\n' +
+          '• PDF generado: ' + (data.data.pdf_filename || '') + '\n' +
+          '• Vinculado a Orden de Trabajo: ' + (data.data.order_number || '') + '\n' +
+          '• Disponible en el módulo de Billing'
+        ));
+      } else {
+        alert(t(
+          '❌ Error saving timesheet: ' + (data.error || 'Unknown error'),
+          '❌ Error al guardar timesheet: ' + (data.error || 'Error desconocido')
+        ));
+      }
+    })
+    .catch(function(err) {
+      console.error('Error saving timesheet:', err);
+      alert(t(
+        '❌ Connection error. Please try again.',
+        '❌ Error de conexión. Por favor intente de nuevo.'
+      ));
+    })
+    .finally(function() {
+      // Re-enable button
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    });
   };
 
   // ─── ESC key to close modals ───
