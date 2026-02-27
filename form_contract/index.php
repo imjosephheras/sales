@@ -1758,8 +1758,11 @@ document.addEventListener("DOMContentLoaded", () => {
       photoCard.innerHTML = `
         <img src="${imgSrc}" alt="${photo.photo_filename || 'Photo'}" loading="lazy">
         <div class="photo-card-actions">
+          <button type="button" class="photo-card-btn preview" title="Preview">
+            &#128269;
+          </button>
           <button type="button" class="photo-card-btn delete" data-photo-id="${photo.id}">
-            🗑️
+            &#128465;
           </button>
         </div>
         <div class="photo-info">
@@ -1767,6 +1770,26 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="photo-size">${photo.photo_size ? formatPhotoFileSize(photo.photo_size) : ''}</div>
         </div>
       `;
+
+      // Preview button opens lightbox
+      const previewBtn = photoCard.querySelector('.photo-card-btn.preview');
+      previewBtn.addEventListener('click', function() {
+        const cards = Array.from(photoContainer.querySelectorAll('.photo-card'));
+        const idx = cards.indexOf(photoCard);
+        if (typeof window.openPhotoLightbox === 'function') {
+          window.openPhotoLightbox(idx >= 0 ? idx : 0);
+        }
+      });
+
+      // Clicking image also opens lightbox
+      const imgEl = photoCard.querySelector('img');
+      imgEl.addEventListener('click', function() {
+        const cards = Array.from(photoContainer.querySelectorAll('.photo-card'));
+        const idx = cards.indexOf(photoCard);
+        if (typeof window.openPhotoLightbox === 'function') {
+          window.openPhotoLightbox(idx >= 0 ? idx : 0);
+        }
+      });
 
       // Delete handler for server photos
       const deleteBtn = photoCard.querySelector('.photo-card-btn.delete');
