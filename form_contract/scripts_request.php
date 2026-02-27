@@ -21,17 +21,17 @@ const formConfig = {
     { type: "Contract", service: "Staff", hide: [12,13,17,18,19,22,23,25] },
 
     // === HOSPITALITY: PROPOSAL ===
-    { type: "Proposal", service: "Kitchen Cleaning & Hood Vent", hide: [12,17,18,20,21,22,23,24,25,29] },
+    { type: "Proposal", service: "Kitchen Cleaning & Hood Vent", hide: [12,17,18,20,21,22,23,24,25] },
     { type: "Proposal", service: "Staff", hide: [12,13,16,17,18,19,21,22,23,24,25,28] },
 
     // === HOSPITALITY: KITCHEN & HOODVENT JWO ===
-    { type: "JWO", service: "Kitchen Cleaning & Hood Vent", hide: [12,15,17,18,20,25,29] },
+    { type: "JWO", service: "Kitchen Cleaning & Hood Vent", hide: [12,15,17,18,20,25] },
 
     // === JANITORIAL: CONTRACT (comodín) ===
     { type: "Contract", service: "*", hide: [] },
 
     // === JANITORIAL: PROPOSAL ===
-    { type: "Proposal", service: "Staff",   hide: [18,19,21,22,23,24,25,29] },
+    { type: "Proposal", service: "Staff",   hide: [18,19,21,22,23,24,25] },
     { type: "Proposal", service: "Package", hide: [18,19,20] },
 
     // === JANITORIAL: JWO — TODOS LOS SERVICIOS ===
