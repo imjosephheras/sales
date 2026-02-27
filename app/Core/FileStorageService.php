@@ -52,11 +52,11 @@ class FileStorageService
 
     /** Subdirectory mapping for each storage context */
     private const STORAGE_PATHS = [
-        'form_photos'        => 'uploads/form_photos',
-        'work_report_photos' => 'uploads/work_report_photos',
-        'profile_photos'     => 'uploads/profile_photos',
-        'documents'          => 'uploads/documents',
-        'final_pdfs'         => 'final_pdfs',
+        'form_photos'        => 'sales/fotos_forms',
+        'work_report_photos' => 'sales/work_report_photos',
+        'profile_photos'     => 'sales/profile_photos',
+        'documents'          => 'sales/files',
+        'final_pdfs'         => 'sales/final_pdfs',
     ];
 
     public function __construct(?string $storageRoot = null)
