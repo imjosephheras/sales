@@ -28,7 +28,7 @@ try {
     }
 
     // Validate file_type
-    $allowed_file_types = ['timesheet', 'invoice', 'po', 'jwo_pdf', 'other'];
+    $allowed_file_types = ['timesheet', 'invoice', 'po', 'jwo_pdf', 'other', 'scanned'];
     if (!in_array($file_type, $allowed_file_types)) {
         echo json_encode(['success' => false, 'error' => 'Invalid file_type. Allowed: ' . implode(', ', $allowed_file_types)]);
         exit;

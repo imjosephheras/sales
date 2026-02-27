@@ -37,6 +37,9 @@
                 <button class="btn btn-doc-type btn-doc-other" data-file-type="other" title="Attach Other Document">
                     <i class="fas fa-file-alt"></i> Other
                 </button>
+                <button class="btn btn-doc-scan" id="btn-scan-document" title="Escanear Documento">
+                    <i class="fas fa-camera"></i> Escanear
+                </button>
                 <button class="btn btn-action-completed" id="btn-mark-completed" title="Mark as Completed">
                     <i class="fas fa-check-circle"></i> Mark as Completed
                 </button>
@@ -66,6 +69,105 @@
             <iframe id="pdf-viewer" src="" frameborder="0"></iframe>
         </div>
     </div>
+</div>
+
+<!-- Document Scanner Modal -->
+<div class="scanner-modal" id="scanner-modal">
+
+    <!-- Step 1: Camera Capture -->
+    <div class="scanner-step" id="scanner-step-camera">
+        <div class="scanner-header">
+            <h3><i class="fas fa-camera"></i> Escanear Documento</h3>
+            <button class="scanner-close-btn" id="scanner-close-camera">&times;</button>
+        </div>
+        <div class="scanner-camera-container">
+            <video id="scanner-video" autoplay playsinline muted></video>
+            <div class="scanner-guide-overlay">
+                <div class="scanner-guide-frame">
+                    <span class="guide-corner guide-tl"></span>
+                    <span class="guide-corner guide-tr"></span>
+                    <span class="guide-corner guide-bl"></span>
+                    <span class="guide-corner guide-br"></span>
+                </div>
+                <p class="scanner-guide-text">Alinee el documento dentro del marco</p>
+            </div>
+            <div class="scanner-camera-error" id="scanner-camera-error" style="display:none;">
+                <i class="fas fa-video-slash"></i>
+                <p>No se puede acceder a la cámara</p>
+            </div>
+        </div>
+        <div class="scanner-controls">
+            <button class="scanner-btn-capture" id="scanner-btn-capture" title="Capturar">
+                <span class="capture-ring"></span>
+                <span class="capture-inner"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 2: Crop / Corner Adjustment -->
+    <div class="scanner-step" id="scanner-step-crop" style="display:none;">
+        <div class="scanner-header">
+            <h3><i class="fas fa-crop-alt"></i> Ajustar Documento</h3>
+            <button class="scanner-close-btn" id="scanner-close-crop">&times;</button>
+        </div>
+        <div class="scanner-hint">
+            <i class="fas fa-hand-pointer"></i> Arrastre las esquinas para ajustar el área del documento
+        </div>
+        <div class="scanner-crop-container">
+            <canvas id="scanner-crop-canvas"></canvas>
+            <div class="scanner-loading" id="scanner-crop-loading" style="display:none;">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Procesando...</p>
+            </div>
+        </div>
+        <div class="scanner-controls scanner-controls-row">
+            <button class="scanner-btn-secondary" id="scanner-btn-retake-crop">
+                <i class="fas fa-redo"></i> Repetir
+            </button>
+            <button class="scanner-btn-primary" id="scanner-btn-apply-crop">
+                <i class="fas fa-magic"></i> Aplicar
+            </button>
+        </div>
+    </div>
+
+    <!-- Step 3: Preview & Save -->
+    <div class="scanner-step" id="scanner-step-preview" style="display:none;">
+        <div class="scanner-header">
+            <h3><i class="fas fa-eye"></i> Vista Previa</h3>
+            <button class="scanner-close-btn" id="scanner-close-preview">&times;</button>
+        </div>
+        <div class="scanner-filter-bar">
+            <button class="scanner-filter-btn active" data-filter="bw">
+                <i class="fas fa-file-alt"></i> B&N
+            </button>
+            <button class="scanner-filter-btn" data-filter="gray">
+                <i class="fas fa-adjust"></i> Gris
+            </button>
+            <button class="scanner-filter-btn" data-filter="color">
+                <i class="fas fa-palette"></i> Color
+            </button>
+        </div>
+        <div class="scanner-preview-container">
+            <canvas id="scanner-preview-canvas"></canvas>
+            <div class="scanner-loading" id="scanner-preview-loading" style="display:none;">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Aplicando filtro...</p>
+            </div>
+            <div class="scanner-loading" id="scanner-save-loading" style="display:none;">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Guardando...</p>
+            </div>
+        </div>
+        <div class="scanner-controls scanner-controls-row">
+            <button class="scanner-btn-secondary" id="scanner-btn-retake-preview">
+                <i class="fas fa-redo"></i> Repetir
+            </button>
+            <button class="scanner-btn-success" id="scanner-btn-save">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+        </div>
+    </div>
+
 </div>
 
 <!-- Upload Attachment Modal -->
