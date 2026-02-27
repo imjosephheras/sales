@@ -6,6 +6,14 @@ storage/uploads/documents/*
 storage/final_pdfs/*
 !storage/**/.gitkeep
 
+# Request photos (fotos_forms)
+fotos_forms/*
+!fotos_forms/.gitkeep
+
+# JWO and accounting/billing files
+files/*
+!files/.gitkeep
+
 # Document attachments (keep directory structure via .gitkeep)
 uploads/documents/*
 !uploads/documents/.gitkeep
