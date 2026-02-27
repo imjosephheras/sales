@@ -55,6 +55,7 @@ ob_start();
 
     </div>
 
+    <script src="<?= url('/billing/js/document-scanner.js') ?>?v=<?php echo time(); ?>"></script>
     <script src="<?= url('/billing/js/billing.js') ?>?v=<?php echo time(); ?>"></script>
 
 <?php

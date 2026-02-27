@@ -419,6 +419,7 @@
             'po':        { label: 'PO', cls: 'badge-po' },
             'jwo_pdf':   { label: 'JWO PDF', cls: 'badge-jwo' },
             'other':     { label: 'Other', cls: 'badge-other' },
+            'scanned':   { label: 'Scanned', cls: 'badge-scanned' },
         };
         return types[fileType] || { label: fileType || 'Other', cls: 'badge-other' };
     }
@@ -714,6 +715,20 @@
             openUploadModal(this.dataset.fileType);
         });
     });
+
+    // Scan document button
+    var btnScanDocument = document.getElementById('btn-scan-document');
+    if (btnScanDocument) {
+        btnScanDocument.addEventListener('click', function () {
+            if (!selectedDocId) {
+                alert('Please select a document first.');
+                return;
+            }
+            DocumentScanner.open(selectedDocId, selectedDocType || 'Contract', function () {
+                loadAttachments();
+            });
+        });
+    }
     btnCloseModal.addEventListener('click', closeUploadModal);
     btnCancelUpload.addEventListener('click', closeUploadModal);
     attachmentForm.addEventListener('submit', submitUpload);
